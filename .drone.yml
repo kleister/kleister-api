@@ -1,0 +1,63 @@
+clone:
+  path: github.com/solderapp/solder
+
+build:
+  testing:
+    image: golang:1.5
+    commands:
+      - make deps
+      - make build
+      - make test
+
+  release:
+    image: golang:1.5
+    commands:
+      - make release
+    when:
+      event: tag
+
+publish:
+  coverage:
+    when:
+      branch: master
+
+  github_release:
+    api_key: $$GITHUB_APIKEY
+    files:
+      - dist/*
+    when:
+      event: tag
+
+notify:
+  slack:
+    webhook_url: $$SLACK_WEBHOOK
+    channel: develop
+    username: hippie
+    when:
+      success: false
+      failure: true
+      change: true
+
+  irc:
+    prefix: build
+    nick: hippie
+    channel: webhippie
+    server:
+      host: chat.freenode.net
+      port: 6667
+    when:
+      success: false
+      failure: true
+      change: true
+
+  email:
+    from: drone@webhippie.de
+    host: $$EMAIL_HOST
+    username: $$EMAIL_USERNAME
+    password: $$EMAIL_PASSWORD
+    recipients:
+      - thomas@webhippie.de
+    when:
+      success: false
+      failure: true
+      change: true
