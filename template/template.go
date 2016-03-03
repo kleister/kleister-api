@@ -2,20 +2,17 @@ package template
 
 import (
 	"html/template"
-
-	"github.com/solderapp/solder/config"
 )
 
-//go:generate esc -o bindata.go -pkg template -prefix files files/
+//go:generate go-bindata -ignore "\\.go" -pkg template -prefix dist -o bindata.go ./dist/...
+//go:generate go fmt bindata.go
 
-func Load(cfg *config.Config) *template.Template {
-	file := FSMustString(false, "/index.html")
-
+func Load() *template.Template {
 	return template.Must(
 		template.New(
 			"index.html",
 		).Parse(
-			string(file),
+			string(MustAsset("index.html")),
 		),
 	)
 }

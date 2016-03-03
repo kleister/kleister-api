@@ -19,8 +19,8 @@ clean:
 	rm -rf $(BIN) $(DIST)
 
 deps:
-	GO15VENDOREXPERIMENT=1 go get github.com/mjibson/esc
-	GO15VENDOREXPERIMENT=1 go get github.com/govend/govend
+	GO15VENDOREXPERIMENT=1 go get -u github.com/jteeuwen/go-bindata/...
+	GO15VENDOREXPERIMENT=1 go get -u github.com/govend/govend
 	GO15VENDOREXPERIMENT=1 govend -v
 
 vendor:

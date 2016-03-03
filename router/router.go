@@ -10,7 +10,7 @@ import (
 	"github.com/solderapp/solder/router/middleware/logger"
 	"github.com/solderapp/solder/router/middleware/recover"
 	"github.com/solderapp/solder/router/middleware/session"
-	"github.com/solderapp/solder/router/middleware/static"
+	"github.com/solderapp/solder/static"
 	"github.com/solderapp/solder/template"
 )
 
@@ -24,11 +24,10 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 	e := gin.New()
 
 	e.SetHTMLTemplate(
-		template.Load(cfg),
+		template.Load(),
 	)
 
 	e.Use(middleware...)
-	e.Use(static.SetStatic())
 	e.Use(logger.SetLogger())
 	e.Use(recover.SetRecover())
 	e.Use(header.SetCache())
@@ -38,6 +37,20 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 
 	r := e.Group(cfg.Server.Root)
 	{
+		r.StaticFS(
+			"/assets",
+			static.Load(),
+		)
+
+		r.StaticFile(
+			"/favicon.ico",
+			string(
+				static.MustAsset(
+					"images/favicon.ico",
+				),
+			),
+		)
+
 		r.GET("", controller.GetIndex)
 
 		api := r.Group("/api")

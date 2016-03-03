@@ -3,11 +3,17 @@ package static
 import (
 	"net/http"
 
-	"github.com/solderapp/solder/config"
+  "github.com/elazarl/go-bindata-assetfs"
 )
 
-//go:generate esc -o bindata.go -pkg static -prefix files files/
+//go:generate go-bindata -ignore "\\.go" -pkg static -prefix dist -o bindata.go ./dist/...
+//go:generate go fmt bindata.go
 
-func Load(cfg *config.Config) http.FileSystem {
-	return FS(false)
+func Load() http.FileSystem {
+	return &assetfs.AssetFS{
+    Asset: Asset,
+    AssetDir: AssetDir,
+    AssetInfo: AssetInfo,
+    Prefix: "",
+  }
 }
