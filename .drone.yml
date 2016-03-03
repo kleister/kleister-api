@@ -29,34 +29,8 @@ publish:
       event: tag
 
 notify:
-  slack:
-    webhook_url: $$SLACK_WEBHOOK
-    channel: develop
-    username: hippie
-    when:
-      success: false
-      failure: true
-      change: true
-
-  irc:
-    prefix: build
-    nick: hippie
-    channel: webhippie
-    server:
-      host: chat.freenode.net
-      port: 6667
-    when:
-      success: false
-      failure: true
-      change: true
-
-  email:
-    from: drone@webhippie.de
-    host: $$EMAIL_HOST
-    username: $$EMAIL_USERNAME
-    password: $$EMAIL_PASSWORD
-    recipients:
-      - thomas@webhippie.de
+  gitter:
+    webhook_url: $$GITTER_WEBHOOK
     when:
       success: false
       failure: true
