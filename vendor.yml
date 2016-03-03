@@ -7,6 +7,8 @@ vendors:
   rev: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
 - path: github.com/denisenkom/go-mssqldb
   rev: 6e7f3d73dade2e5566f87d18c3a1d00d2ce33421
+- path: github.com/elazarl/go-bindata-assetfs
+  rev: 57eb5e1fc594ad4b0b1dbea7b286d299e0cb43c2
 - path: github.com/erikstmartin/go-testdb
   rev: 8d10e4a1bae52cd8b81ffdec3445890d6dccab3d
 - path: github.com/gin-gonic/gin
