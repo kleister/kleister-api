@@ -24,7 +24,7 @@ deps:
 	GO15VENDOREXPERIMENT=1 govend -v
 
 vendor:
-	GO15VENDOREXPERIMENT=1 govend -v -l -u
+	GO15VENDOREXPERIMENT=1 govend -vtlu
 
 generate:
 	go generate $(PACKAGES)
