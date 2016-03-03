@@ -22,8 +22,9 @@ this awesome project!
 
 Make sure you have a working Go environment, for further reference or a guide
 take a look at the [install instructions](http://golang.org/doc/install.html).
-As this project relies on vendoring of the dependencies you have to use a Go
-version `>= 1.5`
+As this project relies on vendoring of the dependencies and we are not
+exporting `GO15VENDOREXPERIMENT=1` within our makefile you have to use a Go
+version `>= 1.6`
 
 ```bash
 go get github.com/solderapp/solder

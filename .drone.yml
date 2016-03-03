@@ -3,14 +3,15 @@ clone:
 
 build:
   testing:
-    image: golang:1.5
+    image: webhippie/golang:latest
     commands:
+      - make clean
       - make deps
       - make build
       - make test
 
   release:
-    image: golang:1.5
+    image: webhippie/golang:latest
     commands:
       - make release
     when:

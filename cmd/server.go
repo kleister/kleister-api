@@ -16,14 +16,14 @@ func Server(cfg *config.Config) cli.Command {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:        "driver",
-				Value:       "sqlite3",
+				Value:       "mysql",
 				Usage:       "Database driver selection",
 				EnvVar:      "SOLDER_DB_DRIVER",
 				Destination: &cfg.Database.Driver,
 			},
 			cli.StringFlag{
 				Name:        "config",
-				Value:       "file:///var/lib/solder/database.sqlite3",
+				Value:       "root:root@(localhost:3306)/solder",
 				Usage:       "Database driver config",
 				EnvVar:      "SOLDER_DB_CONFIG",
 				Destination: &cfg.Database.Config,
