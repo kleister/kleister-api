@@ -1,12 +1,11 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type Pack struct {
-	gorm.Model
-
+	ID            int64       `json:"id" gorm:"primary_key"`
 	Icon          *Attachment `json:"icon" gorm:"polymorphic:Owner"`
 	Logo          *Attachment `json:"logo" gorm:"polymorphic:Owner"`
 	Background    *Attachment `json:"background" gorm:"polymorphic:Owner"`
@@ -19,5 +18,7 @@ type Pack struct {
 	Website       string      `json:"website"`
 	Hidden        bool        `json:"hidden" sql:"default:true"`
 	Private       bool        `json:"private" sql:"default:false"`
+	CreatedAt     time.Time   `json:"created_at"`
+	UpdatedAt     time.Time   `json:"updated_at"`
 	Builds        []*Build    `json:"builds"`
 }

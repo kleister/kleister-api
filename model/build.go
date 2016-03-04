@@ -1,12 +1,11 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type Build struct {
-	gorm.Model
-
+	ID          int64      `json:"id" gorm:"primary_key"`
 	Pack        *Pack      `json:"pack"`
 	PackID      int        `json:"pack_id" sql:"index"`
 	Minecraft   *Minecraft `json:"minecraft"`
@@ -19,5 +18,7 @@ type Build struct {
 	MinMemory   string     `json:"min_memory"`
 	Published   bool       `json:"published" sql:"default:false"`
 	Private     bool       `json:"private" sql:"default:false"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 	Mods        []*Mod     `json:"mods" gorm:"many2many:build_mods;"`
 }

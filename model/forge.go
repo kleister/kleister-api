@@ -1,14 +1,18 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type Forge struct {
-	gorm.Model
-
-	Slug   string   `json:"slug" sql:"unique_index"`
-	Name   string   `json:"version" sql:"unique_index"`
-	MD5    string   `json:"md5"`
-	Builds []*Build `json:"builds"`
+	ID        int64     `json:"id" gorm:"primary_key"`
+	Slug      string    `json:"slug" sql:"unique_index"`
+	Name      string    `json:"version" sql:"unique_index"`
+	Minecraft string    `json:"minecraft"`
+	URL       string    `json:"url"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Builds    []*Build  `json:"builds"`
 }
+
+// http://files.minecraftforge.net/maven/net/minecraftforge/forge/json
