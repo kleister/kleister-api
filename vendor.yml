@@ -31,6 +31,8 @@ vendors:
   rev: ee05b128a739a0fb76c7ebd3ae4810c1de808d6d
 - path: github.com/mattn/go-sqlite3
   rev: 45f056ca8f5ef4ee3f68796167a0a0e6a6214813
+- path: github.com/mcuadros/go-version
+  rev: d52711f8d6bea8dc01efafdb68ad95a4e2606630
 - path: github.com/o1egl/gormrus
   rev: 57710b0229272260f1fa2b31838a0dc4baa22a0a
 - path: github.com/pmezard/go-difflib
