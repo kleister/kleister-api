@@ -68,11 +68,11 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 
 			solder := api.Group("/")
 			{
-				solder.GET("/modpack/:pack", controller.GetPack)
-				solder.GET("/modpack/:pack/:build", controller.GetBuild)
+				solder.GET("/modpack/:pack", solder.GetPack)
+				solder.GET("/modpack/:pack/:build", solder.GetBuild)
 
-				solder.GET("/mod/:mod", controller.GetMod)
-				solder.GET("/mod/:mod/:version", controller.GetVersion)
+				solder.GET("/mod/:mod", solder.GetMod)
+				solder.GET("/mod/:mod/:version", solder.GetVersion)
 			}
 
 			packs := api.Group("/packs")
