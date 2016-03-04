@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder/model"
@@ -12,6 +14,24 @@ func GetForge(c *gin.Context) {
 	records := &model.Forges{}
 
 	context.Store(c).Order(
+		"minecraft DESC, name DESC",
+	).Find(
+		&records,
+	)
+
+	c.IndentedJSON(
+		200,
+		records,
+	)
+}
+
+func CompleteForge(c *gin.Context) {
+	records := &model.Forges{}
+
+	context.Store(c).Where(
+		"name LIKE ?",
+		fmt.Sprintf("%%%s%%", c.Param("filter")),
+	).Order(
 		"minecraft DESC, name DESC",
 	).Find(
 		&records,

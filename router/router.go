@@ -61,9 +61,11 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 			api.PATCH("/profile", controller.PatchProfile)
 
 			api.GET("/minecraft", controller.GetMinecraft)
+			api.GET("/minecraft/:filter", controller.CompleteMinecraft)
 			api.PATCH("/minecraft", controller.PatchMinecraft)
 
 			api.GET("/forge", controller.GetForge)
+			api.GET("/forge/:filter", controller.CompleteForge)
 			api.PATCH("/forge", controller.PatchForge)
 
 			packs := api.Group("/packs")
