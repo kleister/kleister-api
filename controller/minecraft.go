@@ -9,12 +9,17 @@ import (
 )
 
 func GetMinecraft(c *gin.Context) {
-	minecrafts := &model.Minecrafts{}
-	context.Store(c).Order("name DESC").Find(&minecrafts)
+	records := &model.Minecrafts{}
+
+	context.Store(c).Order(
+		"name DESC",
+	).Find(
+		&records,
+	)
 
 	c.IndentedJSON(
 		200,
-		minecrafts,
+		records,
 	)
 }
 
@@ -42,8 +47,6 @@ func PatchMinecraft(c *gin.Context) {
 			continue
 		}
 
-		logrus.Debug(version)
-
 		err := context.Store(c).Where(
 			model.Minecraft{
 				Name: version.ID,
@@ -51,7 +54,6 @@ func PatchMinecraft(c *gin.Context) {
 		).Attrs(
 			model.Minecraft{
 				Type: version.Type,
-				URL:  version.URL,
 			},
 		).FirstOrCreate(
 			&record,

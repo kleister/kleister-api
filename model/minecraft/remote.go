@@ -1,5 +1,5 @@
 package minecraft
 
 type Remote struct {
-	Versions []*Version
+	Versions []*Version `json:"versions"`
 }

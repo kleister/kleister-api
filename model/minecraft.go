@@ -13,7 +13,6 @@ type Minecraft struct {
 	Slug      string    `json:"slug" sql:"unique_index"`
 	Name      string    `json:"version" sql:"unique_index"`
 	Type      string    `json:"type"`
-	URL       string    `json:"url"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Builds    []*Build  `json:"-"`
