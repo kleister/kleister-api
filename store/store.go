@@ -6,6 +6,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
+	"github.com/o1egl/gormrus"
 	"github.com/solderapp/solder/model"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -43,6 +44,9 @@ func From(driver string, handle *sql.DB) *Store {
 }
 
 func setupDatabase(driver string, db *gorm.DB) *gorm.DB {
+	db.LogMode(true)
+	db.SetLogger(gormrus.New())
+
 	if err := prepareDatabase(driver, db); err != nil {
 		logrus.Errorln(err)
 		logrus.Fatalln("database preparation failed")
@@ -86,11 +90,15 @@ func pingDatabase(driver string, db *gorm.DB) error {
 
 func migrateDatabase(driver string, db *gorm.DB) error {
 	db.AutoMigrate(
+		&model.Attachment{},
 		&model.Build{},
 		&model.Client{},
+		&model.Forge{},
 		&model.Key{},
+		&model.Minecraft{},
 		&model.Mod{},
 		&model.Pack{},
+		&model.Permission{},
 		&model.User{},
 		&model.Version{},
 	)
