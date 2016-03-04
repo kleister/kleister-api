@@ -66,15 +66,6 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 			api.GET("/forge", controller.GetForge)
 			api.PATCH("/forge", controller.PatchForge)
 
-			solder := api.Group("/")
-			{
-				solder.GET("/modpack/:pack", solder.GetPack)
-				solder.GET("/modpack/:pack/:build", solder.GetBuild)
-
-				solder.GET("/mod/:mod", solder.GetMod)
-				solder.GET("/mod/:mod/:version", solder.GetVersion)
-			}
-
 			packs := api.Group("/packs")
 			{
 				packs.GET("", controller.GetPacks)
@@ -136,6 +127,15 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				clients.DELETE("/:client", controller.DeleteClient)
 				clients.PATCH("/:client", controller.PatchClient)
 				clients.POST("", controller.PostClient)
+			}
+
+			solder := api.Group("/")
+			{
+				solder.GET("/modpack/:pack", solder.GetSolderPack)
+				solder.GET("/modpack/:pack/:build", solder.GetSolderBuild)
+
+				solder.GET("/mod/:mod", solder.GetSolderMod)
+				solder.GET("/mod/:mod/:version", solder.GetSolderVersion)
 			}
 		}
 	}

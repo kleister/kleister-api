@@ -6,28 +6,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetPack(c *gin.Context) {
+func GetSolderPack(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
 		gin.H{},
 	)
 }
 
-func GetBuild(c *gin.Context) {
+func GetSolderBuild(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
 		gin.H{},
 	)
 }
 
-func GetMod(c *gin.Context) {
+func GetSolderMod(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
 		gin.H{},
 	)
 }
 
-func GetVersion(c *gin.Context) {
+func GetSolderVersion(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
 		gin.H{},
