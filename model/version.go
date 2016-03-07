@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+// Versions is simply a collection of version structs.
+type Versions []*Version
+
 // Version represents a version model definition.
 type Version struct {
 	ID        int64     `json:"id" gorm:"primary_key"`

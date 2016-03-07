@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+// Builds is simply a collection of build structs.
+type Builds []*Build
+
 // Build represents a build model definition.
 type Build struct {
 	ID          int64      `json:"id" gorm:"primary_key"`

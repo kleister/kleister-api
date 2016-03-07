@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+// Clients is simply a collection of client structs.
+type Clients []*Client
+
 // Client represents a client model definition.
 type Client struct {
 	ID        int64     `json:"id" gorm:"primary_key"`

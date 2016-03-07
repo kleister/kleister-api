@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+// Mods is simply a collection of mod structs.
+type Mods []*Mod
+
 // Mod represents a mod model definition.
 type Mod struct {
 	ID          int64      `json:"id" gorm:"primary_key"`

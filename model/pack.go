@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+// Packs is simply a collection of pack structs.
+type Packs []*Pack
+
 // Pack represents a pack model definition.
 type Pack struct {
 	ID            int64       `json:"id" gorm:"primary_key"`

@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+// Users is simply a collection of user structs.
+type Users []*User
+
 // User represents a user model definition.
 type User struct {
 	ID         int64       `json:"id" gorm:"primary_key"`

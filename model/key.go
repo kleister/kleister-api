@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+// Keys is simply a collection of key structs.
+type Keys []*Key
+
 // Key represents a key model definition.
 type Key struct {
 	ID        int64     `json:"id" gorm:"primary_key"`
