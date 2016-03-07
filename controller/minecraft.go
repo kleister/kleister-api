@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder/model"
 	"github.com/solderapp/solder/model/minecraft"
@@ -14,11 +13,22 @@ import (
 func GetMinecraft(c *gin.Context) {
 	records := &model.Minecrafts{}
 
-	context.Store(c).Order(
-		"name DESC",
-	).Find(
+	err := context.Store(c).Find(
 		&records,
-	)
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			422,
+			gin.H{
+				"status":  422,
+				"message": "Failed to fetch Minecraft versions",
+			},
+		)
+
+		c.Abort()
+		return
+	}
 
 	c.IndentedJSON(
 		200,
@@ -30,14 +40,25 @@ func GetMinecraft(c *gin.Context) {
 func CompleteMinecraft(c *gin.Context) {
 	records := &model.Minecrafts{}
 
-	context.Store(c).Where(
+	err := context.Store(c).Where(
 		"name LIKE ?",
 		fmt.Sprintf("%%%s%%", c.Param("filter")),
-	).Order(
-		"name DESC",
 	).Find(
 		&records,
-	)
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			422,
+			gin.H{
+				"status":  422,
+				"message": "Failed to filter Minecraft versions",
+			},
+		)
+
+		c.Abort()
+		return
+	}
 
 	c.IndentedJSON(
 		200,
@@ -50,8 +71,6 @@ func PatchMinecraft(c *gin.Context) {
 	result, err := minecraft.Load()
 
 	if err != nil {
-		logrus.Warn(err)
-
 		c.IndentedJSON(
 			422,
 			gin.H{
@@ -60,6 +79,7 @@ func PatchMinecraft(c *gin.Context) {
 			},
 		)
 
+		c.Abort()
 		return
 	}
 
@@ -91,6 +111,7 @@ func PatchMinecraft(c *gin.Context) {
 				},
 			)
 
+			c.Abort()
 			return
 		}
 	}
