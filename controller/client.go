@@ -84,8 +84,54 @@ func PatchClient(c *gin.Context) {
 
 // PostClient updates an existing client.
 func PostClient(c *gin.Context) {
+	record := &model.Client{}
+	record.Defaults()
+
+	if err := c.BindJSON(&record); err != nil {
+		c.IndentedJSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind client form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	if err := record.Validate(context.Store(c)); err != nil {
+		c.IndentedJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err,
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Create(
+		&record,
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to store client",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.IndentedJSON(
 		http.StatusOK,
-		gin.H{},
+		record,
 	)
 }

@@ -84,8 +84,54 @@ func PatchKey(c *gin.Context) {
 
 // PostKey updates an existing key.
 func PostKey(c *gin.Context) {
+	record := &model.Client{}
+	record.Defaults()
+
+	if err := c.Bind(&record); err != nil {
+		c.IndentedJSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind key form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	if err := record.Validate(context.Store(c)); err != nil {
+		c.IndentedJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err,
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Create(
+		&record,
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to store key",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.IndentedJSON(
 		http.StatusOK,
-		gin.H{},
+		record,
 	)
 }
