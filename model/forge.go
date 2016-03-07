@@ -3,8 +3,18 @@ package model
 import (
 	"time"
 
+	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 )
+
+// ForgeDefaultOrder is the default ordering for forge listings.
+func ForgeDefaultOrder(db *gorm.DB) *gorm.DB {
+	return db.Order(
+		"forges.minecraft DESC",
+	).Order(
+		"forges.name DESC",
+	)
+}
 
 // Forges is simply a collection of forge structs.
 type Forges []*Forge

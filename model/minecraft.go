@@ -3,8 +3,16 @@ package model
 import (
 	"time"
 
+	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 )
+
+// MinecraftDefaultOrder is the default ordering for minecraft listings.
+func MinecraftDefaultOrder(db *gorm.DB) *gorm.DB {
+	return db.Order(
+		"minecrafts.name DESC",
+	)
+}
 
 // Minecrafts is simply a collection of minecraft structs.
 type Minecrafts []*Minecraft

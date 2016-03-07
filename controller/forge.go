@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder/model"
@@ -13,15 +14,17 @@ import (
 func GetForge(c *gin.Context) {
 	records := &model.Forges{}
 
-	err := context.Store(c).Find(
+	err := context.Store(c).Scopes(
+		model.ForgeDefaultOrder,
+	).Find(
 		&records,
 	).Error
 
 	if err != nil {
 		c.IndentedJSON(
-			500,
+			http.StatusInternalServerError,
 			gin.H{
-				"status":  500,
+				"status":  http.StatusInternalServerError,
 				"message": "Failed to fetch Forge versions",
 			},
 		)
@@ -31,7 +34,7 @@ func GetForge(c *gin.Context) {
 	}
 
 	c.IndentedJSON(
-		200,
+		http.StatusOK,
 		records,
 	)
 }
@@ -43,15 +46,17 @@ func CompleteForge(c *gin.Context) {
 	err := context.Store(c).Where(
 		"name LIKE ?",
 		fmt.Sprintf("%%%s%%", c.Param("filter")),
+	).Scopes(
+		model.ForgeDefaultOrder,
 	).Find(
 		&records,
 	).Error
 
 	if err != nil {
 		c.IndentedJSON(
-			500,
+			http.StatusInternalServerError,
 			gin.H{
-				"status":  500,
+				"status":  http.StatusInternalServerError,
 				"message": "Failed to filter Forge versions",
 			},
 		)
@@ -61,7 +66,7 @@ func CompleteForge(c *gin.Context) {
 	}
 
 	c.IndentedJSON(
-		200,
+		http.StatusOK,
 		records,
 	)
 }
@@ -72,9 +77,9 @@ func PatchForge(c *gin.Context) {
 
 	if err != nil {
 		c.IndentedJSON(
-			422,
+			http.StatusServiceUnavailable,
 			gin.H{
-				"status":  422,
+				"status":  http.StatusServiceUnavailable,
 				"message": "Failed to request Forge versions",
 			},
 		)
@@ -104,9 +109,9 @@ func PatchForge(c *gin.Context) {
 
 		if err != nil {
 			c.IndentedJSON(
-				422,
+				http.StatusInternalServerError,
 				gin.H{
-					"status":  422,
+					"status":  http.StatusInternalServerError,
 					"message": "Failed to store Forge versions",
 				},
 			)
@@ -117,9 +122,9 @@ func PatchForge(c *gin.Context) {
 	}
 
 	c.IndentedJSON(
-		200,
+		http.StatusOK,
 		gin.H{
-			"status":  200,
+			"status":  http.StatusOK,
 			"message": "Successfully imported Forge versions",
 		},
 	)
