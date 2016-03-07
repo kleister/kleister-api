@@ -24,6 +24,7 @@ clean:
 deps:
 	go get -u github.com/jteeuwen/go-bindata/...
 	go get -u github.com/govend/govend
+	go get -u github.com/golang/lint/golint
 	govend -v
 
 vendor:
@@ -38,10 +39,13 @@ fmt:
 vet:
 	go vet $(PACKAGES)
 
-build: $(BIN)/$(EXECUTABLE)
+lint:
+	for PKG in $(PACKAGES); do golint $$PKG || exit 1; done;
 
 test:
 	for PKG in $(PACKAGES); do go test -cover -coverprofile $$GOPATH/src/$$PKG/coverage.out $$PKG || exit 1; done;
+
+build: $(BIN)/$(EXECUTABLE)
 
 release: $(RELEASES)
 
@@ -62,5 +66,5 @@ $(DIST)/$(EXECUTABLE)-%: $(BIN)/%/$(EXECUTABLE)
 	mkdir -p $(DIST)
 	cp $(BIN)/$*/$(EXECUTABLE) $(DIST)/$(EXECUTABLE)-$(VERSION)-$(GOOS)-$(GOARCH)
 
-.PHONY: all clean deps vendor generate fmt vet build test
+.PHONY: all clean deps vendor generate fmt vet lint test build
 .PRECIOUS: $(BIN)/%/$(EXECUTABLE)
