@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Permission represents a permission model definition.
 type Permission struct {
 	ID            int64     `json:"id" gorm:"primary_key"`
 	User          *User     `json:"-"`

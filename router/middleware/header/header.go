@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SetCache writes required cache headers to all requests.
 func SetCache() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
@@ -16,6 +17,7 @@ func SetCache() gin.HandlerFunc {
 	}
 }
 
+// SetOptions writes required option headers to all requests.
 func SetOptions() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.Method != "OPTIONS" {
@@ -32,6 +34,7 @@ func SetOptions() gin.HandlerFunc {
 	}
 }
 
+// SetSecure writes required access headers to all requests.
 func SetSecure() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")

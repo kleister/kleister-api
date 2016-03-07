@@ -7,6 +7,7 @@ import (
 	"github.com/solderapp/solder/router/middleware/context"
 )
 
+// GetIndex represents the index page.
 func GetIndex(c *gin.Context) {
 	config := context.Config(c)
 
@@ -19,6 +20,7 @@ func GetIndex(c *gin.Context) {
 	)
 }
 
+// GetAPI represents the API index.
 func GetAPI(c *gin.Context) {
 	config := context.Config(c)
 

@@ -4,9 +4,10 @@ import (
 	"time"
 )
 
+// Attachment represents any uploadable asset.
 type Attachment struct {
 	ID        int64     `json:"id" gorm:"primary_key"`
-	OwnerId   int       `json:"-"`
+	OwnerID   int       `json:"-"`
 	OwnerType string    `json:"-"`
 	URL       string    `json:"url"`
 	MD5       string    `json:"md5"`

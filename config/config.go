@@ -1,5 +1,6 @@
 package config
 
+// Config provides all application config values.
 type Config struct {
 	Version string
 	Debug   bool

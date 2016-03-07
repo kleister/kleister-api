@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetBuilds retrieves all available builds.
 func GetBuilds(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -13,6 +14,7 @@ func GetBuilds(c *gin.Context) {
 	)
 }
 
+// GetBuild retrieves a specific build.
 func GetBuild(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -20,6 +22,7 @@ func GetBuild(c *gin.Context) {
 	)
 }
 
+// DeleteBuild removes a specific build.
 func DeleteBuild(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -27,6 +30,7 @@ func DeleteBuild(c *gin.Context) {
 	)
 }
 
+// PatchBuild creates a new build.
 func PatchBuild(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -34,6 +38,7 @@ func PatchBuild(c *gin.Context) {
 	)
 }
 
+// PostBuild updates an existing build.
 func PostBuild(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,

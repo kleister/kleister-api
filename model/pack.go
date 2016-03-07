@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Pack represents a pack model definition.
 type Pack struct {
 	ID            int64       `json:"id" gorm:"primary_key"`
 	Icon          *Attachment `json:"icon" gorm:"polymorphic:Owner"`

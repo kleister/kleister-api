@@ -6,6 +6,7 @@ import (
 	"github.com/solderapp/solder/config"
 )
 
+// Client provides all client related sub-commands.
 func Client(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "client",
@@ -19,6 +20,7 @@ func Client(cfg *config.Config) cli.Command {
 	}
 }
 
+// ClientCreate provides the sub-command to create a client.
 func ClientCreate(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "create",
@@ -29,6 +31,7 @@ func ClientCreate(cfg *config.Config) cli.Command {
 	}
 }
 
+// ClientUpdate provides the sub-command to update a client.
 func ClientUpdate(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "update",
@@ -39,6 +42,7 @@ func ClientUpdate(cfg *config.Config) cli.Command {
 	}
 }
 
+// ClientDelete provides the sub-command to delete a client.
 func ClientDelete(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "delete",
@@ -49,6 +53,7 @@ func ClientDelete(cfg *config.Config) cli.Command {
 	}
 }
 
+// ClientShow provides the sub-command to show a client.
 func ClientShow(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "show",

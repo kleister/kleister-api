@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Build represents a build model definition.
 type Build struct {
 	ID          int64      `json:"id" gorm:"primary_key"`
 	Pack        *Pack      `json:"pack"`

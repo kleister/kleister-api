@@ -8,11 +8,13 @@ import (
 )
 
 const (
-	FORGE_VERSIONS = "http://files.minecraftforge.net/maven/net/minecraftforge/forge/json"
+	// ForgeVersions represents the URL to fetch all available Forge versions
+	ForgeVersions = "http://files.minecraftforge.net/maven/net/minecraftforge/forge/json"
 )
 
+// Load initializes and fetches the Forge versions from the remote service.
 func Load() (*Remote, error) {
-	res, err := http.Get(FORGE_VERSIONS)
+	res, err := http.Get(ForgeVersions)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to fetch Forge versions. %s", err)

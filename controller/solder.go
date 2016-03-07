@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetSolderPack retrieves the pack compatible to Technic Platform.
 func GetSolderPack(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -13,6 +14,7 @@ func GetSolderPack(c *gin.Context) {
 	)
 }
 
+// GetSolderBuild retrieves the build compatible to Technic Platform.
 func GetSolderBuild(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -20,6 +22,7 @@ func GetSolderBuild(c *gin.Context) {
 	)
 }
 
+// GetSolderMod retrieves the mod compatible to Technic Platform.
 func GetSolderMod(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -27,6 +30,7 @@ func GetSolderMod(c *gin.Context) {
 	)
 }
 
+// GetSolderVersion retrieves the version compatible to Technic Platform.
 func GetSolderVersion(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,

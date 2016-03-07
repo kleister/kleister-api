@@ -9,6 +9,7 @@ import (
 //go:generate go-bindata -ignore "\\.go" -pkg static -prefix dist -o bindata.go ./dist/...
 //go:generate go fmt bindata.go
 
+// Load initializes the static files.
 func Load() http.FileSystem {
 	return &assetfs.AssetFS{
 		Asset:     Asset,

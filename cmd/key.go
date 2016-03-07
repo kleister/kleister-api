@@ -6,6 +6,7 @@ import (
 	"github.com/solderapp/solder/config"
 )
 
+// Key provides all key related sub-commands.
 func Key(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "key",
@@ -19,6 +20,7 @@ func Key(cfg *config.Config) cli.Command {
 	}
 }
 
+// KeyCreate provides the sub-command to create a key.
 func KeyCreate(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "create",
@@ -29,6 +31,7 @@ func KeyCreate(cfg *config.Config) cli.Command {
 	}
 }
 
+// KeyUpdate provides the sub-command to update a key.
 func KeyUpdate(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "update",
@@ -39,6 +42,7 @@ func KeyUpdate(cfg *config.Config) cli.Command {
 	}
 }
 
+// KeyDelete provides the sub-command to delete a key.
 func KeyDelete(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "delete",
@@ -49,6 +53,7 @@ func KeyDelete(cfg *config.Config) cli.Command {
 	}
 }
 
+// KeyShow provides the sub-command to show a key.
 func KeyShow(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "show",

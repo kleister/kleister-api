@@ -10,6 +10,7 @@ import (
 	"github.com/solderapp/solder/router/middleware/context"
 )
 
+// GetForge retrieves all available Forge versions.
 func GetForge(c *gin.Context) {
 	records := &model.Forges{}
 
@@ -25,6 +26,7 @@ func GetForge(c *gin.Context) {
 	)
 }
 
+// CompleteForge returns filtered Forge versions for autocompletion.
 func CompleteForge(c *gin.Context) {
 	records := &model.Forges{}
 
@@ -43,6 +45,7 @@ func CompleteForge(c *gin.Context) {
 	)
 }
 
+// PatchForge updates the list of available Forge versions.
 func PatchForge(c *gin.Context) {
 	result, err := forge.Load()
 

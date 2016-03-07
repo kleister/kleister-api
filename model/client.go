@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Client represents a client model definition.
 type Client struct {
 	ID        int64     `json:"id" gorm:"primary_key"`
 	Slug      string    `json:"slug" sql:"unique_index"`

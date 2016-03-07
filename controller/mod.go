@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetMods retrieves all available mods.
 func GetMods(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -13,6 +14,7 @@ func GetMods(c *gin.Context) {
 	)
 }
 
+// GetMod retrieves a specific mod.
 func GetMod(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -20,6 +22,7 @@ func GetMod(c *gin.Context) {
 	)
 }
 
+// DeleteMod removes a specific mod.
 func DeleteMod(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -27,6 +30,7 @@ func DeleteMod(c *gin.Context) {
 	)
 }
 
+// PatchMod creates a new mod.
 func PatchMod(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -34,6 +38,7 @@ func PatchMod(c *gin.Context) {
 	)
 }
 
+// PostMod updates an existing mod.
 func PostMod(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,

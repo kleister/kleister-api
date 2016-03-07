@@ -9,14 +9,19 @@ import (
 	"github.com/o1egl/gormrus"
 	"github.com/solderapp/solder/model"
 
+	// Register MySQL driver for GORM
 	_ "github.com/go-sql-driver/mysql"
+
+	// Register Postgres driver for GORM
 	_ "github.com/lib/pq"
 )
 
+// Store is a basic struct to represent the database handle.
 type Store struct {
 	*gorm.DB
 }
 
+// New initializes a new database connection.
 func New(driver string, config string) *Store {
 	db, err := gorm.Open(driver, config)
 
@@ -30,6 +35,7 @@ func New(driver string, config string) *Store {
 	}
 }
 
+// From takes an existing database connection.
 func From(driver string, handle *sql.DB) *Store {
 	db, err := gorm.Open(driver, handle)
 

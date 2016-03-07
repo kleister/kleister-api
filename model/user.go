@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// User represents a user model definition.
 type User struct {
 	ID         int64       `json:"id" gorm:"primary_key"`
 	Permission *Permission `json:"permission"`

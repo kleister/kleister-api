@@ -10,6 +10,7 @@ import (
 	"github.com/solderapp/solder/router/middleware/context"
 )
 
+// GetMinecraft retrieves all available Minecraft versions.
 func GetMinecraft(c *gin.Context) {
 	records := &model.Minecrafts{}
 
@@ -25,6 +26,7 @@ func GetMinecraft(c *gin.Context) {
 	)
 }
 
+// CompleteMinecraft returns filtered Minecraft versions for autocompletion.
 func CompleteMinecraft(c *gin.Context) {
 	records := &model.Minecrafts{}
 
@@ -43,6 +45,7 @@ func CompleteMinecraft(c *gin.Context) {
 	)
 }
 
+// PatchMinecraft updates the list of available Minecraft versions.
 func PatchMinecraft(c *gin.Context) {
 	result, err := minecraft.Load()
 

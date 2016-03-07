@@ -9,6 +9,7 @@ import (
 	"github.com/solderapp/solder/store"
 )
 
+// Server provides the sub-command to start the API server.
 func Server(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "server",

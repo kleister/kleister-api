@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetPacks retrieves all available packs.
 func GetPacks(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -13,6 +14,7 @@ func GetPacks(c *gin.Context) {
 	)
 }
 
+// GetPack retrieves a specific pack.
 func GetPack(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -20,6 +22,7 @@ func GetPack(c *gin.Context) {
 	)
 }
 
+// DeletePack removes a specific pack.
 func DeletePack(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -27,6 +30,7 @@ func DeletePack(c *gin.Context) {
 	)
 }
 
+// PatchPack creates a new pack.
 func PatchPack(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -34,6 +38,7 @@ func PatchPack(c *gin.Context) {
 	)
 }
 
+// PostPack updates an existing pack.
 func PostPack(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,

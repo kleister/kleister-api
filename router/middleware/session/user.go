@@ -7,6 +7,7 @@ import (
 	"github.com/solderapp/solder/model"
 )
 
+// User gets the user from the context.
 func User(c *gin.Context) *model.User {
 	v, ok := c.Get("user")
 
@@ -23,6 +24,7 @@ func User(c *gin.Context) *model.User {
 	return u
 }
 
+// SetUser injects the user into the context.
 func SetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// TODO(must): Set user in the context
@@ -30,6 +32,7 @@ func SetUser() gin.HandlerFunc {
 	}
 }
 
+// MustAdmin validates the the user is an admin.
 func MustAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := User(c)
@@ -45,6 +48,7 @@ func MustAdmin() gin.HandlerFunc {
 	}
 }
 
+// MustUser validates the the user is authed.
 func MustUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := User(c)

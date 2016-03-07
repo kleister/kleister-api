@@ -6,6 +6,7 @@ import (
 	"github.com/solderapp/solder/config"
 )
 
+// User provides all user related sub-commands.
 func User(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "user",
@@ -19,6 +20,7 @@ func User(cfg *config.Config) cli.Command {
 	}
 }
 
+// UserCreate provides the sub-command to create a user.
 func UserCreate(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "create",
@@ -29,6 +31,7 @@ func UserCreate(cfg *config.Config) cli.Command {
 	}
 }
 
+// UserUpdate provides the sub-command to update a user.
 func UserUpdate(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "update",
@@ -39,6 +42,7 @@ func UserUpdate(cfg *config.Config) cli.Command {
 	}
 }
 
+// UserDelete provides the sub-command to delete a user.
 func UserDelete(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "delete",
@@ -49,6 +53,7 @@ func UserDelete(cfg *config.Config) cli.Command {
 	}
 }
 
+// UserShow provides the sub-command to show a user.
 func UserShow(cfg *config.Config) cli.Command {
 	return cli.Command{
 		Name:  "show",

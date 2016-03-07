@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Version represents a version model definition.
 type Version struct {
 	ID        int64     `json:"id" gorm:"primary_key"`
 	Mod       *Mod      `json:"mod"`

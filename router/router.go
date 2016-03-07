@@ -14,6 +14,7 @@ import (
 	"github.com/solderapp/solder/template"
 )
 
+// Load initializes the routing of the application.
 func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 	if cfg.Develop {
 		gin.SetMode(gin.DebugMode)

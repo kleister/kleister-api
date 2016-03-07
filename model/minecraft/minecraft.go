@@ -8,11 +8,13 @@ import (
 )
 
 const (
-	MINECRAFT_VERSIONS = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
+	// MinecraftVersions represents the URL to fetch all available Minecraft versions
+	MinecraftVersions = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 )
 
+// Load initializes and fetches the Minecraft versions from the remote service.
 func Load() (*Remote, error) {
-	res, err := http.Get(MINECRAFT_VERSIONS)
+	res, err := http.Get(MinecraftVersions)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to fetch minecraft versions. %s", err)

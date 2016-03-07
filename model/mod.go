@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Mod represents a mod model definition.
 type Mod struct {
 	ID          int64      `json:"id" gorm:"primary_key"`
 	Slug        string     `json:"slug" sql:"unique_index"`

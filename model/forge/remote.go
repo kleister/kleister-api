@@ -1,6 +1,6 @@
 package forge
 
+// Remote represents the structure of the remote info.
 type Remote struct {
-	Webpath string             `json:"webpath"`
 	Numbers map[string]*Number `json:"number"`
 }

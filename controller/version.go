@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetVersions retrieves all available versions.
 func GetVersions(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -13,6 +14,7 @@ func GetVersions(c *gin.Context) {
 	)
 }
 
+// GetVersion retrieves a specific version.
 func GetVersion(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -20,6 +22,7 @@ func GetVersion(c *gin.Context) {
 	)
 }
 
+// DeleteVersion removes a specific version.
 func DeleteVersion(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -27,6 +30,7 @@ func DeleteVersion(c *gin.Context) {
 	)
 }
 
+// PatchVersion creates a new version.
 func PatchVersion(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -34,6 +38,7 @@ func PatchVersion(c *gin.Context) {
 	)
 }
 
+// PostVersion updates an existing version.
 func PostVersion(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,

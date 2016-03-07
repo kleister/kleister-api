@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetProfile displays the current profile.
 func GetProfile(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -13,6 +14,7 @@ func GetProfile(c *gin.Context) {
 	)
 }
 
+// PatchProfile updates the current profile.
 func PatchProfile(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
