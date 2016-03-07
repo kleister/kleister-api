@@ -2,7 +2,16 @@ package model
 
 import (
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
+
+// KeyDefaultOrder is the default ordering for key listings.
+func KeyDefaultOrder(db *gorm.DB) *gorm.DB {
+	return db.Order(
+		"keys.name ASC",
+	)
+}
 
 // Keys is simply a collection of key structs.
 type Keys []*Key

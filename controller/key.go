@@ -4,13 +4,36 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/solderapp/solder/model"
+	"github.com/solderapp/solder/router/middleware/context"
 )
 
 // GetKeys retrieves all available keys.
 func GetKeys(c *gin.Context) {
+	records := &model.Keys{}
+
+	err := context.Store(c).Scopes(
+		model.KeyDefaultOrder,
+	).Find(
+		&records,
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to fetch keys",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.IndentedJSON(
 		http.StatusOK,
-		gin.H{},
+		records,
 	)
 }
 
