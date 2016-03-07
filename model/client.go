@@ -2,7 +2,16 @@ package model
 
 import (
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
+
+// ClientDefaultOrder is the default ordering for client listings.
+func ClientDefaultOrder(db *gorm.DB) *gorm.DB {
+	return db.Order(
+		"clients.name ASC",
+	)
+}
 
 // Clients is simply a collection of client structs.
 type Clients []*Client
