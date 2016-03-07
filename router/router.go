@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder/config"
 	"github.com/solderapp/solder/controller"
+	"github.com/solderapp/solder/router/middleware/error"
 	"github.com/solderapp/solder/router/middleware/header"
 	"github.com/solderapp/solder/router/middleware/logger"
 	"github.com/solderapp/solder/router/middleware/recover"
@@ -31,6 +32,7 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 	e.Use(middleware...)
 	e.Use(logger.SetLogger())
 	e.Use(recover.SetRecover())
+	e.Use(error.SetError())
 	e.Use(header.SetCache())
 	e.Use(header.SetOptions())
 	e.Use(header.SetSecure())
