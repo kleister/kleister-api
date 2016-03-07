@@ -7,7 +7,6 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
 	"github.com/o1egl/gormrus"
-	"github.com/solderapp/solder/model"
 
 	// Register MySQL driver for GORM
 	_ "github.com/go-sql-driver/mysql"
@@ -63,11 +62,6 @@ func setupDatabase(driver string, db *gorm.DB) *gorm.DB {
 		logrus.Fatalln("database ping attempts failed")
 	}
 
-	if err := migrateDatabase(driver, db); err != nil {
-		logrus.Errorln(err)
-		logrus.Fatalln("database auto migrate failed")
-	}
-
 	return db
 }
 
@@ -90,24 +84,6 @@ func pingDatabase(driver string, db *gorm.DB) error {
 		logrus.Infof("database ping failed, retry in 1s")
 		time.Sleep(time.Second)
 	}
-
-	return nil
-}
-
-func migrateDatabase(driver string, db *gorm.DB) error {
-	db.AutoMigrate(
-		&model.Attachment{},
-		&model.Build{},
-		&model.Client{},
-		&model.Forge{},
-		&model.Key{},
-		&model.Minecraft{},
-		&model.Mod{},
-		&model.Pack{},
-		&model.Permission{},
-		&model.User{},
-		&model.Version{},
-	)
 
 	return nil
 }
