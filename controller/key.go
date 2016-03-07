@@ -39,9 +39,30 @@ func GetKeys(c *gin.Context) {
 
 // GetKey retrieves a specific key.
 func GetKey(c *gin.Context) {
+	record := &model.Key{
+		Slug: c.Param("key"),
+	}
+
+	err := context.Store(c).Find(
+		&record,
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			http.StatusNotFound,
+			gin.H{
+				"status":  http.StatusNotFound,
+				"message": "Failed to find key",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.IndentedJSON(
 		http.StatusOK,
-		gin.H{},
+		record,
 	)
 }
 
