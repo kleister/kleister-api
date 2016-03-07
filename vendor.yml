@@ -49,7 +49,11 @@ vendors:
   rev: 6acef71eb69611914f7a30939ea9f6e194c78172
 - path: golang.org/x/sys
   rev: 7a56174f0086b32866ebd746a794417edbc678a1
+- path: gopkg.in/check.v1
+  rev: 4f90aeace3a26ad7021961c297b22c42160c7b25
 - path: gopkg.in/go-playground/assert.v1
   rev: 4f4dfbc7d1c48336cf93399deae81aa9067e88af
 - path: gopkg.in/go-playground/validator.v8
   rev: 014792cf3e266caff1e916876be12282b33059e0
+- path: gopkg.in/validator.v2
+  rev: 3e4f037f12a1221a0864cf0dd2e81c452ab22448
