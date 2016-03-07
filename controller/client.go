@@ -39,9 +39,30 @@ func GetClients(c *gin.Context) {
 
 // GetClient retrieves a specific client.
 func GetClient(c *gin.Context) {
+	record := &model.Client{
+		Slug: c.Param("client"),
+	}
+
+	err := context.Store(c).Find(
+		&record,
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			http.StatusNotFound,
+			gin.H{
+				"status":  http.StatusNotFound,
+				"message": "Failed to find client",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.IndentedJSON(
 		http.StatusOK,
-		gin.H{},
+		record,
 	)
 }
 
