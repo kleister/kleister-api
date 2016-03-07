@@ -2,6 +2,8 @@
 
 [![Build Status](http://github.dronehippie.de/api/badges/solderapp/solder/status.svg)](http://github.dronehippie.de/solderapp/solder)
 [![Coverage Status](https://aircover.co/badges/solderapp/solder/coverage.svg)](https://aircover.co/solderapp/solder)
+[![Go Doc](https://godoc.org/github.com/solderapp/solder?status.svg)](http://godoc.org/github.com/solderapp/solder)
+[![Go Report](http://goreportcard.com/badge/solderapp/solder)](http://goreportcard.com/report/solderapp/solder)
 [![Join the chat at https://gitter.im/solderapp/solder](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/solderapp/solder)
 ![Release Status](https://img.shields.io/badge/status-beta-yellow.svg?style=flat)
 
