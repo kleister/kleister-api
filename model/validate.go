@@ -1,17 +1,17 @@
 package model
 
 import (
-  "gopkg.in/go-playground/validator.v8"
+	"gopkg.in/go-playground/validator.v8"
 )
 
 var (
-  validate *validator.Validate
+	validate *validator.Validate
 )
 
 func init() {
-  validate = validator.New(
-    &validator.Config{
-      TagName: "validate",
-    },
-  )
+	validate = validator.New(
+		&validator.Config{
+			TagName: "validate",
+		},
+	)
 }

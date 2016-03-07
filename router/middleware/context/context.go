@@ -3,8 +3,8 @@ package context
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder/config"
-	"github.com/solderapp/solder/store"
 	"github.com/solderapp/solder/model"
+	"github.com/solderapp/solder/store"
 )
 
 // Config gets the config from the context.
