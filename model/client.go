@@ -1,11 +1,17 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
-	"github.com/Machiel/slugify"
+	"github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
-	"github.com/solderapp/solder/store"
+	"github.com/satori/go.uuid"
+)
+
+const (
+	ClientNameMinLength = "3"
+	ClientNameMaxLength = "255"
 )
 
 // ClientDefaultOrder is the default ordering for client listings.
@@ -22,16 +28,16 @@ type Clients []*Client
 type Client struct {
 	ID        int64     `json:"id" gorm:"primary_key"`
 	Slug      string    `json:"slug" sql:"unique_index"`
-	Name      string    `json:"name" sql:"unique_index" validate:"gte=3,lte=255"`
-	Value     string    `json:"uuid" sql:"unique_index" validate:"required"`
+	Name      string    `json:"name" sql:"unique_index"`
+	Value     string    `json:"uuid" sql:"unique_index"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // BeforeSave invokes required actions before persisting.
-func (u *Client) BeforeSave() (err error) {
+func (u *Client) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
-		u.Slug = slugify.Slugify(u.Name)
+		u.Slug = uuid.NewV4().String()
 	}
 
 	return nil
@@ -39,26 +45,48 @@ func (u *Client) BeforeSave() (err error) {
 
 // Defaults prefills the struct with some default values.
 func (u *Client) Defaults() {
-
+	// Currently no default values required.
 }
 
 // Validate does some validation to be able to store the record.
-func (u *Client) Validate(store store.Store) error {
-	err := validate.Struct(u)
+func (u *Client) Validate(db *gorm.DB) {
+	if u.Name == "" {
+		db.AddError(fmt.Errorf("Name is a required attribute"))
+	}
+
+	if !govalidator.StringLength(u.Name, ClientNameMinLength, ClientNameMaxLength) {
+		db.AddError(fmt.Errorf("Name should be longer than 3 characters"))
+	}
+
+	if u.Value == "" {
+		db.AddError(fmt.Errorf("UUID is a required attribute"))
+	}
 
 	if u.Name != "" {
 		count := 1
 
-		store.Where("clients.name = ?", u.Name).Find(
+		db.Where("clients.name = ?", u.Name).Find(
 			&Client{},
 		).Count(
 			&count,
 		)
 
 		if count > 0 {
-			// Invalid because it's bigger than 1
+			db.AddError(fmt.Errorf("Name is already present"))
 		}
 	}
 
-	return err
+	if u.Value != "" {
+		count := 1
+
+		db.Where("clients.value = ?", u.Value).Find(
+			&Client{},
+		).Count(
+			&count,
+		)
+
+		if count > 0 {
+			db.AddError(fmt.Errorf("UUID is already present"))
+		}
+	}
 }

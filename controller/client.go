@@ -100,29 +100,16 @@ func PostClient(c *gin.Context) {
 		return
 	}
 
-	if err := record.Validate(context.Store(c)); err != nil {
+	res := context.Store(c).Create(
+		&record,
+	)
+
+	if res.Error != nil {
 		c.IndentedJSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
-				"message": err,
-			},
-		)
-
-		c.Abort()
-		return
-	}
-
-	err := context.Store(c).Create(
-		&record,
-	).Error
-
-	if err != nil {
-		c.IndentedJSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"status":  http.StatusInternalServerError,
-				"message": "Failed to store client",
+				"message": res.Error.Error(),
 			},
 		)
 
