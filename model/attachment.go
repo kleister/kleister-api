@@ -7,7 +7,7 @@ import (
 // Attachment represents any uploadable asset.
 type Attachment struct {
 	ID        int64     `json:"id" gorm:"primary_key"`
-	OwnerID   int       `json:"-"`
+	OwnerID   int64     `json:"-"`
 	OwnerType string    `json:"-"`
 	URL       string    `json:"url"`
 	MD5       string    `json:"md5"`

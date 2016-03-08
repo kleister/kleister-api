@@ -11,7 +11,7 @@ type Permissions []*Permission
 type Permission struct {
 	ID             int64     `json:"-" gorm:"primary_key"`
 	User           *User     `json:"-"`
-	UserID         int       `json:"-" sql:"index"`
+	UserID         int64     `json:"-" sql:"index"`
 	DisplayUsers   bool      `json:"display_users" sql:"default:false"`
 	ChangeUsers    bool      `json:"change_users" sql:"default:false"`
 	DeleteUsers    bool      `json:"delete_users" sql:"default:false"`
