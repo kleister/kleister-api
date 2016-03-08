@@ -125,9 +125,64 @@ func DeleteClient(c *gin.Context) {
 
 // PatchClient updates an existing client.
 func PatchClient(c *gin.Context) {
+	record := &model.Client{}
+
+	res := context.Store(c).Where(
+		"clients.id = ?",
+		c.Param("client"),
+	).Or(
+		"clients.slug = ?",
+		c.Param("client"),
+	).First(
+		&record,
+	)
+
+	if res.RecordNotFound() {
+		c.IndentedJSON(
+			http.StatusNotFound,
+			gin.H{
+				"status":  http.StatusNotFound,
+				"message": "Failed to find client",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	if err := c.BindJSON(&record); err != nil {
+		c.IndentedJSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind client data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Save(
+		&record,
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err.Error(),
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.IndentedJSON(
 		http.StatusOK,
-		gin.H{},
+		record,
 	)
 }
 
@@ -141,7 +196,7 @@ func PostClient(c *gin.Context) {
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind client form data",
+				"message": "Failed to bind client data",
 			},
 		)
 

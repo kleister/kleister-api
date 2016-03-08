@@ -68,7 +68,7 @@ func (u *Key) Validate(db *gorm.DB) {
 	if u.Name != "" {
 		count := 1
 
-		db.Where("keys.name = ?", u.Name).Find(
+		db.Where("name = ?", u.Name).Not("id", u.ID).Find(
 			&Key{},
 		).Count(
 			&count,
@@ -82,7 +82,7 @@ func (u *Key) Validate(db *gorm.DB) {
 	if u.Value != "" {
 		count := 1
 
-		db.Where("keys.value = ?", u.Name).Find(
+		db.Where("value = ?", u.Name).Not("id", u.ID).Find(
 			&Key{},
 		).Count(
 			&count,

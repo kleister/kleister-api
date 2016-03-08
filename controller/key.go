@@ -125,9 +125,64 @@ func DeleteKey(c *gin.Context) {
 
 // PatchKey updates an existing key.
 func PatchKey(c *gin.Context) {
+	record := &model.Key{}
+
+	res := context.Store(c).Where(
+		"keys.id = ?",
+		c.Param("key"),
+	).Or(
+		"keys.slug = ?",
+		c.Param("key"),
+	).First(
+		&record,
+	)
+
+	if res.RecordNotFound() {
+		c.IndentedJSON(
+			http.StatusNotFound,
+			gin.H{
+				"status":  http.StatusNotFound,
+				"message": "Failed to find key",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	if err := c.Bind(&record); err != nil {
+		c.IndentedJSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind key data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Save(
+		&record,
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err.Error(),
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.IndentedJSON(
 		http.StatusOK,
-		gin.H{},
+		record,
 	)
 }
 
@@ -141,7 +196,7 @@ func PostKey(c *gin.Context) {
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind key form data",
+				"message": "Failed to bind key data",
 			},
 		)
 
