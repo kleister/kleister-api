@@ -26,5 +26,5 @@ type Build struct {
 	Private     bool       `json:"private" sql:"default:false"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
-	Mods        []*Mod     `json:"mods" gorm:"many2many:build_mods;"`
+	Mods        *Mods      `json:"mods" gorm:"many2many:build_mods;"`
 }

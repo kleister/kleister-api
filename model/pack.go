@@ -26,5 +26,5 @@ type Pack struct {
 	Private       bool        `json:"private" sql:"default:false"`
 	CreatedAt     time.Time   `json:"created_at"`
 	UpdatedAt     time.Time   `json:"updated_at"`
-	Builds        []*Build    `json:"builds"`
+	Builds        *Builds     `json:"builds"`
 }

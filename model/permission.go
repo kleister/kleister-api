@@ -27,5 +27,5 @@ type Permission struct {
 	ManageMods    bool      `json:"manage_mods" sql:"default:false"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
-	Packs         []*Pack   `json:"packs" gorm:"many2many:permission_packs;"`
+	Packs         *Packs    `json:"packs" gorm:"many2many:permission_packs;"`
 }

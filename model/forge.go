@@ -27,7 +27,7 @@ type Forge struct {
 	Minecraft string    `json:"minecraft"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Builds    []*Build  `json:"-"`
+	Builds    *Builds   `json:"-"`
 }
 
 // BeforeSave invokes required actions before persisting.
