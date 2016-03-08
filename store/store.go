@@ -7,6 +7,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
 	"github.com/o1egl/gormrus"
+	"github.com/qor/validations"
 
 	// Register MySQL driver for GORM
 	_ "github.com/go-sql-driver/mysql"
@@ -30,7 +31,7 @@ func New(driver string, config string) *Store {
 	}
 
 	return &Store{
-		setupDatabase(driver, &db),
+		setupDatabase(driver, db),
 	}
 }
 
@@ -44,7 +45,7 @@ func From(driver string, handle *sql.DB) *Store {
 	}
 
 	return &Store{
-		setupDatabase(driver, &db),
+		setupDatabase(driver, db),
 	}
 }
 
@@ -69,6 +70,10 @@ func prepareDatabase(driver string, db *gorm.DB) error {
 	if driver == "mysql" {
 		db.DB().SetMaxIdleConns(0)
 	}
+
+	validations.RegisterCallbacks(
+		db,
+	)
 
 	return nil
 }
