@@ -1,6 +1,7 @@
 package context
 
 import (
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder/config"
 	"github.com/solderapp/solder/model"
@@ -27,21 +28,63 @@ func Store(c *gin.Context) store.Store {
 
 // SetStore injects the storage into the context.
 func SetStore(store store.Store) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		store.AutoMigrate(
-			&model.Attachment{},
-			&model.Build{},
-			&model.Client{},
-			&model.Forge{},
-			&model.Key{},
-			&model.Minecraft{},
-			&model.Mod{},
-			&model.Pack{},
-			&model.Permission{},
-			&model.User{},
-			&model.Version{},
-		)
+	users := 0
 
+	store.AutoMigrate(
+		&model.Attachment{},
+		&model.Build{},
+		&model.Client{},
+		&model.Forge{},
+		&model.Key{},
+		&model.Minecraft{},
+		&model.Mod{},
+		&model.Pack{},
+		&model.Permission{},
+		&model.User{},
+		&model.Version{},
+	)
+
+	store.Model(
+		&model.User{},
+	).Count(
+		&users,
+	)
+
+	if users == 0 {
+		record := &model.User{
+			Username: "admin",
+			Password: "admin",
+			Email:    "admin@example.com",
+			Permission: &model.Permission{
+				DisplayUsers:   true,
+				ChangeUsers:    true,
+				DeleteUsers:    true,
+				DisplayKeys:    true,
+				ChangeKeys:     true,
+				DeleteKeys:     true,
+				DisplayClients: true,
+				ChangeClients:  true,
+				DeleteClients:  true,
+				DisplayPacks:   true,
+				ChangePacks:    true,
+				DeletePacks:    true,
+				DisplayMods:    true,
+				ChangeMods:     true,
+				DeleteMods:     true,
+			},
+		}
+
+		err := store.Create(&record).Error
+
+		if err != nil {
+			logrus.Errorf(
+				"Failed to create initial user. %s",
+				err.Error(),
+			)
+		}
+	}
+
+	return func(c *gin.Context) {
 		c.Set("store", store)
 		c.Next()
 	}
