@@ -36,7 +36,7 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 	e.Use(header.SetCache())
 	e.Use(header.SetOptions())
 	e.Use(header.SetSecure())
-	e.Use(session.SetUser())
+	e.Use(session.SetCurrent())
 
 	r := e.Group(cfg.Server.Root)
 	{
@@ -110,9 +110,9 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 			users := api.Group("/users")
 			{
 				users.GET("", controller.GetUsers)
-				users.GET("/:user", controller.GetUser)
-				users.DELETE("/:user", controller.DeleteUser)
-				users.PATCH("/:user", controller.PatchUser)
+				users.GET("/:user", session.SetUser(), controller.GetUser)
+				users.DELETE("/:user", session.SetUser(), controller.DeleteUser)
+				users.PATCH("/:user", session.SetUser(), controller.PatchUser)
 				users.POST("", controller.PostUser)
 			}
 
