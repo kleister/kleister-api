@@ -9,11 +9,14 @@ import (
 	"github.com/o1egl/gormrus"
 	"github.com/qor/validations"
 
+	// Register Sqlite3 driver for GORM
+	// _ "github.com/jinzhu/gorm/dialects/sqlite"
+
 	// Register MySQL driver for GORM
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 
 	// Register Postgres driver for GORM
-	_ "github.com/lib/pq"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 // Store is a basic struct to represent the database handle.
