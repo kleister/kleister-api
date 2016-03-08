@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder/model"
 	"github.com/solderapp/solder/router/middleware/context"
+	"github.com/solderapp/solder/router/middleware/session"
 )
 
 // GetKeys retrieves all available keys.
@@ -39,30 +40,7 @@ func GetKeys(c *gin.Context) {
 
 // GetKey retrieves a specific key.
 func GetKey(c *gin.Context) {
-	record := &model.Key{}
-
-	res := context.Store(c).Where(
-		"keys.id = ?",
-		c.Param("key"),
-	).Or(
-		"keys.slug = ?",
-		c.Param("key"),
-	).First(
-		&record,
-	)
-
-	if res.RecordNotFound() {
-		c.IndentedJSON(
-			http.StatusNotFound,
-			gin.H{
-				"status":  http.StatusNotFound,
-				"message": "Failed to find key",
-			},
-		)
-
-		c.Abort()
-		return
-	}
+	record := session.Key(c)
 
 	c.IndentedJSON(
 		http.StatusOK,
@@ -72,30 +50,7 @@ func GetKey(c *gin.Context) {
 
 // DeleteKey removes a specific key.
 func DeleteKey(c *gin.Context) {
-	record := &model.Key{}
-
-	res := context.Store(c).Where(
-		"keys.id = ?",
-		c.Param("key"),
-	).Or(
-		"keys.slug = ?",
-		c.Param("key"),
-	).First(
-		&record,
-	)
-
-	if res.RecordNotFound() {
-		c.IndentedJSON(
-			http.StatusNotFound,
-			gin.H{
-				"status":  http.StatusNotFound,
-				"message": "Failed to find key",
-			},
-		)
-
-		c.Abort()
-		return
-	}
+	record := session.Key(c)
 
 	err := context.Store(c).Delete(
 		&record,
@@ -125,30 +80,7 @@ func DeleteKey(c *gin.Context) {
 
 // PatchKey updates an existing key.
 func PatchKey(c *gin.Context) {
-	record := &model.Key{}
-
-	res := context.Store(c).Where(
-		"keys.id = ?",
-		c.Param("key"),
-	).Or(
-		"keys.slug = ?",
-		c.Param("key"),
-	).First(
-		&record,
-	)
-
-	if res.RecordNotFound() {
-		c.IndentedJSON(
-			http.StatusNotFound,
-			gin.H{
-				"status":  http.StatusNotFound,
-				"message": "Failed to find key",
-			},
-		)
-
-		c.Abort()
-		return
-	}
+	record := session.Key(c)
 
 	if err := c.Bind(&record); err != nil {
 		c.IndentedJSON(

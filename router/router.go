@@ -119,18 +119,18 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 			keys := api.Group("/keys")
 			{
 				keys.GET("", controller.GetKeys)
-				keys.GET("/:key", controller.GetKey)
-				keys.DELETE("/:key", controller.DeleteKey)
-				keys.PATCH("/:key", controller.PatchKey)
+				keys.GET("/:key", session.SetKey(), controller.GetKey)
+				keys.DELETE("/:key", session.SetKey(), controller.DeleteKey)
+				keys.PATCH("/:key", session.SetKey(), controller.PatchKey)
 				keys.POST("", controller.PostKey)
 			}
 
 			clients := api.Group("/clients")
 			{
 				clients.GET("", controller.GetClients)
-				clients.GET("/:client", controller.GetClient)
-				clients.DELETE("/:client", controller.DeleteClient)
-				clients.PATCH("/:client", controller.PatchClient)
+				clients.GET("/:client", session.SetClient(), controller.GetClient)
+				clients.DELETE("/:client", session.SetClient(), controller.DeleteClient)
+				clients.PATCH("/:client", session.SetClient(), controller.PatchClient)
 				clients.POST("", controller.PostClient)
 			}
 

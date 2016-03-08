@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder/model"
 	"github.com/solderapp/solder/router/middleware/context"
+	"github.com/solderapp/solder/router/middleware/session"
 )
 
 // GetClients retrieves all available clients.
@@ -39,30 +40,7 @@ func GetClients(c *gin.Context) {
 
 // GetClient retrieves a specific client.
 func GetClient(c *gin.Context) {
-	record := &model.Client{}
-
-	res := context.Store(c).Where(
-		"clients.id = ?",
-		c.Param("client"),
-	).Or(
-		"clients.slug = ?",
-		c.Param("client"),
-	).First(
-		&record,
-	)
-
-	if res.RecordNotFound() {
-		c.IndentedJSON(
-			http.StatusNotFound,
-			gin.H{
-				"status":  http.StatusNotFound,
-				"message": "Failed to find client",
-			},
-		)
-
-		c.Abort()
-		return
-	}
+	record := session.Client(c)
 
 	c.IndentedJSON(
 		http.StatusOK,
@@ -72,30 +50,7 @@ func GetClient(c *gin.Context) {
 
 // DeleteClient removes a specific client.
 func DeleteClient(c *gin.Context) {
-	record := &model.Client{}
-
-	res := context.Store(c).Where(
-		"clients.id = ?",
-		c.Param("client"),
-	).Or(
-		"clients.slug = ?",
-		c.Param("client"),
-	).First(
-		&record,
-	)
-
-	if res.RecordNotFound() {
-		c.IndentedJSON(
-			http.StatusNotFound,
-			gin.H{
-				"status":  http.StatusNotFound,
-				"message": "Failed to find client",
-			},
-		)
-
-		c.Abort()
-		return
-	}
+	record := session.Client(c)
 
 	err := context.Store(c).Delete(
 		&record,
@@ -125,30 +80,7 @@ func DeleteClient(c *gin.Context) {
 
 // PatchClient updates an existing client.
 func PatchClient(c *gin.Context) {
-	record := &model.Client{}
-
-	res := context.Store(c).Where(
-		"clients.id = ?",
-		c.Param("client"),
-	).Or(
-		"clients.slug = ?",
-		c.Param("client"),
-	).First(
-		&record,
-	)
-
-	if res.RecordNotFound() {
-		c.IndentedJSON(
-			http.StatusNotFound,
-			gin.H{
-				"status":  http.StatusNotFound,
-				"message": "Failed to find client",
-			},
-		)
-
-		c.Abort()
-		return
-	}
+	record := session.Client(c)
 
 	if err := c.BindJSON(&record); err != nil {
 		c.IndentedJSON(
