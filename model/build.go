@@ -16,7 +16,7 @@ const (
 	BuildUsernameMaxLength = "255"
 )
 
-// PackDefaultOrder is the default ordering for pack listings.
+// BuildDefaultOrder is the default ordering for pack listings.
 func BuildDefaultOrder(db *gorm.DB) *gorm.DB {
 	return db.Order(
 		"builds.name ASC",
