@@ -39,15 +39,19 @@ func GetClients(c *gin.Context) {
 
 // GetClient retrieves a specific client.
 func GetClient(c *gin.Context) {
-	record := &model.Client{
-		Slug: c.Param("client"),
-	}
+	record := &model.Client{}
 
-	err := context.Store(c).Find(
+	res := context.Store(c).Where(
+		"clients.id = ?",
+		c.Param("client"),
+	).Or(
+		"clients.slug = ?",
+		c.Param("client"),
+	).First(
 		&record,
-	).Error
+	)
 
-	if err != nil {
+	if res.RecordNotFound() {
 		c.IndentedJSON(
 			http.StatusNotFound,
 			gin.H{
@@ -68,9 +72,54 @@ func GetClient(c *gin.Context) {
 
 // DeleteClient removes a specific client.
 func DeleteClient(c *gin.Context) {
+	record := &model.Client{}
+
+	res := context.Store(c).Where(
+		"clients.id = ?",
+		c.Param("client"),
+	).Or(
+		"clients.slug = ?",
+		c.Param("client"),
+	).First(
+		&record,
+	)
+
+	if res.RecordNotFound() {
+		c.IndentedJSON(
+			http.StatusNotFound,
+			gin.H{
+				"status":  http.StatusNotFound,
+				"message": "Failed to find client",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Delete(
+		&record,
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err.Error(),
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.IndentedJSON(
 		http.StatusOK,
-		gin.H{},
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully deleted client",
+		},
 	)
 }
 
@@ -100,16 +149,16 @@ func PostClient(c *gin.Context) {
 		return
 	}
 
-	res := context.Store(c).Create(
+	err := context.Store(c).Create(
 		&record,
-	)
+	).Error
 
-	if res.Error != nil {
+	if err != nil {
 		c.IndentedJSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
-				"message": res.Error.Error(),
+				"message": err.Error(),
 			},
 		)
 

@@ -39,15 +39,19 @@ func GetKeys(c *gin.Context) {
 
 // GetKey retrieves a specific key.
 func GetKey(c *gin.Context) {
-	record := &model.Key{
-		Slug: c.Param("key"),
-	}
+	record := &model.Key{}
 
-	err := context.Store(c).Find(
+	res := context.Store(c).Where(
+		"keys.id = ?",
+		c.Param("key"),
+	).Or(
+		"keys.slug = ?",
+		c.Param("key"),
+	).First(
 		&record,
-	).Error
+	)
 
-	if err != nil {
+	if res.RecordNotFound() {
 		c.IndentedJSON(
 			http.StatusNotFound,
 			gin.H{
@@ -68,9 +72,54 @@ func GetKey(c *gin.Context) {
 
 // DeleteKey removes a specific key.
 func DeleteKey(c *gin.Context) {
+	record := &model.Key{}
+
+	res := context.Store(c).Where(
+		"keys.id = ?",
+		c.Param("key"),
+	).Or(
+		"keys.slug = ?",
+		c.Param("key"),
+	).First(
+		&record,
+	)
+
+	if res.RecordNotFound() {
+		c.IndentedJSON(
+			http.StatusNotFound,
+			gin.H{
+				"status":  http.StatusNotFound,
+				"message": "Failed to find key",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Delete(
+		&record,
+	).Error
+
+	if err != nil {
+		c.IndentedJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err.Error(),
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.IndentedJSON(
 		http.StatusOK,
-		gin.H{},
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully deleted key",
+		},
 	)
 }
 
@@ -84,7 +133,7 @@ func PatchKey(c *gin.Context) {
 
 // PostKey creates a new key.
 func PostKey(c *gin.Context) {
-	record := &model.Client{}
+	record := &model.Key{}
 	record.Defaults()
 
 	if err := c.Bind(&record); err != nil {
@@ -100,16 +149,16 @@ func PostKey(c *gin.Context) {
 		return
 	}
 
-	res := context.Store(c).Create(
+	err := context.Store(c).Create(
 		&record,
-	)
+	).Error
 
-	if res.Error != nil {
+	if err != nil {
 		c.IndentedJSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
-				"message": res.Error.Error(),
+				"message": err.Error(),
 			},
 		)
 
