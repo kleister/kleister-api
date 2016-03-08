@@ -4,44 +4,168 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/solderapp/solder/model"
+	"github.com/solderapp/solder/router/middleware/context"
+	"github.com/solderapp/solder/router/middleware/session"
 )
 
 // GetBuilds retrieves all available builds.
 func GetBuilds(c *gin.Context) {
+	pack := session.Pack(c)
+	records := &model.Builds{}
+
+	err := context.Store(c).Scopes(
+		model.BuildDefaultOrder,
+	).Model(
+		&model.Build{},
+	).Where(
+		"builds.pack_id = ?",
+		pack.ID,
+	).Find(
+		&records,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to fetch builds",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.JSON(
 		http.StatusOK,
-		gin.H{},
+		records,
 	)
 }
 
 // GetBuild retrieves a specific build.
 func GetBuild(c *gin.Context) {
+	record := session.Build(c)
+
 	c.JSON(
 		http.StatusOK,
-		gin.H{},
+		record,
 	)
 }
 
 // DeleteBuild removes a specific build.
 func DeleteBuild(c *gin.Context) {
+	record := session.Build(c)
+
+	err := context.Store(c).Delete(
+		&record,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err.Error(),
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.JSON(
 		http.StatusOK,
-		gin.H{},
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully deleted build",
+		},
 	)
 }
 
 // PatchBuild updates an existing build.
 func PatchBuild(c *gin.Context) {
+	record := session.Build(c)
+
+	if err := c.BindJSON(&record); err != nil {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind build data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Save(
+		&record,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err.Error(),
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.JSON(
 		http.StatusOK,
-		gin.H{},
+		record,
 	)
 }
 
 // PostBuild creates a new build.
 func PostBuild(c *gin.Context) {
+	pack := session.Pack(c)
+
+	record := &model.Build{
+		PackID: pack.ID,
+	}
+
+	record.Defaults()
+
+	if err := c.BindJSON(&record); err != nil {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind build data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Create(
+		&record,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err.Error(),
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
 	c.JSON(
 		http.StatusOK,
-		gin.H{},
+		record,
 	)
 }
