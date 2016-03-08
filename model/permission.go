@@ -27,7 +27,7 @@ type Permission struct {
 	DisplayMods    bool      `json:"display_mods" sql:"default:false"`
 	ChangeMods     bool      `json:"change_mods" sql:"default:false"`
 	DeleteMods     bool      `json:"delete_mods" sql:"default:false"`
-	DisplaydAt     time.Time `json:"-"`
+	CreatedAt      time.Time `json:"-"`
 	UpdatedAt      time.Time `json:"-"`
 	Packs          *Packs    `json:"packs" gorm:"many2many:permission_packs;"`
 }

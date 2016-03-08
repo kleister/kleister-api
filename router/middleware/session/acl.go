@@ -1,8 +1,6 @@
 package session
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder/model"
 )
@@ -32,6 +30,29 @@ func Current(c *gin.Context) *model.User {
 // SetCurrent injects the user into the context.
 func SetCurrent() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		record := &model.User{
+			Username: "static",
+			Email:    "solder@webhippie.de",
+			Permission: &model.Permission{
+				DisplayUsers:   true,
+				ChangeUsers:    true,
+				DeleteUsers:    true,
+				DisplayKeys:    true,
+				ChangeKeys:     true,
+				DeleteKeys:     true,
+				DisplayClients: true,
+				ChangeClients:  true,
+				DeleteClients:  true,
+				DisplayPacks:   true,
+				ChangePacks:    true,
+				DeletePacks:    true,
+				DisplayMods:    true,
+				ChangeMods:     true,
+				DeleteMods:     true,
+			},
+		}
+
+		c.Set(CurrentContextKey, record)
 		c.Next()
 	}
 }

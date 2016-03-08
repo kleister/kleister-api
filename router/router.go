@@ -109,29 +109,35 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 
 			users := api.Group("/users")
 			{
+				users.Use(session.MustUsers("display"))
+
 				users.GET("", controller.GetUsers)
 				users.GET("/:user", session.SetUser(), controller.GetUser)
-				users.DELETE("/:user", session.SetUser(), controller.DeleteUser)
-				users.PATCH("/:user", session.SetUser(), controller.PatchUser)
-				users.POST("", controller.PostUser)
+				users.DELETE("/:user", session.MustUsers("delete"), session.SetUser(), controller.DeleteUser)
+				users.PATCH("/:user", session.MustUsers("change"), session.SetUser(), controller.PatchUser)
+				users.POST("", session.MustUsers("change"), controller.PostUser)
 			}
 
 			keys := api.Group("/keys")
 			{
+				keys.Use(session.MustKeys("display"))
+
 				keys.GET("", controller.GetKeys)
 				keys.GET("/:key", session.SetKey(), controller.GetKey)
-				keys.DELETE("/:key", session.SetKey(), controller.DeleteKey)
-				keys.PATCH("/:key", session.SetKey(), controller.PatchKey)
-				keys.POST("", controller.PostKey)
+				keys.DELETE("/:key", session.MustKeys("delete"), session.SetKey(), controller.DeleteKey)
+				keys.PATCH("/:key", session.MustKeys("change"), session.SetKey(), controller.PatchKey)
+				keys.POST("", session.MustKeys("change"), controller.PostKey)
 			}
 
 			clients := api.Group("/clients")
 			{
+				clients.Use(session.MustClients("display"))
+
 				clients.GET("", controller.GetClients)
 				clients.GET("/:client", session.SetClient(), controller.GetClient)
-				clients.DELETE("/:client", session.SetClient(), controller.DeleteClient)
-				clients.PATCH("/:client", session.SetClient(), controller.PatchClient)
-				clients.POST("", controller.PostClient)
+				clients.DELETE("/:client", session.MustClients("delete"), session.SetClient(), controller.DeleteClient)
+				clients.PATCH("/:client", session.MustClients("change"), session.SetClient(), controller.PatchClient)
+				clients.POST("", session.MustClients("change"), controller.PostClient)
 			}
 
 			solder := api.Group("/")

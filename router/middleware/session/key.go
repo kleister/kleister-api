@@ -61,3 +61,41 @@ func SetKey() gin.HandlerFunc {
 		}
 	}
 }
+
+// MustKeys validates the keys access.
+func MustKeys(action string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := Current(c)
+
+		if user == nil {
+			c.JSON(
+				http.StatusUnauthorized,
+				gin.H{
+					"status":  http.StatusUnauthorized,
+					"message": "You have to be authenticated",
+				},
+			)
+
+			c.Abort()
+		} else {
+			switch {
+			case action == "display" && user.Permission.DisplayKeys:
+				c.Next()
+			case action == "change" && user.Permission.ChangeKeys:
+				c.Next()
+			case action == "delete" && user.Permission.DeleteKeys:
+				c.Next()
+			default:
+				c.JSON(
+					http.StatusForbidden,
+					gin.H{
+						"status":  http.StatusForbidden,
+						"message": "You are not authorized to request this resource",
+					},
+				)
+
+				c.Abort()
+			}
+		}
+	}
+}
