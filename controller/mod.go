@@ -15,11 +15,13 @@ func GetMods(c *gin.Context) {
 
 	err := context.Store(c).Scopes(
 		model.ModDefaultOrder,
-	).Preload(
-		"Versions",
 	).Find(
 		&records,
 	).Error
+
+	// .Preload(
+	// 	"Versions",
+	// )
 
 	if err != nil {
 		c.JSON(

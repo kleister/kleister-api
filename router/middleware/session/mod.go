@@ -41,13 +41,15 @@ func SetMod() gin.HandlerFunc {
 		).Or(
 			"mods.slug = ?",
 			c.Param("mod"),
-		).Model(
-			&model.Mod{},
-		).Preload(
-			"Versions",
 		).First(
 			&record,
 		)
+
+		// .Model(
+		// 	&model.Mod{},
+		// ).Preload(
+		// 	"Versions",
+		// )
 
 		if res.RecordNotFound() {
 			c.JSON(

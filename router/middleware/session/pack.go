@@ -41,13 +41,15 @@ func SetPack() gin.HandlerFunc {
 		).Or(
 			"packs.slug = ?",
 			c.Param("pack"),
-		).Model(
-			&model.Pack{},
-		).Preload(
-			"Builds",
 		).First(
 			&record,
 		)
+
+		// .Model(
+		// 	&model.Pack{},
+		// ).Preload(
+		// 	"Builds",
+		// )
 
 		if res.RecordNotFound() {
 			c.JSON(
