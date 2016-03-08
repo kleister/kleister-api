@@ -12,7 +12,10 @@ type Config struct {
 		Root string
 	}
 	Database struct {
-		Driver string
-		Config string
+		Driver   string
+		Username string
+		Password string
+		Name     string
+		Host     string
 	}
 }

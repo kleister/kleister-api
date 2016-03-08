@@ -1,17 +1,45 @@
 package store
 
 import (
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/solderapp/solder/config"
 )
 
 // Load initializes the database connection.
 func Load(cfg *config.Config) *Store {
-	logrus.Infof("using database driver %s", cfg.Database.Driver)
-	logrus.Infof("using database config %s", cfg.Database.Config)
+	driver := cfg.Database.Driver
+	connect := ""
+
+	switch driver {
+	case "mysql":
+		connect = fmt.Sprintf(
+			"%s:%s@(%s)/%s?parseTime=True&loc=Local",
+			cfg.Database.Username,
+			cfg.Database.Password,
+			cfg.Database.Host,
+			cfg.Database.Name,
+		)
+	case "postgres":
+		connect = fmt.Sprintf(
+			"postgres://%s:%s@%s/%s?sslmode=disable",
+			cfg.Database.Username,
+			cfg.Database.Password,
+			cfg.Database.Host,
+			cfg.Database.Name,
+		)
+	case "sqlite":
+		connect = cfg.Database.Name
+	default:
+		logrus.Fatal("Unknown database driver selected")
+	}
+
+	logrus.Infof("using database driver %s", driver)
+	logrus.Infof("using database config %s", connect)
 
 	return New(
-		cfg.Database.Driver,
-		cfg.Database.Config,
+		driver,
+		connect,
 	)
 }
