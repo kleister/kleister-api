@@ -91,9 +91,6 @@ func main() {
 
 	app.Commands = []cli.Command{
 		cmd.Server(cfg),
-		cmd.User(cfg),
-		cmd.Client(cfg),
-		cmd.Key(cfg),
 	}
 
 	cli.HelpFlag = cli.BoolFlag{
