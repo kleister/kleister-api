@@ -13,8 +13,8 @@ type User struct {
 	Permission *Permission `json:"permission"`
 	Slug       string      `json:"slug" sql:"unique_index"`
 	Username   string      `json:"username" sql:"unique_index"`
+	Password   string      `json:"-"`
 	Email      string      `json:"email"`
 	CreatedAt  time.Time   `json:"created_at"`
 	UpdatedAt  time.Time   `json:"updated_at"`
-	Password   string      `json:"-"`
 }
