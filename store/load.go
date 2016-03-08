@@ -15,7 +15,7 @@ func Load(cfg *config.Config) *Store {
 	switch driver {
 	case "mysql":
 		connect = fmt.Sprintf(
-			"%s:%s@(%s)/%s?parseTime=True&loc=Local",
+			"%s:%s@(%s)/%s?charset=utf8&parseTime=True&loc=Local",
 			cfg.Database.Username,
 			cfg.Database.Password,
 			cfg.Database.Host,
