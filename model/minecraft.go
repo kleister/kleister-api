@@ -29,7 +29,7 @@ type Minecraft struct {
 }
 
 // BeforeSave invokes required actions before persisting.
-func (u *Minecraft) BeforeSave() (err error) {
+func (u *Minecraft) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
 		u.Slug = uuid.NewV4().String()
 	}

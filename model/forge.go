@@ -31,7 +31,7 @@ type Forge struct {
 }
 
 // BeforeSave invokes required actions before persisting.
-func (u *Forge) BeforeSave() (err error) {
+func (u *Forge) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
 		u.Slug = uuid.NewV4().String()
 	}
