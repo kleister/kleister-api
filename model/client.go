@@ -35,6 +35,7 @@ type Client struct {
 	Value     string    `json:"uuid" sql:"unique_index"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	Packs     *Packs    `json:"packs" gorm:"many2many:client_packs;"`
 }
 
 // BeforeSave invokes required actions before persisting.
