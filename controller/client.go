@@ -74,7 +74,7 @@ func DeleteClient(c *gin.Context) {
 	)
 }
 
-// PatchClient creates a new client.
+// PatchClient updates an existing client.
 func PatchClient(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -82,7 +82,7 @@ func PatchClient(c *gin.Context) {
 	)
 }
 
-// PostClient updates an existing client.
+// PostClient creates a new client.
 func PostClient(c *gin.Context) {
 	record := &model.Client{}
 	record.Defaults()

@@ -30,7 +30,7 @@ func DeleteBuild(c *gin.Context) {
 	)
 }
 
-// PatchBuild creates a new build.
+// PatchBuild updates an existing build.
 func PatchBuild(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -38,7 +38,7 @@ func PatchBuild(c *gin.Context) {
 	)
 }
 
-// PostBuild updates an existing build.
+// PostBuild creates a new build.
 func PostBuild(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,

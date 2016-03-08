@@ -30,7 +30,7 @@ func DeleteUser(c *gin.Context) {
 	)
 }
 
-// PatchUser creates an new user.
+// PatchUser updates an existing user.
 func PatchUser(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -38,7 +38,7 @@ func PatchUser(c *gin.Context) {
 	)
 }
 
-// PostUser updates an existing user.
+// PostUser creates an new user.
 func PostUser(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,

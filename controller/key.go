@@ -74,7 +74,7 @@ func DeleteKey(c *gin.Context) {
 	)
 }
 
-// PatchKey creates a new key.
+// PatchKey updates an existing key.
 func PatchKey(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -82,7 +82,7 @@ func PatchKey(c *gin.Context) {
 	)
 }
 
-// PostKey updates an existing key.
+// PostKey creates a new key.
 func PostKey(c *gin.Context) {
 	record := &model.Client{}
 	record.Defaults()

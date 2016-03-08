@@ -30,7 +30,7 @@ func DeletePack(c *gin.Context) {
 	)
 }
 
-// PatchPack creates a new pack.
+// PatchPack updates an existing pack.
 func PatchPack(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -38,7 +38,7 @@ func PatchPack(c *gin.Context) {
 	)
 }
 
-// PostPack updates an existing pack.
+// PostPack creates a new pack.
 func PostPack(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,

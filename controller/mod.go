@@ -30,7 +30,7 @@ func DeleteMod(c *gin.Context) {
 	)
 }
 
-// PatchMod creates a new mod.
+// PatchMod updates an existing mod.
 func PatchMod(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -38,7 +38,7 @@ func PatchMod(c *gin.Context) {
 	)
 }
 
-// PostMod updates an existing mod.
+// PostMod creates a new mod.
 func PostMod(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,

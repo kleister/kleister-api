@@ -30,7 +30,7 @@ func DeleteVersion(c *gin.Context) {
 	)
 }
 
-// PatchVersion creates a new version.
+// PatchVersion updates an existing version.
 func PatchVersion(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
@@ -38,7 +38,7 @@ func PatchVersion(c *gin.Context) {
 	)
 }
 
-// PostVersion updates an existing version.
+// PostVersion creates a new version.
 func PostVersion(c *gin.Context) {
 	c.IndentedJSON(
 		http.StatusOK,
