@@ -60,51 +60,61 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 		{
 			api.GET("", controller.GetAPI)
 
-			api.GET("/profile", controller.GetProfile)
-			api.PATCH("/profile", controller.PatchProfile)
+			api.GET("/profile", session.MustCurrent(), controller.GetProfile)
+			api.PATCH("/profile", session.MustCurrent(), controller.PatchProfile)
 
-			api.GET("/minecraft", controller.GetMinecraft)
-			api.GET("/minecraft/:filter", controller.CompleteMinecraft)
-			api.PATCH("/minecraft", controller.PatchMinecraft)
+			api.GET("/minecraft", session.MustCurrent(), controller.GetMinecraft)
+			api.GET("/minecraft/:filter", session.MustCurrent(), controller.CompleteMinecraft)
+			api.PATCH("/minecraft", session.MustPacks("change"), controller.PatchMinecraft)
 
-			api.GET("/forge", controller.GetForge)
-			api.GET("/forge/:filter", controller.CompleteForge)
-			api.PATCH("/forge", controller.PatchForge)
+			api.GET("/forge", session.MustCurrent(), controller.GetForge)
+			api.GET("/forge/:filter", session.MustCurrent(), controller.CompleteForge)
+			api.PATCH("/forge", session.MustPacks("change"), controller.PatchForge)
 
 			packs := api.Group("/packs")
 			{
+				packs.Use(session.MustPacks("display"))
+
 				packs.GET("", controller.GetPacks)
-				packs.GET("/:pack", controller.GetPack)
-				packs.DELETE("/:pack", controller.DeletePack)
-				packs.PATCH("/:pack", controller.PatchPack)
-				packs.POST("", controller.PostPack)
+				packs.GET("/:pack", session.SetPack(), controller.GetPack)
+				packs.DELETE("/:pack", session.SetPack(), session.MustPacks("delete"), controller.DeletePack)
+				packs.PATCH("/:pack", session.SetPack(), session.MustPacks("change"), controller.PatchPack)
+				packs.POST("", session.MustPacks("change"), controller.PostPack)
 			}
 
 			builds := api.Group("/packs/:pack/builds")
 			{
+				builds.Use(session.SetPack())
+				builds.Use(session.MustPacks("display"))
+
 				builds.GET("", controller.GetBuilds)
-				builds.GET("/:build", controller.GetBuild)
-				builds.DELETE("/:build", controller.DeleteBuild)
-				builds.PATCH("/:build", controller.PatchBuild)
-				builds.POST("", controller.PostBuild)
+				builds.GET("/:build", session.SetBuild(), controller.GetBuild)
+				builds.DELETE("/:build", session.SetBuild(), session.MustPacks("delete"), controller.DeleteBuild)
+				builds.PATCH("/:build", session.SetBuild(), session.MustPacks("change"), controller.PatchBuild)
+				builds.POST("", session.MustPacks("change"), controller.PostBuild)
 			}
 
 			mods := api.Group("/mods")
 			{
+				mods.Use(session.MustMods("display"))
+
 				mods.GET("", controller.GetMods)
-				mods.GET("/:mod", controller.GetMod)
-				mods.DELETE("/:mod", controller.DeleteMod)
-				mods.PATCH("/:mod", controller.PatchMod)
-				mods.POST("", controller.PostMod)
+				mods.GET("/:mod", session.SetMod(), controller.GetMod)
+				mods.DELETE("/:mod", session.SetMod(), session.MustMods("delete"), controller.DeleteMod)
+				mods.PATCH("/:mod", session.SetMod(), session.MustMods("change"), controller.PatchMod)
+				mods.POST("", session.MustMods("change"), controller.PostMod)
 			}
 
 			versions := api.Group("/mods/:mod/versions")
 			{
+				versions.Use(session.SetMod())
+				versions.Use(session.MustMods("display"))
+
 				versions.GET("", controller.GetVersions)
-				versions.GET("/:version", controller.GetVersion)
-				versions.DELETE("/:version", controller.DeleteVersion)
-				versions.PATCH("/:version", controller.PatchVersion)
-				versions.POST("", controller.PostVersion)
+				versions.GET("/:version", session.SetVersion(), controller.GetVersion)
+				versions.DELETE("/:version", session.SetVersion(), session.MustMods("delete"), controller.DeleteVersion)
+				versions.PATCH("/:version", session.SetVersion(), session.MustMods("change"), controller.PatchVersion)
+				versions.POST("", session.MustMods("change"), controller.PostVersion)
 			}
 
 			users := api.Group("/users")
@@ -113,8 +123,8 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 
 				users.GET("", controller.GetUsers)
 				users.GET("/:user", session.SetUser(), controller.GetUser)
-				users.DELETE("/:user", session.MustUsers("delete"), session.SetUser(), controller.DeleteUser)
-				users.PATCH("/:user", session.MustUsers("change"), session.SetUser(), controller.PatchUser)
+				users.DELETE("/:user", session.SetUser(), session.MustUsers("delete"), controller.DeleteUser)
+				users.PATCH("/:user", session.SetUser(), session.MustUsers("change"), controller.PatchUser)
 				users.POST("", session.MustUsers("change"), controller.PostUser)
 			}
 
@@ -124,8 +134,8 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 
 				keys.GET("", controller.GetKeys)
 				keys.GET("/:key", session.SetKey(), controller.GetKey)
-				keys.DELETE("/:key", session.MustKeys("delete"), session.SetKey(), controller.DeleteKey)
-				keys.PATCH("/:key", session.MustKeys("change"), session.SetKey(), controller.PatchKey)
+				keys.DELETE("/:key", session.SetKey(), session.MustKeys("delete"), controller.DeleteKey)
+				keys.PATCH("/:key", session.SetKey(), session.MustKeys("change"), controller.PatchKey)
 				keys.POST("", session.MustKeys("change"), controller.PostKey)
 			}
 
@@ -135,8 +145,8 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 
 				clients.GET("", controller.GetClients)
 				clients.GET("/:client", session.SetClient(), controller.GetClient)
-				clients.DELETE("/:client", session.MustClients("delete"), session.SetClient(), controller.DeleteClient)
-				clients.PATCH("/:client", session.MustClients("change"), session.SetClient(), controller.PatchClient)
+				clients.DELETE("/:client", session.SetClient(), session.MustClients("delete"), controller.DeleteClient)
+				clients.PATCH("/:client", session.SetClient(), session.MustClients("change"), controller.PatchClient)
 				clients.POST("", session.MustClients("change"), controller.PostClient)
 			}
 

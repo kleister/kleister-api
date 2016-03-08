@@ -1,13 +1,15 @@
 package session
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder/model"
 )
 
 const (
 	// CurrentContextKey defines the context key that stores the user.
-	CurrentContextKey = "client"
+	CurrentContextKey = "current"
 )
 
 // Current gets the user from the context.
@@ -54,5 +56,26 @@ func SetCurrent() gin.HandlerFunc {
 
 		c.Set(CurrentContextKey, record)
 		c.Next()
+	}
+}
+
+// MustCurrent validates the user access.
+func MustCurrent() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := Current(c)
+
+		if user == nil {
+			c.JSON(
+				http.StatusUnauthorized,
+				gin.H{
+					"status":  http.StatusUnauthorized,
+					"message": "You have to be authenticated",
+				},
+			)
+
+			c.Abort()
+		} else {
+			c.Next()
+		}
 	}
 }
