@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	_ "github.com/Machiel/slugify"
 )
 
 // Packs is simply a collection of pack structs.

@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	_ "github.com/Machiel/slugify"
 )
 
 // Mods is simply a collection of mod structs.

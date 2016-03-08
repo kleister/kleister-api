@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	_ "github.com/Machiel/slugify"
 )
 
 // Versions is simply a collection of version structs.

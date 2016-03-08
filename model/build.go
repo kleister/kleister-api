@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	_ "github.com/Machiel/slugify"
 )
 
 // Builds is simply a collection of build structs.
