@@ -21,7 +21,7 @@ type Forges []*Forge
 
 // Forge represents a forge model definition.
 type Forge struct {
-	ID        int64     `json:"id" gorm:"primary_key"`
+	ID        uint      `json:"id" gorm:"primary_key"`
 	Slug      string    `json:"slug" sql:"unique_index"`
 	Name      string    `json:"version" sql:"unique_index"`
 	Minecraft string    `json:"minecraft"`

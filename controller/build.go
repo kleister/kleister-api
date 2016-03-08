@@ -16,8 +16,6 @@ func GetBuilds(c *gin.Context) {
 
 	err := context.Store(c).Scopes(
 		model.BuildDefaultOrder,
-	).Model(
-		&model.Build{},
 	).Where(
 		"builds.pack_id = ?",
 		pack.ID,

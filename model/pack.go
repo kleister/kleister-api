@@ -28,14 +28,14 @@ type Packs []*Pack
 
 // Pack represents a pack model definition.
 type Pack struct {
-	ID            int64        `json:"id" gorm:"primary_key"`
+	ID            uint         `json:"id" gorm:"primary_key"`
 	Icon          *Attachment  `json:"icon" gorm:"polymorphic:Owner"`
 	Logo          *Attachment  `json:"logo" gorm:"polymorphic:Owner"`
 	Background    *Attachment  `json:"background" gorm:"polymorphic:Owner"`
 	Recommended   *Build       `json:"recommended"`
-	RecommendedID int64        `json:"recommended_id" sql:"index"`
+	RecommendedID uint         `json:"recommended_id" sql:"index"`
 	Latest        *Build       `json:"latest"`
-	LatestID      int64        `json:"latest_id" sql:"index"`
+	LatestID      uint         `json:"latest_id" sql:"index"`
 	Slug          string       `json:"slug" sql:"unique_index"`
 	Name          string       `json:"name" sql:"unique_index"`
 	Website       string       `json:"website"`

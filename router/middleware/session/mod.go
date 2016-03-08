@@ -42,7 +42,7 @@ func SetMod() gin.HandlerFunc {
 			"mods.slug = ?",
 			c.Param("mod"),
 		).Model(
-			&record,
+			&model.Mod{},
 		).Preload(
 			"Versions",
 		).First(

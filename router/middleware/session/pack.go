@@ -42,7 +42,7 @@ func SetPack() gin.HandlerFunc {
 			"packs.slug = ?",
 			c.Param("pack"),
 		).Model(
-			&record,
+			&model.Pack{},
 		).Preload(
 			"Builds",
 		).First(

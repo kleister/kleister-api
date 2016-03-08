@@ -16,8 +16,6 @@ func GetVersions(c *gin.Context) {
 
 	err := context.Store(c).Scopes(
 		model.VersionDefaultOrder,
-	).Model(
-		&model.Version{},
 	).Where(
 		"versions.mod_id = ?",
 		mod.ID,
