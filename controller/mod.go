@@ -8,7 +8,7 @@ import (
 
 // GetMods retrieves all available mods.
 func GetMods(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -16,7 +16,7 @@ func GetMods(c *gin.Context) {
 
 // GetMod retrieves a specific mod.
 func GetMod(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -24,7 +24,7 @@ func GetMod(c *gin.Context) {
 
 // DeleteMod removes a specific mod.
 func DeleteMod(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -32,7 +32,7 @@ func DeleteMod(c *gin.Context) {
 
 // PatchMod updates an existing mod.
 func PatchMod(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -40,7 +40,7 @@ func PatchMod(c *gin.Context) {
 
 // PostMod creates a new mod.
 func PostMod(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)

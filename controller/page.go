@@ -24,7 +24,7 @@ func GetIndex(c *gin.Context) {
 func GetAPI(c *gin.Context) {
 	config := context.Config(c)
 
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{
 			"stream":  "reloaded",

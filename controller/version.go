@@ -8,7 +8,7 @@ import (
 
 // GetVersions retrieves all available versions.
 func GetVersions(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -16,7 +16,7 @@ func GetVersions(c *gin.Context) {
 
 // GetVersion retrieves a specific version.
 func GetVersion(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -24,7 +24,7 @@ func GetVersion(c *gin.Context) {
 
 // DeleteVersion removes a specific version.
 func DeleteVersion(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -32,7 +32,7 @@ func DeleteVersion(c *gin.Context) {
 
 // PatchVersion updates an existing version.
 func PatchVersion(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -40,7 +40,7 @@ func PatchVersion(c *gin.Context) {
 
 // PostVersion creates a new version.
 func PostVersion(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)

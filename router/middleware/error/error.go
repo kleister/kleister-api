@@ -26,7 +26,7 @@ func SetError() gin.HandlerFunc {
 
 			logrus.Warn(err.Error())
 
-			c.IndentedJSON(
+			c.JSON(
 				status,
 				gin.H{
 					"status":  status,

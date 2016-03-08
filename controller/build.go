@@ -8,7 +8,7 @@ import (
 
 // GetBuilds retrieves all available builds.
 func GetBuilds(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -16,7 +16,7 @@ func GetBuilds(c *gin.Context) {
 
 // GetBuild retrieves a specific build.
 func GetBuild(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -24,7 +24,7 @@ func GetBuild(c *gin.Context) {
 
 // DeleteBuild removes a specific build.
 func DeleteBuild(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -32,7 +32,7 @@ func DeleteBuild(c *gin.Context) {
 
 // PatchBuild updates an existing build.
 func PatchBuild(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -40,7 +40,7 @@ func PatchBuild(c *gin.Context) {
 
 // PostBuild creates a new build.
 func PostBuild(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)

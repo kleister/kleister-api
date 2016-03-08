@@ -20,7 +20,7 @@ func GetClients(c *gin.Context) {
 	).Error
 
 	if err != nil {
-		c.IndentedJSON(
+		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
 				"status":  http.StatusInternalServerError,
@@ -32,7 +32,7 @@ func GetClients(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		records,
 	)
@@ -42,7 +42,7 @@ func GetClients(c *gin.Context) {
 func GetClient(c *gin.Context) {
 	record := session.Client(c)
 
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		record,
 	)
@@ -57,7 +57,7 @@ func DeleteClient(c *gin.Context) {
 	).Error
 
 	if err != nil {
-		c.IndentedJSON(
+		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
@@ -69,7 +69,7 @@ func DeleteClient(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{
 			"status":  http.StatusOK,
@@ -83,7 +83,7 @@ func PatchClient(c *gin.Context) {
 	record := session.Client(c)
 
 	if err := c.BindJSON(&record); err != nil {
-		c.IndentedJSON(
+		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
@@ -100,7 +100,7 @@ func PatchClient(c *gin.Context) {
 	).Error
 
 	if err != nil {
-		c.IndentedJSON(
+		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
@@ -112,7 +112,7 @@ func PatchClient(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		record,
 	)
@@ -124,7 +124,7 @@ func PostClient(c *gin.Context) {
 	record.Defaults()
 
 	if err := c.BindJSON(&record); err != nil {
-		c.IndentedJSON(
+		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
@@ -141,7 +141,7 @@ func PostClient(c *gin.Context) {
 	).Error
 
 	if err != nil {
-		c.IndentedJSON(
+		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
@@ -153,7 +153,7 @@ func PostClient(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		record,
 	)

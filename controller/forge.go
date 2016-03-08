@@ -21,7 +21,7 @@ func GetForge(c *gin.Context) {
 	).Error
 
 	if err != nil {
-		c.IndentedJSON(
+		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
 				"status":  http.StatusInternalServerError,
@@ -33,7 +33,7 @@ func GetForge(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		records,
 	)
@@ -53,7 +53,7 @@ func CompleteForge(c *gin.Context) {
 	).Error
 
 	if err != nil {
-		c.IndentedJSON(
+		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
 				"status":  http.StatusInternalServerError,
@@ -65,7 +65,7 @@ func CompleteForge(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		records,
 	)
@@ -76,7 +76,7 @@ func PatchForge(c *gin.Context) {
 	result, err := forge.Load()
 
 	if err != nil {
-		c.IndentedJSON(
+		c.JSON(
 			http.StatusServiceUnavailable,
 			gin.H{
 				"status":  http.StatusServiceUnavailable,
@@ -108,7 +108,7 @@ func PatchForge(c *gin.Context) {
 		).Error
 
 		if err != nil {
-			c.IndentedJSON(
+			c.JSON(
 				http.StatusInternalServerError,
 				gin.H{
 					"status":  http.StatusInternalServerError,
@@ -121,7 +121,7 @@ func PatchForge(c *gin.Context) {
 		}
 	}
 
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{
 			"status":  http.StatusOK,

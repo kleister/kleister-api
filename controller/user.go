@@ -8,7 +8,7 @@ import (
 
 // GetUsers retrieves all available users.
 func GetUsers(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -16,7 +16,7 @@ func GetUsers(c *gin.Context) {
 
 // GetUser retrieves an specific user.
 func GetUser(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -24,7 +24,7 @@ func GetUser(c *gin.Context) {
 
 // DeleteUser removes an specific user.
 func DeleteUser(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -32,7 +32,7 @@ func DeleteUser(c *gin.Context) {
 
 // PatchUser updates an existing user.
 func PatchUser(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -40,7 +40,7 @@ func PatchUser(c *gin.Context) {
 
 // PostUser creates an new user.
 func PostUser(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)

@@ -46,7 +46,7 @@ func SetKey() gin.HandlerFunc {
 		)
 
 		if res.RecordNotFound() {
-			c.IndentedJSON(
+			c.JSON(
 				http.StatusNotFound,
 				gin.H{
 					"status":  http.StatusNotFound,

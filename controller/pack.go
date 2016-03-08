@@ -8,7 +8,7 @@ import (
 
 // GetPacks retrieves all available packs.
 func GetPacks(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -16,7 +16,7 @@ func GetPacks(c *gin.Context) {
 
 // GetPack retrieves a specific pack.
 func GetPack(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -24,7 +24,7 @@ func GetPack(c *gin.Context) {
 
 // DeletePack removes a specific pack.
 func DeletePack(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -32,7 +32,7 @@ func DeletePack(c *gin.Context) {
 
 // PatchPack updates an existing pack.
 func PatchPack(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
@@ -40,7 +40,7 @@ func PatchPack(c *gin.Context) {
 
 // PostPack creates a new pack.
 func PostPack(c *gin.Context) {
-	c.IndentedJSON(
+	c.JSON(
 		http.StatusOK,
 		gin.H{},
 	)
