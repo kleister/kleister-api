@@ -10,7 +10,10 @@ import (
 )
 
 const (
+	// ClientNameMinLength is the minimum length of the client name.
 	ClientNameMinLength = "3"
+
+	// ClientNameMaxLength is the maximum length of the client name.
 	ClientNameMaxLength = "255"
 )
 

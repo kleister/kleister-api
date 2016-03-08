@@ -10,7 +10,10 @@ import (
 )
 
 const (
+	// KeyNameMinLength is the minimum length of the key name.
 	KeyNameMinLength = "3"
+
+	// KeyNameMaxLength is the maximum length of the key name.
 	KeyNameMaxLength = "255"
 )
 
