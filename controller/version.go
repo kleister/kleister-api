@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder/model"
-	"github.com/solderapp/solder/router/middleware/context"
-	"github.com/solderapp/solder/router/middleware/session"
+	"github.com/solderapp/solder-api/model"
+	"github.com/solderapp/solder-api/router/middleware/context"
+	"github.com/solderapp/solder-api/router/middleware/session"
 )
 
 // GetVersions retrieves all available versions.

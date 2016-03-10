@@ -3,9 +3,9 @@ package context
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder/config"
-	"github.com/solderapp/solder/model"
-	"github.com/solderapp/solder/store"
+	"github.com/solderapp/solder-api/config"
+	"github.com/solderapp/solder-api/model"
+	"github.com/solderapp/solder-api/store"
 )
 
 // Config gets the config from the context.

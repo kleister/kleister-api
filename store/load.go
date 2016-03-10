@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/solderapp/solder/config"
+	"github.com/solderapp/solder-api/config"
 )
 
 // Load initializes the database connection.

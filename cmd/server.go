@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"github.com/codegangsta/cli"
-	"github.com/solderapp/solder/config"
-	"github.com/solderapp/solder/router"
-	"github.com/solderapp/solder/router/middleware/context"
-	"github.com/solderapp/solder/server"
-	"github.com/solderapp/solder/store"
+	"github.com/solderapp/solder-api/config"
+	"github.com/solderapp/solder-api/router"
+	"github.com/solderapp/solder-api/router/middleware/context"
+	"github.com/solderapp/solder-api/server"
+	"github.com/solderapp/solder-api/store"
 )
 
 // Server provides the sub-command to start the API server.

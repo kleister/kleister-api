@@ -6,8 +6,8 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
-	"github.com/solderapp/solder/cmd"
-	"github.com/solderapp/solder/config"
+	"github.com/solderapp/solder-api/cmd"
+	"github.com/solderapp/solder-api/config"
 )
 
 var (
