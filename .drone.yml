@@ -28,6 +28,7 @@ publish:
 
 notify:
   gitter:
-    webhook_url: $$GITTER_WEBHOOK
+    webhook:
+      - $$GITTER_WEBHOOK
     when:
       repo: solderapp/solder-api
