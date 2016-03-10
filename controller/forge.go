@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder/model"
-	"github.com/solderapp/solder/model/forge"
-	"github.com/solderapp/solder/router/middleware/context"
+	"gopkg.in/solderapp/solder-api.v0/model"
+	"gopkg.in/solderapp/solder-api.v0/model/forge"
+	"gopkg.in/solderapp/solder-api.v0/router/middleware/context"
 )
 
 // GetForge retrieves all available Forge versions.

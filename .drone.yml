@@ -1,6 +1,3 @@
-clone:
-  path: github.com/solderapp/solder
-
 build:
   testing:
     image: webhippie/golang:latest
@@ -33,6 +30,4 @@ notify:
   gitter:
     webhook_url: $$GITTER_WEBHOOK
     when:
-      success: false
-      failure: true
-      change: true
+      repo: solderapp/solder-api

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder/router/middleware/context"
+	"gopkg.in/solderapp/solder-api.v0/router/middleware/context"
 )
 
 // GetIndex represents the index page.

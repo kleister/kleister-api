@@ -1,10 +1,10 @@
 # Solder
 
-[![Build Status](http://github.dronehippie.de/api/badges/solderapp/solder/status.svg)](http://github.dronehippie.de/solderapp/solder)
-[![Coverage Status](https://aircover.co/badges/solderapp/solder/coverage.svg)](https://aircover.co/solderapp/solder)
-[![Go Doc](https://godoc.org/github.com/solderapp/solder?status.svg)](http://godoc.org/github.com/solderapp/solder)
-[![Go Report](http://goreportcard.com/badge/solderapp/solder)](http://goreportcard.com/report/solderapp/solder)
-[![Join the chat at https://gitter.im/solderapp/solder](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/solderapp/solder)
+[![Build Status](http://github.dronehippie.de/api/badges/solderapp/solder-api/status.svg)](http://github.dronehippie.de/solderapp/solder-api)
+[![Coverage Status](https://aircover.co/badges/solderapp/solder-api/coverage.svg)](https://aircover.co/solderapp/solder-api)
+[![Go Doc](https://godoc.org/github.com/solderapp/solder-api?status.svg)](http://godoc.org/github.com/solderapp/solder-api)
+[![Go Report](http://goreportcard.com/badge/solderapp/solder-api)](http://goreportcard.com/report/solderapp/solder-api)
+[![Join the chat at https://gitter.im/solderapp/solder-api](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/solderapp/solder-api)
 ![Release Status](https://img.shields.io/badge/status-beta-yellow.svg?style=flat)
 
 Solder is a web UI to manage mod packs for the Minecraft Technic launcher for
@@ -29,7 +29,7 @@ exporting `GO15VENDOREXPERIMENT=1` within our makefile you have to use a Go
 version `>= 1.6`
 
 ```bash
-go get github.com/solderapp/solder
+go get gopkg.in/solderapp/solder-api.v0
 ```
 
 

@@ -1,6 +1,6 @@
 DIST := dist
 BIN := bin
-EXECUTABLE := solder
+EXECUTABLE := solder-api
 VERSION := $(shell cat VERSION)
 
 LDFLAGS += -X "main.version=$(VERSION)"
