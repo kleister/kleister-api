@@ -7,6 +7,8 @@
 [![Join the chat at https://gitter.im/solderapp/solder-api](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/solderapp/solder-api)
 ![Release Status](https://img.shields.io/badge/status-beta-yellow.svg?style=flat)
 
+**This project is under heavy development, it's not in a working state yet!**
+
 Solder is a web UI to manage mod packs for the Minecraft Technic launcher for
 the Technic platform. Even if there is an upstream version available at
 [TechnicPack/TechnicSolder](https://github.com/TechnicPack/TechnicSolder) I
