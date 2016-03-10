@@ -1,4 +1,4 @@
-# Solder
+# Solder: API server
 
 [![Build Status](http://github.dronehippie.de/api/badges/solderapp/solder-api/status.svg)](http://github.dronehippie.de/solderapp/solder-api)
 [![Coverage Status](https://aircover.co/badges/solderapp/solder-api/coverage.svg)](https://aircover.co/solderapp/solder-api)
@@ -29,7 +29,11 @@ exporting `GO15VENDOREXPERIMENT=1` within our makefile you have to use a Go
 version `>= 1.6`
 
 ```bash
-go get -d github.com/solderapp/solder-cli
+go get -d github.com/solderapp/solder-api
+cd $GOPATH/src/github.com/solderapp/solder-api
+make deps build
+
+bin/drone-api -h
 ```
 
 Later on we will also provide a download of prebuilt binaries for various
