@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"github.com/codegangsta/cli"
-	"gopkg.in/solderapp/solder-api.v0/config"
-	"gopkg.in/solderapp/solder-api.v0/router"
-	"gopkg.in/solderapp/solder-api.v0/router/middleware/context"
-	"gopkg.in/solderapp/solder-api.v0/server"
-	"gopkg.in/solderapp/solder-api.v0/store"
+	"github.com/solderapp/solder/config"
+	"github.com/solderapp/solder/router"
+	"github.com/solderapp/solder/router/middleware/context"
+	"github.com/solderapp/solder/server"
+	"github.com/solderapp/solder/store"
 )
 
 // Server provides the sub-command to start the API server.

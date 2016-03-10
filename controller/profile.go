@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gopkg.in/solderapp/solder-api.v0/router/middleware/context"
-	"gopkg.in/solderapp/solder-api.v0/router/middleware/session"
+	"github.com/solderapp/solder/router/middleware/context"
+	"github.com/solderapp/solder/router/middleware/session"
 )
 
 // GetProfile displays the current profile.

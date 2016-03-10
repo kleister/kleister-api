@@ -4,15 +4,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gopkg.in/solderapp/solder-api.v0/config"
-	"gopkg.in/solderapp/solder-api.v0/controller"
-	"gopkg.in/solderapp/solder-api.v0/router/middleware/error"
-	"gopkg.in/solderapp/solder-api.v0/router/middleware/header"
-	"gopkg.in/solderapp/solder-api.v0/router/middleware/logger"
-	"gopkg.in/solderapp/solder-api.v0/router/middleware/recover"
-	"gopkg.in/solderapp/solder-api.v0/router/middleware/session"
-	"gopkg.in/solderapp/solder-api.v0/static"
-	"gopkg.in/solderapp/solder-api.v0/template"
+	"github.com/solderapp/solder/config"
+	"github.com/solderapp/solder/controller"
+	"github.com/solderapp/solder/router/middleware/error"
+	"github.com/solderapp/solder/router/middleware/header"
+	"github.com/solderapp/solder/router/middleware/logger"
+	"github.com/solderapp/solder/router/middleware/recover"
+	"github.com/solderapp/solder/router/middleware/session"
+	"github.com/solderapp/solder/static"
+	"github.com/solderapp/solder/template"
 )
 
 // Load initializes the routing of the application.

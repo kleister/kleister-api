@@ -29,8 +29,12 @@ exporting `GO15VENDOREXPERIMENT=1` within our makefile you have to use a Go
 version `>= 1.6`
 
 ```bash
-go get gopkg.in/solderapp/solder-api.v0
+go get -d github.com/solderapp/solder-cli
 ```
+
+Later on we will also provide a download of prebuilt binaries for various
+platforms, but this will start if we get to an somehow working state or if we
+are more or less on feature parity with the upstream project.
 
 
 ## Contributing

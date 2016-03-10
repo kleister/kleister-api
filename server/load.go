@@ -1,7 +1,7 @@
 package server
 
 import (
-	"gopkg.in/solderapp/solder-api.v0/config"
+	"github.com/solderapp/solder/config"
 )
 
 // Load initializes the server of the application.

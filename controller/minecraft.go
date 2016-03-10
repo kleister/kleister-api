@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gopkg.in/solderapp/solder-api.v0/model"
-	"gopkg.in/solderapp/solder-api.v0/model/minecraft"
-	"gopkg.in/solderapp/solder-api.v0/router/middleware/context"
+	"github.com/solderapp/solder/model"
+	"github.com/solderapp/solder/model/minecraft"
+	"github.com/solderapp/solder/router/middleware/context"
 )
 
 // GetMinecraft retrieves all available Minecraft versions.
