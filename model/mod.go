@@ -37,7 +37,7 @@ type Mod struct {
 	Donate      string    `json:"donate"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
-	Versions    *Versions `json:"versions"`
+	Versions    Versions  `json:"versions"`
 }
 
 // BeforeSave invokes required actions before persisting.

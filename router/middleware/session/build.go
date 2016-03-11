@@ -41,6 +41,10 @@ func SetBuild() gin.HandlerFunc {
 		).Or(
 			"builds.slug = ?",
 			c.Param("build"),
+		).Model(
+			&record,
+		).Preload(
+			"Pack",
 		).First(
 			&record,
 		)

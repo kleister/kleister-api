@@ -41,6 +41,10 @@ func SetVersion() gin.HandlerFunc {
 		).Or(
 			"versions.slug = ?",
 			c.Param("version"),
+		).Model(
+			&record,
+		).Preload(
+			"Mod",
 		).First(
 			&record,
 		)

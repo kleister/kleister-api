@@ -15,13 +15,11 @@ func GetPacks(c *gin.Context) {
 
 	err := context.Store(c).Scopes(
 		model.PackDefaultOrder,
+	).Preload(
+		"Builds",
 	).Find(
 		&records,
 	).Error
-
-	// .Preload(
-	// 	"Builds",
-	// )
 
 	if err != nil {
 		c.JSON(

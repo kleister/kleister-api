@@ -29,7 +29,7 @@ type Versions []*Version
 // Version represents a version model definition.
 type Version struct {
 	ID        uint      `json:"id" gorm:"primary_key"`
-	Mod       *Mod      `json:"-"`
+	Mod       *Mod      `json:"mod"`
 	ModID     uint      `json:"mod_id" sql:"index"`
 	Slug      string    `json:"slug" sql:"unique_index"`
 	Name      string    `json:"name" sql:"unique_index"`

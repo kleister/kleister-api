@@ -29,7 +29,7 @@ type Permission struct {
 	DeleteMods     bool      `json:"delete_mods" sql:"default:false"`
 	CreatedAt      time.Time `json:"-"`
 	UpdatedAt      time.Time `json:"-"`
-	Packs          *Packs    `json:"packs" gorm:"many2many:permission_packs;"`
+	Packs          Packs     `json:"packs" gorm:"many2many:permission_packs;"`
 }
 
 // Defaults prefills the struct with some default values.

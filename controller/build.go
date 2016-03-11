@@ -19,6 +19,8 @@ func GetBuilds(c *gin.Context) {
 	).Where(
 		"builds.pack_id = ?",
 		pack.ID,
+	).Preload(
+		"Pack",
 	).Find(
 		&records,
 	).Error

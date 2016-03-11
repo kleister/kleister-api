@@ -29,11 +29,11 @@ type Builds []*Build
 // Build represents a build model definition.
 type Build struct {
 	ID          uint       `json:"id" gorm:"primary_key"`
-	Pack        *Pack      `json:"-"`
+	Pack        *Pack      `json:"pack"`
 	PackID      uint       `json:"pack_id" sql:"index"`
-	Minecraft   *Minecraft `json:"-"`
+	Minecraft   *Minecraft `json:"minecraft"`
 	MinecraftID uint       `json:"minecraft_id" sql:"index"`
-	Forge       *Forge     `json:"-"`
+	Forge       *Forge     `json:"forge"`
 	ForgeID     uint       `json:"forge_id" sql:"index"`
 	Slug        string     `json:"slug" sql:"unique_index"`
 	Name        string     `json:"name" sql:"unique_index"`
@@ -43,7 +43,7 @@ type Build struct {
 	Private     bool       `json:"private" sql:"default:false"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
-	Mods        *Mods      `json:"mods" gorm:"many2many:build_mods;"`
+	Mods        Mods       `json:"mods" gorm:"many2many:build_mods;"`
 }
 
 // BeforeSave invokes required actions before persisting.

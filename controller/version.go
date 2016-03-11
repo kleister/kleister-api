@@ -19,6 +19,8 @@ func GetVersions(c *gin.Context) {
 	).Where(
 		"versions.mod_id = ?",
 		mod.ID,
+	).Preload(
+		"Mod",
 	).Find(
 		&records,
 	).Error
