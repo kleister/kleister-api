@@ -43,7 +43,7 @@ type Build struct {
 	Private     bool       `json:"private" sql:"default:false"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
-	Mods        Mods       `json:"mods" gorm:"many2many:build_mods;"`
+	Versions    Versions   `json:"versions" gorm:"many2many:build_versions;"`
 }
 
 // BeforeSave invokes required actions before persisting.

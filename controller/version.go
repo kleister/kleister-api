@@ -169,3 +169,18 @@ func PostVersion(c *gin.Context) {
 		record,
 	)
 }
+
+// GetVersionBuilds retrieves all builds related to a version.
+func GetVersionBuilds(c *gin.Context) {
+
+}
+
+// PatchVersionBuild appends a build to a version.
+func PatchVersionBuild(c *gin.Context) {
+
+}
+
+// DeleteVersionBuild deleted a build from a version
+func DeleteVersionBuild(c *gin.Context) {
+
+}

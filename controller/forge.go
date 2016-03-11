@@ -129,3 +129,18 @@ func PatchForge(c *gin.Context) {
 		},
 	)
 }
+
+// GetForgeBuilds retrieves all builds related to a Forge version.
+func GetForgeBuilds(c *gin.Context) {
+
+}
+
+// PatchForgeBuild appends a build to a Forge version.
+func PatchForgeBuild(c *gin.Context) {
+
+}
+
+// DeleteForgeBuild deleted a build from a Forge version
+func DeleteForgeBuild(c *gin.Context) {
+
+}

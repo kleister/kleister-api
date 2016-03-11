@@ -129,3 +129,18 @@ func PatchMinecraft(c *gin.Context) {
 		},
 	)
 }
+
+// GetMinecraftBuilds retrieves all builds related to a Minecraft version.
+func GetMinecraftBuilds(c *gin.Context) {
+
+}
+
+// PatchMinecraftBuild appends a build to a Minecraft version.
+func PatchMinecraftBuild(c *gin.Context) {
+
+}
+
+// DeleteMinecraftBuild deleted a build from a Minecraft version
+func DeleteMinecraftBuild(c *gin.Context) {
+
+}

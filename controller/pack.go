@@ -160,3 +160,18 @@ func PostPack(c *gin.Context) {
 		record,
 	)
 }
+
+// GetPackClients retrieves all clients related to a pack.
+func GetPackClients(c *gin.Context) {
+
+}
+
+// PatchPackClient appends a client to a pack.
+func PatchPackClient(c *gin.Context) {
+
+}
+
+// DeletePackClient deleted a client from a pack
+func DeletePackClient(c *gin.Context) {
+
+}
