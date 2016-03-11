@@ -32,3 +32,7 @@ notify:
       - $$GITTER_WEBHOOK
     when:
       repo: solderapp/solder-api
+
+cache:
+  mount:
+    - vendor
