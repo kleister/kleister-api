@@ -161,15 +161,144 @@ func PostClient(c *gin.Context) {
 
 // GetClientPacks retrieves all packs related to a client.
 func GetClientPacks(c *gin.Context) {
+	client := session.Client(c)
+	records := &model.Packs{}
 
+	err := context.Store(c).Model(
+		&client,
+	).Association(
+		"Packs",
+	).Find(
+		&records,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to fetch packs",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		records,
+	)
 }
 
 // PatchClientPack appends a pack to a client.
 func PatchClientPack(c *gin.Context) {
+	client := session.Client(c)
+	pack := session.Pack(c)
 
+	count := context.Store(c).Model(
+		&client,
+	).Association(
+		"Packs",
+	).Find(
+		&pack,
+	).Count()
+
+	if count > 0 {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Pack is already appended",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Model(
+		&client,
+	).Association(
+		"Packs",
+	).Append(
+		&pack,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append pack",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully appended pack",
+		},
+	)
 }
 
 // DeleteClientPack deleted a pack from a client
 func DeleteClientPack(c *gin.Context) {
+	client := session.Client(c)
+	pack := session.Pack(c)
 
+	count := context.Store(c).Model(
+		&client,
+	).Association(
+		"Packs",
+	).Find(
+		&pack,
+	).Count()
+
+	if count < 1 {
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{
+				"status":  http.StatusNotFound,
+				"message": "Pack is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Model(
+		&client,
+	).Association(
+		"Packs",
+	).Delete(
+		&pack,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink pack",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully unlinked pack",
+		},
+	)
 }

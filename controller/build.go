@@ -172,15 +172,144 @@ func PostBuild(c *gin.Context) {
 
 // GetBuildVersions retrieves all versions related to a build.
 func GetBuildVersions(c *gin.Context) {
+	build := session.Build(c)
+	records := &model.Versions{}
 
+	err := context.Store(c).Model(
+		&build,
+	).Association(
+		"Versions",
+	).Find(
+		&records,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to fetch versions",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		records,
+	)
 }
 
 // PatchBuildVersion appends a version to a build.
 func PatchBuildVersion(c *gin.Context) {
+	build := session.Build(c)
+	version := session.Version(c)
 
+	count := context.Store(c).Model(
+		&build,
+	).Association(
+		"Versions",
+	).Find(
+		&version,
+	).Count()
+
+	if count > 0 {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Version is already appended",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Model(
+		&build,
+	).Association(
+		"Versions",
+	).Append(
+		&version,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append version",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully appended version",
+		},
+	)
 }
 
 // DeleteBuildVersion deleted a version from a build
 func DeleteBuildVersion(c *gin.Context) {
+	build := session.Build(c)
+	version := session.Version(c)
 
+	count := context.Store(c).Model(
+		&build,
+	).Association(
+		"Versions",
+	).Find(
+		&version,
+	).Count()
+
+	if count < 1 {
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{
+				"status":  http.StatusNotFound,
+				"message": "Version is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Model(
+		&build,
+	).Association(
+		"Versions",
+	).Delete(
+		&version,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink version",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully unlinked version",
+		},
+	)
 }
