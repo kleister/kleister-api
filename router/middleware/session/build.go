@@ -36,10 +36,10 @@ func SetBuild() gin.HandlerFunc {
 		record := &model.Build{}
 
 		res := context.Store(c).Where(
-			"builds.id = ?",
+			"id = ?",
 			c.Param("build"),
 		).Or(
-			"builds.slug = ?",
+			"slug = ?",
 			c.Param("build"),
 		).Model(
 			&record,
