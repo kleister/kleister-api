@@ -60,6 +60,9 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 		{
 			api.GET("", controller.GetAPI)
 
+			//
+			// Profile
+			//
 			profile := api.Group("/profile")
 			{
 				profile.Use(session.MustCurrent())
@@ -68,6 +71,9 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				profile.PATCH("", controller.PatchProfile)
 			}
 
+			//
+			// Minecraft
+			//
 			minecraft := api.Group("/minecraft")
 			{
 				minecraft.Use(session.MustCurrent())
@@ -87,6 +93,9 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				minecraftBuilds.DELETE("/:build", session.SetBuild(), controller.DeleteMinecraftBuild)
 			}
 
+			//
+			// Forge
+			//
 			forge := api.Group("/forge")
 			{
 				forge.Use(session.MustCurrent())
@@ -106,6 +115,9 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				forgeBuilds.DELETE("/:build", session.SetBuild(), controller.DeleteForgeBuild)
 			}
 
+			//
+			// Packs
+			//
 			packs := api.Group("/packs")
 			{
 				packs.Use(session.MustPacks("display"))
@@ -127,9 +139,13 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				packClients.DELETE("/:client", session.SetClient(), controller.DeletePackClient)
 			}
 
-			builds := api.Group("/builds")
+			//
+			// Builds
+			//
+			builds := api.Group("/packs/:pack/builds")
 			{
 				builds.Use(session.MustPacks("display"))
+				builds.Use(session.SetPack())
 
 				builds.GET("", controller.GetBuilds)
 				builds.GET("/:build", session.SetBuild(), controller.GetBuild)
@@ -138,9 +154,10 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				builds.POST("", session.MustPacks("change"), controller.PostBuild)
 			}
 
-			buildVersions := api.Group("/builds/:build/versions")
+			buildVersions := api.Group("/packs/:pack/builds/:build/versions")
 			{
 				buildVersions.Use(session.MustPacks("change"))
+				buildVersions.Use(session.SetPack())
 				buildVersions.Use(session.SetBuild())
 
 				buildVersions.GET("", controller.GetBuildVersions)
@@ -148,6 +165,9 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				buildVersions.DELETE("/:version", session.SetVersion(), controller.DeleteBuildVersion)
 			}
 
+			//
+			// Mods
+			//
 			mods := api.Group("/mods")
 			{
 				mods.Use(session.MustMods("display"))
@@ -159,9 +179,23 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				mods.POST("", session.MustMods("change"), controller.PostMod)
 			}
 
-			versions := api.Group("/versions")
+			modUsers := api.Group("/mods/:mod/users")
+			{
+				modUsers.Use(session.MustMods("change"))
+				modUsers.Use(session.SetMod())
+
+				modUsers.GET("", controller.GetModUsers)
+				modUsers.PATCH("/:user", session.SetUser(), controller.PatchModUser)
+				modUsers.DELETE("/:user", session.SetUser(), controller.DeleteModUser)
+			}
+
+			//
+			// Versions
+			//
+			versions := api.Group("/mods/:mod/versions")
 			{
 				versions.Use(session.MustMods("display"))
+				versions.Use(session.SetMod())
 
 				versions.GET("", controller.GetVersions)
 				versions.GET("/:version", session.SetVersion(), controller.GetVersion)
@@ -170,9 +204,10 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				versions.POST("", session.MustMods("change"), controller.PostVersion)
 			}
 
-			versionBuilds := api.Group("/versions/:version/builds")
+			versionBuilds := api.Group("/mods/:mod/versions/:version/builds")
 			{
 				versionBuilds.Use(session.MustMods("change"))
+				versionBuilds.Use(session.SetMod())
 				versionBuilds.Use(session.SetVersion())
 
 				versionBuilds.GET("", controller.GetVersionBuilds)
@@ -180,6 +215,9 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				versionBuilds.DELETE("/:build", session.SetBuild(), controller.DeleteVersionBuild)
 			}
 
+			//
+			// Clients
+			//
 			clients := api.Group("/clients")
 			{
 				clients.Use(session.MustClients("display"))
@@ -201,17 +239,9 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				clientPacks.DELETE("/:pack", session.SetPack(), controller.DeleteClientPack)
 			}
 
-			keys := api.Group("/keys")
-			{
-				keys.Use(session.MustKeys("display"))
-
-				keys.GET("", controller.GetKeys)
-				keys.GET("/:key", session.SetKey(), controller.GetKey)
-				keys.DELETE("/:key", session.SetKey(), session.MustKeys("delete"), controller.DeleteKey)
-				keys.PATCH("/:key", session.SetKey(), session.MustKeys("change"), controller.PatchKey)
-				keys.POST("", session.MustKeys("change"), controller.PostKey)
-			}
-
+			//
+			// Users
+			//
 			users := api.Group("/users")
 			{
 				users.Use(session.MustUsers("display"))
@@ -223,6 +253,33 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				users.POST("", session.MustUsers("change"), controller.PostUser)
 			}
 
+			userMods := api.Group("/users/:user/mods")
+			{
+				userMods.Use(session.MustMods("change"))
+				userMods.Use(session.SetUser())
+
+				userMods.GET("", controller.GetUserMods)
+				userMods.PATCH("/:mod", session.SetMod(), controller.PatchUserMod)
+				userMods.DELETE("/:mod", session.SetMod(), controller.DeleteUserMod)
+			}
+
+			//
+			// Keys
+			//
+			keys := api.Group("/keys")
+			{
+				keys.Use(session.MustKeys("display"))
+
+				keys.GET("", controller.GetKeys)
+				keys.GET("/:key", session.SetKey(), controller.GetKey)
+				keys.DELETE("/:key", session.SetKey(), session.MustKeys("delete"), controller.DeleteKey)
+				keys.PATCH("/:key", session.SetKey(), session.MustKeys("change"), controller.PatchKey)
+				keys.POST("", session.MustKeys("change"), controller.PostKey)
+			}
+
+			//
+			// Solder
+			//
 			solder := api.Group("/")
 			{
 				solder.GET("/modpack/:pack", controller.GetSolderPack)
