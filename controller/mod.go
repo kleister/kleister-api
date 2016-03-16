@@ -160,3 +160,147 @@ func PostMod(c *gin.Context) {
 		record,
 	)
 }
+
+// GetModUsers retrieves all users related to a mod.
+func GetModUsers(c *gin.Context) {
+	mod := session.Mod(c)
+	records := &model.Users{}
+
+	err := context.Store(c).Model(
+		&mod,
+	).Association(
+		"Users",
+	).Find(
+		&records,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to fetch users",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		records,
+	)
+}
+
+// PatchModUser appends a user to a mod.
+func PatchModUser(c *gin.Context) {
+	mod := session.Mod(c)
+	user := session.User(c)
+
+	count := context.Store(c).Model(
+		&mod,
+	).Association(
+		"Users",
+	).Find(
+		&user,
+	).Count()
+
+	if count > 0 {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "User is already appended",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Model(
+		&mod,
+	).Association(
+		"Users",
+	).Append(
+		&user,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append user",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully appended user",
+		},
+	)
+}
+
+// DeleteModUser deleted a user from a mod
+func DeleteModUser(c *gin.Context) {
+	mod := session.Mod(c)
+	user := session.User(c)
+
+	count := context.Store(c).Model(
+		&mod,
+	).Association(
+		"Users",
+	).Find(
+		&user,
+	).Count()
+
+	if count < 1 {
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{
+				"status":  http.StatusNotFound,
+				"message": "User is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Model(
+		&mod,
+	).Association(
+		"Users",
+	).Delete(
+		&user,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink user",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully unlinked user",
+		},
+	)
+}

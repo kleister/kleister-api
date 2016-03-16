@@ -160,3 +160,147 @@ func PostUser(c *gin.Context) {
 		record,
 	)
 }
+
+// GetUserMods retrieves all mods related to a user.
+func GetUserMods(c *gin.Context) {
+	user := session.User(c)
+	records := &model.Users{}
+
+	err := context.Store(c).Model(
+		&user,
+	).Association(
+		"Mods",
+	).Find(
+		&records,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to fetch mods",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		records,
+	)
+}
+
+// PatchUserMod appends a mod to a user.
+func PatchUserMod(c *gin.Context) {
+	user := session.User(c)
+	mod := session.Mod(c)
+
+	count := context.Store(c).Model(
+		&user,
+	).Association(
+		"Mods",
+	).Find(
+		&mod,
+	).Count()
+
+	if count > 0 {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Mod is already appended",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Model(
+		&user,
+	).Association(
+		"Mods",
+	).Append(
+		&mod,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append mod",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully appended mod",
+		},
+	)
+}
+
+// DeleteUserMod deleted a mod from a user
+func DeleteUserMod(c *gin.Context) {
+	user := session.User(c)
+	mod := session.Mod(c)
+
+	count := context.Store(c).Model(
+		&user,
+	).Association(
+		"Mods",
+	).Find(
+		&mod,
+	).Count()
+
+	if count < 1 {
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{
+				"status":  http.StatusNotFound,
+				"message": "Mod is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := context.Store(c).Model(
+		&user,
+	).Association(
+		"Mods",
+	).Delete(
+		&mod,
+	).Error
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink mod",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully unlinked mod",
+		},
+	)
+}
