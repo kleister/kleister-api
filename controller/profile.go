@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/router/middleware/context"
 	"github.com/solderapp/solder-api/router/middleware/session"
@@ -23,6 +24,9 @@ func PatchProfile(c *gin.Context) {
 	record := session.Current(c)
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind profile data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{

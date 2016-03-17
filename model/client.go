@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Machiel/slugify"
 	"github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
-	"github.com/satori/go.uuid"
 )
 
 const (
@@ -15,6 +15,12 @@ const (
 
 	// ClientNameMaxLength is the maximum length of the client name.
 	ClientNameMaxLength = "255"
+
+	// ClientValueMinLength is the minimum length of the client value.
+	ClientValueMinLength = "3"
+
+	// ClientValueMaxLength is the maximum length of the client value.
+	ClientValueMaxLength = "255"
 )
 
 // ClientDefaultOrder is the default ordering for client listings.
@@ -41,55 +47,64 @@ type Client struct {
 // BeforeSave invokes required actions before persisting.
 func (u *Client) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
-		u.Slug = uuid.NewV4().String()
+		for i := 0; true; i++ {
+			if i == 0 {
+				u.Slug = slugify.Slugify(u.Name)
+			} else {
+				u.Slug = slugify.Slugify(
+					fmt.Sprintf("%s-%d", u.Name, i),
+				)
+			}
+
+			notFound := db.Where(
+				"slug = ?",
+				u.Slug,
+			).Not(
+				"id",
+				u.ID,
+			).First(
+				&Client{},
+			).RecordNotFound()
+
+			if notFound {
+				break
+			}
+		}
 	}
 
 	return nil
 }
 
-// Defaults prefills the struct with some default values.
-func (u *Client) Defaults() {
-	// Currently no default values required.
-}
-
 // Validate does some validation to be able to store the record.
 func (u *Client) Validate(db *gorm.DB) {
-	if u.Name == "" {
-		db.AddError(fmt.Errorf("Name is a required attribute"))
-	}
-
 	if !govalidator.StringLength(u.Name, ClientNameMinLength, ClientNameMaxLength) {
-		db.AddError(fmt.Errorf("Name should be longer than 3 characters"))
-	}
-
-	if u.Value == "" {
-		db.AddError(fmt.Errorf("UUID is a required attribute"))
+		db.AddError(fmt.Errorf(
+			"Name should be longer than %s and shorter than %s",
+			ClientNameMinLength,
+			ClientNameMaxLength,
+		))
 	}
 
 	if u.Name != "" {
-		count := 1
+		notFound := db.Where("name = ?", u.Name).Not("id", u.ID).First(&Client{}).RecordNotFound()
 
-		db.Where("name = ?", u.Name).Not("id", u.ID).Find(
-			&Client{},
-		).Count(
-			&count,
-		)
-
-		if count > 0 {
+		if !notFound {
 			db.AddError(fmt.Errorf("Name is already present"))
 		}
 	}
 
+	if !govalidator.StringLength(u.Value, ClientValueMinLength, ClientValueMaxLength) {
+		db.AddError(fmt.Errorf(
+			"UUID should be longer than %s and shorter than %s",
+			ClientValueMinLength,
+			ClientValueMaxLength,
+		))
+	}
+
 	if u.Value != "" {
-		count := 1
+		notFound := db.Where("value = ?", u.Value).Not("id", u.ID).First(&Client{}).RecordNotFound()
 
-		db.Where("value = ?", u.Value).Not("id", u.ID).Find(
-			&Client{},
-		).Count(
-			&count,
-		)
-
-		if count > 0 {
+		if !notFound {
 			db.AddError(fmt.Errorf("UUID is already present"))
 		}
 	}

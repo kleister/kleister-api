@@ -33,7 +33,23 @@ type Forge struct {
 // BeforeSave invokes required actions before persisting.
 func (u *Forge) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
-		u.Slug = uuid.NewV4().String()
+		for {
+			u.Slug = uuid.NewV4().String()
+
+			notFound := db.Where(
+				"slug = ?",
+				u.Slug,
+			).Not(
+				"id",
+				u.ID,
+			).First(
+				&Forge{},
+			).RecordNotFound()
+
+			if notFound {
+				break
+			}
+		}
 	}
 
 	return nil

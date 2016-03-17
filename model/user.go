@@ -7,6 +7,7 @@ import (
 	"github.com/Machiel/slugify"
 	"github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -39,81 +40,113 @@ type User struct {
 	Permission *Permission `json:"permission"`
 	Slug       string      `json:"slug" sql:"unique_index"`
 	Username   string      `json:"username" sql:"unique_index"`
-	Password   string      `json:"password"`
-	Email      string      `json:"email"`
+	Email      string      `json:"email" sql:"unique_index"`
+	Password   string      `json:"password,omitempty" sql:"-"`
+	Hashword   string      `json:"-"`
 	CreatedAt  time.Time   `json:"created_at"`
 	UpdatedAt  time.Time   `json:"updated_at"`
+	Mods       Mods        `json:"mods" gorm:"many2many:user_mods;"`
 }
 
 // BeforeSave invokes required actions before persisting.
 func (u *User) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
+		for i := 0; true; i++ {
+			if i == 0 {
+				u.Slug = slugify.Slugify(u.Username)
+			} else {
+				u.Slug = slugify.Slugify(
+					fmt.Sprintf("%s-%d", u.Username, i),
+				)
+			}
 
-		u.Slug = slugify.Slugify(u.Username)
-		// Fill the slug with slugified username
+			notFound := db.Where(
+				"slug = ?",
+				u.Slug,
+			).Not(
+				"id",
+				u.ID,
+			).First(
+				&User{},
+			).RecordNotFound()
 
-	}
-
-	u.Email, _ = govalidator.NormalizeEmail(u.Email)
-
-	return nil
-}
-
-// Defaults prefills the struct with some default values.
-func (u *User) Defaults() {
-	u.Permission = &Permission{}
-	u.Permission.Defaults()
-}
-
-// Validate does some validation to be able to store the record.
-func (u *User) Validate(db *gorm.DB) {
-	if u.Username == "" {
-		db.AddError(fmt.Errorf("Username is a required attribute"))
-	}
-
-	if !govalidator.StringLength(u.Username, UserUsernameMinLength, UserUsernameMaxLength) {
-		db.AddError(fmt.Errorf("Username should be longer than 3 characters"))
-	}
-
-	if u.Email == "" {
-		db.AddError(fmt.Errorf("Email is a required attribute"))
-	}
-
-	if !govalidator.IsEmail(u.Email) {
-		db.AddError(fmt.Errorf("Email must be a valid email address"))
-	}
-
-	if db.NewRecord(u) {
-		if !govalidator.StringLength(u.Password, UserPasswordMinLength, UserPasswordMaxLength) {
-			db.AddError(fmt.Errorf("Password should be longer than 3 characters"))
-		}
-	}
-
-	if u.Username != "" {
-		count := 1
-
-		db.Where("username = ?", u.Username).Not("id", u.ID).Find(
-			&User{},
-		).Count(
-			&count,
-		)
-
-		if count > 0 {
-			db.AddError(fmt.Errorf("Username is already present"))
+			if notFound {
+				break
+			}
 		}
 	}
 
 	if u.Email != "" {
-		count := 1
-
-		db.Where("email = ?", u.Email).Not("id", u.ID).Find(
-			&User{},
-		).Count(
-			&count,
+		email, err := govalidator.NormalizeEmail(
+			u.Email,
 		)
 
-		if count > 0 {
+		if err != nil {
+			return fmt.Errorf("Failed to normalize email")
+		}
+
+		u.Email = email
+	}
+
+	if u.Password != "" {
+		encrypt, err := bcrypt.GenerateFromPassword(
+			[]byte(u.Password),
+			bcrypt.DefaultCost,
+		)
+
+		if err != nil {
+			return fmt.Errorf("Failed to encrypt password")
+		}
+
+		u.Hashword = string(encrypt)
+	}
+
+	return nil
+}
+
+// Validate does some validation to be able to store the record.
+func (u *User) Validate(db *gorm.DB) {
+	if !govalidator.StringLength(u.Username, UserUsernameMinLength, UserUsernameMaxLength) {
+		db.AddError(fmt.Errorf(
+			"Username should be longer than %s and shorter than %s",
+			UserUsernameMinLength,
+			UserUsernameMaxLength,
+		))
+	}
+
+	if u.Username != "" {
+		notFound := db.Where("username = ?", u.Username).Not("id", u.ID).First(&User{}).RecordNotFound()
+
+		if !notFound {
+			db.AddError(fmt.Errorf("Username is already present"))
+		}
+	}
+
+	if !govalidator.IsEmail(u.Email) {
+		db.AddError(fmt.Errorf(
+			"Email must be a valid email address",
+		))
+	}
+
+	if u.Email != "" {
+		normalized, _ := govalidator.NormalizeEmail(
+			u.Email,
+		)
+
+		notFound := db.Where("email = ?", normalized).Not("id", u.ID).First(&User{}).RecordNotFound()
+
+		if !notFound {
 			db.AddError(fmt.Errorf("Email is already present"))
+		}
+	}
+
+	if db.NewRecord(u) {
+		if !govalidator.StringLength(u.Password, UserPasswordMinLength, UserPasswordMaxLength) {
+			db.AddError(fmt.Errorf(
+				"Password should be longer than %s and shorter than %s",
+				UserPasswordMinLength,
+				UserPasswordMaxLength,
+			))
 		}
 	}
 }

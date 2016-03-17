@@ -5,15 +5,16 @@ import (
 	"time"
 
 	"github.com/Machiel/slugify"
+	"github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
 )
 
 const (
-	// PackUsernameMinLength is the minimum length of the username.
-	PackUsernameMinLength = "3"
+	// PackNameMinLength is the minimum length of the name.
+	PackNameMinLength = "3"
 
-	// PackUsernameMaxLength is the maximum length of the username.
-	PackUsernameMaxLength = "255"
+	// PackNameMaxLength is the maximum length of the name.
+	PackNameMaxLength = "255"
 )
 
 // PackDefaultOrder is the default ordering for pack listings.
@@ -39,7 +40,7 @@ type Pack struct {
 	Slug          string      `json:"slug" sql:"unique_index"`
 	Name          string      `json:"name" sql:"unique_index"`
 	Website       string      `json:"website"`
-	Hidden        bool        `json:"hidden" sql:"default:true"`
+	Published     bool        `json:"published" sql:"default:false"`
 	Private       bool        `json:"private" sql:"default:false"`
 	CreatedAt     time.Time   `json:"created_at"`
 	UpdatedAt     time.Time   `json:"updated_at"`
@@ -51,23 +52,81 @@ type Pack struct {
 // BeforeSave invokes required actions before persisting.
 func (u *Pack) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
+		for i := 0; true; i++ {
+			if i == 0 {
+				u.Slug = slugify.Slugify(u.Name)
+			} else {
+				u.Slug = slugify.Slugify(
+					fmt.Sprintf("%s-%d", u.Name, i),
+				)
+			}
 
-		u.Slug = slugify.Slugify(u.Name)
-		// Fill the slug with slugified name
+			notFound := db.Where(
+				"slug = ?",
+				u.Slug,
+			).Not(
+				"id",
+				u.ID,
+			).First(
+				&Mod{},
+			).RecordNotFound()
 
+			if notFound {
+				break
+			}
+		}
 	}
 
 	return nil
 }
 
-// Defaults prefills the struct with some default values.
-func (u *Pack) Defaults() {
-	// Currently no default values required.
-}
-
 // Validate does some validation to be able to store the record.
 func (u *Pack) Validate(db *gorm.DB) {
-	if u.Name == "" {
-		db.AddError(fmt.Errorf("Name is a required attribute"))
+	if u.RecommendedID > 0 {
+		res := db.Where(
+			"pack_id = ?",
+			u.ID,
+		).Where(
+			"id = ?",
+			u.RecommendedID,
+		).First(
+			&Build{},
+		)
+
+		if res.RecordNotFound() {
+			db.AddError(fmt.Errorf("Referenced recommended build does not exist"))
+		}
+	}
+
+	if u.LatestID > 0 {
+		res := db.Where(
+			"pack_id = ?",
+			u.ID,
+		).Where(
+			"id = ?",
+			u.LatestID,
+		).First(
+			&Build{},
+		)
+
+		if res.RecordNotFound() {
+			db.AddError(fmt.Errorf("Referenced latest build does not exist"))
+		}
+	}
+
+	if !govalidator.StringLength(u.Name, PackNameMinLength, PackNameMaxLength) {
+		db.AddError(fmt.Errorf(
+			"Name should be longer than %s and shorter than %s",
+			PackNameMinLength,
+			PackNameMaxLength,
+		))
+	}
+
+	if u.Name != "" {
+		notFound := db.Where("name = ?", u.Name).Not("id", u.ID).First(&Pack{}).RecordNotFound()
+
+		if !notFound {
+			db.AddError(fmt.Errorf("Name is already present"))
+		}
 	}
 }

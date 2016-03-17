@@ -5,15 +5,16 @@ import (
 	"time"
 
 	"github.com/Machiel/slugify"
+	"github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
 )
 
 const (
-	// ModUsernameMinLength is the minimum length of the username.
-	ModUsernameMinLength = "3"
+	// ModNameMinLength is the minimum length of the name.
+	ModNameMinLength = "3"
 
-	// ModUsernameMaxLength is the maximum length of the username.
-	ModUsernameMaxLength = "255"
+	// ModNameMaxLength is the maximum length of the name.
+	ModNameMaxLength = "255"
 )
 
 // ModDefaultOrder is the default ordering for mod listings.
@@ -38,28 +39,55 @@ type Mod struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	Versions    Versions  `json:"versions"`
+	Users       Users     `json:"users" gorm:"many2many:user_mods;"`
 }
 
 // BeforeSave invokes required actions before persisting.
 func (u *Mod) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
+		for i := 0; true; i++ {
+			if i == 0 {
+				u.Slug = slugify.Slugify(u.Name)
+			} else {
+				u.Slug = slugify.Slugify(
+					fmt.Sprintf("%s-%d", u.Name, i),
+				)
+			}
 
-		u.Slug = slugify.Slugify(u.Name)
-		// Fill the slug with slugified name
+			notFound := db.Where(
+				"slug = ?",
+				u.Slug,
+			).Not(
+				"id",
+				u.ID,
+			).First(
+				&Mod{},
+			).RecordNotFound()
 
+			if notFound {
+				break
+			}
+		}
 	}
 
 	return nil
 }
 
-// Defaults prefills the struct with some default values.
-func (u *Mod) Defaults() {
-	// Currently no default values required.
-}
-
 // Validate does some validation to be able to store the record.
 func (u *Mod) Validate(db *gorm.DB) {
-	if u.Name == "" {
-		db.AddError(fmt.Errorf("Name is a required attribute"))
+	if !govalidator.StringLength(u.Name, ModNameMinLength, ModNameMaxLength) {
+		db.AddError(fmt.Errorf(
+			"Name should be longer than %s and shorter than %s",
+			ModNameMinLength,
+			ModNameMaxLength,
+		))
+	}
+
+	if u.Name != "" {
+		notFound := db.Where("name = ?", u.Name).Not("id", u.ID).First(&Mod{}).RecordNotFound()
+
+		if !notFound {
+			db.AddError(fmt.Errorf("Name is already present"))
+		}
 	}
 }

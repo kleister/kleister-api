@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router/middleware/context"
@@ -83,6 +84,9 @@ func PatchKey(c *gin.Context) {
 	record := session.Key(c)
 
 	if err := c.Bind(&record); err != nil {
+		logrus.Warn("Failed to bind key data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -121,9 +125,11 @@ func PatchKey(c *gin.Context) {
 // PostKey creates a new key.
 func PostKey(c *gin.Context) {
 	record := &model.Key{}
-	record.Defaults()
 
 	if err := c.Bind(&record); err != nil {
+		logrus.Warn("Failed to bind key data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{

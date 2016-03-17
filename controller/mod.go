@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router/middleware/context"
@@ -85,6 +86,9 @@ func PatchMod(c *gin.Context) {
 	record := session.Mod(c)
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind mod data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -123,9 +127,11 @@ func PatchMod(c *gin.Context) {
 // PostMod creates a new mod.
 func PostMod(c *gin.Context) {
 	record := &model.Mod{}
-	record.Defaults()
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind mod data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{

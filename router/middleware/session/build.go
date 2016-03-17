@@ -33,9 +33,27 @@ func Build(c *gin.Context) *model.Build {
 // SetBuild injects the build into the context.
 func SetBuild() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		pack := Pack(c)
+
+		if pack == nil {
+			c.JSON(
+				http.StatusNotFound,
+				gin.H{
+					"status":  http.StatusNotFound,
+					"message": "Failed to find parent",
+				},
+			)
+
+			c.Abort()
+			return
+		}
+
 		record := &model.Build{}
 
 		res := context.Store(c).Where(
+			"pack_id = ?",
+			pack.ID,
+		).Where(
 			"id = ?",
 			c.Param("build"),
 		).Or(
@@ -45,6 +63,10 @@ func SetBuild() gin.HandlerFunc {
 			&record,
 		).Preload(
 			"Pack",
+		).Preload(
+			"Minecraft",
+		).Preload(
+			"Forge",
 		).First(
 			&record,
 		)

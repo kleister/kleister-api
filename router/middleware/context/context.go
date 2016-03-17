@@ -45,6 +45,38 @@ func SetStore(store store.Store) gin.HandlerFunc {
 	)
 
 	store.Model(
+		&model.Build{},
+	).AddUniqueIndex(
+		"uix_builds_pack_id_slug",
+		"pack_id",
+		"slug",
+	)
+
+	store.Model(
+		&model.Build{},
+	).AddUniqueIndex(
+		"uix_builds_pack_id_name",
+		"pack_id",
+		"name",
+	)
+
+	store.Model(
+		&model.Version{},
+	).AddUniqueIndex(
+		"uix_versions_mod_id_slug",
+		"mod_id",
+		"slug",
+	)
+
+	store.Model(
+		&model.Version{},
+	).AddUniqueIndex(
+		"uix_versions_mod_id_name",
+		"mod_id",
+		"name",
+	)
+
+	store.Model(
 		&model.User{},
 	).Count(
 		&users,

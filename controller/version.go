@@ -1,12 +1,15 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router/middleware/context"
 	"github.com/solderapp/solder-api/router/middleware/session"
+	"github.com/vincent-petithory/dataurl"
 )
 
 // GetVersions retrieves all available versions.
@@ -17,10 +20,12 @@ func GetVersions(c *gin.Context) {
 	err := context.Store(c).Scopes(
 		model.VersionDefaultOrder,
 	).Where(
-		"versions.mod_id = ?",
+		"mod_id = ?",
 		mod.ID,
 	).Preload(
 		"Mod",
+	).Preload(
+		"File",
 	).Find(
 		&records,
 	).Error
@@ -48,9 +53,47 @@ func GetVersions(c *gin.Context) {
 func GetVersion(c *gin.Context) {
 	record := session.Version(c)
 
+	// c.Request.Host
+
 	c.JSON(
 		http.StatusOK,
 		record,
+	)
+}
+
+// GetVersionFile retrieves a file for a specific version.
+func GetVersionFile(c *gin.Context) {
+	record := session.Version(c)
+
+	if record.File == nil {
+		c.AbortWithError(
+			http.StatusNotFound,
+			fmt.Errorf("No file content available"),
+		)
+
+		return
+	}
+
+	decoded, err := dataurl.DecodeString(
+		record.File.Content,
+	)
+
+	if err != nil {
+		c.AbortWithError(
+			http.StatusInternalServerError,
+			fmt.Errorf("Failed to decode file"),
+		)
+
+		return
+	}
+
+	c.Writer.Header().Set(
+		"Content-Type",
+		decoded.ContentType(),
+	)
+
+	c.Writer.Write(
+		decoded.Data,
 	)
 }
 
@@ -89,6 +132,9 @@ func PatchVersion(c *gin.Context) {
 	record := session.Version(c)
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind version data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -127,14 +173,12 @@ func PatchVersion(c *gin.Context) {
 // PostVersion creates a new version.
 func PostVersion(c *gin.Context) {
 	mod := session.Mod(c)
-
-	record := &model.Version{
-		ModID: mod.ID,
-	}
-
-	record.Defaults()
+	record := &model.Version{}
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind version data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -146,6 +190,8 @@ func PostVersion(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
+	record.ModID = mod.ID
 
 	err := context.Store(c).Create(
 		&record,

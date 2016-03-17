@@ -33,9 +33,27 @@ func Version(c *gin.Context) *model.Version {
 // SetVersion injects the version into the context.
 func SetVersion() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		mod := Mod(c)
+
+		if mod == nil {
+			c.JSON(
+				http.StatusNotFound,
+				gin.H{
+					"status":  http.StatusNotFound,
+					"message": "Failed to find parent",
+				},
+			)
+
+			c.Abort()
+			return
+		}
+
 		record := &model.Version{}
 
 		res := context.Store(c).Where(
+			"mod_id = ?",
+			mod.ID,
+		).Where(
 			"versions.id = ?",
 			c.Param("version"),
 		).Or(
@@ -45,6 +63,8 @@ func SetVersion() gin.HandlerFunc {
 			&record,
 		).Preload(
 			"Mod",
+		).Preload(
+			"File",
 		).First(
 			&record,
 		)

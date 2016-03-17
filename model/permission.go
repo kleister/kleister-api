@@ -31,8 +31,3 @@ type Permission struct {
 	UpdatedAt      time.Time `json:"-"`
 	Packs          Packs     `json:"packs" gorm:"many2many:permission_packs;"`
 }
-
-// Defaults prefills the struct with some default values.
-func (u *Permission) Defaults() {
-	// Currently no default values required.
-}

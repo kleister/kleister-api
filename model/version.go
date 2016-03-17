@@ -5,15 +5,16 @@ import (
 	"time"
 
 	"github.com/Machiel/slugify"
+	"github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
 )
 
 const (
-	// VersionUsernameMinLength is the minimum length of the username.
-	VersionUsernameMinLength = "3"
+	// VersionNameMinLength is the minimum length of the name.
+	VersionNameMinLength = "3"
 
-	// VersionUsernameMaxLength is the maximum length of the username.
-	VersionUsernameMaxLength = "255"
+	// VersionNameMaxLength is the maximum length of the name.
+	VersionNameMaxLength = "255"
 )
 
 // VersionDefaultOrder is the default ordering for pack listings.
@@ -32,9 +33,8 @@ type Version struct {
 	File      *Attachment `json:"file" gorm:"polymorphic:Owner"`
 	Mod       *Mod        `json:"mod"`
 	ModID     uint        `json:"mod_id" sql:"index"`
-	Slug      string      `json:"slug" sql:"unique_index"`
-	Name      string      `json:"name" sql:"unique_index"`
-	MD5       string      `json:"md5"`
+	Slug      string      `json:"slug"`
+	Name      string      `json:"name"`
 	CreatedAt time.Time   `json:"created_at"`
 	UpdatedAt time.Time   `json:"updated_at"`
 	Builds    Builds      `json:"builds"`
@@ -43,23 +43,67 @@ type Version struct {
 // BeforeSave invokes required actions before persisting.
 func (u *Version) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
+		for i := 0; true; i++ {
+			if i == 0 {
+				u.Slug = slugify.Slugify(u.Name)
+			} else {
+				u.Slug = slugify.Slugify(
+					fmt.Sprintf("%s-%d", u.Name, i),
+				)
+			}
 
-		u.Slug = slugify.Slugify(u.Name)
-		// Fill the slug with slugified name
+			notFound := db.Where(
+				"mod_id = ?",
+				u.ModID,
+			).Where(
+				"slug = ?",
+				u.Slug,
+			).Not(
+				"id",
+				u.ID,
+			).First(
+				&Version{},
+			).RecordNotFound()
 
+			if notFound {
+				break
+			}
+		}
 	}
 
 	return nil
 }
 
-// Defaults prefills the struct with some default values.
-func (u *Version) Defaults() {
-	// Currently no default values required.
-}
-
 // Validate does some validation to be able to store the record.
 func (u *Version) Validate(db *gorm.DB) {
-	if u.Name == "" {
-		db.AddError(fmt.Errorf("Name is a required attribute"))
+	if u.ModID == 0 {
+		db.AddError(fmt.Errorf("A mod reference is required"))
+	} else {
+		res := db.Where(
+			"id = ?",
+			u.ModID,
+		).First(
+			&Mod{},
+		)
+
+		if res.RecordNotFound() {
+			db.AddError(fmt.Errorf("Referenced mod does not exist"))
+		}
+	}
+
+	if !govalidator.StringLength(u.Name, VersionNameMinLength, VersionNameMaxLength) {
+		db.AddError(fmt.Errorf(
+			"Name should be longer than %s and shorter than %s",
+			VersionNameMinLength,
+			VersionNameMaxLength,
+		))
+	}
+
+	if u.Name != "" {
+		notFound := db.Where("mod_id = ?", u.ModID).Where("name = ?", u.Name).Not("id", u.ID).First(&Version{}).RecordNotFound()
+
+		if !notFound {
+			db.AddError(fmt.Errorf("Name is already present"))
+		}
 	}
 }

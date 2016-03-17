@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router/middleware/context"
@@ -17,10 +18,14 @@ func GetBuilds(c *gin.Context) {
 	err := context.Store(c).Scopes(
 		model.BuildDefaultOrder,
 	).Where(
-		"builds.pack_id = ?",
+		"pack_id = ?",
 		pack.ID,
 	).Preload(
 		"Pack",
+	).Preload(
+		"Minecraft",
+	).Preload(
+		"Forge",
 	).Find(
 		&records,
 	).Error
@@ -89,6 +94,9 @@ func PatchBuild(c *gin.Context) {
 	record := session.Build(c)
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind build data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -127,14 +135,12 @@ func PatchBuild(c *gin.Context) {
 // PostBuild creates a new build.
 func PostBuild(c *gin.Context) {
 	pack := session.Pack(c)
-
-	record := &model.Build{
-		PackID: pack.ID,
-	}
-
-	record.Defaults()
+	record := &model.Build{}
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind build data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -146,6 +152,8 @@ func PostBuild(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
+	record.PackID = pack.ID
 
 	err := context.Store(c).Create(
 		&record,

@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router/middleware/context"
@@ -85,6 +86,9 @@ func PatchUser(c *gin.Context) {
 	record := session.User(c)
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind user data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -122,10 +126,14 @@ func PatchUser(c *gin.Context) {
 
 // PostUser creates a new user.
 func PostUser(c *gin.Context) {
-	record := &model.User{}
-	record.Defaults()
+	record := &model.User{
+		Permission: &model.Permission{},
+	}
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind user data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -164,7 +172,7 @@ func PostUser(c *gin.Context) {
 // GetUserMods retrieves all mods related to a user.
 func GetUserMods(c *gin.Context) {
 	user := session.User(c)
-	records := &model.Users{}
+	records := &model.Mods{}
 
 	err := context.Store(c).Model(
 		&user,
@@ -224,7 +232,9 @@ func PatchUserMod(c *gin.Context) {
 	).Association(
 		"Mods",
 	).Append(
-		&mod,
+		model.Mod{
+			ID: mod.ID,
+		},
 	).Error
 
 	if err != nil {
@@ -280,7 +290,9 @@ func DeleteUserMod(c *gin.Context) {
 	).Association(
 		"Mods",
 	).Delete(
-		&mod,
+		model.Mod{
+			ID: mod.ID,
+		},
 	).Error
 
 	if err != nil {

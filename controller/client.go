@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router/middleware/context"
@@ -83,6 +84,9 @@ func PatchClient(c *gin.Context) {
 	record := session.Client(c)
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind client data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -121,9 +125,11 @@ func PatchClient(c *gin.Context) {
 // PostClient creates a new client.
 func PostClient(c *gin.Context) {
 	record := &model.Client{}
-	record.Defaults()
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind client data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -222,10 +228,14 @@ func PatchClientPack(c *gin.Context) {
 	).Association(
 		"Packs",
 	).Append(
-		&pack,
+		model.Pack{
+			ID: pack.ID,
+		},
 	).Error
 
 	if err != nil {
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -278,7 +288,9 @@ func DeleteClientPack(c *gin.Context) {
 	).Association(
 		"Packs",
 	).Delete(
-		&pack,
+		model.Pack{
+			ID: pack.ID,
+		},
 	).Error
 
 	if err != nil {

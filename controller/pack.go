@@ -1,12 +1,15 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router/middleware/context"
 	"github.com/solderapp/solder-api/router/middleware/session"
+	"github.com/vincent-petithory/dataurl"
 )
 
 // GetPacks retrieves all available packs.
@@ -50,6 +53,114 @@ func GetPack(c *gin.Context) {
 	)
 }
 
+// GetPackLogo retrieves a logo for a specific pack.
+func GetPackLogo(c *gin.Context) {
+	record := session.Pack(c)
+
+	if record.Logo == nil {
+		c.AbortWithError(
+			http.StatusNotFound,
+			fmt.Errorf("No logo content available"),
+		)
+
+		return
+	}
+
+	decoded, err := dataurl.DecodeString(
+		record.Logo.Content,
+	)
+
+	if err != nil {
+		c.AbortWithError(
+			http.StatusInternalServerError,
+			fmt.Errorf("Failed to decode logo"),
+		)
+
+		return
+	}
+
+	c.Writer.Header().Set(
+		"Content-Type",
+		decoded.ContentType(),
+	)
+
+	c.Writer.Write(
+		decoded.Data,
+	)
+}
+
+// GetPackBackground retrieves a background for a specific pack.
+func GetPackBackground(c *gin.Context) {
+	record := session.Pack(c)
+
+	if record.Background == nil {
+		c.AbortWithError(
+			http.StatusNotFound,
+			fmt.Errorf("No background content available"),
+		)
+
+		return
+	}
+
+	decoded, err := dataurl.DecodeString(
+		record.Background.Content,
+	)
+
+	if err != nil {
+		c.AbortWithError(
+			http.StatusInternalServerError,
+			fmt.Errorf("Failed to decode background"),
+		)
+
+		return
+	}
+
+	c.Writer.Header().Set(
+		"Content-Type",
+		decoded.ContentType(),
+	)
+
+	c.Writer.Write(
+		decoded.Data,
+	)
+}
+
+// GetPackIcon retrieves a icon for a specific pack.
+func GetPackIcon(c *gin.Context) {
+	record := session.Pack(c)
+
+	if record.Icon == nil {
+		c.AbortWithError(
+			http.StatusNotFound,
+			fmt.Errorf("No icon content available"),
+		)
+
+		return
+	}
+
+	decoded, err := dataurl.DecodeString(
+		record.Icon.Content,
+	)
+
+	if err != nil {
+		c.AbortWithError(
+			http.StatusInternalServerError,
+			fmt.Errorf("Failed to decode icon"),
+		)
+
+		return
+	}
+
+	c.Writer.Header().Set(
+		"Content-Type",
+		decoded.ContentType(),
+	)
+
+	c.Writer.Write(
+		decoded.Data,
+	)
+}
+
 // DeletePack removes a specific pack.
 func DeletePack(c *gin.Context) {
 	record := session.Pack(c)
@@ -85,6 +196,9 @@ func PatchPack(c *gin.Context) {
 	record := session.Pack(c)
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind pack data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -123,9 +237,11 @@ func PatchPack(c *gin.Context) {
 // PostPack creates a new pack.
 func PostPack(c *gin.Context) {
 	record := &model.Pack{}
-	record.Defaults()
 
 	if err := c.BindJSON(&record); err != nil {
+		logrus.Warn("Failed to bind pack data")
+		logrus.Warn(err)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{

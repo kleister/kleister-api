@@ -127,6 +127,10 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				packs.DELETE("/:pack", session.SetPack(), session.MustPacks("delete"), controller.DeletePack)
 				packs.PATCH("/:pack", session.SetPack(), session.MustPacks("change"), controller.PatchPack)
 				packs.POST("", session.MustPacks("change"), controller.PostPack)
+
+				packs.GET("/:pack/logo", session.SetPack(), controller.GetPackLogo)
+				packs.GET("/:pack/background", session.SetPack(), controller.GetPackBackground)
+				packs.GET("/:pack/icon", session.SetPack(), controller.GetPackIcon)
 			}
 
 			packClients := api.Group("/packs/:pack/clients")
@@ -202,6 +206,8 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				versions.DELETE("/:version", session.SetVersion(), session.MustMods("delete"), controller.DeleteVersion)
 				versions.PATCH("/:version", session.SetVersion(), session.MustMods("change"), controller.PatchVersion)
 				versions.POST("", session.MustMods("change"), controller.PostVersion)
+
+				versions.GET("/:version/file", session.SetVersion(), controller.GetVersionFile)
 			}
 
 			versionBuilds := api.Group("/mods/:mod/versions/:version/builds")
