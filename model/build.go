@@ -29,13 +29,13 @@ type Builds []*Build
 
 // Build represents a build model definition.
 type Build struct {
-	ID          uint       `json:"id" gorm:"primary_key"`
+	ID          int        `json:"id" gorm:"primary_key"`
 	Pack        *Pack      `json:"pack"`
-	PackID      uint       `json:"pack_id" sql:"index"`
+	PackID      int        `json:"pack_id" sql:"index"`
 	Minecraft   *Minecraft `json:"minecraft"`
-	MinecraftID uint       `json:"minecraft_id" sql:"index"`
+	MinecraftID int        `json:"minecraft_id" sql:"index"`
 	Forge       *Forge     `json:"forge"`
-	ForgeID     uint       `json:"forge_id" sql:"index"`
+	ForgeID     int        `json:"forge_id" sql:"index"`
 	Slug        string     `json:"slug"`
 	Name        string     `json:"name"`
 	MinJava     string     `json:"min_java"`

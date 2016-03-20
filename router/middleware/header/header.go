@@ -13,6 +13,7 @@ func SetCache() gin.HandlerFunc {
 		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
 		c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
 		c.Header("Last-Modified", time.Now().UTC().Format(http.TimeFormat))
+
 		c.Next()
 	}
 }
@@ -45,5 +46,7 @@ func SetSecure() gin.HandlerFunc {
 		if c.Request.TLS != nil {
 			c.Header("Strict-Transport-Security", "max-age=31536000")
 		}
+
+		c.Next()
 	}
 }

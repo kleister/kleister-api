@@ -35,7 +35,7 @@ type Clients []*Client
 
 // Client represents a client model definition.
 type Client struct {
-	ID        uint      `json:"id" gorm:"primary_key"`
+	ID        int       `json:"id" gorm:"primary_key"`
 	Slug      string    `json:"slug" sql:"unique_index"`
 	Name      string    `json:"name" sql:"unique_index"`
 	Value     string    `json:"uuid" sql:"unique_index"`

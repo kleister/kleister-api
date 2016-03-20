@@ -9,9 +9,9 @@ type Permissions []*Permission
 
 // Permission represents a permission model definition.
 type Permission struct {
-	ID             uint      `json:"-" gorm:"primary_key"`
+	ID             int       `json:"-" gorm:"primary_key"`
 	User           *User     `json:"-"`
-	UserID         uint      `json:"-" sql:"index"`
+	UserID         int       `json:"-" sql:"index"`
 	DisplayUsers   bool      `json:"display_users" sql:"default:false"`
 	ChangeUsers    bool      `json:"change_users" sql:"default:false"`
 	DeleteUsers    bool      `json:"delete_users" sql:"default:false"`

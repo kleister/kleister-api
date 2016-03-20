@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/solderapp/solder-api/config"
 )
 
 // Server represents the sub config for the server.
@@ -35,4 +36,16 @@ func (s *Server) Run(handler http.Handler) {
 			),
 		)
 	}
+}
+
+// Load initializes the server of the application.
+func Load(cfg *config.Config) *Server {
+	s := &Server{
+		Addr: cfg.Server.Addr,
+		Cert: cfg.Server.Cert,
+		Key:  cfg.Server.Key,
+		Root: cfg.Server.Root,
+	}
+
+	return s
 }

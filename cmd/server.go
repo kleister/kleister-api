@@ -3,10 +3,10 @@ package cmd
 import (
 	"github.com/codegangsta/cli"
 	"github.com/solderapp/solder-api/config"
+	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router"
 	"github.com/solderapp/solder-api/router/middleware/context"
 	"github.com/solderapp/solder-api/server"
-	"github.com/solderapp/solder-api/store"
 )
 
 // Server provides the sub-command to start the API server.
@@ -45,7 +45,7 @@ func Server(cfg *config.Config) cli.Command {
 			},
 		},
 		Action: func(c *cli.Context) {
-			dat := store.Load(
+			dat := model.Load(
 				cfg,
 			)
 
