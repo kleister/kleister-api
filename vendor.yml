@@ -1,10 +1,14 @@
 vendors:
 - path: github.com/Machiel/slugify
   rev: 9c8f186ad6ea352ad2709ad0ec08f2ecc8a1b424
+- path: github.com/Pallinder/go-randomdata
+  rev: 4134a721d6473f81816b1799866bf3e553a9b8d4
 - path: github.com/Sirupsen/logrus
-  rev: a26f43589d737684363ff856c5a0f9f24b946510
+  rev: 4b6ea7319e214d98c938f12692336f7ca9348d6b
 - path: github.com/asaskevich/govalidator
   rev: 9699ab6b38bee2e02cd3fe8b99ecf67665395c96
+- path: github.com/bluele/factory-go
+  rev: d6a4ddee8ba43b1d900c1e0d093397811e2b5dd8
 - path: github.com/codegangsta/cli
   rev: aca5b047ed14d17224157c3434ea93bf6cdaadee
 - path: github.com/davecgh/go-spew
@@ -15,14 +19,16 @@ vendors:
   rev: 57eb5e1fc594ad4b0b1dbea7b286d299e0cb43c2
 - path: github.com/erikstmartin/go-testdb
   rev: 8d10e4a1bae52cd8b81ffdec3445890d6dccab3d
+- path: github.com/franela/goblin
+  rev: 889391d730237f8aca06ce3e62975112983f96b4
 - path: github.com/gin-gonic/gin
   rev: 4a6bc4aac4607e253bcda67c8c5bcda693d2388e
 - path: github.com/go-sql-driver/mysql
   rev: 66312f7fe2678aa0f5ec770f96702f4c4ec5aa8e
 - path: github.com/golang/protobuf
-  rev: 99511271042a09d1e01baea8781caa5210fec66e
+  rev: 62e4364d64b32762febb61f2c88c0a29bc49a225
 - path: github.com/jinzhu/gorm
-  rev: 83002c4d5f060f4819bfd2115b76a0e1429a7f32
+  rev: 021d7b33143de37b743d1cf660974e9c8d3f80ea
 - path: github.com/jinzhu/inflection
   rev: 3272df6c21d04180007eb3349844c89a3856bc25
 - path: github.com/jinzhu/now
@@ -42,7 +48,7 @@ vendors:
 - path: github.com/qor/inflection
   rev: 3272df6c21d04180007eb3349844c89a3856bc25
 - path: github.com/qor/qor
-  rev: 01d373d61bb393ca7f11a5d84200d576f79dac21
+  rev: 7f5e5de01ed27c619972576d07e6b44eafea4fd1
 - path: github.com/qor/validations
   rev: 87c1296c75e72a8f3247beab65c48c50b7b66a7a
 - path: github.com/satori/go.uuid
@@ -52,7 +58,7 @@ vendors:
 - path: github.com/vincent-petithory/dataurl
   rev: a81abcdac6cb8cbd9bf6ec779c2fb09fffb1d3f5
 - path: golang.org/x/crypto
-  rev: 6025851c7c2bf210daf74d22300c699b16541847
+  rev: c197bcf24cde29d3f73c7b4ac6fd41f4384e8af6
 - path: golang.org/x/net
   rev: 35b06af0720201bc2f326773a80767387544f8c4
 - path: golang.org/x/sys
