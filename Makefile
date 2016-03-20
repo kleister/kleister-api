@@ -28,7 +28,7 @@ deps:
 	govend -v
 
 vendor:
-	govend -vtlu
+	govend -vtlu --prune
 
 generate:
 	go generate $(PACKAGES)

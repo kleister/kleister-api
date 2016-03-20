@@ -1,14 +1,10 @@
 vendors:
 - path: github.com/Machiel/slugify
   rev: 9c8f186ad6ea352ad2709ad0ec08f2ecc8a1b424
-- path: github.com/Pallinder/go-randomdata
-  rev: 4134a721d6473f81816b1799866bf3e553a9b8d4
 - path: github.com/Sirupsen/logrus
   rev: 4b6ea7319e214d98c938f12692336f7ca9348d6b
 - path: github.com/asaskevich/govalidator
-  rev: 9699ab6b38bee2e02cd3fe8b99ecf67665395c96
-- path: github.com/bluele/factory-go
-  rev: d6a4ddee8ba43b1d900c1e0d093397811e2b5dd8
+  rev: 5208815a79dd0135690e0d716d4663c2fbd41ac4
 - path: github.com/codegangsta/cli
   rev: aca5b047ed14d17224157c3434ea93bf6cdaadee
 - path: github.com/davecgh/go-spew
