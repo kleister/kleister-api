@@ -1,45 +1,49 @@
 package controller
 
 import (
+	"encoding/json"
 	"testing"
 
-	// "github.com/Pallinder/go-randomdata"
-	// "github.com/bluele/factory-go/factory"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 
 	. "github.com/franela/goblin"
 )
 
-// var MinecraftFactory = factory.NewFactory(
-//  &model.Minecraft{},
-// ).SeqInt("ID", func(n int) (interface{}, error) {
-//  return n, nil
-// }).Attr("Name", func(args factory.Args) (interface{}, error) {
-//  return randomdata.StringNumberExt(3, "-", 1), nil
-// }).Attr("Minecraft", func(args factory.Args) (interface{}, error) {
-//  return randomdata.StringNumberExt(3, "-", 1), nil
-// })
-
 func TestMinecraft(t *testing.T) {
+	gin.SetMode(gin.TestMode)
 	store := *model.Test()
 
 	g := Goblin(t)
 	g.Describe("GetMinecraft", func() {
-		// var minecrafts model.Minecrafts
+		var minecrafts model.Minecrafts
 
-		// g.BeforeEach(func() {
-		//  minecrafts = model.Minecrafts{
-		//    MinecraftFactory.MustCreate().(*model.Minecraft),
-		//    MinecraftFactory.MustCreate().(*model.Minecraft),
-		//    MinecraftFactory.MustCreate().(*model.Minecraft),
-		//  }
-		// })
+		g.BeforeEach(func() {
+			minecrafts = model.Minecrafts{
+				&model.Minecraft{
+					Name: "1.4.0",
+					Type: "snapshot",
+				},
+				&model.Minecraft{
+					Name: "1.10.4",
+					Type: "release",
+				},
+				&model.Minecraft{
+					Name: "1.8.0",
+					Type: "release",
+				},
+			}
 
-		// g.AfterEach(func() {
-		// })
+			for _, record := range minecrafts {
+				store.Create(record)
+			}
+		})
 
-		g.It("should serve minecraft versions", func() {
+		g.AfterEach(func() {
+			store.Delete(&model.Minecraft{})
+		})
+
+		g.It("should respond with json content type", func() {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
@@ -47,7 +51,19 @@ func TestMinecraft(t *testing.T) {
 
 			g.Assert(rw.Code).Equal(200)
 			g.Assert(rw.HeaderMap.Get("Content-Type")).Equal("application/json; charset=utf-8")
-			// g.Assert(rw.Body.Bytes()).Equal()
+		})
+
+		g.It("should serve a collection", func() {
+			ctx, rw, _ := gin.CreateTestContext()
+			ctx.Set("store", store)
+
+			GetMinecraft(ctx)
+
+			out := model.Minecrafts{}
+			json.NewDecoder(rw.Body).Decode(&out)
+
+			g.Assert(len(out)).Equal(len(minecrafts))
+			g.Assert(out[0]).Equal(minecrafts[2])
 		})
 	})
 }
