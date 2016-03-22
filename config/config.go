@@ -4,7 +4,6 @@ package config
 type Config struct {
 	Version string
 	Debug   bool
-	Develop bool
 	Server  struct {
 		Addr string
 		Cert string

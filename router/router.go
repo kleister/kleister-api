@@ -17,7 +17,7 @@ import (
 
 // Load initializes the routing of the application.
 func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
-	if cfg.Develop {
+	if cfg.Debug {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
