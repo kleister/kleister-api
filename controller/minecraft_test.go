@@ -63,7 +63,20 @@ func TestMinecraft(t *testing.T) {
 			json.NewDecoder(rw.Body).Decode(&out)
 
 			g.Assert(len(out)).Equal(len(minecrafts))
-			g.Assert(out[0]).Equal(minecrafts[2])
+		})
+
+		g.It("should sort the collection", func() {
+			ctx, rw, _ := gin.CreateTestContext()
+			ctx.Set("store", store)
+
+			GetMinecraft(ctx)
+
+			out := model.Minecrafts{}
+			json.NewDecoder(rw.Body).Decode(&out)
+
+			g.Assert(out[0].Name).Equal(minecrafts[0].Name)
+			g.Assert(out[1].Name).Equal(minecrafts[2].Name)
+			g.Assert(out[2].Name).Equal(minecrafts[1].Name)
 		})
 	})
 }

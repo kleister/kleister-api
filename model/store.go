@@ -228,9 +228,9 @@ func (s Store) GetPacks() (*Packs, error) {
 	).Preload(
 		"Builds",
 	).Preload(
-		"Forge",
+		"Builds.Forge",
 	).Preload(
-		"Minecraft",
+		"Builds.Minecraft",
 	).Find(
 		&records,
 	).Error

@@ -63,7 +63,20 @@ func TestForge(t *testing.T) {
 			json.NewDecoder(rw.Body).Decode(&out)
 
 			g.Assert(len(out)).Equal(len(forges))
-			g.Assert(out[0]).Equal(forges[1])
+		})
+
+		g.It("should sort the collection", func() {
+			ctx, rw, _ := gin.CreateTestContext()
+			ctx.Set("store", store)
+
+			GetForge(ctx)
+
+			out := model.Forges{}
+			json.NewDecoder(rw.Body).Decode(&out)
+
+			g.Assert(out[0].Name).Equal(forges[1].Name)
+			g.Assert(out[1].Name).Equal(forges[2].Name)
+			g.Assert(out[2].Name).Equal(forges[0].Name)
 		})
 	})
 }

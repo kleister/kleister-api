@@ -44,7 +44,7 @@ func TestPack(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetPack(ctx)
+			GetPacks(ctx)
 
 			g.Assert(rw.Code).Equal(200)
 			g.Assert(rw.HeaderMap.Get("Content-Type")).Equal("application/json; charset=utf-8")
@@ -54,13 +54,26 @@ func TestPack(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetPack(ctx)
+			GetPacks(ctx)
 
 			out := model.Packs{}
 			json.NewDecoder(rw.Body).Decode(&out)
 
 			g.Assert(len(out)).Equal(len(packs))
-			g.Assert(out[0]).Equal(packs[2])
+		})
+
+		g.It("should sort the collection", func() {
+			ctx, rw, _ := gin.CreateTestContext()
+			ctx.Set("store", store)
+
+			GetPacks(ctx)
+
+			out := model.Packs{}
+			json.NewDecoder(rw.Body).Decode(&out)
+
+			g.Assert(out[0].Name).Equal(packs[1].Name)
+			g.Assert(out[1].Name).Equal(packs[2].Name)
+			g.Assert(out[2].Name).Equal(packs[0].Name)
 		})
 	})
 }

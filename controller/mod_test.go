@@ -44,7 +44,7 @@ func TestMod(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetMod(ctx)
+			GetMods(ctx)
 
 			g.Assert(rw.Code).Equal(200)
 			g.Assert(rw.HeaderMap.Get("Content-Type")).Equal("application/json; charset=utf-8")
@@ -54,13 +54,26 @@ func TestMod(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetMod(ctx)
+			GetMods(ctx)
 
 			out := model.Mods{}
 			json.NewDecoder(rw.Body).Decode(&out)
 
 			g.Assert(len(out)).Equal(len(mods))
-			g.Assert(out[0]).Equal(mods[2])
+		})
+
+		g.It("should sort the collection", func() {
+			ctx, rw, _ := gin.CreateTestContext()
+			ctx.Set("store", store)
+
+			GetMods(ctx)
+
+			out := model.Mods{}
+			json.NewDecoder(rw.Body).Decode(&out)
+
+			g.Assert(out[0].Name).Equal(mods[0].Name)
+			g.Assert(out[1].Name).Equal(mods[1].Name)
+			g.Assert(out[2].Name).Equal(mods[2].Name)
 		})
 	})
 }

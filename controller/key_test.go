@@ -21,13 +21,16 @@ func TestKey(t *testing.T) {
 		g.BeforeEach(func() {
 			keys = model.Keys{
 				&model.Key{
-					Name: "Key 2",
+					Name:  "Key 2",
+					Value: "KEY2",
 				},
 				&model.Key{
-					Name: "Key 1",
+					Name:  "Key 1",
+					Value: "KEY1",
 				},
 				&model.Key{
-					Name: "Key 3",
+					Name:  "Key 3",
+					Value: "KEY3",
 				},
 			}
 
@@ -44,7 +47,7 @@ func TestKey(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetKey(ctx)
+			GetKeys(ctx)
 
 			g.Assert(rw.Code).Equal(200)
 			g.Assert(rw.HeaderMap.Get("Content-Type")).Equal("application/json; charset=utf-8")
@@ -54,13 +57,26 @@ func TestKey(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetKey(ctx)
+			GetKeys(ctx)
 
 			out := model.Keys{}
 			json.NewDecoder(rw.Body).Decode(&out)
 
 			g.Assert(len(out)).Equal(len(keys))
-			g.Assert(out[0]).Equal(keys[2])
+		})
+
+		g.It("should sort the collection", func() {
+			ctx, rw, _ := gin.CreateTestContext()
+			ctx.Set("store", store)
+
+			GetKeys(ctx)
+
+			out := model.Keys{}
+			json.NewDecoder(rw.Body).Decode(&out)
+
+			g.Assert(out[0].Name).Equal(keys[1].Name)
+			g.Assert(out[1].Name).Equal(keys[0].Name)
+			g.Assert(out[2].Name).Equal(keys[2].Name)
 		})
 	})
 }

@@ -16,18 +16,28 @@ func TestBuild(t *testing.T) {
 
 	g := Goblin(t)
 	g.Describe("GetBuilds", func() {
+		var pack model.Pack
 		var builds model.Builds
 
 		g.BeforeEach(func() {
+			pack = model.Pack{
+				Name: "Pack",
+			}
+
+			store.Create(&pack)
+
 			builds = model.Builds{
 				&model.Build{
-					Name: "Build 1",
+					PackID: pack.ID,
+					Name:   "Build 1",
 				},
 				&model.Build{
-					Name: "Build 3",
+					PackID: pack.ID,
+					Name:   "Build 3",
 				},
 				&model.Build{
-					Name: "Build 2",
+					PackID: pack.ID,
+					Name:   "Build 2",
 				},
 			}
 
@@ -38,13 +48,15 @@ func TestBuild(t *testing.T) {
 
 		g.AfterEach(func() {
 			store.Delete(&model.Build{})
+			store.Delete(&model.Pack{})
 		})
 
 		g.It("should respond with json content type", func() {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
+			ctx.Set("pack", &pack)
 
-			GetBuild(ctx)
+			GetBuilds(ctx)
 
 			g.Assert(rw.Code).Equal(200)
 			g.Assert(rw.HeaderMap.Get("Content-Type")).Equal("application/json; charset=utf-8")
@@ -53,14 +65,29 @@ func TestBuild(t *testing.T) {
 		g.It("should serve a collection", func() {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
+			ctx.Set("pack", &pack)
 
-			GetBuild(ctx)
+			GetBuilds(ctx)
 
 			out := model.Builds{}
 			json.NewDecoder(rw.Body).Decode(&out)
 
 			g.Assert(len(out)).Equal(len(builds))
-			g.Assert(out[0]).Equal(builds[2])
+		})
+
+		g.It("should sort the collection", func() {
+			ctx, rw, _ := gin.CreateTestContext()
+			ctx.Set("store", store)
+			ctx.Set("pack", &pack)
+
+			GetBuilds(ctx)
+
+			out := model.Builds{}
+			json.NewDecoder(rw.Body).Decode(&out)
+
+			g.Assert(out[0].Name).Equal(builds[0].Name)
+			g.Assert(out[1].Name).Equal(builds[2].Name)
+			g.Assert(out[2].Name).Equal(builds[1].Name)
 		})
 	})
 }

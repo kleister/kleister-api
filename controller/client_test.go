@@ -21,13 +21,16 @@ func TestClient(t *testing.T) {
 		g.BeforeEach(func() {
 			clients = model.Clients{
 				&model.Client{
-					Name: "Client 3",
+					Name:  "Client 3",
+					Value: "UUID3",
 				},
 				&model.Client{
-					Name: "Client 1",
+					Name:  "Client 1",
+					Value: "UUID1",
 				},
 				&model.Client{
-					Name: "Client 2",
+					Name:  "Client 2",
+					Value: "UUID2",
 				},
 			}
 
@@ -44,7 +47,7 @@ func TestClient(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetClient(ctx)
+			GetClients(ctx)
 
 			g.Assert(rw.Code).Equal(200)
 			g.Assert(rw.HeaderMap.Get("Content-Type")).Equal("application/json; charset=utf-8")
@@ -54,13 +57,26 @@ func TestClient(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetClient(ctx)
+			GetClients(ctx)
 
 			out := model.Clients{}
 			json.NewDecoder(rw.Body).Decode(&out)
 
 			g.Assert(len(out)).Equal(len(clients))
-			g.Assert(out[0]).Equal(clients[2])
+		})
+
+		g.It("should sort the collection", func() {
+			ctx, rw, _ := gin.CreateTestContext()
+			ctx.Set("store", store)
+
+			GetClients(ctx)
+
+			out := model.Clients{}
+			json.NewDecoder(rw.Body).Decode(&out)
+
+			g.Assert(out[0].Name).Equal(clients[1].Name)
+			g.Assert(out[1].Name).Equal(clients[2].Name)
+			g.Assert(out[2].Name).Equal(clients[0].Name)
 		})
 	})
 }

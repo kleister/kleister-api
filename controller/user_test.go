@@ -22,12 +22,18 @@ func TestUser(t *testing.T) {
 			users = model.Users{
 				&model.User{
 					Username: "thomas",
+					Email:    "thomas@webhippie.de",
+					Password: "test12345",
 				},
 				&model.User{
 					Username: "brad",
+					Email:    "brad@webhippie.de",
+					Password: "test12345",
 				},
 				&model.User{
 					Username: "felix",
+					Email:    "felix@webhippie.de",
+					Password: "test12345",
 				},
 			}
 
@@ -44,7 +50,7 @@ func TestUser(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetUser(ctx)
+			GetUsers(ctx)
 
 			g.Assert(rw.Code).Equal(200)
 			g.Assert(rw.HeaderMap.Get("Content-Type")).Equal("application/json; charset=utf-8")
@@ -54,13 +60,26 @@ func TestUser(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetUser(ctx)
+			GetUsers(ctx)
 
 			out := model.Users{}
 			json.NewDecoder(rw.Body).Decode(&out)
 
 			g.Assert(len(out)).Equal(len(users))
-			g.Assert(out[0]).Equal(users[2])
+		})
+
+		g.It("should sort the collection", func() {
+			ctx, rw, _ := gin.CreateTestContext()
+			ctx.Set("store", store)
+
+			GetUsers(ctx)
+
+			out := model.Users{}
+			json.NewDecoder(rw.Body).Decode(&out)
+
+			g.Assert(out[0].Username).Equal(users[1].Username)
+			g.Assert(out[1].Username).Equal(users[2].Username)
+			g.Assert(out[2].Username).Equal(users[0].Username)
 		})
 	})
 }

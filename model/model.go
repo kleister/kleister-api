@@ -16,8 +16,9 @@ import (
 
 	// Register Postgres driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+
 	// Register SQLite driver for GORM
-	// _ "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 // New initializes a new database connection.
