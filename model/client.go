@@ -9,27 +9,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-const (
-	// ClientNameMinLength is the minimum length of the client name.
-	ClientNameMinLength = "3"
-
-	// ClientNameMaxLength is the maximum length of the client name.
-	ClientNameMaxLength = "255"
-
-	// ClientValueMinLength is the minimum length of the client value.
-	ClientValueMinLength = "3"
-
-	// ClientValueMaxLength is the maximum length of the client value.
-	ClientValueMaxLength = "255"
-)
-
-// ClientDefaultOrder is the default ordering for client listings.
-func ClientDefaultOrder(db *gorm.DB) *gorm.DB {
-	return db.Order(
-		"clients.name ASC",
-	)
-}
-
 // Clients is simply a collection of client structs.
 type Clients []*Client
 
@@ -41,7 +20,7 @@ type Client struct {
 	Value     string    `json:"uuid" sql:"unique_index"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Packs     Packs     `json:"packs" gorm:"many2many:client_packs;"`
+	Packs     Packs     `json:"packs,omitempty" gorm:"many2many:client_packs"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -77,32 +56,40 @@ func (u *Client) BeforeSave(db *gorm.DB) (err error) {
 
 // Validate does some validation to be able to store the record.
 func (u *Client) Validate(db *gorm.DB) {
-	if !govalidator.StringLength(u.Name, ClientNameMinLength, ClientNameMaxLength) {
-		db.AddError(fmt.Errorf(
-			"Name should be longer than %s and shorter than %s",
-			ClientNameMinLength,
-			ClientNameMaxLength,
-		))
+	if !govalidator.StringLength(u.Name, "2", "255") {
+		db.AddError(fmt.Errorf("Name should be longer than 2 and shorter than 255"))
 	}
 
 	if u.Name != "" {
-		notFound := db.Where("name = ?", u.Name).Not("id", u.ID).First(&Client{}).RecordNotFound()
+		notFound := db.Where(
+			"name = ?",
+			u.Name,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&Client{},
+		).RecordNotFound()
 
 		if !notFound {
 			db.AddError(fmt.Errorf("Name is already present"))
 		}
 	}
 
-	if !govalidator.StringLength(u.Value, ClientValueMinLength, ClientValueMaxLength) {
-		db.AddError(fmt.Errorf(
-			"UUID should be longer than %s and shorter than %s",
-			ClientValueMinLength,
-			ClientValueMaxLength,
-		))
+	if !govalidator.StringLength(u.Value, "2", "255") {
+		db.AddError(fmt.Errorf("UUID should be longer than 2 and shorter than 255"))
 	}
 
 	if u.Value != "" {
-		notFound := db.Where("value = ?", u.Value).Not("id", u.ID).First(&Client{}).RecordNotFound()
+		notFound := db.Where(
+			"value = ?",
+			u.Value,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&Client{},
+		).RecordNotFound()
 
 		if !notFound {
 			db.AddError(fmt.Errorf("UUID is already present"))

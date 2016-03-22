@@ -9,27 +9,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-const (
-	// KeyNameMinLength is the minimum length of the key name.
-	KeyNameMinLength = "3"
-
-	// KeyNameMaxLength is the maximum length of the key name.
-	KeyNameMaxLength = "255"
-
-	// KeyValueMinLength is the minimum length of the key value.
-	KeyValueMinLength = "3"
-
-	// KeyValueMaxLength is the maximum length of the key value.
-	KeyValueMaxLength = "255"
-)
-
-// KeyDefaultOrder is the default ordering for key listings.
-func KeyDefaultOrder(db *gorm.DB) *gorm.DB {
-	return db.Order(
-		"keys.name ASC",
-	)
-}
-
 // Keys is simply a collection of key structs.
 type Keys []*Key
 
@@ -76,32 +55,40 @@ func (u *Key) BeforeSave(db *gorm.DB) (err error) {
 
 // Validate does some validation to be able to store the record.
 func (u *Key) Validate(db *gorm.DB) {
-	if !govalidator.StringLength(u.Name, KeyNameMinLength, KeyNameMaxLength) {
-		db.AddError(fmt.Errorf(
-			"Name should be longer than %s and shorter than %s",
-			KeyNameMinLength,
-			KeyNameMaxLength,
-		))
+	if !govalidator.StringLength(u.Name, "2", "255") {
+		db.AddError(fmt.Errorf("Name should be longer than 2 and shorter than 255"))
 	}
 
 	if u.Name != "" {
-		notFound := db.Where("name = ?", u.Name).Not("id", u.ID).First(&Key{}).RecordNotFound()
+		notFound := db.Where(
+			"name = ?",
+			u.Name,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&Key{},
+		).RecordNotFound()
 
 		if !notFound {
 			db.AddError(fmt.Errorf("Name is already present"))
 		}
 	}
 
-	if !govalidator.StringLength(u.Value, KeyValueMinLength, KeyValueMaxLength) {
-		db.AddError(fmt.Errorf(
-			"Key should be longer than %s and shorter than %s",
-			KeyValueMinLength,
-			KeyValueMaxLength,
-		))
+	if !govalidator.StringLength(u.Value, "2", "255") {
+		db.AddError(fmt.Errorf("Key should be longer than 2 and shorter than 255"))
 	}
 
 	if u.Value != "" {
-		notFound := db.Where("value = ?", u.Value).Not("id", u.ID).First(&Key{}).RecordNotFound()
+		notFound := db.Where(
+			"value = ?",
+			u.Value,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&Key{},
+		).RecordNotFound()
 
 		if !notFound {
 			db.AddError(fmt.Errorf("Key is already present"))

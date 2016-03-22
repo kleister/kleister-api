@@ -33,23 +33,11 @@ func User(c *gin.Context) *model.User {
 // SetUser injects the user into the context.
 func SetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record := &model.User{}
-
-		res := context.Store(c).Where(
-			"users.id = ?",
+		record, res := context.Store(c).GetUser(
 			c.Param("user"),
-		).Or(
-			"users.slug = ?",
-			c.Param("user"),
-		).Model(
-			&record,
-		).Preload(
-			"Permission",
-		).First(
-			&record,
 		)
 
-		if res.RecordNotFound() {
+		if res.Error != nil || res.RecordNotFound() {
 			c.JSON(
 				http.StatusNotFound,
 				gin.H{

@@ -33,19 +33,11 @@ func Client(c *gin.Context) *model.Client {
 // SetClient injects the client into the context.
 func SetClient() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record := &model.Client{}
-
-		res := context.Store(c).Where(
-			"clients.id = ?",
+		record, res := context.Store(c).GetClient(
 			c.Param("client"),
-		).Or(
-			"clients.slug = ?",
-			c.Param("client"),
-		).First(
-			&record,
 		)
 
-		if res.RecordNotFound() {
+		if res.Error != nil || res.RecordNotFound() {
 			c.JSON(
 				http.StatusNotFound,
 				gin.H{

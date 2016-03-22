@@ -12,15 +12,7 @@ import (
 
 // GetMods retrieves all available mods.
 func GetMods(c *gin.Context) {
-	records := &model.Mods{}
-
-	err := context.Store(c).Scopes(
-		model.ModDefaultOrder,
-	).Preload(
-		"Versions",
-	).Find(
-		&records,
-	).Error
+	records, err := context.Store(c).GetMods()
 
 	if err != nil {
 		c.JSON(

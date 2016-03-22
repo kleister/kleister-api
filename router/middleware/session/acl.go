@@ -33,21 +33,24 @@ func Current(c *gin.Context) *model.User {
 // SetCurrent injects the user into the context.
 func SetCurrent() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record := &model.User{}
-
-		context.Store(c).Where(
-			"username = ?",
+		record, res := context.Store(c).GetUser(
 			"admin",
-		).Model(
-			&record,
-		).Preload(
-			"Permission",
-		).First(
-			&record,
 		)
 
-		c.Set(CurrentContextKey, record)
-		c.Next()
+		if res.Error != nil || res.RecordNotFound() {
+			c.JSON(
+				http.StatusNotFound,
+				gin.H{
+					"status":  http.StatusNotFound,
+					"message": "Failed to find current",
+				},
+			)
+
+			c.Abort()
+		} else {
+			c.Set(CurrentContextKey, record)
+			c.Next()
+		}
 	}
 }
 

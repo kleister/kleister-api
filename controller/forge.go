@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,13 +12,7 @@ import (
 
 // GetForge retrieves all available Forge versions.
 func GetForge(c *gin.Context) {
-	records := &model.Forges{}
-
-	err := context.Store(c).Scopes(
-		model.ForgeDefaultOrder,
-	).Find(
-		&records,
-	).Error
+	records, err := context.Store(c).GetForges()
 
 	if err != nil {
 		c.JSON(
@@ -42,23 +35,14 @@ func GetForge(c *gin.Context) {
 
 // CompleteForge returns filtered Forge versions for autocompletion.
 func CompleteForge(c *gin.Context) {
-	records := &model.Forges{}
-
-	err := context.Store(c).Where(
-		"name LIKE ?",
-		fmt.Sprintf("%%%s%%", c.Param("filter")),
-	).Scopes(
-		model.ForgeDefaultOrder,
-	).Find(
-		&records,
-	).Error
+	records, err := context.Store(c).GetForges()
 
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
 				"status":  http.StatusInternalServerError,
-				"message": "Failed to filter Forge versions",
+				"message": "Failed to fetch Forge versions",
 			},
 		)
 
@@ -68,7 +52,7 @@ func CompleteForge(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,
-		records,
+		records.Filter(c.Param("forge")),
 	)
 }
 

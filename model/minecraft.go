@@ -1,21 +1,28 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 )
 
-// MinecraftDefaultOrder is the default ordering for minecraft listings.
-func MinecraftDefaultOrder(db *gorm.DB) *gorm.DB {
-	return db.Order(
-		"minecrafts.name DESC",
-	)
-}
-
 // Minecrafts is simply a collection of minecraft structs.
 type Minecrafts []*Minecraft
+
+// Filter searches for a name substring and returns a new collection.
+func (u *Minecrafts) Filter(term string) *Minecrafts {
+	res := Minecrafts{}
+
+	for _, record := range *u {
+		if strings.Contains(record.Name, term) {
+			res = append(res, record)
+		}
+	}
+
+	return &res
+}
 
 // Minecraft represents a minecraft model definition.
 type Minecraft struct {
@@ -25,7 +32,7 @@ type Minecraft struct {
 	Type      string    `json:"type"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Builds    Builds    `json:"builds"`
+	Builds    Builds    `json:"-"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -51,4 +58,9 @@ func (u *Minecraft) BeforeSave(db *gorm.DB) (err error) {
 	}
 
 	return nil
+}
+
+// Validate does some validation to be able to store the record.
+func (u *Minecraft) Validate(db *gorm.DB) {
+
 }

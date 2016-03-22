@@ -12,13 +12,7 @@ import (
 
 // GetClients retrieves all available clients.
 func GetClients(c *gin.Context) {
-	records := &model.Clients{}
-
-	err := context.Store(c).Scopes(
-		model.ClientDefaultOrder,
-	).Find(
-		&records,
-	).Error
+	records, err := context.Store(c).GetClients()
 
 	if err != nil {
 		c.JSON(

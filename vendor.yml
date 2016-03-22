@@ -13,28 +13,14 @@ vendors:
   rev: a054ae320ba22b9a424e1cc2eb03f1a3d3384b0f
 - path: github.com/coreos/go-etcd
   rev: 003851be7bb0694fe3cc457a49529a19388ee7cf
-- path: github.com/cznic/b
-  rev: 47184dd8c1d2c7e7f87dae8448ee2007cdf0c6c4
-- path: github.com/cznic/bufs
-  rev: 3dcccbd7064a1689f9c093a988ea11ac00e21f51
-- path: github.com/cznic/exp
-  rev: c21cce1fce3e6e5bc84854aa3d02a808de44229b
-- path: github.com/cznic/fileutil
-  rev: 1c9c88fbf552b3737c7b97e1f243860359687976
-- path: github.com/cznic/mathutil
-  rev: 38a5fe05cd94d69433fd1c928417834c604f281d
-- path: github.com/cznic/ql
-  rev: 5bc7f0d7470dab6e352540506c5ce7c874a81b4f
-- path: github.com/cznic/sortutil
-  rev: 4c7342852e65c2088c981288f2c5610d10b9f7f4
-- path: github.com/cznic/strutil
-  rev: 1eb03e3cc9d345307a45ec82bd3016cde4bd4464
-- path: github.com/cznic/zappy
-  rev: 4f5e6ef19fd692f1ef9b01206de4f1161a314e9a
 - path: github.com/davecgh/go-spew
   rev: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+- path: github.com/denisenkom/go-mssqldb
+  rev: 6e7f3d73dade2e5566f87d18c3a1d00d2ce33421
 - path: github.com/elazarl/go-bindata-assetfs
   rev: 57eb5e1fc594ad4b0b1dbea7b286d299e0cb43c2
+- path: github.com/erikstmartin/go-testdb
+  rev: 8d10e4a1bae52cd8b81ffdec3445890d6dccab3d
 - path: github.com/franela/goblin
   rev: 889391d730237f8aca06ce3e62975112983f96b4
 - path: github.com/gin-gonic/gin
@@ -49,6 +35,12 @@ vendors:
   rev: 8d92cf5fc15a4382f8964b08e1f42a75c0591aa3
 - path: github.com/golang/snappy
   rev: 5f1c01d9f64b941dd9582c638279d046eda6ca31
+- path: github.com/jinzhu/gorm
+  rev: 021d7b33143de37b743d1cf660974e9c8d3f80ea
+- path: github.com/jinzhu/inflection
+  rev: 3272df6c21d04180007eb3349844c89a3856bc25
+- path: github.com/jinzhu/now
+  rev: ce80572eb55aa0ac839330041ca9db1afa5f1f6c
 - path: github.com/juju/errors
   rev: b2c7a7da5b2995941048f60146e67702a292e468
 - path: github.com/juju/loggo
@@ -77,6 +69,8 @@ vendors:
   rev: 118f6c141d58f1e72577ff61f43f649bf39355ee
 - path: github.com/ngaut/zkhelper
   rev: 6738bdc138d469112c6687fbfcfe049ccabd6a0a
+- path: github.com/o1egl/gormrus
+  rev: 57710b0229272260f1fa2b31838a0dc4baa22a0a
 - path: github.com/onsi/ginkgo
   rev: c3a655f9b37a2207fa39721b078b3173ee9218d6
 - path: github.com/onsi/gomega
@@ -93,6 +87,12 @@ vendors:
   rev: 33197485abe227dcb254644cf5081c9a3c281669
 - path: github.com/pmezard/go-difflib
   rev: 792786c7400a136282c1664665ae0a8db921c6c2
+- path: github.com/qor/inflection
+  rev: 3272df6c21d04180007eb3349844c89a3856bc25
+- path: github.com/qor/qor
+  rev: 7f5e5de01ed27c619972576d07e6b44eafea4fd1
+- path: github.com/qor/validations
+  rev: 87c1296c75e72a8f3247beab65c48c50b7b66a7a
 - path: github.com/satori/go.uuid
   rev: e673fdd4dea8a7334adbbe7f57b7e4b00bdc5502
 - path: github.com/stretchr/testify
@@ -105,8 +105,6 @@ vendors:
   rev: c062049c1793b01a3cc3fe786108edabbaf7756b
 - path: github.com/vincent-petithory/dataurl
   rev: a81abcdac6cb8cbd9bf6ec779c2fb09fffb1d3f5
-- path: go4.org
-  rev: 03efcb870d84809319ea509714dd6d19a1498483
 - path: golang.org/x/crypto
   rev: c197bcf24cde29d3f73c7b4ac6fd41f4384e8af6
 - path: golang.org/x/net

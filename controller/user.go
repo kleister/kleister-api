@@ -12,15 +12,7 @@ import (
 
 // GetUsers retrieves all available users.
 func GetUsers(c *gin.Context) {
-	records := &model.Users{}
-
-	err := context.Store(c).Scopes(
-		model.UserDefaultOrder,
-	).Preload(
-		"Permission",
-	).Find(
-		&records,
-	).Error
+	records, err := context.Store(c).GetUsers()
 
 	if err != nil {
 		c.JSON(

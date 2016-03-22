@@ -10,27 +10,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const (
-	// UserUsernameMinLength is the minimum length of the username.
-	UserUsernameMinLength = "3"
-
-	// UserUsernameMaxLength is the maximum length of the username.
-	UserUsernameMaxLength = "255"
-
-	// UserPasswordMinLength is the minimum length of the password.
-	UserPasswordMinLength = "3"
-
-	// UserPasswordMaxLength is the maximum length of the password.
-	UserPasswordMaxLength = "255"
-)
-
-// UserDefaultOrder is the default ordering for user listings.
-func UserDefaultOrder(db *gorm.DB) *gorm.DB {
-	return db.Order(
-		"users.username ASC",
-	)
-}
-
 // Users is simply a collection of user structs.
 type Users []*User
 
@@ -45,7 +24,7 @@ type User struct {
 	Hashword   string      `json:"-"`
 	CreatedAt  time.Time   `json:"created_at"`
 	UpdatedAt  time.Time   `json:"updated_at"`
-	Mods       Mods        `json:"mods" gorm:"many2many:user_mods;"`
+	Mods       Mods        `json:"mods,omitempty" gorm:"many2many:user_mods;"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -106,16 +85,20 @@ func (u *User) BeforeSave(db *gorm.DB) (err error) {
 
 // Validate does some validation to be able to store the record.
 func (u *User) Validate(db *gorm.DB) {
-	if !govalidator.StringLength(u.Username, UserUsernameMinLength, UserUsernameMaxLength) {
-		db.AddError(fmt.Errorf(
-			"Username should be longer than %s and shorter than %s",
-			UserUsernameMinLength,
-			UserUsernameMaxLength,
-		))
+	if !govalidator.StringLength(u.Username, "2", "255") {
+		db.AddError(fmt.Errorf("Username should be longer than 2 and shorter than 255"))
 	}
 
 	if u.Username != "" {
-		notFound := db.Where("username = ?", u.Username).Not("id", u.ID).First(&User{}).RecordNotFound()
+		notFound := db.Where(
+			"username = ?",
+			u.Username,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&User{},
+		).RecordNotFound()
 
 		if !notFound {
 			db.AddError(fmt.Errorf("Username is already present"))
@@ -133,7 +116,15 @@ func (u *User) Validate(db *gorm.DB) {
 			u.Email,
 		)
 
-		notFound := db.Where("email = ?", normalized).Not("id", u.ID).First(&User{}).RecordNotFound()
+		notFound := db.Where(
+			"email = ?",
+			normalized,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&User{},
+		).RecordNotFound()
 
 		if !notFound {
 			db.AddError(fmt.Errorf("Email is already present"))
@@ -141,12 +132,8 @@ func (u *User) Validate(db *gorm.DB) {
 	}
 
 	if db.NewRecord(u) {
-		if !govalidator.StringLength(u.Password, UserPasswordMinLength, UserPasswordMaxLength) {
-			db.AddError(fmt.Errorf(
-				"Password should be longer than %s and shorter than %s",
-				UserPasswordMinLength,
-				UserPasswordMaxLength,
-			))
+		if !govalidator.StringLength(u.Password, "5", "255") {
+			db.AddError(fmt.Errorf("Password should be longer than 5 and shorter than 255"))
 		}
 	}
 }

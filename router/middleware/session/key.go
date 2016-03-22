@@ -33,19 +33,11 @@ func Key(c *gin.Context) *model.Key {
 // SetKey injects the key into the context.
 func SetKey() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record := &model.Key{}
-
-		res := context.Store(c).Where(
-			"keys.id = ?",
+		record, res := context.Store(c).GetKey(
 			c.Param("key"),
-		).Or(
-			"keys.slug = ?",
-			c.Param("key"),
-		).First(
-			&record,
 		)
 
-		if res.RecordNotFound() {
+		if res.Error != nil || res.RecordNotFound() {
 			c.JSON(
 				http.StatusNotFound,
 				gin.H{

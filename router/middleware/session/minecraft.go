@@ -33,19 +33,11 @@ func Minecraft(c *gin.Context) *model.Minecraft {
 // SetMinecraft injects the minecraft into the context.
 func SetMinecraft() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record := &model.Minecraft{}
-
-		res := context.Store(c).Where(
-			"minecrafts.id = ?",
+		record, res := context.Store(c).GetMinecraft(
 			c.Param("minecraft"),
-		).Or(
-			"minecrafts.slug = ?",
-			c.Param("minecraft"),
-		).First(
-			&record,
 		)
 
-		if res.RecordNotFound() {
+		if res.Error != nil || res.RecordNotFound() {
 			c.JSON(
 				http.StatusNotFound,
 				gin.H{

@@ -33,23 +33,11 @@ func Mod(c *gin.Context) *model.Mod {
 // SetMod injects the mod into the context.
 func SetMod() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record := &model.Mod{}
-
-		res := context.Store(c).Where(
-			"mods.id = ?",
+		record, res := context.Store(c).GetMod(
 			c.Param("mod"),
-		).Or(
-			"mods.slug = ?",
-			c.Param("mod"),
-		).Model(
-			&record,
-		).Preload(
-			"Versions",
-		).First(
-			&record,
 		)
 
-		if res.RecordNotFound() {
+		if res.Error != nil || res.RecordNotFound() {
 			c.JSON(
 				http.StatusNotFound,
 				gin.H{

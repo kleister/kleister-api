@@ -14,15 +14,7 @@ import (
 
 // GetPacks retrieves all available packs.
 func GetPacks(c *gin.Context) {
-	records := &model.Packs{}
-
-	err := context.Store(c).Scopes(
-		model.PackDefaultOrder,
-	).Preload(
-		"Builds",
-	).Find(
-		&records,
-	).Error
+	records, err := context.Store(c).GetPacks()
 
 	if err != nil {
 		c.JSON(

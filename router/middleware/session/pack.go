@@ -33,23 +33,11 @@ func Pack(c *gin.Context) *model.Pack {
 // SetPack injects the pack into the context.
 func SetPack() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record := &model.Pack{}
-
-		res := context.Store(c).Where(
-			"packs.id = ?",
+		record, res := context.Store(c).GetPack(
 			c.Param("pack"),
-		).Or(
-			"packs.slug = ?",
-			c.Param("pack"),
-		).Model(
-			&record,
-		).Preload(
-			"Builds",
-		).First(
-			&record,
 		)
 
-		if res.RecordNotFound() {
+		if res.Error != nil || res.RecordNotFound() {
 			c.JSON(
 				http.StatusNotFound,
 				gin.H{

@@ -33,19 +33,11 @@ func Forge(c *gin.Context) *model.Forge {
 // SetForge injects the forge into the context.
 func SetForge() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record := &model.Forge{}
-
-		res := context.Store(c).Where(
-			"forges.id = ?",
+		record, res := context.Store(c).GetForge(
 			c.Param("forge"),
-		).Or(
-			"forges.slug = ?",
-			c.Param("forge"),
-		).First(
-			&record,
 		)
 
-		if res.RecordNotFound() {
+		if res.Error != nil || res.RecordNotFound() {
 			c.JSON(
 				http.StatusNotFound,
 				gin.H{

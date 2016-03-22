@@ -15,20 +15,10 @@ import (
 // GetVersions retrieves all available versions.
 func GetVersions(c *gin.Context) {
 	mod := session.Mod(c)
-	records := &model.Versions{}
 
-	err := context.Store(c).Scopes(
-		model.VersionDefaultOrder,
-	).Where(
-		"mod_id = ?",
+	records, err := context.Store(c).GetVersions(
 		mod.ID,
-	).Preload(
-		"Mod",
-	).Preload(
-		"File",
-	).Find(
-		&records,
-	).Error
+	)
 
 	if err != nil {
 		c.JSON(

@@ -9,44 +9,29 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-const (
-	// PackNameMinLength is the minimum length of the name.
-	PackNameMinLength = "3"
-
-	// PackNameMaxLength is the maximum length of the name.
-	PackNameMaxLength = "255"
-)
-
-// PackDefaultOrder is the default ordering for pack listings.
-func PackDefaultOrder(db *gorm.DB) *gorm.DB {
-	return db.Order(
-		"packs.name ASC",
-	)
-}
-
 // Packs is simply a collection of pack structs.
 type Packs []*Pack
 
 // Pack represents a pack model definition.
 type Pack struct {
-	ID            int         `json:"id" gorm:"primary_key"`
-	Icon          *Attachment `json:"icon" gorm:"polymorphic:Owner"`
-	Logo          *Attachment `json:"logo" gorm:"polymorphic:Owner"`
-	Background    *Attachment `json:"background" gorm:"polymorphic:Owner"`
-	Recommended   *Build      `json:"recommended"`
-	RecommendedID int         `json:"recommended_id" sql:"index"`
-	Latest        *Build      `json:"latest"`
-	LatestID      int         `json:"latest_id" sql:"index"`
-	Slug          string      `json:"slug" sql:"unique_index"`
-	Name          string      `json:"name" sql:"unique_index"`
-	Website       string      `json:"website"`
-	Published     bool        `json:"published" sql:"default:false"`
-	Private       bool        `json:"private" sql:"default:false"`
-	CreatedAt     time.Time   `json:"created_at"`
-	UpdatedAt     time.Time   `json:"updated_at"`
-	Builds        Builds      `json:"builds"`
-	Permissions   Permissions `json:"permissions" gorm:"many2many:permission_packs;"`
-	Clients       Clients     `json:"clients" gorm:"many2many:client_packs;"`
+	ID            int             `json:"id" gorm:"primary_key"`
+	Icon          *PackIcon       `json:"icon,omitempty"`
+	Logo          *PackLogo       `json:"logo,omitempty"`
+	Background    *PackBackground `json:"background,omitempty"`
+	Recommended   *Build          `json:"recommended,omitempty"`
+	RecommendedID int             `json:"recommended_id" sql:"index"`
+	Latest        *Build          `json:"latest,omitempty"`
+	LatestID      int             `json:"latest_id" sql:"index"`
+	Slug          string          `json:"slug" sql:"unique_index"`
+	Name          string          `json:"name" sql:"unique_index"`
+	Website       string          `json:"website"`
+	Published     bool            `json:"published" sql:"default:false"`
+	Private       bool            `json:"private" sql:"default:false"`
+	CreatedAt     time.Time       `json:"created_at"`
+	UpdatedAt     time.Time       `json:"updated_at"`
+	Builds        Builds          `json:"builds,omitempty"`
+	Permissions   Permissions     `json:"permissions,omitempty" gorm:"many2many:permission_packs"`
+	Clients       Clients         `json:"clients,omitempty" gorm:"many2many:client_packs"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -114,16 +99,20 @@ func (u *Pack) Validate(db *gorm.DB) {
 		}
 	}
 
-	if !govalidator.StringLength(u.Name, PackNameMinLength, PackNameMaxLength) {
-		db.AddError(fmt.Errorf(
-			"Name should be longer than %s and shorter than %s",
-			PackNameMinLength,
-			PackNameMaxLength,
-		))
+	if !govalidator.StringLength(u.Name, "2", "255") {
+		db.AddError(fmt.Errorf("Name should be longer than 2 and shorter than 255"))
 	}
 
 	if u.Name != "" {
-		notFound := db.Where("name = ?", u.Name).Not("id", u.ID).First(&Pack{}).RecordNotFound()
+		notFound := db.Where(
+			"name = ?",
+			u.Name,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&Pack{},
+		).RecordNotFound()
 
 		if !notFound {
 			db.AddError(fmt.Errorf("Name is already present"))

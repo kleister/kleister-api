@@ -48,28 +48,12 @@ func SetVersion() gin.HandlerFunc {
 			return
 		}
 
-		record := &model.Version{}
-
-		res := context.Store(c).Where(
-			"mod_id = ?",
+		record, res := context.Store(c).GetVersion(
 			mod.ID,
-		).Where(
-			"versions.id = ?",
 			c.Param("version"),
-		).Or(
-			"versions.slug = ?",
-			c.Param("version"),
-		).Model(
-			&record,
-		).Preload(
-			"Mod",
-		).Preload(
-			"File",
-		).First(
-			&record,
 		)
 
-		if res.RecordNotFound() {
+		if res.Error != nil || res.RecordNotFound() {
 			c.JSON(
 				http.StatusNotFound,
 				gin.H{

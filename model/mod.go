@@ -9,21 +9,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-const (
-	// ModNameMinLength is the minimum length of the name.
-	ModNameMinLength = "3"
-
-	// ModNameMaxLength is the maximum length of the name.
-	ModNameMaxLength = "255"
-)
-
-// ModDefaultOrder is the default ordering for mod listings.
-func ModDefaultOrder(db *gorm.DB) *gorm.DB {
-	return db.Order(
-		"mods.name ASC",
-	)
-}
-
 // Mods is simply a collection of mod structs.
 type Mods []*Mod
 
@@ -38,8 +23,8 @@ type Mod struct {
 	Donate      string    `json:"donate"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
-	Versions    Versions  `json:"versions"`
-	Users       Users     `json:"users" gorm:"many2many:user_mods;"`
+	Versions    Versions  `json:"versions,omitempty"`
+	Users       Users     `json:"users,omitempty" gorm:"many2many:user_mods"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -75,16 +60,20 @@ func (u *Mod) BeforeSave(db *gorm.DB) (err error) {
 
 // Validate does some validation to be able to store the record.
 func (u *Mod) Validate(db *gorm.DB) {
-	if !govalidator.StringLength(u.Name, ModNameMinLength, ModNameMaxLength) {
-		db.AddError(fmt.Errorf(
-			"Name should be longer than %s and shorter than %s",
-			ModNameMinLength,
-			ModNameMaxLength,
-		))
+	if !govalidator.StringLength(u.Name, "2", "255") {
+		db.AddError(fmt.Errorf("Name should be longer than 2 and shorter than 255"))
 	}
 
 	if u.Name != "" {
-		notFound := db.Where("name = ?", u.Name).Not("id", u.ID).First(&Mod{}).RecordNotFound()
+		notFound := db.Where(
+			"name = ?",
+			u.Name,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&Mod{},
+		).RecordNotFound()
 
 		if !notFound {
 			db.AddError(fmt.Errorf("Name is already present"))

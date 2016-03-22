@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,13 +12,7 @@ import (
 
 // GetMinecraft retrieves all available Minecraft versions.
 func GetMinecraft(c *gin.Context) {
-	records := &model.Minecrafts{}
-
-	err := context.Store(c).Scopes(
-		model.MinecraftDefaultOrder,
-	).Find(
-		&records,
-	).Error
+	records, err := context.Store(c).GetMinecrafts()
 
 	if err != nil {
 		c.JSON(
@@ -42,23 +35,14 @@ func GetMinecraft(c *gin.Context) {
 
 // CompleteMinecraft returns filtered Minecraft versions for autocompletion.
 func CompleteMinecraft(c *gin.Context) {
-	records := &model.Minecrafts{}
-
-	err := context.Store(c).Where(
-		"name LIKE ?",
-		fmt.Sprintf("%%%s%%", c.Param("filter")),
-	).Scopes(
-		model.MinecraftDefaultOrder,
-	).Find(
-		&records,
-	).Error
+	records, err := context.Store(c).GetMinecrafts()
 
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
 				"status":  http.StatusInternalServerError,
-				"message": "Failed to filter Minecraft versions",
+				"message": "Failed to fetch Minecraft versions",
 			},
 		)
 
@@ -68,7 +52,7 @@ func CompleteMinecraft(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,
-		records,
+		records.Filter(c.Param("minecraft")),
 	)
 }
 

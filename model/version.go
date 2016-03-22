@@ -9,35 +9,20 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-const (
-	// VersionNameMinLength is the minimum length of the name.
-	VersionNameMinLength = "3"
-
-	// VersionNameMaxLength is the maximum length of the name.
-	VersionNameMaxLength = "255"
-)
-
-// VersionDefaultOrder is the default ordering for pack listings.
-func VersionDefaultOrder(db *gorm.DB) *gorm.DB {
-	return db.Order(
-		"versions.name ASC",
-	)
-}
-
 // Versions is simply a collection of version structs.
 type Versions []*Version
 
 // Version represents a version model definition.
 type Version struct {
-	ID        int         `json:"id" gorm:"primary_key"`
-	File      *Attachment `json:"file" gorm:"polymorphic:Owner"`
-	Mod       *Mod        `json:"mod"`
-	ModID     int         `json:"mod_id" sql:"index"`
-	Slug      string      `json:"slug"`
-	Name      string      `json:"name"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
-	Builds    Builds      `json:"builds"`
+	ID        int          `json:"id" gorm:"primary_key"`
+	File      *VersionFile `json:"file,omitempty"`
+	Mod       *Mod         `json:"mod,omitempty"`
+	ModID     int          `json:"mod_id" sql:"index"`
+	Slug      string       `json:"slug"`
+	Name      string       `json:"name"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+	Builds    Builds       `json:"builds,omitempty"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -91,16 +76,23 @@ func (u *Version) Validate(db *gorm.DB) {
 		}
 	}
 
-	if !govalidator.StringLength(u.Name, VersionNameMinLength, VersionNameMaxLength) {
-		db.AddError(fmt.Errorf(
-			"Name should be longer than %s and shorter than %s",
-			VersionNameMinLength,
-			VersionNameMaxLength,
-		))
+	if !govalidator.StringLength(u.Name, "2", "255") {
+		db.AddError(fmt.Errorf("Name should be longer than 2 and shorter than 255"))
 	}
 
 	if u.Name != "" {
-		notFound := db.Where("mod_id = ?", u.ModID).Where("name = ?", u.Name).Not("id", u.ID).First(&Version{}).RecordNotFound()
+		notFound := db.Where(
+			"mod_id = ?",
+			u.ModID,
+		).Where(
+			"name = ?",
+			u.Name,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&Version{},
+		).RecordNotFound()
 
 		if !notFound {
 			db.AddError(fmt.Errorf("Name is already present"))

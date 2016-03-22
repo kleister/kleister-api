@@ -13,22 +13,10 @@ import (
 // GetBuilds retrieves all available builds.
 func GetBuilds(c *gin.Context) {
 	pack := session.Pack(c)
-	records := &model.Builds{}
 
-	err := context.Store(c).Scopes(
-		model.BuildDefaultOrder,
-	).Where(
-		"pack_id = ?",
+	records, err := context.Store(c).GetBuilds(
 		pack.ID,
-	).Preload(
-		"Pack",
-	).Preload(
-		"Minecraft",
-	).Preload(
-		"Forge",
-	).Find(
-		&records,
-	).Error
+	)
 
 	if err != nil {
 		c.JSON(

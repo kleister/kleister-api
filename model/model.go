@@ -16,6 +16,8 @@ import (
 
 	// Register Postgres driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	// Register SQLite driver for GORM
+	// _ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 // New initializes a new database connection.
@@ -134,7 +136,6 @@ func pingDatabase(driver string, db *gorm.DB) error {
 
 func migrateDatabase(driver string, db *gorm.DB) error {
 	db.AutoMigrate(
-		&Attachment{},
 		&Build{},
 		&Client{},
 		&Forge{},
@@ -142,9 +143,13 @@ func migrateDatabase(driver string, db *gorm.DB) error {
 		&Minecraft{},
 		&Mod{},
 		&Pack{},
+		&PackBackground{},
+		&PackIcon{},
+		&PackLogo{},
 		&Permission{},
 		&User{},
 		&Version{},
+		&VersionFile{},
 	)
 
 	db.Model(

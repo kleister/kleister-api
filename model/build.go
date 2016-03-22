@@ -9,32 +9,17 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-const (
-	// BuildNameMinLength is the minimum length of the name.
-	BuildNameMinLength = "2"
-
-	// BuildNameMaxLength is the maximum length of the name.
-	BuildNameMaxLength = "255"
-)
-
-// BuildDefaultOrder is the default ordering for pack listings.
-func BuildDefaultOrder(db *gorm.DB) *gorm.DB {
-	return db.Order(
-		"builds.name ASC",
-	)
-}
-
 // Builds is simply a collection of build structs.
 type Builds []*Build
 
 // Build represents a build model definition.
 type Build struct {
 	ID          int        `json:"id" gorm:"primary_key"`
-	Pack        *Pack      `json:"pack"`
+	Pack        *Pack      `json:"pack,omitempty"`
 	PackID      int        `json:"pack_id" sql:"index"`
-	Minecraft   *Minecraft `json:"minecraft"`
+	Minecraft   *Minecraft `json:"minecraft,omitempty"`
 	MinecraftID int        `json:"minecraft_id" sql:"index"`
-	Forge       *Forge     `json:"forge"`
+	Forge       *Forge     `json:"forge,omitempty"`
 	ForgeID     int        `json:"forge_id" sql:"index"`
 	Slug        string     `json:"slug"`
 	Name        string     `json:"name"`
@@ -44,7 +29,7 @@ type Build struct {
 	Private     bool       `json:"private" sql:"default:false"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
-	Versions    Versions   `json:"versions" gorm:"many2many:build_versions;"`
+	Versions    Versions   `json:"versions,omitempty" gorm:"many2many:build_versions"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -124,16 +109,23 @@ func (u *Build) Validate(db *gorm.DB) {
 		}
 	}
 
-	if !govalidator.StringLength(u.Name, BuildNameMinLength, BuildNameMaxLength) {
-		db.AddError(fmt.Errorf(
-			"Name should be longer than %s and shorter than %s",
-			BuildNameMinLength,
-			BuildNameMaxLength,
-		))
+	if !govalidator.StringLength(u.Name, "2", "255") {
+		db.AddError(fmt.Errorf("Name should be longer than 2 and shorter than 255"))
 	}
 
 	if u.Name != "" {
-		notFound := db.Where("pack_id = ?", u.PackID).Where("name = ?", u.Name).Not("id", u.ID).First(&Build{}).RecordNotFound()
+		notFound := db.Where(
+			"pack_id = ?",
+			u.PackID,
+		).Where(
+			"name = ?",
+			u.Name,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&Build{},
+		).RecordNotFound()
 
 		if !notFound {
 			db.AddError(fmt.Errorf("Name is already present"))

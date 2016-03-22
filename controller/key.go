@@ -12,13 +12,7 @@ import (
 
 // GetKeys retrieves all available keys.
 func GetKeys(c *gin.Context) {
-	records := &model.Keys{}
-
-	err := context.Store(c).Scopes(
-		model.KeyDefaultOrder,
-	).Find(
-		&records,
-	).Error
+	records, err := context.Store(c).GetKeys()
 
 	if err != nil {
 		c.JSON(

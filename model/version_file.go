@@ -10,28 +10,30 @@ import (
 	"github.com/vincent-petithory/dataurl"
 )
 
-// Attachment represents any uploadable asset.
-type Attachment struct {
-	ID        int       `json:"id" gorm:"primary_key"`
-	OwnerID   int       `json:"-"`
-	OwnerType string    `json:"-"`
-	URL       string    `json:"url" gorm:"-"`
+// VersionFiles is simply a collection of version file structs.
+type VersionFiles []*VersionFile
+
+// VersionFile represents a version file model definition.
+type VersionFile struct {
+	VersionID int       `json:"-" gorm:"primary_key"`
+	Version   *Pack     `json:"-"`
+	URL       string    `json:"url" sql:"-"`
 	MD5       string    `json:"md5"`
 	Content   string    `json:"-" gorm:"type:longtext"`
-	Upload    string    `json:"upload,omitempty" gorm:"-"`
+	Upload    string    `json:"upload,omitempty" sql:"-"`
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 }
 
 // BeforeSave invokes required actions before persisting.
-func (u *Attachment) BeforeSave(db *gorm.DB) (err error) {
+func (u *VersionFile) BeforeSave(db *gorm.DB) (err error) {
 	if u.Upload != "" {
 		decoded, err := dataurl.DecodeString(
 			u.Upload,
 		)
 
 		if err != nil {
-			return fmt.Errorf("Failed to decode upload")
+			return fmt.Errorf("Failed to decode file")
 		}
 
 		check := md5.Sum(

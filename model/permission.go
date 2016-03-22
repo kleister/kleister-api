@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 // Permissions is simply a collection of permission structs.
@@ -29,5 +31,15 @@ type Permission struct {
 	DeleteMods     bool      `json:"delete_mods" sql:"default:false"`
 	CreatedAt      time.Time `json:"-"`
 	UpdatedAt      time.Time `json:"-"`
-	Packs          Packs     `json:"packs" gorm:"many2many:permission_packs;"`
+	Packs          Packs     `json:"packs,omitempty" gorm:"many2many:permission_packs;"`
+}
+
+// BeforeSave invokes required actions before persisting.
+func (u *Permission) BeforeSave(db *gorm.DB) (err error) {
+	return nil
+}
+
+// Validate does some validation to be able to store the record.
+func (u *Permission) Validate(db *gorm.DB) {
+
 }

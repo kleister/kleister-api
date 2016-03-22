@@ -48,30 +48,12 @@ func SetBuild() gin.HandlerFunc {
 			return
 		}
 
-		record := &model.Build{}
-
-		res := context.Store(c).Where(
-			"pack_id = ?",
+		record, res := context.Store(c).GetBuild(
 			pack.ID,
-		).Where(
-			"id = ?",
 			c.Param("build"),
-		).Or(
-			"slug = ?",
-			c.Param("build"),
-		).Model(
-			&record,
-		).Preload(
-			"Pack",
-		).Preload(
-			"Minecraft",
-		).Preload(
-			"Forge",
-		).First(
-			&record,
 		)
 
-		if res.RecordNotFound() {
+		if res.Error != nil || res.RecordNotFound() {
 			c.JSON(
 				http.StatusNotFound,
 				gin.H{
