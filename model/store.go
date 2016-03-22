@@ -9,6 +9,7 @@ type Store struct {
 	*gorm.DB
 }
 
+// GetBuilds retrieves all available builds from the database.
 func (s Store) GetBuilds(pack int) (*Builds, error) {
 	records := &Builds{}
 
@@ -30,6 +31,7 @@ func (s Store) GetBuilds(pack int) (*Builds, error) {
 	return records, err
 }
 
+// GetBuild retrieves a specific build from the database.
 func (s Store) GetBuild(pack int, id string) (*Build, *gorm.DB) {
 	record := &Build{}
 
@@ -57,6 +59,7 @@ func (s Store) GetBuild(pack int, id string) (*Build, *gorm.DB) {
 	return record, res
 }
 
+// GetClients retrieves all available clients from the database.
 func (s Store) GetClients() (*Clients, error) {
 	records := &Clients{}
 
@@ -69,6 +72,7 @@ func (s Store) GetClients() (*Clients, error) {
 	return records, err
 }
 
+// GetClient retrieves a specific client from the database.
 func (s Store) GetClient(id string) (*Client, *gorm.DB) {
 	record := &Client{}
 
@@ -85,6 +89,7 @@ func (s Store) GetClient(id string) (*Client, *gorm.DB) {
 	return record, res
 }
 
+// GetForges retrieves all available Forge versions from the database.
 func (s Store) GetForges() (*Forges, error) {
 	records := &Forges{}
 
@@ -99,6 +104,7 @@ func (s Store) GetForges() (*Forges, error) {
 	return records, err
 }
 
+// GetForge retrieves a specific Forge version from the database.
 func (s Store) GetForge(id string) (*Forge, *gorm.DB) {
 	record := &Forge{}
 
@@ -115,6 +121,7 @@ func (s Store) GetForge(id string) (*Forge, *gorm.DB) {
 	return record, res
 }
 
+// GetKeys retrieves all available keys from the database.
 func (s Store) GetKeys() (*Keys, error) {
 	records := &Keys{}
 
@@ -127,6 +134,7 @@ func (s Store) GetKeys() (*Keys, error) {
 	return records, err
 }
 
+// GetKey retrieves a specific key from the database.
 func (s Store) GetKey(id string) (*Key, *gorm.DB) {
 	record := &Key{}
 
@@ -143,6 +151,7 @@ func (s Store) GetKey(id string) (*Key, *gorm.DB) {
 	return record, res
 }
 
+// GetMinecrafts retrieves all available Minecraft versions from the database.
 func (s Store) GetMinecrafts() (*Minecrafts, error) {
 	records := &Minecrafts{}
 
@@ -157,6 +166,7 @@ func (s Store) GetMinecrafts() (*Minecrafts, error) {
 	return records, err
 }
 
+// GetMinecraft retrieves a specific Minecraft version from the database.
 func (s Store) GetMinecraft(id string) (*Minecraft, *gorm.DB) {
 	record := &Minecraft{}
 
@@ -173,6 +183,7 @@ func (s Store) GetMinecraft(id string) (*Minecraft, *gorm.DB) {
 	return record, res
 }
 
+// GetMods retrieves all available mods from the database.
 func (s Store) GetMods() (*Mods, error) {
 	records := &Mods{}
 
@@ -187,6 +198,7 @@ func (s Store) GetMods() (*Mods, error) {
 	return records, err
 }
 
+// GetMod retrieves a specific mod from the database.
 func (s Store) GetMod(id string) (*Mod, *gorm.DB) {
 	record := &Mod{}
 
@@ -207,6 +219,7 @@ func (s Store) GetMod(id string) (*Mod, *gorm.DB) {
 	return record, res
 }
 
+// GetPacks retrieves all available packs from the database.
 func (s Store) GetPacks() (*Packs, error) {
 	records := &Packs{}
 
@@ -225,6 +238,7 @@ func (s Store) GetPacks() (*Packs, error) {
 	return records, err
 }
 
+// GetPack retrieves a specific pack from the database.
 func (s Store) GetPack(id string) (*Pack, *gorm.DB) {
 	record := &Pack{}
 
@@ -245,6 +259,7 @@ func (s Store) GetPack(id string) (*Pack, *gorm.DB) {
 	return record, res
 }
 
+// GetUsers retrieves all available users from the database.
 func (s Store) GetUsers() (*Users, error) {
 	records := &Users{}
 
@@ -259,6 +274,7 @@ func (s Store) GetUsers() (*Users, error) {
 	return records, err
 }
 
+// GetUser retrieves a specific user from the database.
 func (s Store) GetUser(id string) (*User, *gorm.DB) {
 	record := &User{}
 
@@ -279,6 +295,7 @@ func (s Store) GetUser(id string) (*User, *gorm.DB) {
 	return record, res
 }
 
+// GetVersions retrieves all available versions from the database.
 func (s Store) GetVersions(mod int) (*Versions, error) {
 	records := &Versions{}
 
@@ -298,6 +315,7 @@ func (s Store) GetVersions(mod int) (*Versions, error) {
 	return records, err
 }
 
+// GetVersion retrieves a specific version from the database.
 func (s Store) GetVersion(mod int, id string) (*Version, *gorm.DB) {
 	record := &Version{}
 
