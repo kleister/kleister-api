@@ -1,7 +1,7 @@
 # Solder: API server
 
 [![Build Status](http://github.dronehippie.de/api/badges/solderapp/solder-api/status.svg)](http://github.dronehippie.de/solderapp/solder-api)
-[![Coverage Status](https://aircover.co/badges/solderapp/solder-api/coverage.svg)](https://aircover.co/solderapp/solder-api)
+[![Coverage Status](http://coverage.dronehippie.de//badges/solderapp/solder-api/coverage.svg)](https://aircover.co/solderapp/solder-api)
 [![Go Doc](https://godoc.org/github.com/solderapp/solder-api?status.svg)](http://godoc.org/github.com/solderapp/solder-api)
 [![Go Report](http://goreportcard.com/badge/solderapp/solder-api)](http://goreportcard.com/report/solderapp/solder-api)
 [![Join the chat at https://gitter.im/solderapp/solder-api](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/solderapp/solder-api)

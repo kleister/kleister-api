@@ -16,6 +16,8 @@ build:
 
 publish:
   coverage:
+    server: http://coverage.dronehippie.de
+    token: $$GITHUB_APIKEY
     when:
       branch: master
 
