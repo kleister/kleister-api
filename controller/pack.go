@@ -2,14 +2,16 @@ package controller
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
+	"path"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router/middleware/context"
 	"github.com/solderapp/solder-api/router/middleware/session"
-	"github.com/vincent-petithory/dataurl"
 )
 
 // GetPacks retrieves all available packs.
@@ -39,6 +41,8 @@ func GetPacks(c *gin.Context) {
 func GetPack(c *gin.Context) {
 	record := session.Pack(c)
 
+	// c.Request.Host
+
 	c.JSON(
 		http.StatusOK,
 		record,
@@ -47,6 +51,7 @@ func GetPack(c *gin.Context) {
 
 // GetPackLogo retrieves a logo for a specific pack.
 func GetPackLogo(c *gin.Context) {
+	config := context.Config(c)
 	record := session.Pack(c)
 
 	if record.Logo == nil {
@@ -58,14 +63,27 @@ func GetPackLogo(c *gin.Context) {
 		return
 	}
 
-	decoded, err := dataurl.DecodeString(
-		record.Logo.Content,
+	path := path.Join(
+		config.Server.Storage,
+		"logo",
+		record.Logo.MD5,
 	)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		c.AbortWithError(
+			http.StatusNotFound,
+			fmt.Errorf("Logo not found on storage"),
+		)
+
+		return
+	}
+
+	content, err := ioutil.ReadFile(path)
 
 	if err != nil {
 		c.AbortWithError(
 			http.StatusInternalServerError,
-			fmt.Errorf("Failed to decode logo"),
+			fmt.Errorf("Failed to read logo"),
 		)
 
 		return
@@ -73,16 +91,17 @@ func GetPackLogo(c *gin.Context) {
 
 	c.Writer.Header().Set(
 		"Content-Type",
-		decoded.ContentType(),
+		record.Logo.ContentType,
 	)
 
 	c.Writer.Write(
-		decoded.Data,
+		content,
 	)
 }
 
 // GetPackBackground retrieves a background for a specific pack.
 func GetPackBackground(c *gin.Context) {
+	config := context.Config(c)
 	record := session.Pack(c)
 
 	if record.Background == nil {
@@ -94,14 +113,27 @@ func GetPackBackground(c *gin.Context) {
 		return
 	}
 
-	decoded, err := dataurl.DecodeString(
-		record.Background.Content,
+	path := path.Join(
+		config.Server.Storage,
+		"background",
+		record.Background.MD5,
 	)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		c.AbortWithError(
+			http.StatusNotFound,
+			fmt.Errorf("Background not found on storage"),
+		)
+
+		return
+	}
+
+	content, err := ioutil.ReadFile(path)
 
 	if err != nil {
 		c.AbortWithError(
 			http.StatusInternalServerError,
-			fmt.Errorf("Failed to decode background"),
+			fmt.Errorf("Failed to read background"),
 		)
 
 		return
@@ -109,16 +141,17 @@ func GetPackBackground(c *gin.Context) {
 
 	c.Writer.Header().Set(
 		"Content-Type",
-		decoded.ContentType(),
+		record.Logo.ContentType,
 	)
 
 	c.Writer.Write(
-		decoded.Data,
+		content,
 	)
 }
 
 // GetPackIcon retrieves a icon for a specific pack.
 func GetPackIcon(c *gin.Context) {
+	config := context.Config(c)
 	record := session.Pack(c)
 
 	if record.Icon == nil {
@@ -130,14 +163,27 @@ func GetPackIcon(c *gin.Context) {
 		return
 	}
 
-	decoded, err := dataurl.DecodeString(
-		record.Icon.Content,
+	path := path.Join(
+		config.Server.Storage,
+		"icon",
+		record.Icon.MD5,
 	)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		c.AbortWithError(
+			http.StatusNotFound,
+			fmt.Errorf("Icon not found on storage"),
+		)
+
+		return
+	}
+
+	content, err := ioutil.ReadFile(path)
 
 	if err != nil {
 		c.AbortWithError(
 			http.StatusInternalServerError,
-			fmt.Errorf("Failed to decode icon"),
+			fmt.Errorf("Failed to read icon"),
 		)
 
 		return
@@ -145,11 +191,11 @@ func GetPackIcon(c *gin.Context) {
 
 	c.Writer.Header().Set(
 		"Content-Type",
-		decoded.ContentType(),
+		record.Logo.ContentType,
 	)
 
 	c.Writer.Write(
-		decoded.Data,
+		content,
 	)
 }
 

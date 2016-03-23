@@ -2,14 +2,16 @@ package controller
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
+	"path"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router/middleware/context"
 	"github.com/solderapp/solder-api/router/middleware/session"
-	"github.com/vincent-petithory/dataurl"
 )
 
 // GetVersions retrieves all available versions.
@@ -53,6 +55,7 @@ func GetVersion(c *gin.Context) {
 
 // GetVersionFile retrieves a file for a specific version.
 func GetVersionFile(c *gin.Context) {
+	config := context.Config(c)
 	record := session.Version(c)
 
 	if record.File == nil {
@@ -64,14 +67,27 @@ func GetVersionFile(c *gin.Context) {
 		return
 	}
 
-	decoded, err := dataurl.DecodeString(
-		record.File.Content,
+	path := path.Join(
+		config.Server.Storage,
+		"version",
+		record.File.MD5,
 	)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		c.AbortWithError(
+			http.StatusNotFound,
+			fmt.Errorf("File not found on storage"),
+		)
+
+		return
+	}
+
+	content, err := ioutil.ReadFile(path)
 
 	if err != nil {
 		c.AbortWithError(
 			http.StatusInternalServerError,
-			fmt.Errorf("Failed to decode file"),
+			fmt.Errorf("Failed to read file"),
 		)
 
 		return
@@ -79,11 +95,11 @@ func GetVersionFile(c *gin.Context) {
 
 	c.Writer.Header().Set(
 		"Content-Type",
-		decoded.ContentType(),
+		record.File.ContentType,
 	)
 
 	c.Writer.Write(
-		decoded.Data,
+		content,
 	)
 }
 
