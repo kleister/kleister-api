@@ -23,10 +23,8 @@ clean:
 
 deps:
 	go get -u github.com/jteeuwen/go-bindata/...
-	go get -u github.com/govend/govend
 	go get -u github.com/golang/lint/golint
-	go get -u golang.org/x/tools/cmd/cover
-	go get -u golang.org/x/tools/cmd/vet
+	go get -u github.com/govend/govend
 	govend -v
 
 vendor:
