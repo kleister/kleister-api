@@ -7,3 +7,4 @@
 * [ ] Write tests for the models
 * [ ] Integrate optional S3 uploads
 * [ ] Integrate a ReactJS based UI
+* [ ] Integrate solder compatible API
