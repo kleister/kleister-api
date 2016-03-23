@@ -47,7 +47,7 @@ func TestForge(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetForge(ctx)
+			GetForges(ctx)
 
 			g.Assert(rw.Code).Equal(200)
 			g.Assert(rw.HeaderMap.Get("Content-Type")).Equal("application/json; charset=utf-8")
@@ -57,7 +57,7 @@ func TestForge(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetForge(ctx)
+			GetForges(ctx)
 
 			out := model.Forges{}
 			json.NewDecoder(rw.Body).Decode(&out)
@@ -69,7 +69,7 @@ func TestForge(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetForge(ctx)
+			GetForges(ctx)
 
 			out := model.Forges{}
 			json.NewDecoder(rw.Body).Decode(&out)

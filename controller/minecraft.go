@@ -10,8 +10,8 @@ import (
 	"github.com/solderapp/solder-api/router/middleware/session"
 )
 
-// GetMinecraft retrieves all available Minecraft versions.
-func GetMinecraft(c *gin.Context) {
+// GetMinecrafts retrieves all available Minecraft versions.
+func GetMinecrafts(c *gin.Context) {
 	records, err := context.Store(c).GetMinecrafts()
 
 	if err != nil {
@@ -25,34 +25,17 @@ func GetMinecraft(c *gin.Context) {
 
 		c.Abort()
 		return
+	}
+
+	if c.Param("minecraft") != "" {
+		records = records.Filter(
+			c.Param("minecraft"),
+		)
 	}
 
 	c.JSON(
 		http.StatusOK,
 		records,
-	)
-}
-
-// CompleteMinecraft returns filtered Minecraft versions for autocompletion.
-func CompleteMinecraft(c *gin.Context) {
-	records, err := context.Store(c).GetMinecrafts()
-
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"status":  http.StatusInternalServerError,
-				"message": "Failed to fetch Minecraft versions",
-			},
-		)
-
-		c.Abort()
-		return
-	}
-
-	c.JSON(
-		http.StatusOK,
-		records.Filter(c.Param("minecraft")),
 	)
 }
 

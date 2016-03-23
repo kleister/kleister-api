@@ -10,8 +10,8 @@ import (
 	"github.com/solderapp/solder-api/router/middleware/session"
 )
 
-// GetForge retrieves all available Forge versions.
-func GetForge(c *gin.Context) {
+// GetForges retrieves all available Forge versions.
+func GetForges(c *gin.Context) {
 	records, err := context.Store(c).GetForges()
 
 	if err != nil {
@@ -25,34 +25,17 @@ func GetForge(c *gin.Context) {
 
 		c.Abort()
 		return
+	}
+
+	if c.Param("forge") != "" {
+		records = records.Filter(
+			c.Param("forge"),
+		)
 	}
 
 	c.JSON(
 		http.StatusOK,
 		records,
-	)
-}
-
-// CompleteForge returns filtered Forge versions for autocompletion.
-func CompleteForge(c *gin.Context) {
-	records, err := context.Store(c).GetForges()
-
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"status":  http.StatusInternalServerError,
-				"message": "Failed to fetch Forge versions",
-			},
-		)
-
-		c.Abort()
-		return
-	}
-
-	c.JSON(
-		http.StatusOK,
-		records.Filter(c.Param("forge")),
 	)
 }
 

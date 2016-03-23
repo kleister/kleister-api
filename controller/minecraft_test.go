@@ -47,7 +47,7 @@ func TestMinecraft(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetMinecraft(ctx)
+			GetMinecrafts(ctx)
 
 			g.Assert(rw.Code).Equal(200)
 			g.Assert(rw.HeaderMap.Get("Content-Type")).Equal("application/json; charset=utf-8")
@@ -57,7 +57,7 @@ func TestMinecraft(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetMinecraft(ctx)
+			GetMinecrafts(ctx)
 
 			out := model.Minecrafts{}
 			json.NewDecoder(rw.Body).Decode(&out)
@@ -69,7 +69,7 @@ func TestMinecraft(t *testing.T) {
 			ctx, rw, _ := gin.CreateTestContext()
 			ctx.Set("store", store)
 
-			GetMinecraft(ctx)
+			GetMinecrafts(ctx)
 
 			out := model.Minecrafts{}
 			json.NewDecoder(rw.Body).Decode(&out)

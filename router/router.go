@@ -78,8 +78,8 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 			{
 				minecraft.Use(session.MustCurrent())
 
-				minecraft.GET("", controller.GetMinecraft)
-				minecraft.GET("/:minecraft", controller.CompleteMinecraft)
+				minecraft.GET("", controller.GetMinecrafts)
+				minecraft.GET("/:minecraft", controller.GetMinecrafts)
 				minecraft.PATCH("", session.MustPacks("change"), controller.PatchMinecraft)
 			}
 
@@ -100,8 +100,8 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 			{
 				forge.Use(session.MustCurrent())
 
-				forge.GET("", controller.GetForge)
-				forge.GET("/:forge", controller.CompleteForge)
+				forge.GET("", controller.GetForges)
+				forge.GET("/:forge", controller.GetForges)
 				forge.PATCH("", session.MustPacks("change"), controller.PatchForge)
 			}
 
