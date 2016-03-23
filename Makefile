@@ -22,7 +22,6 @@ clean:
 	rm -rf $(BIN) $(DIST)
 
 deps:
-	go get -u github.com/jteeuwen/go-bindata/...
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/govend/govend
 	govend -v
@@ -31,6 +30,8 @@ vendor:
 	govend -vtlu
 
 generate:
+	go get -u github.com/vektra/mockery/...
+	go get -u github.com/jteeuwen/go-bindata/...
 	go generate $(PACKAGES)
 
 fmt:
