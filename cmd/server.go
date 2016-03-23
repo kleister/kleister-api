@@ -78,6 +78,13 @@ func Server(cfg *config.Config) cli.Command {
 				EnvVar:      "SOLDER_SERVER_ROOT",
 				Destination: &cfg.Server.Root,
 			},
+			cli.StringFlag{
+				Name:        "storage",
+				Value:       "storage/",
+				Usage:       "Folder for storing uploads",
+				EnvVar:      "SOLDER_SERVER_STORAGE",
+				Destination: &cfg.Server.Storage,
+			},
 			cli.BoolFlag{
 				Name:        "debug",
 				Usage:       "Activate debug information",
