@@ -17,7 +17,7 @@ type Server struct {
 
 // Run starts serving the API based on above config.
 func (s *Server) Run(handler http.Handler) {
-	logrus.Infof("starting server %s", s.Addr)
+	logrus.Infof("starting server on %s", s.Addr)
 
 	if s.Cert != "" && s.Key != "" {
 		logrus.Fatal(
