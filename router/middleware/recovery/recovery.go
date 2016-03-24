@@ -1,10 +1,10 @@
-package recover
+package recovery
 
 import (
 	"github.com/gin-gonic/gin"
 )
 
 // SetRecover initializes the recovery middleware.
-func SetRecover() gin.HandlerFunc {
+func SetRecovery() gin.HandlerFunc {
 	return gin.Recovery()
 }
