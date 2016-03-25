@@ -5,8 +5,11 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"path"
+	"path/filepath"
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
 	"github.com/vincent-petithory/dataurl"
 )
@@ -16,13 +19,13 @@ type PackBackgrounds []*PackBackground
 
 // PackBackground represents a pack background model definition.
 type PackBackground struct {
-	PackID      int              `json:"-" gorm:"primary_key"`
+	ID          int              `json:"id" gorm:"primary_key"`
+	PackID      int              `json:"-"`
 	Pack        *Pack            `json:"-"`
 	ContentType string           `json:"content_type"`
 	Path        string           `json:"-" sql:"-"`
 	URL         string           `json:"url" sql:"-"`
 	MD5         string           `json:"md5"`
-	Content     string           `json:"-" gorm:"type:longtext"`
 	Upload      *dataurl.DataURL `json:"upload,omitempty" sql:"-"`
 	CreatedAt   time.Time        `json:"-"`
 	UpdatedAt   time.Time        `json:"-"`
@@ -49,16 +52,29 @@ func (u *PackBackground) BeforeSave(db *gorm.DB) error {
 // AfterSave invokes required actions after persisting.
 func (u *PackBackground) AfterSave(db *gorm.DB) error {
 	if u.Upload != nil {
-		if u.Path == "" {
-			return fmt.Errorf("Missing storage path for logo")
+		absolutePath, err := u.AbsolutePath()
+
+		if err != nil {
+			return fmt.Errorf("Missing storage path for background")
+		}
+
+		errDir := os.MkdirAll(
+			filepath.Dir(
+				absolutePath,
+			),
+			os.ModePerm,
+		)
+
+		if errDir != nil {
+			return fmt.Errorf("Failed to create background directory")
 		}
 
 		file, errCreate := os.Create(
-			u.Path,
+			absolutePath,
 		)
 
 		if errCreate != nil {
-			return fmt.Errorf("Failed to open background at %s", u.Path)
+			return fmt.Errorf("Failed to open background at %s", absolutePath)
 		}
 
 		_, errWrite := u.Upload.WriteTo(
@@ -66,9 +82,38 @@ func (u *PackBackground) AfterSave(db *gorm.DB) error {
 		)
 
 		if errWrite != nil {
-			return fmt.Errorf("Failed to write background at %s", u.Path)
+			return fmt.Errorf("Failed to write background at %s", absolutePath)
 		}
 	}
 
 	return nil
+}
+
+// Validate does some validation to be able to store the record.
+func (u *PackBackground) Validate(db *gorm.DB) {
+	if u.Upload == nil {
+		db.AddError(fmt.Errorf("A background is required"))
+	}
+
+	if isInvalidPackBackgroundType(u.Upload.MediaType.String()) {
+		db.AddError(fmt.Errorf("Invalid background media type"))
+	}
+}
+
+// Path generates the absolute path to the background.
+func (u *PackBackground) AbsolutePath() (string, error) {
+	if u.Path == "" {
+		return "", fmt.Errorf("Missing storage path for background")
+	}
+
+	return path.Join(
+		u.Path,
+		"background",
+		u.MD5,
+	), nil
+}
+
+func isInvalidPackBackgroundType(mediaType string) bool {
+	logrus.Debugf("Got %s pack background media type", mediaType)
+	return false
 }

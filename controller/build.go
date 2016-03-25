@@ -79,6 +79,7 @@ func DeleteBuild(c *gin.Context) {
 
 // PatchBuild updates an existing build.
 func PatchBuild(c *gin.Context) {
+	pack := session.Pack(c)
 	record := session.Build(c)
 
 	if err := c.BindJSON(&record); err != nil {
@@ -96,6 +97,8 @@ func PatchBuild(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
+	record.PackID = pack.ID
 
 	err := context.Store(c).Save(
 		&record,

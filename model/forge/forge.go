@@ -32,7 +32,5 @@ func Load() (*Remote, error) {
 		return nil, fmt.Errorf("Failed to parse Forge versions. %s", err)
 	}
 
-	fmt.Println(remote)
-
 	return remote, nil
 }

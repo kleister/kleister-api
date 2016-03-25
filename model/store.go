@@ -228,6 +228,12 @@ func (s Store) GetPacks() (*Packs, error) {
 	).Preload(
 		"Builds",
 	).Preload(
+		"Icon",
+	).Preload(
+		"Background",
+	).Preload(
+		"Logo",
+	).Preload(
 		"Builds.Forge",
 	).Preload(
 		"Builds.Minecraft",
@@ -252,6 +258,12 @@ func (s Store) GetPack(id string) (*Pack, *gorm.DB) {
 		&record,
 	).Preload(
 		"Builds",
+	).Preload(
+		"Icon",
+	).Preload(
+		"Background",
+	).Preload(
+		"Logo",
 	).First(
 		&record,
 	)

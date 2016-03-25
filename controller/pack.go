@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -49,41 +48,81 @@ func GetPack(c *gin.Context) {
 	)
 }
 
-// GetPackLogo retrieves a logo for a specific pack.
-func GetPackLogo(c *gin.Context) {
+// GetPackFile retrieves a file for a specific pack.
+func GetPackFile(c *gin.Context) {
 	config := context.Config(c)
 	record := session.Pack(c)
 
-	if record.Logo == nil {
+	filePath := ""
+	contentType := ""
+
+	switch c.Param("type") {
+	case "logo":
+		if record.Logo == nil {
+			c.AbortWithError(
+				http.StatusNotFound,
+				fmt.Errorf("No logo content available"),
+			)
+
+			return
+		}
+
+		record.Logo.Path = config.Server.Storage
+
+		filePath, _ = record.Logo.AbsolutePath()
+		contentType = record.Logo.ContentType
+	case "background":
+		if record.Background == nil {
+			c.AbortWithError(
+				http.StatusNotFound,
+				fmt.Errorf("No background content available"),
+			)
+
+			return
+		}
+
+		record.Background.Path = config.Server.Storage
+
+		filePath, _ = record.Background.AbsolutePath()
+		contentType = record.Background.ContentType
+	case "icon":
+		if record.Icon == nil {
+			c.AbortWithError(
+				http.StatusNotFound,
+				fmt.Errorf("No icon content available"),
+			)
+
+			return
+		}
+
+		record.Icon.Path = config.Server.Storage
+
+		filePath, _ = record.Icon.AbsolutePath()
+		contentType = record.Icon.ContentType
+	default:
 		c.AbortWithError(
-			http.StatusNotFound,
-			fmt.Errorf("No logo content available"),
+			http.StatusInternalServerError,
+			fmt.Errorf("Invalid file type"),
 		)
 
 		return
 	}
 
-	path := path.Join(
-		config.Server.Storage,
-		"logo",
-		record.Logo.MD5,
-	)
-
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		c.AbortWithError(
 			http.StatusNotFound,
-			fmt.Errorf("Logo not found on storage"),
+			fmt.Errorf("Storage not found"),
 		)
 
 		return
 	}
 
-	content, err := ioutil.ReadFile(path)
+	content, err := ioutil.ReadFile(filePath)
 
 	if err != nil {
 		c.AbortWithError(
 			http.StatusInternalServerError,
-			fmt.Errorf("Failed to read logo"),
+			fmt.Errorf("Failed to read file"),
 		)
 
 		return
@@ -91,107 +130,7 @@ func GetPackLogo(c *gin.Context) {
 
 	c.Writer.Header().Set(
 		"Content-Type",
-		record.Logo.ContentType,
-	)
-
-	c.Writer.Write(
-		content,
-	)
-}
-
-// GetPackBackground retrieves a background for a specific pack.
-func GetPackBackground(c *gin.Context) {
-	config := context.Config(c)
-	record := session.Pack(c)
-
-	if record.Background == nil {
-		c.AbortWithError(
-			http.StatusNotFound,
-			fmt.Errorf("No background content available"),
-		)
-
-		return
-	}
-
-	path := path.Join(
-		config.Server.Storage,
-		"background",
-		record.Background.MD5,
-	)
-
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		c.AbortWithError(
-			http.StatusNotFound,
-			fmt.Errorf("Background not found on storage"),
-		)
-
-		return
-	}
-
-	content, err := ioutil.ReadFile(path)
-
-	if err != nil {
-		c.AbortWithError(
-			http.StatusInternalServerError,
-			fmt.Errorf("Failed to read background"),
-		)
-
-		return
-	}
-
-	c.Writer.Header().Set(
-		"Content-Type",
-		record.Logo.ContentType,
-	)
-
-	c.Writer.Write(
-		content,
-	)
-}
-
-// GetPackIcon retrieves a icon for a specific pack.
-func GetPackIcon(c *gin.Context) {
-	config := context.Config(c)
-	record := session.Pack(c)
-
-	if record.Icon == nil {
-		c.AbortWithError(
-			http.StatusNotFound,
-			fmt.Errorf("No icon content available"),
-		)
-
-		return
-	}
-
-	path := path.Join(
-		config.Server.Storage,
-		"icon",
-		record.Icon.MD5,
-	)
-
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		c.AbortWithError(
-			http.StatusNotFound,
-			fmt.Errorf("Icon not found on storage"),
-		)
-
-		return
-	}
-
-	content, err := ioutil.ReadFile(path)
-
-	if err != nil {
-		c.AbortWithError(
-			http.StatusInternalServerError,
-			fmt.Errorf("Failed to read icon"),
-		)
-
-		return
-	}
-
-	c.Writer.Header().Set(
-		"Content-Type",
-		record.Logo.ContentType,
+		contentType,
 	)
 
 	c.Writer.Write(
@@ -231,6 +170,7 @@ func DeletePack(c *gin.Context) {
 
 // PatchPack updates an existing pack.
 func PatchPack(c *gin.Context) {
+	config := context.Config(c)
 	record := session.Pack(c)
 
 	if err := c.BindJSON(&record); err != nil {
@@ -247,6 +187,18 @@ func PatchPack(c *gin.Context) {
 
 		c.Abort()
 		return
+	}
+
+	if record.Icon != nil {
+		record.Icon.Path = config.Server.Storage
+	}
+
+	if record.Background != nil {
+		record.Icon.Path = config.Server.Storage
+	}
+
+	if record.Logo != nil {
+		record.Icon.Path = config.Server.Storage
 	}
 
 	err := context.Store(c).Save(
@@ -274,6 +226,7 @@ func PatchPack(c *gin.Context) {
 
 // PostPack creates a new pack.
 func PostPack(c *gin.Context) {
+	config := context.Config(c)
 	record := &model.Pack{}
 
 	if err := c.BindJSON(&record); err != nil {
@@ -290,6 +243,18 @@ func PostPack(c *gin.Context) {
 
 		c.Abort()
 		return
+	}
+
+	if record.Icon != nil {
+		record.Icon.Path = config.Server.Storage
+	}
+
+	if record.Background != nil {
+		record.Icon.Path = config.Server.Storage
+	}
+
+	if record.Logo != nil {
+		record.Icon.Path = config.Server.Storage
 	}
 
 	err := context.Store(c).Create(

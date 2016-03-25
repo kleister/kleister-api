@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -58,31 +57,43 @@ func GetVersionFile(c *gin.Context) {
 	config := context.Config(c)
 	record := session.Version(c)
 
-	if record.File == nil {
+	filePath := ""
+	contentType := ""
+
+	switch c.Param("type") {
+	case "file":
+		if record.File == nil {
+			c.AbortWithError(
+				http.StatusNotFound,
+				fmt.Errorf("No file content available"),
+			)
+
+			return
+		}
+
+		record.File.Path = config.Server.Storage
+
+		filePath, _ = record.File.AbsolutePath()
+		contentType = record.File.ContentType
+	default:
 		c.AbortWithError(
-			http.StatusNotFound,
-			fmt.Errorf("No file content available"),
+			http.StatusInternalServerError,
+			fmt.Errorf("Invalid file type"),
 		)
 
 		return
 	}
 
-	path := path.Join(
-		config.Server.Storage,
-		"version",
-		record.File.MD5,
-	)
-
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		c.AbortWithError(
 			http.StatusNotFound,
-			fmt.Errorf("File not found on storage"),
+			fmt.Errorf("Storage not found"),
 		)
 
 		return
 	}
 
-	content, err := ioutil.ReadFile(path)
+	content, err := ioutil.ReadFile(filePath)
 
 	if err != nil {
 		c.AbortWithError(
@@ -95,7 +106,7 @@ func GetVersionFile(c *gin.Context) {
 
 	c.Writer.Header().Set(
 		"Content-Type",
-		record.File.ContentType,
+		contentType,
 	)
 
 	c.Writer.Write(
@@ -135,6 +146,8 @@ func DeleteVersion(c *gin.Context) {
 
 // PatchVersion updates an existing version.
 func PatchVersion(c *gin.Context) {
+	config := context.Config(c)
+	mod := session.Mod(c)
 	record := session.Version(c)
 
 	if err := c.BindJSON(&record); err != nil {
@@ -151,6 +164,12 @@ func PatchVersion(c *gin.Context) {
 
 		c.Abort()
 		return
+	}
+
+	record.ModID = mod.ID
+
+	if record.File != nil {
+		record.File.Path = config.Server.Storage
 	}
 
 	err := context.Store(c).Save(
@@ -178,6 +197,7 @@ func PatchVersion(c *gin.Context) {
 
 // PostVersion creates a new version.
 func PostVersion(c *gin.Context) {
+	config := context.Config(c)
 	mod := session.Mod(c)
 	record := &model.Version{}
 
@@ -198,6 +218,10 @@ func PostVersion(c *gin.Context) {
 	}
 
 	record.ModID = mod.ID
+
+	if record.File != nil {
+		record.File.Path = config.Server.Storage
+	}
 
 	err := context.Store(c).Create(
 		&record,
