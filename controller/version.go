@@ -79,6 +79,7 @@ func GetVersion(c *gin.Context) {
 
 // DeleteVersion removes a specific version.
 func DeleteVersion(c *gin.Context) {
+	config := context.Config(c)
 	record := session.Version(c)
 
 	if record.File != nil {

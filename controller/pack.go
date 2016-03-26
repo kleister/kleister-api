@@ -124,6 +124,7 @@ func GetPack(c *gin.Context) {
 
 // DeletePack removes a specific pack.
 func DeletePack(c *gin.Context) {
+	config := context.Config(c)
 	record := session.Pack(c)
 
 	if record.Icon != nil {
