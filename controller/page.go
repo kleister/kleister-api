@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/router/middleware/context"
+	"github.com/solderapp/solder-api/static"
 )
 
 // GetIndex represents the index page.
@@ -31,5 +32,16 @@ func GetAPI(c *gin.Context) {
 			"api":     "SolderNG",
 			"version": config.Version,
 		},
+	)
+}
+
+// GetFavicon represents the favicon.
+func GetFavicon(c *gin.Context) {
+	c.Data(
+		http.StatusOK,
+		"image/x-icon",
+		static.MustAsset(
+			"images/favicon.ico",
+		),
 	)
 }

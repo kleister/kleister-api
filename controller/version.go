@@ -1,10 +1,9 @@
 package controller
 
 import (
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
+	"strconv"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -15,6 +14,7 @@ import (
 
 // GetVersions retrieves all available versions.
 func GetVersions(c *gin.Context) {
+	root := context.Root(c)
 	mod := session.Mod(c)
 
 	records, err := context.Store(c).GetVersions(
@@ -34,6 +34,20 @@ func GetVersions(c *gin.Context) {
 		return
 	}
 
+	for _, record := range *records {
+		if record.File != nil {
+			record.File.URL = strings.Join(
+				[]string{
+					root,
+					"storage",
+					"version",
+					strconv.Itoa(record.ID),
+				},
+				"/",
+			)
+		}
+	}
+
 	c.JSON(
 		http.StatusOK,
 		records,
@@ -42,9 +56,20 @@ func GetVersions(c *gin.Context) {
 
 // GetVersion retrieves a specific version.
 func GetVersion(c *gin.Context) {
+	root := context.Root(c)
 	record := session.Version(c)
 
-	// c.Request.Host
+	if record.File != nil {
+		record.File.URL = strings.Join(
+			[]string{
+				root,
+				"storage",
+				"version",
+				strconv.Itoa(record.ID),
+			},
+			"/",
+		)
+	}
 
 	c.JSON(
 		http.StatusOK,
@@ -52,71 +77,13 @@ func GetVersion(c *gin.Context) {
 	)
 }
 
-// GetVersionFile retrieves a file for a specific version.
-func GetVersionFile(c *gin.Context) {
-	config := context.Config(c)
-	record := session.Version(c)
-
-	filePath := ""
-	contentType := ""
-
-	switch c.Param("type") {
-	case "file":
-		if record.File == nil {
-			c.AbortWithError(
-				http.StatusNotFound,
-				fmt.Errorf("No file content available"),
-			)
-
-			return
-		}
-
-		record.File.Path = config.Server.Storage
-
-		filePath, _ = record.File.AbsolutePath()
-		contentType = record.File.ContentType
-	default:
-		c.AbortWithError(
-			http.StatusInternalServerError,
-			fmt.Errorf("Invalid file type"),
-		)
-
-		return
-	}
-
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		c.AbortWithError(
-			http.StatusNotFound,
-			fmt.Errorf("Storage not found"),
-		)
-
-		return
-	}
-
-	content, err := ioutil.ReadFile(filePath)
-
-	if err != nil {
-		c.AbortWithError(
-			http.StatusInternalServerError,
-			fmt.Errorf("Failed to read file"),
-		)
-
-		return
-	}
-
-	c.Writer.Header().Set(
-		"Content-Type",
-		contentType,
-	)
-
-	c.Writer.Write(
-		content,
-	)
-}
-
 // DeleteVersion removes a specific version.
 func DeleteVersion(c *gin.Context) {
 	record := session.Version(c)
+
+	if record.File != nil {
+		record.File.Path = config.Server.Storage
+	}
 
 	err := context.Store(c).Delete(
 		&record,

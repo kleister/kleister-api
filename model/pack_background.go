@@ -4,9 +4,11 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -19,7 +21,7 @@ type PackBackgrounds []*PackBackground
 
 // PackBackground represents a pack background model definition.
 type PackBackground struct {
-	ID          int              `json:"id" gorm:"primary_key"`
+	ID          int              `json:"-" gorm:"primary_key"`
 	PackID      int              `json:"-"`
 	Pack        *Pack            `json:"-"`
 	ContentType string           `json:"content_type"`
@@ -69,16 +71,10 @@ func (u *PackBackground) AfterSave(db *gorm.DB) error {
 			return fmt.Errorf("Failed to create background directory")
 		}
 
-		file, errCreate := os.Create(
+		errWrite := ioutil.WriteFile(
 			absolutePath,
-		)
-
-		if errCreate != nil {
-			return fmt.Errorf("Failed to open background at %s", absolutePath)
-		}
-
-		_, errWrite := u.Upload.WriteTo(
-			file,
+			u.Upload.Data,
+			0644,
 		)
 
 		if errWrite != nil {
@@ -89,14 +85,31 @@ func (u *PackBackground) AfterSave(db *gorm.DB) error {
 	return nil
 }
 
-// Validate does some validation to be able to store the record.
-func (u *PackBackground) Validate(db *gorm.DB) {
-	if u.Upload == nil {
-		db.AddError(fmt.Errorf("A background is required"))
+// AfterDelete invokes required actions after deletion.
+func (u *PackBackground) AfterDelete(db *gorm.DB) error {
+	absolutePath, err := u.AbsolutePath()
+
+	if err != nil {
+		return fmt.Errorf("Missing storage path for background")
 	}
 
-	if isInvalidPackBackgroundType(u.Upload.MediaType.String()) {
-		db.AddError(fmt.Errorf("Invalid background media type"))
+	errRemove := os.Remove(
+		absolutePath,
+	)
+
+	if errRemove != nil {
+		return fmt.Errorf("Failed to remove background")
+	}
+
+	return nil
+}
+
+// Validate does some validation to be able to store the record.
+func (u *PackBackground) Validate(db *gorm.DB) {
+	if u.Upload != nil {
+		if isInvalidPackBackgroundType(u.Upload.MediaType.String()) {
+			db.AddError(fmt.Errorf("Invalid background media type"))
+		}
 	}
 }
 
@@ -109,7 +122,7 @@ func (u *PackBackground) AbsolutePath() (string, error) {
 	return path.Join(
 		u.Path,
 		"background",
-		u.MD5,
+		strconv.Itoa(u.PackID),
 	), nil
 }
 

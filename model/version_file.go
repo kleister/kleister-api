@@ -4,9 +4,11 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -19,7 +21,7 @@ type VersionFiles []*VersionFile
 
 // VersionFile represents a version file model definition.
 type VersionFile struct {
-	ID          int              `json:"id" gorm:"primary_key"`
+	ID          int              `json:"-" gorm:"primary_key"`
 	VersionID   int              `json:"-"`
 	Version     *Pack            `json:"-"`
 	ContentType string           `json:"content_type"`
@@ -55,7 +57,7 @@ func (u *VersionFile) AfterSave(db *gorm.DB) error {
 		absolutePath, err := u.AbsolutePath()
 
 		if err != nil {
-			return fmt.Errorf("Missing storage path for logo")
+			return fmt.Errorf("Missing storage path for file")
 		}
 
 		errDir := os.MkdirAll(
@@ -69,21 +71,34 @@ func (u *VersionFile) AfterSave(db *gorm.DB) error {
 			return fmt.Errorf("Failed to create file directory")
 		}
 
-		file, errCreate := os.Create(
+		errWrite := ioutil.WriteFile(
 			absolutePath,
-		)
-
-		if errCreate != nil {
-			return fmt.Errorf("Failed to open version at %s", absolutePath)
-		}
-
-		_, errWrite := u.Upload.WriteTo(
-			file,
+			u.Upload.Data,
+			0644,
 		)
 
 		if errWrite != nil {
-			return fmt.Errorf("Failed to write version at %s", absolutePath)
+			return fmt.Errorf("Failed to write file at %s", absolutePath)
 		}
+	}
+
+	return nil
+}
+
+// AfterDelete invokes required actions after deletion.
+func (u *VersionFile) AfterDelete(db *gorm.DB) error {
+	absolutePath, err := u.AbsolutePath()
+
+	if err != nil {
+		return fmt.Errorf("Missing storage path for file")
+	}
+
+	errRemove := os.Remove(
+		absolutePath,
+	)
+
+	if errRemove != nil {
+		return fmt.Errorf("Failed to remove file")
 	}
 
 	return nil
@@ -91,12 +106,10 @@ func (u *VersionFile) AfterSave(db *gorm.DB) error {
 
 // Validate does some validation to be able to store the record.
 func (u *VersionFile) Validate(db *gorm.DB) {
-	if u.Upload == nil {
-		db.AddError(fmt.Errorf("A file is required"))
-	}
-
-	if isInvalidVersionFileType(u.Upload.MediaType.String()) {
-		db.AddError(fmt.Errorf("Invalid file media type"))
+	if u.Upload != nil {
+		if isInvalidVersionFileType(u.Upload.MediaType.String()) {
+			db.AddError(fmt.Errorf("Invalid file media type"))
+		}
 	}
 }
 
@@ -109,7 +122,7 @@ func (u *VersionFile) AbsolutePath() (string, error) {
 	return path.Join(
 		u.Path,
 		"version",
-		u.MD5,
+		strconv.Itoa(u.VersionID),
 	), nil
 }
 

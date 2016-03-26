@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
+	"strconv"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -15,6 +15,7 @@ import (
 
 // GetPacks retrieves all available packs.
 func GetPacks(c *gin.Context) {
+	root := context.Root(c)
 	records, err := context.Store(c).GetPacks()
 
 	if err != nil {
@@ -30,6 +31,44 @@ func GetPacks(c *gin.Context) {
 		return
 	}
 
+	for _, record := range *records {
+		if record.Icon != nil {
+			record.Icon.URL = strings.Join(
+				[]string{
+					root,
+					"storage",
+					"icon",
+					strconv.Itoa(record.ID),
+				},
+				"/",
+			)
+		}
+
+		if record.Background != nil {
+			record.Background.URL = strings.Join(
+				[]string{
+					root,
+					"storage",
+					"background",
+					strconv.Itoa(record.ID),
+				},
+				"/",
+			)
+		}
+
+		if record.Logo != nil {
+			record.Logo.URL = strings.Join(
+				[]string{
+					root,
+					"storage",
+					"logo",
+					strconv.Itoa(record.ID),
+				},
+				"/",
+			)
+		}
+	}
+
 	c.JSON(
 		http.StatusOK,
 		records,
@@ -38,9 +77,44 @@ func GetPacks(c *gin.Context) {
 
 // GetPack retrieves a specific pack.
 func GetPack(c *gin.Context) {
+	root := context.Root(c)
 	record := session.Pack(c)
 
-	// c.Request.Host
+	if record.Icon != nil {
+		record.Icon.URL = strings.Join(
+			[]string{
+				root,
+				"storage",
+				"icon",
+				strconv.Itoa(record.ID),
+			},
+			"/",
+		)
+	}
+
+	if record.Background != nil {
+		record.Background.URL = strings.Join(
+			[]string{
+				root,
+				"storage",
+				"background",
+				strconv.Itoa(record.ID),
+			},
+			"/",
+		)
+	}
+
+	if record.Logo != nil {
+		record.Logo.URL = strings.Join(
+			[]string{
+				root,
+				"storage",
+				"logo",
+				strconv.Itoa(record.ID),
+			},
+			"/",
+		)
+	}
 
 	c.JSON(
 		http.StatusOK,
@@ -48,99 +122,21 @@ func GetPack(c *gin.Context) {
 	)
 }
 
-// GetPackFile retrieves a file for a specific pack.
-func GetPackFile(c *gin.Context) {
-	config := context.Config(c)
-	record := session.Pack(c)
-
-	filePath := ""
-	contentType := ""
-
-	switch c.Param("type") {
-	case "logo":
-		if record.Logo == nil {
-			c.AbortWithError(
-				http.StatusNotFound,
-				fmt.Errorf("No logo content available"),
-			)
-
-			return
-		}
-
-		record.Logo.Path = config.Server.Storage
-
-		filePath, _ = record.Logo.AbsolutePath()
-		contentType = record.Logo.ContentType
-	case "background":
-		if record.Background == nil {
-			c.AbortWithError(
-				http.StatusNotFound,
-				fmt.Errorf("No background content available"),
-			)
-
-			return
-		}
-
-		record.Background.Path = config.Server.Storage
-
-		filePath, _ = record.Background.AbsolutePath()
-		contentType = record.Background.ContentType
-	case "icon":
-		if record.Icon == nil {
-			c.AbortWithError(
-				http.StatusNotFound,
-				fmt.Errorf("No icon content available"),
-			)
-
-			return
-		}
-
-		record.Icon.Path = config.Server.Storage
-
-		filePath, _ = record.Icon.AbsolutePath()
-		contentType = record.Icon.ContentType
-	default:
-		c.AbortWithError(
-			http.StatusInternalServerError,
-			fmt.Errorf("Invalid file type"),
-		)
-
-		return
-	}
-
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		c.AbortWithError(
-			http.StatusNotFound,
-			fmt.Errorf("Storage not found"),
-		)
-
-		return
-	}
-
-	content, err := ioutil.ReadFile(filePath)
-
-	if err != nil {
-		c.AbortWithError(
-			http.StatusInternalServerError,
-			fmt.Errorf("Failed to read file"),
-		)
-
-		return
-	}
-
-	c.Writer.Header().Set(
-		"Content-Type",
-		contentType,
-	)
-
-	c.Writer.Write(
-		content,
-	)
-}
-
 // DeletePack removes a specific pack.
 func DeletePack(c *gin.Context) {
 	record := session.Pack(c)
+
+	if record.Icon != nil {
+		record.Icon.Path = config.Server.Storage
+	}
+
+	if record.Background != nil {
+		record.Background.Path = config.Server.Storage
+	}
+
+	if record.Logo != nil {
+		record.Logo.Path = config.Server.Storage
+	}
 
 	err := context.Store(c).Delete(
 		&record,
@@ -177,6 +173,22 @@ func PatchPack(c *gin.Context) {
 		logrus.Warn("Failed to bind pack data")
 		logrus.Warn(err)
 
+		b, err := ioutil.ReadAll(c.Request.Body)
+		if err != nil {
+			c.JSON(
+				http.StatusPreconditionFailed,
+				gin.H{
+					"status":  http.StatusPreconditionFailed,
+					"message": err,
+				},
+			)
+
+			c.Abort()
+			return
+		}
+
+		logrus.Warnf("%s", b)
+
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -194,11 +206,11 @@ func PatchPack(c *gin.Context) {
 	}
 
 	if record.Background != nil {
-		record.Icon.Path = config.Server.Storage
+		record.Background.Path = config.Server.Storage
 	}
 
 	if record.Logo != nil {
-		record.Icon.Path = config.Server.Storage
+		record.Logo.Path = config.Server.Storage
 	}
 
 	err := context.Store(c).Save(
@@ -250,11 +262,11 @@ func PostPack(c *gin.Context) {
 	}
 
 	if record.Background != nil {
-		record.Icon.Path = config.Server.Storage
+		record.Background.Path = config.Server.Storage
 	}
 
 	if record.Logo != nil {
-		record.Icon.Path = config.Server.Storage
+		record.Logo.Path = config.Server.Storage
 	}
 
 	err := context.Store(c).Create(

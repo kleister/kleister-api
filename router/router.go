@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/config"
 	"github.com/solderapp/solder-api/controller"
+	"github.com/solderapp/solder-api/router/middleware/context"
 	"github.com/solderapp/solder-api/router/middleware/header"
 	"github.com/solderapp/solder-api/router/middleware/logger"
 	"github.com/solderapp/solder-api/router/middleware/recovery"
@@ -29,6 +30,7 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 	)
 
 	e.Use(middleware...)
+	e.Use(context.SetRoot())
 	e.Use(logger.SetLogger())
 	e.Use(recovery.SetRecovery())
 	e.Use(header.SetCache())
@@ -39,19 +41,19 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 	r := e.Group(cfg.Server.Root)
 	{
 		r.StaticFS(
+			"/storage",
+			gin.Dir(
+				cfg.Server.Storage,
+				false,
+			),
+		)
+
+		r.StaticFS(
 			"/assets",
 			static.Load(),
 		)
 
-		r.StaticFile(
-			"/favicon.ico",
-			string(
-				static.MustAsset(
-					"images/favicon.ico",
-				),
-			),
-		)
-
+		r.GET("/favicon.ico", controller.GetFavicon)
 		r.GET("", controller.GetIndex)
 
 		api := r.Group("/api")
@@ -125,8 +127,6 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				packs.DELETE("/:pack", session.SetPack(), session.MustPacks("delete"), controller.DeletePack)
 				packs.PATCH("/:pack", session.SetPack(), session.MustPacks("change"), controller.PatchPack)
 				packs.POST("", session.MustPacks("change"), controller.PostPack)
-
-				packs.GET("/:pack/files/:type", session.SetPack(), controller.GetPackFile)
 			}
 
 			packClients := api.Group("/packs/:pack/clients")
@@ -202,8 +202,6 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 				versions.DELETE("/:version", session.SetVersion(), session.MustMods("delete"), controller.DeleteVersion)
 				versions.PATCH("/:version", session.SetVersion(), session.MustMods("change"), controller.PatchVersion)
 				versions.POST("", session.MustMods("change"), controller.PostVersion)
-
-				versions.GET("/:version/files/:type", session.SetVersion(), controller.GetVersionFile)
 			}
 
 			versionBuilds := api.Group("/mods/:mod/versions/:version/builds")

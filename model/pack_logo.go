@@ -4,9 +4,11 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -19,7 +21,7 @@ type PackLogos []*PackLogo
 
 // PackLogo represents a pack logo model definition.
 type PackLogo struct {
-	ID          int              `json:"id" gorm:"primary_key"`
+	ID          int              `json:"-" gorm:"primary_key"`
 	PackID      int              `json:"-"`
 	Pack        *Pack            `json:"-"`
 	ContentType string           `json:"content_type"`
@@ -69,16 +71,10 @@ func (u *PackLogo) AfterSave(db *gorm.DB) error {
 			return fmt.Errorf("Failed to create logo directory")
 		}
 
-		file, errCreate := os.Create(
+		errWrite := ioutil.WriteFile(
 			absolutePath,
-		)
-
-		if errCreate != nil {
-			return fmt.Errorf("Failed to open logo at %s", absolutePath)
-		}
-
-		_, errWrite := u.Upload.WriteTo(
-			file,
+			u.Upload.Data,
+			0644,
 		)
 
 		if errWrite != nil {
@@ -89,14 +85,31 @@ func (u *PackLogo) AfterSave(db *gorm.DB) error {
 	return nil
 }
 
-// Validate does some validation to be able to store the record.
-func (u *PackLogo) Validate(db *gorm.DB) {
-	if u.Upload == nil {
-		db.AddError(fmt.Errorf("A logo is required"))
+// AfterDelete invokes required actions after deletion.
+func (u *PackLogo) AfterDelete(db *gorm.DB) error {
+	absolutePath, err := u.AbsolutePath()
+
+	if err != nil {
+		return fmt.Errorf("Missing storage path for logo")
 	}
 
-	if isInvalidPackLogoType(u.Upload.MediaType.String()) {
-		db.AddError(fmt.Errorf("Invalid logo media type"))
+	errRemove := os.Remove(
+		absolutePath,
+	)
+
+	if errRemove != nil {
+		return fmt.Errorf("Failed to remove logo")
+	}
+
+	return nil
+}
+
+// Validate does some validation to be able to store the record.
+func (u *PackLogo) Validate(db *gorm.DB) {
+	if u.Upload != nil {
+		if isInvalidPackLogoType(u.Upload.MediaType.String()) {
+			db.AddError(fmt.Errorf("Invalid logo media type"))
+		}
 	}
 }
 
@@ -109,7 +122,7 @@ func (u *PackLogo) AbsolutePath() (string, error) {
 	return path.Join(
 		u.Path,
 		"logo",
-		u.MD5,
+		strconv.Itoa(u.PackID),
 	), nil
 }
 
