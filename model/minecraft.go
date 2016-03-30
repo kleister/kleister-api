@@ -1,11 +1,13 @@
 package model
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
-	"github.com/satori/go.uuid"
 )
 
 // Minecrafts is simply a collection of minecraft structs.
@@ -38,8 +40,9 @@ type Minecraft struct {
 // BeforeSave invokes required actions before persisting.
 func (u *Minecraft) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
-		for {
-			u.Slug = uuid.NewV4().String()
+		for i := 0; true; i++ {
+			hash := md5.Sum([]byte(fmt.Sprintf("%s-%d", u.Name, i)))
+			u.Slug = hex.EncodeToString(hash[:])
 
 			notFound := db.Where(
 				"slug = ?",
