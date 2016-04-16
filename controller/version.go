@@ -82,26 +82,41 @@ func DeleteVersion(c *gin.Context) {
 	config := context.Config(c)
 	record := session.Version(c)
 
+	tx := context.Store(c).Begin()
+	failed := false
+
 	if record.File != nil {
 		record.File.Path = config.Server.Storage
+
+		err := tx.Delete(
+			&record.File,
+		).Error
+
+		if err != nil {
+			failed = true
+		}
 	}
 
-	err := context.Store(c).Delete(
+	err := tx.Delete(
 		&record,
 	).Error
 
-	if err != nil {
+	if failed || err != nil {
+		tx.Rollback()
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
-				"message": err.Error(),
+				"message": "Failed to delete version",
 			},
 		)
 
 		c.Abort()
 		return
 	}
+
+	tx.Commit()
 
 	c.JSON(
 		http.StatusOK,

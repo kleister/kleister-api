@@ -1,19 +1,30 @@
 DIST := dist
 BIN := bin
 EXECUTABLE := solder-api
-VERSION := $(shell cat VERSION)
+SHA := $(shell git rev-parse --short HEAD)
 
-LDFLAGS += -X "main.version=$(VERSION)"
+LDFLAGS += -X "github.com/solderapp/solder-api/config.VersionDev=$(SHA)"
 
-RELEASES ?= $(DIST)/$(EXECUTABLE)-linux-amd64 \
-	$(DIST)/$(EXECUTABLE)-linux-386 \
-	$(DIST)/$(EXECUTABLE)-linux-arm \
-	$(DIST)/$(EXECUTABLE)-darwin-amd64 \
-	$(DIST)/$(EXECUTABLE)-darwin-386 \
-	$(DIST)/$(EXECUTABLE)-windows-amd64 \
-	$(DIST)/$(EXECUTABLE)-windows-386
+RELEASES ?= $(BIN)/$(EXECUTABLE)-linux-amd64 \
+	$(BIN)/$(EXECUTABLE)-linux-386 \
+	$(BIN)/$(EXECUTABLE)-linux-arm \
+	$(BIN)/$(EXECUTABLE)-linux-arm64 \
+	$(BIN)/$(EXECUTABLE)-darwin-amd64 \
+	$(BIN)/$(EXECUTABLE)-darwin-386 \
+	$(BIN)/$(EXECUTABLE)-windows-amd64 \
+	$(BIN)/$(EXECUTABLE)-windows-386
 
 PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
+
+ifneq ($(CI_TAG),)
+	VERSION ?= $(CI_TAG)
+else
+	ifneq ($(CI_BRANCH),)
+		VERSION ?= $(CI_BRANCH)
+	else
+		VERSION ?= master
+	endif
+endif
 
 all: clean deps build test
 
@@ -50,22 +61,28 @@ build: $(BIN)/$(EXECUTABLE)
 
 release: $(RELEASES)
 
+updater:
+	go get -u github.com/sanbornm/go-selfupdate
+	go-selfupdate -o $(DIST)/publish $(DIST)/updater $(VERSION)
+
 install: $(BIN)/$(EXECUTABLE)
 	cp $< $(GOPATH)/bin/
 
 $(BIN)/$(EXECUTABLE): $(wildcard *.go)
 	CGO_ENABLED=1 go build -ldflags '-s -w $(LDFLAGS)' -o $@
 
-$(BIN)/%/$(EXECUTABLE): GOOS=$(firstword $(subst -, ,$*))
-$(BIN)/%/$(EXECUTABLE): GOARCH=$(subst .exe,,$(word 2,$(subst -, ,$*)))
-$(BIN)/%/$(EXECUTABLE):
-	CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags '-s -w $(LDFLAGS)' -o $@
-
-$(DIST)/$(EXECUTABLE)-%: GOOS=$(firstword $(subst -, ,$*))
-$(DIST)/$(EXECUTABLE)-%: GOARCH=$(subst .exe,,$(word 2,$(subst -, ,$*)))
-$(DIST)/$(EXECUTABLE)-%: $(BIN)/%/$(EXECUTABLE)
-	mkdir -p $(DIST)
-	cp $(BIN)/$*/$(EXECUTABLE) $(DIST)/$(EXECUTABLE)-$(VERSION)-$(GOOS)-$(GOARCH)
+$(BIN)/$(EXECUTABLE)-%: GOOS=$(word 1,$(subst -, ,$*))
+$(BIN)/$(EXECUTABLE)-%: GOARCH=$(subst .exe,,$(word 2,$(subst -, ,$*)))
+$(BIN)/$(EXECUTABLE)-%:
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags '-s -w $(LDFLAGS)' -o $@
+	mkdir -p $(DIST)/updater
+	cp $@ $(DIST)/updater/$(GOOS)-$(GOARCH)
+	mkdir -p $(DIST)/release
+	cp $@ $(DIST)/release/$(EXECUTABLE)-$(VERSION)-$(GOOS)-$(GOARCH)
+	cd $(DIST)/release && sha256sum $(EXECUTABLE)-$(VERSION)-$(GOOS)-$(GOARCH) > $(EXECUTABLE)-$(VERSION)-$(GOOS)-$(GOARCH).sha256
+	mkdir -p $(DIST)/latest
+	cp $@ $(DIST)/latest/$(EXECUTABLE)-latest-$(GOOS)-$(GOARCH)
+	cd $(DIST)/latest && sha256sum $(EXECUTABLE)-latest-$(GOOS)-$(GOARCH) > $(EXECUTABLE)-latest-$(GOOS)-$(GOARCH).sha256
 
 .PHONY: all clean deps vendor generate fmt vet lint test build
-.PRECIOUS: $(BIN)/%/$(EXECUTABLE)
+.PRECIOUS: $(BIN)/$(EXECUTABLE)-%

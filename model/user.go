@@ -22,6 +22,7 @@ type User struct {
 	Email      string      `json:"email" sql:"unique_index"`
 	Password   string      `json:"password,omitempty" sql:"-"`
 	Hashword   string      `json:"-"`
+	Active     bool        `json:"active" sql:"default:false"`
 	CreatedAt  time.Time   `json:"created_at"`
 	UpdatedAt  time.Time   `json:"updated_at"`
 	Mods       Mods        `json:"mods,omitempty" gorm:"many2many:user_mods;"`

@@ -127,34 +127,65 @@ func DeletePack(c *gin.Context) {
 	config := context.Config(c)
 	record := session.Pack(c)
 
+	tx := context.Store(c).Begin()
+	failed := false
+
 	if record.Icon != nil {
 		record.Icon.Path = config.Server.Storage
+
+		err := tx.Delete(
+			&record.Icon,
+		).Error
+
+		if err != nil {
+			failed = true
+		}
 	}
 
 	if record.Background != nil {
 		record.Background.Path = config.Server.Storage
+
+		err := tx.Delete(
+			&record.Background,
+		).Error
+
+		if err != nil {
+			failed = true
+		}
 	}
 
 	if record.Logo != nil {
 		record.Logo.Path = config.Server.Storage
+
+		err := tx.Delete(
+			&record.Logo,
+		).Error
+
+		if err != nil {
+			failed = true
+		}
 	}
 
-	err := context.Store(c).Delete(
+	err := tx.Delete(
 		&record,
 	).Error
 
-	if err != nil {
+	if failed || err != nil {
+		tx.Rollback()
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
-				"message": err.Error(),
+				"message": "Failed to delete pack",
 			},
 		)
 
 		c.Abort()
 		return
 	}
+
+	tx.Commit()
 
 	c.JSON(
 		http.StatusOK,

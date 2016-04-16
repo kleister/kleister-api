@@ -1,4 +1,4 @@
-package static
+package assets
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"github.com/elazarl/go-bindata-assetfs"
 )
 
-//go:generate go-bindata -ignore "\\.go" -pkg static -prefix dist -o bindata.go ./dist/...
+//go:generate go-bindata -ignore "\\.go" -pkg assets -prefix dist -o bindata.go ./dist/...
 //go:generate go fmt bindata.go
 
 // Load initializes the static files.

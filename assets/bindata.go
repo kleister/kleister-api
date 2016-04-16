@@ -8,7 +8,7 @@
 // dist/styles/vendor.css
 // DO NOT EDIT!
 
-package static
+package assets
 
 import (
 	"bytes"

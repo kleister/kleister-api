@@ -2,9 +2,8 @@ package config
 
 // Config provides all application config values.
 type Config struct {
-	Version string
-	Debug   bool
-	Server  struct {
+	Debug  bool
+	Server struct {
 		Addr    string
 		Cert    string
 		Key     string
@@ -19,3 +18,7 @@ type Config struct {
 		Host     string
 	}
 }
+
+var (
+	Values = &Config{}
+)

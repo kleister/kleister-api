@@ -10,20 +10,13 @@ import (
 	"github.com/solderapp/solder-api/config"
 )
 
-var (
-	version string
-)
-
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-
-	cfg := &config.Config{
-		Version: version,
-	}
+	cfg := &config.Config{}
 
 	app := cli.NewApp()
 	app.Name = "solder"
-	app.Version = version
+	app.Version = config.Version
 	app.Author = "Thomas Boerger <thomas@webhippie.de>"
 	app.Usage = "Manage mod packs for the Technic launcher"
 

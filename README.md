@@ -24,6 +24,17 @@ this awesome project!
 
 ## Install
 
+You can download prebuilt binaries from the GitHub releases or from our
+[download site](http://dl.webhippie.de/solder-api). You are a Mac user? Just take
+a look at our [homebrew formula](https://github.com/solderapp/homebrew-solder).
+If you are missing an architecture just write us on our nice
+[Gitter](https://gitter.im/solderapp/solder-api) chat. Take a look at the help
+output, you can enable auto updates to the binary to avoid bugs related to old
+versions. If you find a security issue please contact thomas@webhippie.de first.
+
+
+## Development
+
 Make sure you have a working Go environment, for further reference or a guide
 take a look at the [install instructions](http://golang.org/doc/install.html).
 As this project relies on vendoring of the dependencies and we are not
@@ -35,12 +46,8 @@ go get -d github.com/solderapp/solder-api
 cd $GOPATH/src/github.com/solderapp/solder-api
 make deps build
 
-bin/drone-api -h
+bin/solder-api -h
 ```
-
-Later on we will also provide a download of prebuilt binaries for various
-platforms, but this will start if we get to an somehow working state or if we
-are more or less on feature parity with the upstream project.
 
 
 ## Contributing

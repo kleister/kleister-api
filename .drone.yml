@@ -1,30 +1,70 @@
 build:
-  testing:
+  general:
     image: webhippie/golang:latest
     commands:
       - make clean
       - make deps
       - make build
       - make test
-
-  release:
-    image: webhippie/golang:latest
-    commands:
       - make release
+
+  updater:
+    image: webhippie/golang:latest
+      - make updater
     when:
       event: tag
 
 publish:
-  coverage:
-    server: http://coverage.dronehippie.de
-    token: $$GITHUB_APIKEY
+  # coverage:
+  #   server: http://coverage.dronehippie.de
+  #   token: $$GITHUB_APIKEY
+  #   when:
+  #     branch: master
+
+  rsync:
+    user: deploy
+    host: dl.webhippie.de
+    source: dist/release/
+    target: $$BASE_PATH/solder-api/master
+    recursive: true
+    delete: true
     when:
       branch: master
+
+  rsync:
+    user: deploy
+    host: dl.webhippie.de
+    source: dist/release/
+    target: $$BASE_PATH/solder-api/$$TAG
+    recursive: true
+    delete: true
+    when:
+      event: tag
+
+  rsync:
+    user: deploy
+    host: dl.webhippie.de
+    source: dist/latest/
+    target: $$BASE_PATH/solder-api/latest
+    recursive: true
+    delete: true
+    when:
+      event: tag
+
+  rsync:
+    user: deploy
+    host: dl.webhippie.de
+    source: dist/publish/
+    target: $$BASE_PATH/solder-api/updates
+    recursive: true
+    delete: false
+    when:
+      event: tag
 
   github_release:
     api_key: $$GITHUB_APIKEY
     files:
-      - dist/*
+      - dist/release/*
     when:
       event: tag
 
@@ -32,8 +72,6 @@ notify:
   gitter:
     webhook:
       - $$GITTER_WEBHOOK
-    when:
-      repo: solderapp/solder-api
 
 cache:
   mount:

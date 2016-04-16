@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/solderapp/solder-api/config"
 )
 
 // SetCache writes required cache headers to all requests.
@@ -47,6 +48,14 @@ func SetSecure() gin.HandlerFunc {
 			c.Header("Strict-Transport-Security", "max-age=31536000")
 		}
 
+		c.Next()
+	}
+}
+
+// SetVersion writes the current API version to the headers.
+func SetVersion() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("X-SOLDER-VERSION", config.Version)
 		c.Next()
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/solderapp/solder-api/assets"
 	"github.com/solderapp/solder-api/config"
 	"github.com/solderapp/solder-api/controller"
 	"github.com/solderapp/solder-api/router/middleware/context"
@@ -11,8 +12,8 @@ import (
 	"github.com/solderapp/solder-api/router/middleware/logger"
 	"github.com/solderapp/solder-api/router/middleware/recovery"
 	"github.com/solderapp/solder-api/router/middleware/session"
-	"github.com/solderapp/solder-api/static"
 	"github.com/solderapp/solder-api/template"
+	"github.com/solderapp/solder-api/web"
 )
 
 // Load initializes the routing of the application.
@@ -36,6 +37,7 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 	e.Use(header.SetCache())
 	e.Use(header.SetOptions())
 	e.Use(header.SetSecure())
+	e.Use(header.SetVersion())
 	e.Use(session.SetCurrent())
 
 	r := e.Group(cfg.Server.Root)
@@ -50,15 +52,15 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 
 		r.StaticFS(
 			"/assets",
-			static.Load(),
+			assets.Load(),
 		)
 
-		r.GET("/favicon.ico", controller.GetFavicon)
-		r.GET("", controller.GetIndex)
+		r.GET("/favicon.ico", web.GetFavicon)
+		r.GET("", web.GetIndex)
 
 		api := r.Group("/api")
 		{
-			api.GET("", controller.GetAPI)
+			api.GET("", controller.GetIndex)
 
 			//
 			// Profile
