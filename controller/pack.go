@@ -15,7 +15,7 @@ import (
 
 // GetPacks retrieves all available packs.
 func GetPacks(c *gin.Context) {
-	root := context.Root(c)
+	location := context.Location(c)
 	records, err := context.Store(c).GetPacks()
 
 	if err != nil {
@@ -35,7 +35,7 @@ func GetPacks(c *gin.Context) {
 		if record.Icon != nil {
 			record.Icon.URL = strings.Join(
 				[]string{
-					root,
+					location.String(),
 					"storage",
 					"icon",
 					strconv.Itoa(record.ID),
@@ -47,7 +47,7 @@ func GetPacks(c *gin.Context) {
 		if record.Background != nil {
 			record.Background.URL = strings.Join(
 				[]string{
-					root,
+					location.String(),
 					"storage",
 					"background",
 					strconv.Itoa(record.ID),
@@ -59,7 +59,7 @@ func GetPacks(c *gin.Context) {
 		if record.Logo != nil {
 			record.Logo.URL = strings.Join(
 				[]string{
-					root,
+					location.String(),
 					"storage",
 					"logo",
 					strconv.Itoa(record.ID),
@@ -77,13 +77,13 @@ func GetPacks(c *gin.Context) {
 
 // GetPack retrieves a specific pack.
 func GetPack(c *gin.Context) {
-	root := context.Root(c)
+	location := context.Location(c)
 	record := session.Pack(c)
 
 	if record.Icon != nil {
 		record.Icon.URL = strings.Join(
 			[]string{
-				root,
+				location.String(),
 				"storage",
 				"icon",
 				strconv.Itoa(record.ID),
@@ -95,7 +95,7 @@ func GetPack(c *gin.Context) {
 	if record.Background != nil {
 		record.Background.URL = strings.Join(
 			[]string{
-				root,
+				location.String(),
 				"storage",
 				"background",
 				strconv.Itoa(record.ID),
@@ -107,7 +107,7 @@ func GetPack(c *gin.Context) {
 	if record.Logo != nil {
 		record.Logo.URL = strings.Join(
 			[]string{
-				root,
+				location.String(),
 				"storage",
 				"logo",
 				strconv.Itoa(record.ID),

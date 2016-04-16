@@ -14,7 +14,7 @@ import (
 
 // GetVersions retrieves all available versions.
 func GetVersions(c *gin.Context) {
-	root := context.Root(c)
+	location := context.Location(c)
 	mod := session.Mod(c)
 
 	records, err := context.Store(c).GetVersions(
@@ -38,7 +38,7 @@ func GetVersions(c *gin.Context) {
 		if record.File != nil {
 			record.File.URL = strings.Join(
 				[]string{
-					root,
+					location.String(),
 					"storage",
 					"version",
 					strconv.Itoa(record.ID),
@@ -56,13 +56,13 @@ func GetVersions(c *gin.Context) {
 
 // GetVersion retrieves a specific version.
 func GetVersion(c *gin.Context) {
-	root := context.Root(c)
+	location := context.Location(c)
 	record := session.Version(c)
 
 	if record.File != nil {
 		record.File.URL = strings.Join(
 			[]string{
-				root,
+				location.String(),
 				"storage",
 				"version",
 				strconv.Itoa(record.ID),

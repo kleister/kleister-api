@@ -31,7 +31,7 @@ func Load(cfg *config.Config, middleware ...gin.HandlerFunc) http.Handler {
 	)
 
 	e.Use(middleware...)
-	e.Use(context.SetRoot())
+	e.Use(context.SetLocation())
 	e.Use(logger.SetLogger())
 	e.Use(recovery.SetRecovery())
 	e.Use(header.SetCache())
