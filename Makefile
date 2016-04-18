@@ -16,11 +16,11 @@ RELEASES ?= $(BIN)/$(EXECUTABLE)-linux-amd64 \
 
 PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
-ifneq ($(CI_TAG),)
-	VERSION ?= $(CI_TAG)
+ifneq ($(DRONE_TAG),)
+	VERSION ?= $(DRONE_TAG)
 else
-	ifneq ($(CI_BRANCH),)
-		VERSION ?= $(CI_BRANCH)
+	ifneq ($(DRONE_BRANCH),)
+		VERSION ?= $(DRONE_BRANCH)
 	else
 		VERSION ?= master
 	endif

@@ -10,6 +10,7 @@ build:
 
   updater:
     image: webhippie/golang:latest
+    commands:
       - make updater
     when:
       event: tag
