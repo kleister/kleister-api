@@ -35,3 +35,8 @@ func GetPack(c context.Context, id string) (*model.Pack, *gorm.DB) {
 func GetPackClients(c context.Context, id int) (*model.Clients, error) {
 	return FromContext(c).GetPackClients(id)
 }
+
+// GetPackHasClient checks if a specific client is assigned to a pack.
+func GetPackHasClient(c context.Context, parent, id int) bool {
+	return FromContext(c).GetPackHasClient(parent, id)
+}

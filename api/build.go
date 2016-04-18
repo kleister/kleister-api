@@ -203,28 +203,27 @@ func GetBuildVersions(c *gin.Context) {
 
 // PatchBuildVersion appends a version to a build.
 func PatchBuildVersion(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// build := session.Build(c)
-	// version := session.Version(c)
+	build := session.Build(c)
+	version := session.Version(c)
 
-	// _, res := store.GetBuildVersion(
-	// 	c,
-	// 	build.ID,
-	// 	version.ID,
-	// )
+	assigned := store.GetBuildHasVersion(
+		c,
+		build.ID,
+		version.ID,
+	)
 
-	// if res.Count() > 0 {
-	// 	c.JSON(
-	// 		http.StatusPreconditionFailed,
-	// 		gin.H{
-	// 			"status":  http.StatusPreconditionFailed,
-	// 			"message": "Version is already appended",
-	// 		},
-	// 	)
+	if assigned == true {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Version is already appended",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// err := context.Store(c).Model(
 	// 	&build,
@@ -258,28 +257,27 @@ func PatchBuildVersion(c *gin.Context) {
 
 // DeleteBuildVersion deleted a version from a build
 func DeleteBuildVersion(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// build := session.Build(c)
-	// version := session.Version(c)
+	build := session.Build(c)
+	version := session.Version(c)
 
-	// _, res := store.GetBuildVersion(
-	// 	c,
-	// 	build.ID,
-	// 	version.ID,
-	// )
+	assigned := store.GetBuildHasVersion(
+		c,
+		build.ID,
+		version.ID,
+	)
 
-	// if res.Count() < 1 {
-	// 	c.JSON(
-	// 		http.StatusNotFound,
-	// 		gin.H{
-	// 			"status":  http.StatusNotFound,
-	// 			"message": "Version is not assigned",
-	// 		},
-	// 	)
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Version is not assigned",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// err := context.Store(c).Model(
 	// 	&build,

@@ -28,6 +28,9 @@ type Store interface {
 	// GetBuildVersions retrieves versions for a build.
 	GetBuildVersions(int) (*model.Versions, error)
 
+	// GetBuildHasVersion checks if a specific version is assigned to a build.
+	GetBuildHasVersion(int, int) bool
+
 	// GetClients retrieves all available clients from the database.
 	GetClients() (*model.Clients, error)
 
@@ -45,6 +48,9 @@ type Store interface {
 
 	// GetClientPacks retrieves packs for a client.
 	GetClientPacks(int) (*model.Packs, error)
+
+	// GetClientHasPack checks if a specific pack is assigned to a client.
+	GetClientHasPack(int, int) bool
 
 	// GetKeys retrieves all available keys from the database.
 	GetKeys() (*model.Keys, error)
@@ -79,6 +85,9 @@ type Store interface {
 	// GetModUsers retrieves users for a mod.
 	GetModUsers(int) (*model.Users, error)
 
+	// GetModHasUser checks if a specific user is assigned to a mod.
+	GetModHasUser(int, int) bool
+
 	// GetPacks retrieves all available packs from the database.
 	GetPacks() (*model.Packs, error)
 
@@ -96,6 +105,9 @@ type Store interface {
 
 	// GetPackClients retrieves clients for a pack.
 	GetPackClients(int) (*model.Clients, error)
+
+	// GetPackHasClient checks if a specific client is assigned to a pack.
+	GetPackHasClient(int, int) bool
 
 	// GetUsers retrieves all available users from the database.
 	GetUsers() (*model.Users, error)
@@ -115,6 +127,9 @@ type Store interface {
 	// GetUserMods retrieves mods for a user.
 	GetUserMods(int) (*model.Mods, error)
 
+	// GetUserHasMod checks if a specific mod is assigned to a user.
+	GetUserHasMod(int, int) bool
+
 	// GetVersions retrieves all available versions from the database.
 	GetVersions(int) (*model.Versions, error)
 
@@ -133,6 +148,9 @@ type Store interface {
 	// GetVersionBuilds retrieves builds for a version.
 	GetVersionBuilds(int) (*model.Builds, error)
 
+	// GetVersionHasBuild checks if a specific build is assigned to a version.
+	GetVersionHasBuild(int, int) bool
+
 	// GetMinecrafts retrieves all available minecrafts from the database.
 	GetMinecrafts() (*model.Minecrafts, error)
 
@@ -145,6 +163,9 @@ type Store interface {
 	// GetMinecraftBuilds retrieves builds for a minecraft.
 	GetMinecraftBuilds(int) (*model.Builds, error)
 
+	// GetMinecraftHasBuild checks if a specific build is assigned to a minecraft.
+	GetMinecraftHasBuild(int, int) bool
+
 	// GetForges retrieves all available forges from the database.
 	GetForges() (*model.Forges, error)
 
@@ -156,4 +177,7 @@ type Store interface {
 
 	// GetForgeBuilds retrieves builds for a forge.
 	GetForgeBuilds(int) (*model.Builds, error)
+
+	// GetForgeHasBuild checks if a specific build is assigned to a forge.
+	GetForgeHasBuild(int, int) bool
 }

@@ -78,3 +78,22 @@ func (db *data) GetModUsers(id int) (*model.Users, error) {
 
 	return records, err
 }
+
+// GetModHasUser checks if a specific user is assigned to a mod.
+func (db *data) GetModHasUser(parent, id int) bool {
+	record := &model.User{
+		ID: id,
+	}
+
+	count := db.Model(
+		&model.Mod{
+			ID: parent,
+		},
+	).Association(
+		"Users",
+	).Find(
+		record,
+	).Count()
+
+	return count > 0
+}

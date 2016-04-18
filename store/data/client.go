@@ -72,3 +72,22 @@ func (db *data) GetClientPacks(id int) (*model.Packs, error) {
 
 	return records, err
 }
+
+// GetClientHasPack checks if a specific pack is assigned to a client.
+func (db *data) GetClientHasPack(parent, id int) bool {
+	record := &model.Pack{
+		ID: id,
+	}
+
+	count := db.Model(
+		&model.Client{
+			ID: parent,
+		},
+	).Association(
+		"Packs",
+	).Find(
+		record,
+	).Count()
+
+	return count > 0
+}

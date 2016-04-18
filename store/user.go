@@ -35,3 +35,8 @@ func GetUser(c context.Context, id string) (*model.User, *gorm.DB) {
 func GetUserMods(c context.Context, id int) (*model.Mods, error) {
 	return FromContext(c).GetUserMods(id)
 }
+
+// GetUserHasMod checks if a specific mod is assigned to a user.
+func GetUserHasMod(c context.Context, parent, id int) bool {
+	return FromContext(c).GetUserHasMod(parent, id)
+}

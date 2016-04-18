@@ -73,3 +73,22 @@ func (db *data) GetForgeBuilds(id int) (*model.Builds, error) {
 
 	return records, err
 }
+
+// GetForgeHasBuild checks if a specific build is assigned to a minecraft.
+func (db *data) GetForgeHasBuild(parent, id int) bool {
+	record := &model.Build{
+		ID: id,
+	}
+
+	count := db.Model(
+		&model.Forge{
+			ID: parent,
+		},
+	).Association(
+		"Builds",
+	).Find(
+		record,
+	).Count()
+
+	return count > 0
+}

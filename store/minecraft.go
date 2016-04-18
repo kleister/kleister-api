@@ -26,3 +26,8 @@ func GetMinecraft(c context.Context, id string) (*model.Minecraft, *gorm.DB) {
 func GetMinecraftBuilds(c context.Context, id int) (*model.Builds, error) {
 	return FromContext(c).GetMinecraftBuilds(id)
 }
+
+// GetMinecraftHasBuild checks if a specific build is assigned to a minecraft.
+func GetMinecraftHasBuild(c context.Context, parent, id int) bool {
+	return FromContext(c).GetMinecraftHasBuild(parent, id)
+}

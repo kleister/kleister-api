@@ -274,30 +274,27 @@ func GetPackClients(c *gin.Context) {
 
 // PatchPackClient appends a client to a pack.
 func PatchPackClient(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// pack := session.Pack(c)
-	// client := session.Client(c)
+	pack := session.Pack(c)
+	client := session.Client(c)
 
-	// count := context.Store(c).Model(
-	// 	&pack,
-	// ).Association(
-	// 	"Clients",
-	// ).Find(
-	// 	&client,
-	// ).Count()
+	assigned := store.GetPackHasClient(
+		c,
+		pack.ID,
+		client.ID,
+	)
 
-	// if count > 0 {
-	// 	c.JSON(
-	// 		http.StatusPreconditionFailed,
-	// 		gin.H{
-	// 			"status":  http.StatusPreconditionFailed,
-	// 			"message": "Client is already appended",
-	// 		},
-	// 	)
+	if assigned == true {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Client is already appended",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// err := context.Store(c).Model(
 	// 	&pack,
@@ -331,30 +328,27 @@ func PatchPackClient(c *gin.Context) {
 
 // DeletePackClient deleted a client from a pack
 func DeletePackClient(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// pack := session.Pack(c)
-	// client := session.Client(c)
+	pack := session.Pack(c)
+	client := session.Client(c)
 
-	// count := context.Store(c).Model(
-	// 	&pack,
-	// ).Association(
-	// 	"Clients",
-	// ).Find(
-	// 	&client,
-	// ).Count()
+	assigned := store.GetPackHasClient(
+		c,
+		pack.ID,
+		client.ID,
+	)
 
-	// if count < 1 {
-	// 	c.JSON(
-	// 		http.StatusNotFound,
-	// 		gin.H{
-	// 			"status":  http.StatusNotFound,
-	// 			"message": "Client is not assigned",
-	// 		},
-	// 	)
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Client is not assigned",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// err := context.Store(c).Model(
 	// 	&pack,

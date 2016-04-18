@@ -120,30 +120,27 @@ func GetForgeBuilds(c *gin.Context) {
 
 // PatchForgeBuild appends a build to a Forge version.
 func PatchForgeBuild(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// forge := session.Forge(c)
-	// build := session.Build(c)
+	forge := session.Forge(c)
+	build := session.Build(c)
 
-	// count := context.Store(c).Model(
-	// 	&forge,
-	// ).Association(
-	// 	"Builds",
-	// ).Find(
-	// 	&build,
-	// ).Count()
+	assigned := store.GetForgeHasBuild(
+		c,
+		forge.ID,
+		build.ID,
+	)
 
-	// if count > 0 {
-	// 	c.JSON(
-	// 		http.StatusPreconditionFailed,
-	// 		gin.H{
-	// 			"status":  http.StatusPreconditionFailed,
-	// 			"message": "Build is already appended",
-	// 		},
-	// 	)
+	if assigned == true {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Build is already appended",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// build.Forge = forge
 
@@ -175,30 +172,27 @@ func PatchForgeBuild(c *gin.Context) {
 
 // DeleteForgeBuild deleted a build from a Forge version
 func DeleteForgeBuild(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// forge := session.Forge(c)
-	// build := session.Build(c)
+	forge := session.Forge(c)
+	build := session.Build(c)
 
-	// count := context.Store(c).Model(
-	// 	&forge,
-	// ).Association(
-	// 	"Builds",
-	// ).Find(
-	// 	&build,
-	// ).Count()
+	assigned := store.GetForgeHasBuild(
+		c,
+		forge.ID,
+		build.ID,
+	)
 
-	// if count < 1 {
-	// 	c.JSON(
-	// 		http.StatusNotFound,
-	// 		gin.H{
-	// 			"status":  http.StatusNotFound,
-	// 			"message": "Build is not assigned",
-	// 		},
-	// 	)
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Build is not assigned",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// build.ForgeID = 0
 

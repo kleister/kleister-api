@@ -196,30 +196,27 @@ func GetUserMods(c *gin.Context) {
 
 // PatchUserMod appends a mod to a user.
 func PatchUserMod(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// user := session.User(c)
-	// mod := session.Mod(c)
+	user := session.User(c)
+	mod := session.Mod(c)
 
-	// count := context.Store(c).Model(
-	// 	&user,
-	// ).Association(
-	// 	"Mods",
-	// ).Find(
-	// 	&mod,
-	// ).Count()
+	assigned := store.GetUserHasMod(
+		c,
+		user.ID,
+		mod.ID,
+	)
 
-	// if count > 0 {
-	// 	c.JSON(
-	// 		http.StatusPreconditionFailed,
-	// 		gin.H{
-	// 			"status":  http.StatusPreconditionFailed,
-	// 			"message": "Mod is already appended",
-	// 		},
-	// 	)
+	if assigned == true {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Mod is already appended",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// err := context.Store(c).Model(
 	// 	&user,
@@ -255,30 +252,27 @@ func PatchUserMod(c *gin.Context) {
 
 // DeleteUserMod deleted a mod from a user
 func DeleteUserMod(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// user := session.User(c)
-	// mod := session.Mod(c)
+	user := session.User(c)
+	mod := session.Mod(c)
 
-	// count := context.Store(c).Model(
-	// 	&user,
-	// ).Association(
-	// 	"Mods",
-	// ).Find(
-	// 	&mod,
-	// ).Count()
+	assigned := store.GetUserHasMod(
+		c,
+		user.ID,
+		mod.ID,
+	)
 
-	// if count < 1 {
-	// 	c.JSON(
-	// 		http.StatusNotFound,
-	// 		gin.H{
-	// 			"status":  http.StatusNotFound,
-	// 			"message": "Mod is not assigned",
-	// 		},
-	// 	)
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Mod is not assigned",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// err := context.Store(c).Model(
 	// 	&user,

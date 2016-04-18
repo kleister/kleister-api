@@ -35,3 +35,8 @@ func GetBuild(c context.Context, pack int, id string) (*model.Build, *gorm.DB) {
 func GetBuildVersions(c context.Context, id int) (*model.Versions, error) {
 	return FromContext(c).GetBuildVersions(id)
 }
+
+// GetBuildHasVersion checks if a specific version is assigned to a build.
+func GetBuildHasVersion(c context.Context, parent, id int) bool {
+	return FromContext(c).GetBuildHasVersion(parent, id)
+}

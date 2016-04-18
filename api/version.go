@@ -234,30 +234,27 @@ func GetVersionBuilds(c *gin.Context) {
 
 // PatchVersionBuild appends a build to a version.
 func PatchVersionBuild(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// version := session.Version(c)
-	// build := session.Build(c)
+	version := session.Version(c)
+	build := session.Build(c)
 
-	// count := context.Store(c).Model(
-	// 	&version,
-	// ).Association(
-	// 	"Builds",
-	// ).Find(
-	// 	&build,
-	// ).Count()
+	assigned := store.GetVersionHasBuild(
+		c,
+		version.ID,
+		build.ID,
+	)
 
-	// if count > 0 {
-	// 	c.JSON(
-	// 		http.StatusPreconditionFailed,
-	// 		gin.H{
-	// 			"status":  http.StatusPreconditionFailed,
-	// 			"message": "Build is already appended",
-	// 		},
-	// 	)
+	if assigned == true {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Build is already appended",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// err := context.Store(c).Model(
 	// 	&version,
@@ -291,30 +288,27 @@ func PatchVersionBuild(c *gin.Context) {
 
 // DeleteVersionBuild deleted a build from a version
 func DeleteVersionBuild(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// version := session.Version(c)
-	// build := session.Build(c)
+	version := session.Version(c)
+	build := session.Build(c)
 
-	// count := context.Store(c).Model(
-	// 	&version,
-	// ).Association(
-	// 	"Builds",
-	// ).Find(
-	// 	&build,
-	// ).Count()
+	assigned := store.GetVersionHasBuild(
+		c,
+		version.ID,
+		build.ID,
+	)
 
-	// if count < 1 {
-	// 	c.JSON(
-	// 		http.StatusNotFound,
-	// 		gin.H{
-	// 			"status":  http.StatusNotFound,
-	// 			"message": "Build is not assigned",
-	// 		},
-	// 	)
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Build is not assigned",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// err := context.Store(c).Model(
 	// 	&version,

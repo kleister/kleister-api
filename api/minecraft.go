@@ -120,30 +120,27 @@ func GetMinecraftBuilds(c *gin.Context) {
 
 // PatchMinecraftBuild appends a build to a Minecraft version.
 func PatchMinecraftBuild(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// minecraft := session.Minecraft(c)
-	// build := session.Build(c)
+	minecraft := session.Minecraft(c)
+	build := session.Build(c)
 
-	// count := context.Store(c).Model(
-	// 	&minecraft,
-	// ).Association(
-	// 	"Builds",
-	// ).Find(
-	// 	&build,
-	// ).Count()
+	assigned := store.GetMinecraftHasBuild(
+		c,
+		minecraft.ID,
+		build.ID,
+	)
 
-	// if count > 0 {
-	// 	c.JSON(
-	// 		http.StatusPreconditionFailed,
-	// 		gin.H{
-	// 			"status":  http.StatusPreconditionFailed,
-	// 			"message": "Build is already appended",
-	// 		},
-	// 	)
+	if assigned == true {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Build is already appended",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// build.Minecraft = minecraft
 
@@ -175,30 +172,27 @@ func PatchMinecraftBuild(c *gin.Context) {
 
 // DeleteMinecraftBuild deleted a build from a Minecraft version
 func DeleteMinecraftBuild(c *gin.Context) {
-	// TODO(must): Propoer implementation
-	// minecraft := session.Minecraft(c)
-	// build := session.Build(c)
+	minecraft := session.Minecraft(c)
+	build := session.Build(c)
 
-	// count := context.Store(c).Model(
-	// 	&minecraft,
-	// ).Association(
-	// 	"Builds",
-	// ).Find(
-	// 	&build,
-	// ).Count()
+	assigned := store.GetMinecraftHasBuild(
+		c,
+		minecraft.ID,
+		build.ID,
+	)
 
-	// if count < 1 {
-	// 	c.JSON(
-	// 		http.StatusNotFound,
-	// 		gin.H{
-	// 			"status":  http.StatusNotFound,
-	// 			"message": "Build is not assigned",
-	// 		},
-	// 	)
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Build is not assigned",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	// build.MinecraftID = 0
 

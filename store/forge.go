@@ -26,3 +26,8 @@ func GetForge(c context.Context, id string) (*model.Forge, *gorm.DB) {
 func GetForgeBuilds(c context.Context, id int) (*model.Builds, error) {
 	return FromContext(c).GetForgeBuilds(id)
 }
+
+// GetForgeHasBuild checks if a specific build is assigned to a forge.
+func GetForgeHasBuild(c context.Context, parent, id int) bool {
+	return FromContext(c).GetForgeHasBuild(parent, id)
+}

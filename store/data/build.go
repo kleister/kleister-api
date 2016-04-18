@@ -98,3 +98,22 @@ func (db *data) GetBuildVersions(id int) (*model.Versions, error) {
 
 	return records, err
 }
+
+// GetBuildHasVersion checks if a specific version is assigned to a build.
+func (db *data) GetBuildHasVersion(parent, id int) bool {
+	record := &model.Version{
+		ID: id,
+	}
+
+	count := db.Model(
+		&model.Build{
+			ID: parent,
+		},
+	).Association(
+		"Versions",
+	).Find(
+		record,
+	).Count()
+
+	return count > 0
+}
