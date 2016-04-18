@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/router/middleware/context"
+	"github.com/solderapp/solder-api/store"
 )
 
 const (
@@ -48,7 +48,8 @@ func SetBuild() gin.HandlerFunc {
 			return
 		}
 
-		record, res := context.Store(c).GetBuild(
+		record, res := store.GetBuild(
+			c,
 			pack.ID,
 			c.Param("build"),
 		)

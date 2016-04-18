@@ -13,6 +13,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
+	"github.com/solderapp/solder-api/config"
 	"github.com/vincent-petithory/dataurl"
 )
 
@@ -115,12 +116,12 @@ func (u *VersionFile) Validate(db *gorm.DB) {
 
 // Path generates the absolute path to the file.
 func (u *VersionFile) AbsolutePath() (string, error) {
-	if u.Path == "" {
+	if config.Server.Storage == "" {
 		return "", fmt.Errorf("Missing storage path for file")
 	}
 
 	return path.Join(
-		u.Path,
+		config.Server.Storage,
 		"version",
 		strconv.Itoa(u.VersionID),
 	), nil

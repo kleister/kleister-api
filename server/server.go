@@ -39,12 +39,12 @@ func (s *Server) Run(handler http.Handler) {
 }
 
 // Load initializes the server of the application.
-func Load(cfg *config.Config) *Server {
+func Load() *Server {
 	s := &Server{
-		Addr: cfg.Server.Addr,
-		Cert: cfg.Server.Cert,
-		Key:  cfg.Server.Key,
-		Root: cfg.Server.Root,
+		Addr: config.Server.Addr,
+		Cert: config.Server.Cert,
+		Key:  config.Server.Key,
+		Root: config.Server.Root,
 	}
 
 	return s

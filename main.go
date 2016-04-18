@@ -12,7 +12,6 @@ import (
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	cfg := &config.Config{}
 
 	app := cli.NewApp()
 	app.Name = "solder"
@@ -23,7 +22,7 @@ func main() {
 	app.Before = func(c *cli.Context) error {
 		logrus.SetOutput(os.Stdout)
 
-		if cfg.Debug {
+		if config.Debug {
 			logrus.SetLevel(logrus.DebugLevel)
 		} else {
 			logrus.SetLevel(logrus.InfoLevel)
@@ -33,7 +32,7 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
-		cmd.Server(cfg),
+		cmd.Server(),
 	}
 
 	cli.HelpFlag = cli.BoolFlag{

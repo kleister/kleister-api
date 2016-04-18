@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/router/middleware/context"
+	"github.com/solderapp/solder-api/store"
 )
 
 const (
@@ -33,7 +33,8 @@ func Pack(c *gin.Context) *model.Pack {
 // SetPack injects the pack into the context.
 func SetPack() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record, res := context.Store(c).GetPack(
+		record, res := store.GetPack(
+			c,
 			c.Param("pack"),
 		)
 

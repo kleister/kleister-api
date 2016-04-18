@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/router/middleware/context"
+	"github.com/solderapp/solder-api/store"
 )
 
 const (
@@ -33,7 +33,8 @@ func User(c *gin.Context) *model.User {
 // SetUser injects the user into the context.
 func SetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record, res := context.Store(c).GetUser(
+		record, res := store.GetUser(
+			c,
 			c.Param("user"),
 		)
 

@@ -13,7 +13,9 @@ var (
 
 	// VersionPatch is the current patch version
 	VersionPatch = 0
+)
 
+var (
 	// VersionDev indicates the current commit
 	VersionDev = "dev"
 

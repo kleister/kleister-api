@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/router/middleware/context"
+	"github.com/solderapp/solder-api/store"
 )
 
 const (
@@ -33,7 +33,8 @@ func Minecraft(c *gin.Context) *model.Minecraft {
 // SetMinecraft injects the minecraft into the context.
 func SetMinecraft() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record, res := context.Store(c).GetMinecraft(
+		record, res := store.GetMinecraft(
+			c,
 			c.Param("minecraft"),
 		)
 

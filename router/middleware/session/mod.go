@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/router/middleware/context"
+	"github.com/solderapp/solder-api/store"
 )
 
 const (
@@ -33,7 +33,8 @@ func Mod(c *gin.Context) *model.Mod {
 // SetMod injects the mod into the context.
 func SetMod() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record, res := context.Store(c).GetMod(
+		record, res := store.GetMod(
+			c,
 			c.Param("mod"),
 		)
 

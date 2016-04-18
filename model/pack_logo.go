@@ -13,6 +13,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
+	"github.com/solderapp/solder-api/config"
 	"github.com/vincent-petithory/dataurl"
 )
 
@@ -115,12 +116,12 @@ func (u *PackLogo) Validate(db *gorm.DB) {
 
 // Path generates the absolute path to the logo.
 func (u *PackLogo) AbsolutePath() (string, error) {
-	if u.Path == "" {
+	if config.Server.Storage == "" {
 		return "", fmt.Errorf("Missing storage path for logo")
 	}
 
 	return path.Join(
-		u.Path,
+		config.Server.Storage,
 		"logo",
 		strconv.Itoa(u.PackID),
 	), nil

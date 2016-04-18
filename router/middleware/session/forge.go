@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/router/middleware/context"
+	"github.com/solderapp/solder-api/store"
 )
 
 const (
@@ -33,7 +33,8 @@ func Forge(c *gin.Context) *model.Forge {
 // SetForge injects the forge into the context.
 func SetForge() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record, res := context.Store(c).GetForge(
+		record, res := store.GetForge(
+			c,
 			c.Param("forge"),
 		)
 

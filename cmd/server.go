@@ -3,14 +3,12 @@ package cmd
 import (
 	"github.com/codegangsta/cli"
 	"github.com/solderapp/solder-api/config"
-	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/router"
-	"github.com/solderapp/solder-api/router/middleware/context"
 	"github.com/solderapp/solder-api/server"
 )
 
 // Server provides the sub-command to start the API server.
-func Server(cfg *config.Config) cli.Command {
+func Server() cli.Command {
 	return cli.Command{
 		Name:  "server",
 		Usage: "Start the Solder server",
@@ -20,98 +18,81 @@ func Server(cfg *config.Config) cli.Command {
 				Value:       "mysql",
 				Usage:       "Database driver selection",
 				EnvVar:      "SOLDER_DB_DRIVER",
-				Destination: &cfg.Database.Driver,
+				Destination: &config.Database.Driver,
 			},
 			cli.StringFlag{
 				Name:        "db-name",
 				Value:       "solder",
 				Usage:       "Name for database connection",
 				EnvVar:      "SOLDER_DB_NAME",
-				Destination: &cfg.Database.Name,
+				Destination: &config.Database.Name,
 			},
 			cli.StringFlag{
 				Name:        "db-username",
 				Value:       "root",
 				Usage:       "Username for database connection",
 				EnvVar:      "SOLDER_DB_USERNAME",
-				Destination: &cfg.Database.Username,
+				Destination: &config.Database.Username,
 			},
 			cli.StringFlag{
 				Name:        "db-password",
 				Value:       "root",
 				Usage:       "Password for database connection",
 				EnvVar:      "SOLDER_DB_PASSWORD",
-				Destination: &cfg.Database.Password,
+				Destination: &config.Database.Password,
 			},
 			cli.StringFlag{
 				Name:        "db-host",
 				Value:       "localhost:3306",
 				Usage:       "Host for database connection",
 				EnvVar:      "SOLDER_DB_HOST",
-				Destination: &cfg.Database.Host,
+				Destination: &config.Database.Host,
 			},
 			cli.StringFlag{
 				Name:        "addr",
 				Value:       ":8080",
 				Usage:       "Address to bind the server",
 				EnvVar:      "SOLDER_SERVER_ADDR",
-				Destination: &cfg.Server.Addr,
+				Destination: &config.Server.Addr,
 			},
 			cli.StringFlag{
 				Name:        "cert",
 				Value:       "",
 				Usage:       "Path to SSL cert",
 				EnvVar:      "SOLDER_SERVER_CERT",
-				Destination: &cfg.Server.Cert,
+				Destination: &config.Server.Cert,
 			},
 			cli.StringFlag{
 				Name:        "key",
 				Value:       "",
 				Usage:       "Path to SSL key",
 				EnvVar:      "SOLDER_SERVER_KEY",
-				Destination: &cfg.Server.Key,
+				Destination: &config.Server.Key,
 			},
 			cli.StringFlag{
 				Name:        "root",
 				Value:       "/",
 				Usage:       "Root folder of the app",
 				EnvVar:      "SOLDER_SERVER_ROOT",
-				Destination: &cfg.Server.Root,
+				Destination: &config.Server.Root,
 			},
 			cli.StringFlag{
 				Name:        "storage",
 				Value:       "storage/",
 				Usage:       "Folder for storing uploads",
 				EnvVar:      "SOLDER_SERVER_STORAGE",
-				Destination: &cfg.Server.Storage,
+				Destination: &config.Server.Storage,
 			},
 			cli.BoolFlag{
 				Name:        "debug",
 				Usage:       "Activate debug information",
 				EnvVar:      "SOLDER_SERVER_DEBUG",
-				Destination: &cfg.Debug,
+				Destination: &config.Debug,
 			},
 		},
 		Action: func(c *cli.Context) {
-			dat := model.Load(
-				cfg,
-			)
-
-			srv := server.Load(
-				cfg,
-			)
-
-			srv.Run(
-				router.Load(
-					cfg,
-					context.SetConfig(
-						*cfg,
-					),
-					context.SetStore(
-						*dat,
-					),
-				),
-			)
+			srv := server.Load()
+			srv.Run(router.Load())
 		},
 	}
 }

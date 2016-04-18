@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/router/middleware/context"
+	"github.com/solderapp/solder-api/store"
 )
 
 const (
@@ -33,7 +33,8 @@ func Key(c *gin.Context) *model.Key {
 // SetKey injects the key into the context.
 func SetKey() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record, res := context.Store(c).GetKey(
+		record, res := store.GetKey(
+			c,
 			c.Param("key"),
 		)
 

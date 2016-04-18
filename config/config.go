@@ -1,24 +1,23 @@
 package config
 
-// Config provides all application config values.
-type Config struct {
-	Debug  bool
-	Server struct {
-		Addr    string
-		Cert    string
-		Key     string
-		Root    string
-		Storage string
-	}
-	Database struct {
-		Driver   string
-		Username string
-		Password string
-		Name     string
-		Host     string
-	}
+type database struct {
+	Driver   string
+	Username string
+	Password string
+	Name     string
+	Host     string
+}
+
+type server struct {
+	Addr    string
+	Cert    string
+	Key     string
+	Root    string
+	Storage string
 }
 
 var (
-	Values = &Config{}
+	Debug    bool
+	Database = &database{}
+	Server   = &server{}
 )
