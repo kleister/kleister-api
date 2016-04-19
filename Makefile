@@ -74,7 +74,7 @@ $(BIN)/$(EXECUTABLE): $(wildcard *.go)
 $(BIN)/$(EXECUTABLE)-%: GOOS=$(word 1,$(subst -, ,$*))
 $(BIN)/$(EXECUTABLE)-%: GOARCH=$(subst .exe,,$(word 2,$(subst -, ,$*)))
 $(BIN)/$(EXECUTABLE)-%:
-	CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags '-s -w $(LDFLAGS)' -o $@
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags '-s -w $(LDFLAGS)' -o $@
 	mkdir -p $(DIST)/updater
 	cp $@ $(DIST)/updater/$(GOOS)-$(GOARCH)
 	mkdir -p $(DIST)/release

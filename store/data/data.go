@@ -19,9 +19,6 @@ import (
 
 	// Register Postgres driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-
-	// Register SQLite driver for GORM
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 // Store is a basic struct to represent the database handle.
