@@ -69,6 +69,24 @@ publish:
     when:
       event: tag
 
+  docker:
+    username: $$DOCKER_USER
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: solderapp/solder-api
+    tag: $$TAG
+    when:
+      event: tag
+
+  docker:
+    username: $$DOCKER_USER
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: solderapp/solder-api
+    tag: latest
+    when:
+      branch: master
+
 notify:
   gitter:
     webhook:

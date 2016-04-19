@@ -1,6 +1,7 @@
 DIST := dist
 BIN := bin
 EXECUTABLE := solder-api
+IMAGE := solderapp/solder-api
 SHA := $(shell git rev-parse --short HEAD)
 
 LDFLAGS += -X "github.com/solderapp/solder-api/config.VersionDev=$(SHA)"
@@ -57,6 +58,10 @@ lint:
 test:
 	for PKG in $(PACKAGES); do go test -cover -coverprofile $$GOPATH/src/$$PKG/coverage.out $$PKG || exit 1; done;
 
+docker: clean
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w $(LDFLAGS)' -o $(BIN)/$(EXECUTABLE)
+	docker build --rm -t $(IMAGE) .
+
 build: $(BIN)/$(EXECUTABLE)
 
 release: $(RELEASES)
@@ -84,5 +89,5 @@ $(BIN)/$(EXECUTABLE)-%:
 	cp $@ $(DIST)/latest/$(EXECUTABLE)-latest-$(GOOS)-$(GOARCH)
 	cd $(DIST)/latest && sha256sum $(EXECUTABLE)-latest-$(GOOS)-$(GOARCH) > $(EXECUTABLE)-latest-$(GOOS)-$(GOARCH).sha256
 
-.PHONY: all clean deps vendor generate fmt vet lint test build
+.PHONY: all clean deps vendor generate fmt vet lint test docker build
 .PRECIOUS: $(BIN)/$(EXECUTABLE)-%
