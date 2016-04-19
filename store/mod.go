@@ -40,3 +40,11 @@ func GetModUsers(c context.Context, id int) (*model.Users, error) {
 func GetModHasUser(c context.Context, parent, id int) bool {
 	return FromContext(c).GetModHasUser(parent, id)
 }
+
+func CreateModUser(c context.Context, parent, id int) error {
+	return FromContext(c).CreateModUser(parent, id)
+}
+
+func DeleteModUser(c context.Context, parent, id int) error {
+	return FromContext(c).DeleteModUser(parent, id)
+}

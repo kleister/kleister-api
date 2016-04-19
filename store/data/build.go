@@ -117,3 +117,31 @@ func (db *data) GetBuildHasVersion(parent, id int) bool {
 
 	return count > 0
 }
+
+func (db *data) CreateBuildVersion(parent, id int) error {
+	return db.Model(
+		&model.Build{
+			ID: parent,
+		},
+	).Association(
+		"Versions",
+	).Append(
+		&model.Version{
+			ID: id,
+		},
+	).Error
+}
+
+func (db *data) DeleteBuildVersion(parent, id int) error {
+	return db.Model(
+		&model.Build{
+			ID: parent,
+		},
+	).Association(
+		"Versions",
+	).Delete(
+		&model.Version{
+			ID: id,
+		},
+	).Error
+}

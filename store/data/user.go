@@ -97,3 +97,31 @@ func (db *data) GetUserHasMod(parent, id int) bool {
 
 	return count > 0
 }
+
+func (db *data) CreateUserMod(parent, id int) error {
+	return db.Model(
+		&model.User{
+			ID: parent,
+		},
+	).Association(
+		"Mods",
+	).Append(
+		&model.Mod{
+			ID: id,
+		},
+	).Error
+}
+
+func (db *data) DeleteUserMod(parent, id int) error {
+	return db.Model(
+		&model.User{
+			ID: parent,
+		},
+	).Association(
+		"Mods",
+	).Delete(
+		&model.Mod{
+			ID: id,
+		},
+	).Error
+}

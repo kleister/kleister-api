@@ -31,3 +31,11 @@ func GetMinecraftBuilds(c context.Context, id int) (*model.Builds, error) {
 func GetMinecraftHasBuild(c context.Context, parent, id int) bool {
 	return FromContext(c).GetMinecraftHasBuild(parent, id)
 }
+
+func CreateMinecraftBuild(c context.Context, parent, id int) error {
+	return FromContext(c).CreateMinecraftBuild(parent, id)
+}
+
+func DeleteMinecraftBuild(c context.Context, parent, id int) error {
+	return FromContext(c).DeleteMinecraftBuild(parent, id)
+}

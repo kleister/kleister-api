@@ -142,24 +142,24 @@ func PatchMinecraftBuild(c *gin.Context) {
 		return
 	}
 
-	// build.Minecraft = minecraft
+	err := store.CreateMinecraftBuild(
+		c,
+		minecraft.ID,
+		build.ID,
+	)
 
-	// err := context.Store(c).Save(
-	// 	&build,
-	// ).Error
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append build",
+			},
+		)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to append build",
-	// 		},
-	// 	)
-
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,
@@ -194,24 +194,24 @@ func DeleteMinecraftBuild(c *gin.Context) {
 		return
 	}
 
-	// build.MinecraftID = 0
+	err := store.DeleteMinecraftBuild(
+		c,
+		minecraft.ID,
+		build.ID,
+	)
 
-	// err := context.Store(c).Save(
-	// 	&build,
-	// ).Error
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink build",
+			},
+		)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to unlink build",
-	// 		},
-	// 	)
-
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,

@@ -91,3 +91,31 @@ func (db *data) GetClientHasPack(parent, id int) bool {
 
 	return count > 0
 }
+
+func (db *data) CreateClientPack(parent, id int) error {
+	return db.Model(
+		&model.Client{
+			ID: parent,
+		},
+	).Association(
+		"Packs",
+	).Append(
+		model.Pack{
+			ID: id,
+		},
+	).Error
+}
+
+func (db *data) DeleteClientPack(parent, id int) error {
+	return db.Model(
+		&model.Client{
+			ID: parent,
+		},
+	).Association(
+		"Packs",
+	).Delete(
+		model.Pack{
+			ID: id,
+		},
+	).Error
+}

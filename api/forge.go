@@ -142,24 +142,24 @@ func PatchForgeBuild(c *gin.Context) {
 		return
 	}
 
-	// build.Forge = forge
+	err := store.CreateForgeBuild(
+		c,
+		forge.ID,
+		build.ID,
+	)
 
-	// err := context.Store(c).Save(
-	// 	&build,
-	// ).Error
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append build",
+			},
+		)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to append build",
-	// 		},
-	// 	)
-
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,
@@ -194,24 +194,24 @@ func DeleteForgeBuild(c *gin.Context) {
 		return
 	}
 
-	// build.ForgeID = 0
+	err := store.DeleteForgeBuild(
+		c,
+		forge.ID,
+		build.ID,
+	)
 
-	// err := context.Store(c).Save(
-	// 	&build,
-	// ).Error
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink build",
+			},
+		)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to unlink build",
-	// 		},
-	// 	)
-
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,

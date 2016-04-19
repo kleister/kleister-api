@@ -225,26 +225,24 @@ func PatchBuildVersion(c *gin.Context) {
 		return
 	}
 
-	// err := context.Store(c).Model(
-	// 	&build,
-	// ).Association(
-	// 	"Versions",
-	// ).Append(
-	// 	&version,
-	// ).Error
+	err := store.CreateBuildVersion(
+		c,
+		build.ID,
+		version.ID,
+	)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to append version",
-	// 		},
-	// 	)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append version",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,
@@ -279,26 +277,24 @@ func DeleteBuildVersion(c *gin.Context) {
 		return
 	}
 
-	// err := context.Store(c).Model(
-	// 	&build,
-	// ).Association(
-	// 	"Versions",
-	// ).Delete(
-	// 	&version,
-	// ).Error
+	err := store.DeleteBuildVersion(
+		c,
+		build.ID,
+		version.ID,
+	)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to unlink version",
-	// 		},
-	// 	)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink version",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,

@@ -40,3 +40,11 @@ func GetUserMods(c context.Context, id int) (*model.Mods, error) {
 func GetUserHasMod(c context.Context, parent, id int) bool {
 	return FromContext(c).GetUserHasMod(parent, id)
 }
+
+func CreateUserMod(c context.Context, parent, id int) error {
+	return FromContext(c).CreateUserMod(parent, id)
+}
+
+func DeleteUserMod(c context.Context, parent, id int) error {
+	return FromContext(c).DeleteUserMod(parent, id)
+}

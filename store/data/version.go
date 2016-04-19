@@ -45,7 +45,7 @@ func (db *data) UpdateVersion(mod int, record *model.Version) error {
 
 // DeleteVersion deletes a version.
 func (db *data) DeleteVersion(mod int, record *model.Version) error {
-	// tx := context.Store(c).Begin()
+	// tx := db.Begin()
 	// failed := false
 
 	// if record.File != nil {
@@ -148,4 +148,32 @@ func (db *data) GetVersionHasBuild(parent, id int) bool {
 	).Count()
 
 	return count > 0
+}
+
+func (db *data) CreateVersionBuild(parent, id int) error {
+	return db.Model(
+		&model.Version{
+			ID: parent,
+		},
+	).Association(
+		"Builds",
+	).Append(
+		&model.Build{
+			ID: id,
+		},
+	).Error
+}
+
+func (db *data) DeleteVersionBuild(parent, id int) error {
+	return db.Model(
+		&model.Version{
+			ID: parent,
+		},
+	).Association(
+		"Builds",
+	).Delete(
+		&model.Build{
+			ID: id,
+		},
+	).Error
 }

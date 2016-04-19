@@ -40,3 +40,11 @@ func GetClientPacks(c context.Context, id int) (*model.Packs, error) {
 func GetClientHasPack(c context.Context, parent, id int) bool {
 	return FromContext(c).GetClientHasPack(parent, id)
 }
+
+func CreateClientPack(c context.Context, parent, id int) error {
+	return FromContext(c).CreateClientPack(parent, id)
+}
+
+func DeleteClientPack(c context.Context, parent, id int) error {
+	return FromContext(c).DeleteClientPack(parent, id)
+}

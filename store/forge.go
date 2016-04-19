@@ -31,3 +31,11 @@ func GetForgeBuilds(c context.Context, id int) (*model.Builds, error) {
 func GetForgeHasBuild(c context.Context, parent, id int) bool {
 	return FromContext(c).GetForgeHasBuild(parent, id)
 }
+
+func CreateForgeBuild(c context.Context, parent, id int) error {
+	return FromContext(c).CreateForgeBuild(parent, id)
+}
+
+func DeleteForgeBuild(c context.Context, parent, id int) error {
+	return FromContext(c).DeleteForgeBuild(parent, id)
+}

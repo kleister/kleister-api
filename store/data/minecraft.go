@@ -92,3 +92,27 @@ func (db *data) GetMinecraftHasBuild(parent, id int) bool {
 
 	return count > 0
 }
+
+func (db *data) CreateMinecraftBuild(parent, id int) error {
+	return db.Model(
+		&model.Build{},
+	).Where(
+		"id = ?",
+		parent,
+	).Update(
+		"minecraft_id",
+		id,
+	).Error
+}
+
+func (db *data) DeleteMinecraftBuild(parent, id int) error {
+	return db.Model(
+		&model.Build{},
+	).Where(
+		"id = ?",
+		parent,
+	).Update(
+		"minecraft_id",
+		0,
+	).Error
+}

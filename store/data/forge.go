@@ -92,3 +92,27 @@ func (db *data) GetForgeHasBuild(parent, id int) bool {
 
 	return count > 0
 }
+
+func (db *data) CreateForgeBuild(parent, id int) error {
+	return db.Model(
+		&model.Build{},
+	).Where(
+		"id = ?",
+		parent,
+	).Update(
+		"forge_id",
+		id,
+	).Error
+}
+
+func (db *data) DeleteForgeBuild(parent, id int) error {
+	return db.Model(
+		&model.Build{},
+	).Where(
+		"id = ?",
+		parent,
+	).Update(
+		"forge_id",
+		0,
+	).Error
+}

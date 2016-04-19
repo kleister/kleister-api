@@ -40,3 +40,11 @@ func GetBuildVersions(c context.Context, id int) (*model.Versions, error) {
 func GetBuildHasVersion(c context.Context, parent, id int) bool {
 	return FromContext(c).GetBuildHasVersion(parent, id)
 }
+
+func CreateBuildVersion(c context.Context, parent, id int) error {
+	return FromContext(c).CreateBuildVersion(parent, id)
+}
+
+func DeleteBuildVersion(c context.Context, parent, id int) error {
+	return FromContext(c).DeleteBuildVersion(parent, id)
+}

@@ -296,26 +296,24 @@ func PatchPackClient(c *gin.Context) {
 		return
 	}
 
-	// err := context.Store(c).Model(
-	// 	&pack,
-	// ).Association(
-	// 	"Clients",
-	// ).Append(
-	// 	&client,
-	// ).Error
+	err := store.CreatePackClient(
+		c,
+		pack.ID,
+		client.ID,
+	)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to append client",
-	// 		},
-	// 	)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append client",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,
@@ -350,26 +348,24 @@ func DeletePackClient(c *gin.Context) {
 		return
 	}
 
-	// err := context.Store(c).Model(
-	// 	&pack,
-	// ).Association(
-	// 	"Clients",
-	// ).Delete(
-	// 	&client,
-	// ).Error
+	err := store.DeletePackClient(
+		c,
+		pack.ID,
+		client.ID,
+	)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to unlink client",
-	// 		},
-	// 	)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink client",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,

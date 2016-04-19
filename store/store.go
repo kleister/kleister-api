@@ -31,6 +31,10 @@ type Store interface {
 	// GetBuildHasVersion checks if a specific version is assigned to a build.
 	GetBuildHasVersion(int, int) bool
 
+	CreateBuildVersion(int, int) error
+
+	DeleteBuildVersion(int, int) error
+
 	// GetClients retrieves all available clients from the database.
 	GetClients() (*model.Clients, error)
 
@@ -51,6 +55,10 @@ type Store interface {
 
 	// GetClientHasPack checks if a specific pack is assigned to a client.
 	GetClientHasPack(int, int) bool
+
+	CreateClientPack(int, int) error
+
+	DeleteClientPack(int, int) error
 
 	// GetKeys retrieves all available keys from the database.
 	GetKeys() (*model.Keys, error)
@@ -88,6 +96,10 @@ type Store interface {
 	// GetModHasUser checks if a specific user is assigned to a mod.
 	GetModHasUser(int, int) bool
 
+	CreateModUser(int, int) error
+
+	DeleteModUser(int, int) error
+
 	// GetPacks retrieves all available packs from the database.
 	GetPacks() (*model.Packs, error)
 
@@ -108,6 +120,10 @@ type Store interface {
 
 	// GetPackHasClient checks if a specific client is assigned to a pack.
 	GetPackHasClient(int, int) bool
+
+	CreatePackClient(int, int) error
+
+	DeletePackClient(int, int) error
 
 	// GetUsers retrieves all available users from the database.
 	GetUsers() (*model.Users, error)
@@ -130,6 +146,10 @@ type Store interface {
 	// GetUserHasMod checks if a specific mod is assigned to a user.
 	GetUserHasMod(int, int) bool
 
+	CreateUserMod(int, int) error
+
+	DeleteUserMod(int, int) error
+
 	// GetVersions retrieves all available versions from the database.
 	GetVersions(int) (*model.Versions, error)
 
@@ -151,6 +171,10 @@ type Store interface {
 	// GetVersionHasBuild checks if a specific build is assigned to a version.
 	GetVersionHasBuild(int, int) bool
 
+	CreateVersionBuild(int, int) error
+
+	DeleteVersionBuild(int, int) error
+
 	// GetMinecrafts retrieves all available minecrafts from the database.
 	GetMinecrafts() (*model.Minecrafts, error)
 
@@ -166,6 +190,10 @@ type Store interface {
 	// GetMinecraftHasBuild checks if a specific build is assigned to a minecraft.
 	GetMinecraftHasBuild(int, int) bool
 
+	CreateMinecraftBuild(int, int) error
+
+	DeleteMinecraftBuild(int, int) error
+
 	// GetForges retrieves all available forges from the database.
 	GetForges() (*model.Forges, error)
 
@@ -180,4 +208,8 @@ type Store interface {
 
 	// GetForgeHasBuild checks if a specific build is assigned to a forge.
 	GetForgeHasBuild(int, int) bool
+
+	CreateForgeBuild(int, int) error
+
+	DeleteForgeBuild(int, int) error
 }

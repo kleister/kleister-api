@@ -47,7 +47,7 @@ func (db *data) UpdatePack(record *model.Pack) error {
 // DeletePack deletes a pack.
 func (db *data) DeletePack(record *model.Pack) error {
 
-	// tx := context.Store(c).Begin()
+	// tx := db.Begin()
 	// failed := false
 
 	// if record.Icon != nil {
@@ -167,4 +167,32 @@ func (db *data) GetPackHasClient(parent, id int) bool {
 	).Count()
 
 	return count > 0
+}
+
+func (db *data) CreatePackClient(parent, id int) error {
+	return db.Model(
+		&model.Pack{
+			ID: parent,
+		},
+	).Association(
+		"Clients",
+	).Append(
+		&model.Client{
+			ID: id,
+		},
+	).Error
+}
+
+func (db *data) DeletePackClient(parent, id int) error {
+	return db.Model(
+		&model.Pack{
+			ID: parent,
+		},
+	).Association(
+		"Clients",
+	).Delete(
+		&model.Client{
+			ID: id,
+		},
+	).Error
 }

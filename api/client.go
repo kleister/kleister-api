@@ -216,30 +216,26 @@ func PatchClientPack(c *gin.Context) {
 		return
 	}
 
-	// err := context.Store(c).Model(
-	// 	&client,
-	// ).Association(
-	// 	"Packs",
-	// ).Append(
-	// 	model.Pack{
-	// 		ID: pack.ID,
-	// 	},
-	// ).Error
+	err := store.CreateClientPack(
+		c,
+		client.ID,
+		pack.ID,
+	)
 
-	// if err != nil {
-	// 	logrus.Warn(err)
+	if err != nil {
+		logrus.Warn(err)
 
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to append pack",
-	// 		},
-	// 	)
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append pack",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,
@@ -274,28 +270,24 @@ func DeleteClientPack(c *gin.Context) {
 		return
 	}
 
-	// err := context.Store(c).Model(
-	// 	&client,
-	// ).Association(
-	// 	"Packs",
-	// ).Delete(
-	// 	model.Pack{
-	// 		ID: pack.ID,
-	// 	},
-	// ).Error
+	err := store.DeleteClientPack(
+		c,
+		client.ID,
+		pack.ID,
+	)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to unlink pack",
-	// 		},
-	// 	)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink pack",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,

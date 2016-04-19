@@ -218,28 +218,24 @@ func PatchUserMod(c *gin.Context) {
 		return
 	}
 
-	// err := context.Store(c).Model(
-	// 	&user,
-	// ).Association(
-	// 	"Mods",
-	// ).Append(
-	// 	model.Mod{
-	// 		ID: mod.ID,
-	// 	},
-	// ).Error
+	err := store.CreateUserMod(
+		c,
+		user.ID,
+		mod.ID,
+	)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to append mod",
-	// 		},
-	// 	)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append mod",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,
@@ -274,28 +270,24 @@ func DeleteUserMod(c *gin.Context) {
 		return
 	}
 
-	// err := context.Store(c).Model(
-	// 	&user,
-	// ).Association(
-	// 	"Mods",
-	// ).Delete(
-	// 	model.Mod{
-	// 		ID: mod.ID,
-	// 	},
-	// ).Error
+	err := store.DeleteUserMod(
+		c,
+		user.ID,
+		mod.ID,
+	)
 
-	// if err != nil {
-	// 	c.JSON(
-	// 		http.StatusInternalServerError,
-	// 		gin.H{
-	// 			"status":  http.StatusInternalServerError,
-	// 			"message": "Failed to unlink mod",
-	// 		},
-	// 	)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink mod",
+			},
+		)
 
-	// 	c.Abort()
-	// 	return
-	// }
+		c.Abort()
+		return
+	}
 
 	c.JSON(
 		http.StatusOK,
