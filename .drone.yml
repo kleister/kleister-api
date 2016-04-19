@@ -73,6 +73,7 @@ publish:
     username: $$DOCKER_USER
     password: $$DOCKER_PASS
     email: $$DOCKER_EMAIL
+    storage_driver: overlay
     repo: solderapp/solder-api
     tag: $$TAG
     when:
@@ -82,6 +83,7 @@ publish:
     username: $$DOCKER_USER
     password: $$DOCKER_PASS
     email: $$DOCKER_EMAIL
+    storage_driver: overlay
     repo: solderapp/solder-api
     tag: latest
     when:
