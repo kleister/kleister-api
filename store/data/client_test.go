@@ -36,7 +36,7 @@ func TestClients(t *testing.T) {
 				)
 
 				Expect(res.RecordNotFound()).To(BeFalse())
-        Expect(res.Error).NotTo(HaveOccurred())
+				Expect(res.Error).NotTo(HaveOccurred())
 				Expect(record.Slug).To(Equal("client-1"))
 				Expect(record.ID).To(Equal(result.ID))
 				Expect(record.Name).To(Equal(result.Name))
@@ -49,7 +49,7 @@ func TestClients(t *testing.T) {
 				)
 
 				Expect(res.RecordNotFound()).To(BeTrue())
-        Expect(res.Error).To(HaveOccurred())
+				Expect(res.Error).To(HaveOccurred())
 				Expect(result.ID).To(Equal(0))
 			})
 		})
