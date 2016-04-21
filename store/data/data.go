@@ -116,8 +116,10 @@ func Load() store.Store {
 }
 
 func setupDatabase(driver string, db *gorm.DB) *gorm.DB {
-	db.LogMode(true)
-	db.SetLogger(gormrus.New())
+	if config.Debug {
+		db.LogMode(true)
+		db.SetLogger(gormrus.New())
+	}
 
 	if err := prepareDatabase(driver, db); err != nil {
 		logrus.Errorln(err)
