@@ -17,7 +17,8 @@ func Location(c *gin.Context) *url.URL {
 // SetLocation injects the location into the context.
 func SetLocation() gin.HandlerFunc {
 	return location.New(location.Config{
-		Host: "localhost:8080",
+		Scheme: "http",
+		Host:   "localhost:8080",
 		Base: strings.TrimSuffix(
 			config.Server.Root,
 			"/",
