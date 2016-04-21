@@ -46,61 +46,6 @@ func (db *data) UpdatePack(record *model.Pack) error {
 
 // DeletePack deletes a pack.
 func (db *data) DeletePack(record *model.Pack) error {
-
-	// tx := db.Begin()
-	// failed := false
-
-	// if record.Icon != nil {
-	// 	err := tx.Delete(
-	// 		&record.Icon,
-	// 	).Error
-
-	// 	if err != nil {
-	// 		failed = true
-	// 	}
-	// }
-
-	// if record.Background != nil {
-	// 	err := tx.Delete(
-	// 		&record.Background,
-	// 	).Error
-
-	// 	if err != nil {
-	// 		failed = true
-	// 	}
-	// }
-
-	// if record.Logo != nil {
-	// 	err := tx.Delete(
-	// 		&record.Logo,
-	// 	).Error
-
-	// 	if err != nil {
-	// 		failed = true
-	// 	}
-	// }
-
-	// err := tx.Delete(
-	// 	&record,
-	// ).Error
-
-	// if failed || err != nil {
-	// 	tx.Rollback()
-
-	// 	c.JSON(
-	// 		http.StatusBadRequest,
-	// 		gin.H{
-	// 			"status":  http.StatusBadRequest,
-	// 			"message": "Failed to delete pack",
-	// 		},
-	// 	)
-
-	// 	c.Abort()
-	// 	return
-	// }
-
-	// tx.Commit()
-
 	return db.Delete(
 		record,
 	).Error

@@ -45,42 +45,6 @@ func (db *data) UpdateVersion(mod int, record *model.Version) error {
 
 // DeleteVersion deletes a version.
 func (db *data) DeleteVersion(mod int, record *model.Version) error {
-	// tx := db.Begin()
-	// failed := false
-
-	// if record.File != nil {
-	// 	record.File.Path = config.Server.Storage
-
-	// 	err := tx.Delete(
-	// 		&record.File,
-	// 	).Error
-
-	// 	if err != nil {
-	// 		failed = true
-	// 	}
-	// }
-
-	// err := tx.Delete(
-	// 	&record,
-	// ).Error
-
-	// if failed || err != nil {
-	// 	tx.Rollback()
-
-	// 	c.JSON(
-	// 		http.StatusBadRequest,
-	// 		gin.H{
-	// 			"status":  http.StatusBadRequest,
-	// 			"message": "Failed to delete version",
-	// 		},
-	// 	)
-
-	// 	c.Abort()
-	// 	return
-	// }
-
-	// tx.Commit()
-
 	record.ModID = mod
 
 	return db.Delete(

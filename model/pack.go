@@ -65,6 +65,41 @@ func (u *Pack) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
+// AfterDelete invokes required actions after deletion.
+func (u *Pack) AfterDelete(tx *gorm.DB) error {
+	if u.Icon != nil {
+		err := tx.Delete(
+			u.Icon,
+		).Error
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if u.Background != nil {
+		err := tx.Delete(
+			u.Background,
+		).Error
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if u.Logo != nil {
+		err := tx.Delete(
+			u.Logo,
+		).Error
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Validate does some validation to be able to store the record.
 func (u *Pack) Validate(db *gorm.DB) {
 	if u.RecommendedID > 0 {

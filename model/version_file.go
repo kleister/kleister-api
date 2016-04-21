@@ -58,7 +58,7 @@ func (u *VersionFile) AfterSave(db *gorm.DB) error {
 		absolutePath, err := u.AbsolutePath()
 
 		if err != nil {
-			return fmt.Errorf("Missing storage path for file")
+			return err
 		}
 
 		errDir := os.MkdirAll(
@@ -87,11 +87,11 @@ func (u *VersionFile) AfterSave(db *gorm.DB) error {
 }
 
 // AfterDelete invokes required actions after deletion.
-func (u *VersionFile) AfterDelete(db *gorm.DB) error {
+func (u *VersionFile) AfterDelete(tx *gorm.DB) error {
 	absolutePath, err := u.AbsolutePath()
 
 	if err != nil {
-		return fmt.Errorf("Missing storage path for file")
+		return err
 	}
 
 	errRemove := os.Remove(

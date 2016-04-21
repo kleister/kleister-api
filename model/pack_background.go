@@ -58,7 +58,7 @@ func (u *PackBackground) AfterSave(db *gorm.DB) error {
 		absolutePath, err := u.AbsolutePath()
 
 		if err != nil {
-			return fmt.Errorf("Missing storage path for background")
+			return err
 		}
 
 		errDir := os.MkdirAll(
@@ -87,11 +87,11 @@ func (u *PackBackground) AfterSave(db *gorm.DB) error {
 }
 
 // AfterDelete invokes required actions after deletion.
-func (u *PackBackground) AfterDelete(db *gorm.DB) error {
+func (u *PackBackground) AfterDelete(tx *gorm.DB) error {
 	absolutePath, err := u.AbsolutePath()
 
 	if err != nil {
-		return fmt.Errorf("Missing storage path for background")
+		return err
 	}
 
 	errRemove := os.Remove(

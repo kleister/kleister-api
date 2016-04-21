@@ -58,7 +58,7 @@ func (u *PackIcon) AfterSave(db *gorm.DB) error {
 		absolutePath, err := u.AbsolutePath()
 
 		if err != nil {
-			return fmt.Errorf("Missing storage path for icon")
+			return err
 		}
 
 		errDir := os.MkdirAll(
@@ -87,11 +87,11 @@ func (u *PackIcon) AfterSave(db *gorm.DB) error {
 }
 
 // AfterDelete invokes required actions after deletion.
-func (u *PackIcon) AfterDelete(db *gorm.DB) error {
+func (u *PackIcon) AfterDelete(tx *gorm.DB) error {
 	absolutePath, err := u.AbsolutePath()
 
 	if err != nil {
-		return fmt.Errorf("Missing storage path for icon")
+		return err
 	}
 
 	errRemove := os.Remove(

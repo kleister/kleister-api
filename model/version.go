@@ -59,6 +59,21 @@ func (u *Version) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
+// AfterDelete invokes required actions after deletion.
+func (u *Version) AfterDelete(tx *gorm.DB) error {
+	if u.File != nil {
+		err := tx.Delete(
+			u.File,
+		).Error
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Validate does some validation to be able to store the record.
 func (u *Version) Validate(db *gorm.DB) {
 	if u.ModID == 0 {
