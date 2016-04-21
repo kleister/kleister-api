@@ -6,3 +6,7 @@ import (
 	// Register SQLite driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
+
+func init() {
+	dialects = append(dialects, "sqlite3")
+}

@@ -21,6 +21,10 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
+var (
+	dialects []string
+)
+
 // Store is a basic struct to represent the database handle.
 type data struct {
 	*gorm.DB
@@ -83,6 +87,10 @@ func Load() store.Store {
 	driver := config.Database.Driver
 	connect := ""
 
+	if invalidDriver(driver) {
+		logrus.Fatal("Unknown database driver selected")
+	}
+
 	switch driver {
 	case "mysql":
 		connect = fmt.Sprintf(
@@ -100,10 +108,8 @@ func Load() store.Store {
 			config.Database.Host,
 			config.Database.Name,
 		)
-	case "sqlite":
+	case "sqlite3":
 		connect = config.Database.Name
-	default:
-		logrus.Fatal("Unknown database driver selected")
 	}
 
 	logrus.Infof("using database driver %s", driver)
@@ -113,6 +119,18 @@ func Load() store.Store {
 		driver,
 		connect,
 	)
+}
+
+func invalidDriver(driver string) bool {
+	for _, dialect := range dialects {
+		logrus.Debugf("Checking if %s matches %s database driver", dialect, driver)
+
+		if dialect == driver {
+			return false
+		}
+	}
+
+	return true
 }
 
 func setupDatabase(driver string, db *gorm.DB) *gorm.DB {
@@ -254,4 +272,9 @@ func migrateDatabase(driver string, db *gorm.DB) error {
 	}
 
 	return nil
+}
+
+func init() {
+	dialects = append(dialects, "mysql")
+	dialects = append(dialects, "postgres")
 }
