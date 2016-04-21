@@ -67,32 +67,34 @@ func (u *Pack) BeforeSave(db *gorm.DB) (err error) {
 
 // AfterDelete invokes required actions after deletion.
 func (u *Pack) AfterDelete(tx *gorm.DB) error {
-	if u.Icon != nil {
-		err := tx.Delete(
-			u.Icon,
-		).Error
+	for _, build := range u.Builds {
+		if err := tx.Delete(&build).Error; err != nil {
+			return err
+		}
+	}
 
-		if err != nil {
+	if err := tx.Model(u).Association("Clients").Clear().Error; err != nil {
+		return err
+	}
+
+	if err := tx.Model(u).Association("Permissions").Clear().Error; err != nil {
+		return err
+	}
+
+	if u.Icon != nil {
+		if err := tx.Delete(u.Icon).Error; err != nil {
 			return err
 		}
 	}
 
 	if u.Background != nil {
-		err := tx.Delete(
-			u.Background,
-		).Error
-
-		if err != nil {
+		if err := tx.Delete(u.Background).Error; err != nil {
 			return err
 		}
 	}
 
 	if u.Logo != nil {
-		err := tx.Delete(
-			u.Logo,
-		).Error
-
-		if err != nil {
+		if err := tx.Delete(u.Logo).Error; err != nil {
 			return err
 		}
 	}

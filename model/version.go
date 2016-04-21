@@ -22,7 +22,7 @@ type Version struct {
 	Name      string       `json:"name"`
 	CreatedAt time.Time    `json:"created_at"`
 	UpdatedAt time.Time    `json:"updated_at"`
-	Builds    Builds       `json:"builds,omitempty"`
+	Builds    Builds       `json:"builds,omitempty" gorm:"many2many:build_versions"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -61,12 +61,12 @@ func (u *Version) BeforeSave(db *gorm.DB) (err error) {
 
 // AfterDelete invokes required actions after deletion.
 func (u *Version) AfterDelete(tx *gorm.DB) error {
-	if u.File != nil {
-		err := tx.Delete(
-			u.File,
-		).Error
+	if err := tx.Model(u).Association("Builds").Clear().Error; err != nil {
+		return err
+	}
 
-		if err != nil {
+	if u.File != nil {
+		if err := tx.Delete(u.File).Error; err != nil {
 			return err
 		}
 	}

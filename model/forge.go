@@ -63,6 +63,17 @@ func (u *Forge) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
+// AfterDelete invokes required actions after deletion.
+func (u *Forge) AfterDelete(tx *gorm.DB) error {
+	for _, build := range u.Builds {
+		if err := tx.Model(&build).Update("forge_id", 0).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Validate does some validation to be able to store the record.
 func (u *Forge) Validate(db *gorm.DB) {
 

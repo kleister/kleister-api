@@ -54,6 +54,15 @@ func (u *Client) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
+// AfterDelete invokes required actions after deletion.
+func (u *Client) AfterDelete(tx *gorm.DB) error {
+	if err := tx.Model(u).Association("Packs").Clear().Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Validate does some validation to be able to store the record.
 func (u *Client) Validate(db *gorm.DB) {
 	if !govalidator.StringLength(u.Name, "2", "255") {

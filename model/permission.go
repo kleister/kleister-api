@@ -39,6 +39,19 @@ func (u *Permission) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
+// AfterDelete invokes required actions after deletion.
+func (u *Permission) AfterDelete(tx *gorm.DB) error {
+	if err := tx.Delete(u.User).Error; err != nil {
+		return err
+	}
+
+	if err := tx.Model(u).Association("Packs").Clear().Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Validate does some validation to be able to store the record.
 func (u *Permission) Validate(db *gorm.DB) {
 
