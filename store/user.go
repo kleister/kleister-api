@@ -48,3 +48,21 @@ func CreateUserMod(c context.Context, parent, id int) error {
 func DeleteUserMod(c context.Context, parent, id int) error {
 	return FromContext(c).DeleteUserMod(parent, id)
 }
+
+// GetUserPacks retrieves packs for a user.
+func GetUserPacks(c context.Context, id int) (*model.Packs, error) {
+	return FromContext(c).GetUserPacks(id)
+}
+
+// GetUserHasPack checks if a specific pack is assigned to a user.
+func GetUserHasPack(c context.Context, parent, id int) bool {
+	return FromContext(c).GetUserHasPack(parent, id)
+}
+
+func CreateUserPack(c context.Context, parent, id int) error {
+	return FromContext(c).CreateUserPack(parent, id)
+}
+
+func DeleteUserPack(c context.Context, parent, id int) error {
+	return FromContext(c).DeleteUserPack(parent, id)
+}

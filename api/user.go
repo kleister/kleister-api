@@ -297,3 +297,135 @@ func DeleteUserMod(c *gin.Context) {
 		},
 	)
 }
+
+// GetUserPacks retrieves all packs related to a user.
+func GetUserPacks(c *gin.Context) {
+	user := session.User(c)
+
+	records, err := store.GetUserPacks(
+		c,
+		user.ID,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to fetch packs",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		records,
+	)
+}
+
+// PatchUserPack appends a pack to a user.
+func PatchUserPack(c *gin.Context) {
+	user := session.User(c)
+	pack := session.Pack(c)
+
+	assigned := store.GetUserHasPack(
+		c,
+		user.ID,
+		pack.ID,
+	)
+
+	if assigned == true {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Pack is already appended",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.CreateUserPack(
+		c,
+		user.ID,
+		pack.ID,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append pack",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully appended pack",
+		},
+	)
+}
+
+// DeleteUserPack deleted a pack from a user
+func DeleteUserPack(c *gin.Context) {
+	user := session.User(c)
+	pack := session.Pack(c)
+
+	assigned := store.GetUserHasPack(
+		c,
+		user.ID,
+		pack.ID,
+	)
+
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Pack is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.DeleteUserPack(
+		c,
+		user.ID,
+		pack.ID,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink pack",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully unlinked pack",
+		},
+	)
+}

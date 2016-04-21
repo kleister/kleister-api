@@ -143,6 +143,16 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				packClients.DELETE("/:client", session.SetClient(), api.DeletePackClient)
 			}
 
+			packUsers := base.Group("/packs/:pack/users")
+			{
+				packUsers.Use(session.MustPacks("change"))
+				packUsers.Use(session.SetPack())
+
+				packUsers.GET("", api.GetPackUsers)
+				packUsers.PATCH("/:user", session.SetUser(), api.PatchPackUser)
+				packUsers.DELETE("/:user", session.SetUser(), api.DeletePackUser)
+			}
+
 			//
 			// Builds
 			//
@@ -265,6 +275,16 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				userMods.GET("", api.GetUserMods)
 				userMods.PATCH("/:mod", session.SetMod(), api.PatchUserMod)
 				userMods.DELETE("/:mod", session.SetMod(), api.DeleteUserMod)
+			}
+
+			userPacks := base.Group("/users/:user/packs")
+			{
+				userPacks.Use(session.MustPacks("change"))
+				userPacks.Use(session.SetUser())
+
+				userPacks.GET("", api.GetUserPacks)
+				userPacks.PATCH("/:pack", session.SetPack(), api.PatchUserPack)
+				userPacks.DELETE("/:pack", session.SetPack(), api.DeleteUserPack)
 			}
 
 			//

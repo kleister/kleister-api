@@ -26,6 +26,7 @@ type User struct {
 	CreatedAt  time.Time   `json:"created_at"`
 	UpdatedAt  time.Time   `json:"updated_at"`
 	Mods       Mods        `json:"mods,omitempty" gorm:"many2many:user_mods;"`
+	Packs      Packs       `json:"packs,omitempty" gorm:"many2many:user_packs;"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -91,6 +92,10 @@ func (u *User) AfterDelete(tx *gorm.DB) error {
 	}
 
 	if err := tx.Model(u).Association("Mods").Clear().Error; err != nil {
+		return err
+	}
+
+	if err := tx.Model(u).Association("Packs").Clear().Error; err != nil {
 		return err
 	}
 

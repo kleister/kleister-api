@@ -125,6 +125,16 @@ type Store interface {
 
 	DeletePackClient(int, int) error
 
+	// GetPackUsers retrieves users for a pack.
+	GetPackUsers(int) (*model.Users, error)
+
+	// GetPackHasUser checks if a specific user is assigned to a pack.
+	GetPackHasUser(int, int) bool
+
+	CreatePackUser(int, int) error
+
+	DeletePackUser(int, int) error
+
 	// GetUsers retrieves all available users from the database.
 	GetUsers() (*model.Users, error)
 
@@ -149,6 +159,16 @@ type Store interface {
 	CreateUserMod(int, int) error
 
 	DeleteUserMod(int, int) error
+
+	// GetUserPacks retrieves packs for a user.
+	GetUserPacks(int) (*model.Packs, error)
+
+	// GetUserHasPack checks if a specific pack is assigned to a user.
+	GetUserHasPack(int, int) bool
+
+	CreateUserPack(int, int) error
+
+	DeleteUserPack(int, int) error
 
 	// GetVersions retrieves all available versions from the database.
 	GetVersions(int) (*model.Versions, error)

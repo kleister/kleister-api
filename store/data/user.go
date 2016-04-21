@@ -125,3 +125,67 @@ func (db *data) DeleteUserMod(parent, id int) error {
 		},
 	).Error
 }
+
+// GetUserPacks retrieves packs for a user.
+func (db *data) GetUserPacks(id int) (*model.Packs, error) {
+	records := &model.Packs{}
+
+	err := db.Model(
+		&model.User{
+			ID: id,
+		},
+	).Association(
+		"Packs",
+	).Find(
+		records,
+	).Error
+
+	return records, err
+}
+
+// GetUserHasPack checks if a specific pack is assigned to a user.
+func (db *data) GetUserHasPack(parent, id int) bool {
+	record := &model.Pack{
+		ID: id,
+	}
+
+	count := db.Model(
+		&model.User{
+			ID: parent,
+		},
+	).Association(
+		"Packs",
+	).Find(
+		record,
+	).Count()
+
+	return count > 0
+}
+
+func (db *data) CreateUserPack(parent, id int) error {
+	return db.Model(
+		&model.User{
+			ID: parent,
+		},
+	).Association(
+		"Packs",
+	).Append(
+		&model.Pack{
+			ID: id,
+		},
+	).Error
+}
+
+func (db *data) DeleteUserPack(parent, id int) error {
+	return db.Model(
+		&model.User{
+			ID: parent,
+		},
+	).Association(
+		"Packs",
+	).Delete(
+		&model.Pack{
+			ID: id,
+		},
+	).Error
+}

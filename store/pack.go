@@ -48,3 +48,21 @@ func CreatePackClient(c context.Context, parent, id int) error {
 func DeletePackClient(c context.Context, parent, id int) error {
 	return FromContext(c).DeletePackClient(parent, id)
 }
+
+// GetPackUsers retrieves users for a pack.
+func GetPackUsers(c context.Context, id int) (*model.Users, error) {
+	return FromContext(c).GetPackUsers(id)
+}
+
+// GetPackHasUser checks if a specific user is assigned to a pack.
+func GetPackHasUser(c context.Context, parent, id int) bool {
+	return FromContext(c).GetPackHasUser(parent, id)
+}
+
+func CreatePackUser(c context.Context, parent, id int) error {
+	return FromContext(c).CreatePackUser(parent, id)
+}
+
+func DeletePackUser(c context.Context, parent, id int) error {
+	return FromContext(c).DeletePackUser(parent, id)
+}

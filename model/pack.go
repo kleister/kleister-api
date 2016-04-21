@@ -32,6 +32,7 @@ type Pack struct {
 	Builds        Builds          `json:"builds,omitempty"`
 	Permissions   Permissions     `json:"permissions,omitempty" gorm:"many2many:permission_packs"`
 	Clients       Clients         `json:"clients,omitempty" gorm:"many2many:client_packs"`
+	Users         Users           `json:"users,omitempty" gorm:"many2many:user_packs;"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -78,6 +79,10 @@ func (u *Pack) AfterDelete(tx *gorm.DB) error {
 	}
 
 	if err := tx.Model(u).Association("Permissions").Clear().Error; err != nil {
+		return err
+	}
+
+	if err := tx.Model(u).Association("Users").Clear().Error; err != nil {
 		return err
 	}
 

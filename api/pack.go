@@ -375,3 +375,135 @@ func DeletePackClient(c *gin.Context) {
 		},
 	)
 }
+
+// GetPackUsers retrieves all users related to a pack.
+func GetPackUsers(c *gin.Context) {
+	pack := session.Pack(c)
+
+	records, err := store.GetPackUsers(
+		c,
+		pack.ID,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to fetch users",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		records,
+	)
+}
+
+// PatchPackUser appends a user to a pack.
+func PatchPackUser(c *gin.Context) {
+	pack := session.Pack(c)
+	user := session.User(c)
+
+	assigned := store.GetPackHasUser(
+		c,
+		pack.ID,
+		user.ID,
+	)
+
+	if assigned == true {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "User is already appended",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.CreatePackUser(
+		c,
+		pack.ID,
+		user.ID,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append user",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully appended user",
+		},
+	)
+}
+
+// DeletePackUser deleted a user from a pack
+func DeletePackUser(c *gin.Context) {
+	pack := session.Pack(c)
+	user := session.User(c)
+
+	assigned := store.GetPackHasUser(
+		c,
+		pack.ID,
+		user.ID,
+	)
+
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "User is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.DeletePackUser(
+		c,
+		pack.ID,
+		user.ID,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink user",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully unlinked user",
+		},
+	)
+}

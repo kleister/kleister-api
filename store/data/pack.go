@@ -141,3 +141,67 @@ func (db *data) DeletePackClient(parent, id int) error {
 		},
 	).Error
 }
+
+// GetPackUsers retrieves users for a pack.
+func (db *data) GetPackUsers(id int) (*model.Users, error) {
+	records := &model.Users{}
+
+	err := db.Model(
+		&model.Pack{
+			ID: id,
+		},
+	).Association(
+		"Users",
+	).Find(
+		records,
+	).Error
+
+	return records, err
+}
+
+// GetPackHasUser checks if a specific user is assigned to a pack.
+func (db *data) GetPackHasUser(parent, id int) bool {
+	record := &model.User{
+		ID: id,
+	}
+
+	count := db.Model(
+		&model.Pack{
+			ID: parent,
+		},
+	).Association(
+		"Users",
+	).Find(
+		record,
+	).Count()
+
+	return count > 0
+}
+
+func (db *data) CreatePackUser(parent, id int) error {
+	return db.Model(
+		&model.Pack{
+			ID: parent,
+		},
+	).Association(
+		"Users",
+	).Append(
+		&model.User{
+			ID: id,
+		},
+	).Error
+}
+
+func (db *data) DeletePackUser(parent, id int) error {
+	return db.Model(
+		&model.Pack{
+			ID: parent,
+		},
+	).Association(
+		"Users",
+	).Delete(
+		&model.User{
+			ID: id,
+		},
+	).Error
+}
