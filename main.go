@@ -19,6 +19,15 @@ func main() {
 	app.Author = "Thomas Boerger <thomas@webhippie.de>"
 	app.Usage = "Manage mod packs for the Technic launcher"
 
+	app.Flags = []cli.Flag{
+		cli.BoolFlag{
+			Name:        "debug",
+			Usage:       "Activate debug information",
+			EnvVar:      "SOLDER_DEBUG",
+			Destination: &config.Debug,
+		},
+	}
+
 	app.Before = func(c *cli.Context) error {
 		logrus.SetOutput(os.Stdout)
 

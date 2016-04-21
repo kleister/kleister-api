@@ -83,12 +83,6 @@ func Server() cli.Command {
 				EnvVar:      "SOLDER_SERVER_STORAGE",
 				Destination: &config.Server.Storage,
 			},
-			cli.BoolFlag{
-				Name:        "debug",
-				Usage:       "Activate debug information",
-				EnvVar:      "SOLDER_SERVER_DEBUG",
-				Destination: &config.Debug,
-			},
 		},
 		Action: func(c *cli.Context) {
 			srv := server.Load()
