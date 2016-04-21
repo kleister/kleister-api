@@ -53,14 +53,12 @@ vendors:
   rev: 704a44a30dc7ffdbb96c63384eca38f3af3f1c56
 - path: github.com/qor/validations
   rev: 87c1296c75e72a8f3247beab65c48c50b7b66a7a
-- path: github.com/satori/go.uuid
-  rev: f9ab0dce87d815821e221626b772e3475a0d2749
 - path: github.com/stretchr/testify
   rev: c5d7a69bf8a2c9c374798160849c071093e41dd1
 - path: github.com/vincent-petithory/dataurl
   rev: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - path: golang.org/x/crypto
-  rev: 2f6fccd33b9b1fc23ebb73ad4890698820f7174d
+  rev: 3305186468e57f6c7535c9e97cb0bde4b2b65908
 - path: golang.org/x/net
   rev: fb93926129b8ec0056f2f458b1f519654814edf0
 - path: golang.org/x/sys
