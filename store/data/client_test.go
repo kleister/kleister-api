@@ -17,7 +17,8 @@ func TestClients(t *testing.T) {
 
 	g.Describe("Clients", func() {
 		g.BeforeEach(func() {
-			store.DeleteClient(&model.Client{})
+			// TODO(must): Needs to be fixed!
+			// store.Handle().Delete(&model.Client{})
 		})
 
 		g.Describe("GetClient", func() {
