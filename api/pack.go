@@ -246,11 +246,11 @@ func PostPack(c *gin.Context) {
 
 // GetPackClients retrieves all clients related to a pack.
 func GetPackClients(c *gin.Context) {
-	pack := session.Pack(c)
-
 	records, err := store.GetPackClients(
 		c,
-		pack.ID,
+		&model.PackClientParams{
+			Pack: c.Param("pack"),
+		},
 	)
 
 	if err != nil {
@@ -274,13 +274,12 @@ func GetPackClients(c *gin.Context) {
 
 // PatchPackClient appends a client to a pack.
 func PatchPackClient(c *gin.Context) {
-	pack := session.Pack(c)
-	client := session.Client(c)
-
 	assigned := store.GetPackHasClient(
 		c,
-		pack.ID,
-		client.ID,
+		&model.PackClientParams{
+			Pack:   c.Param("pack"),
+			Client: c.Param("client"),
+		},
 	)
 
 	if assigned == true {
@@ -298,8 +297,10 @@ func PatchPackClient(c *gin.Context) {
 
 	err := store.CreatePackClient(
 		c,
-		pack.ID,
-		client.ID,
+		&model.PackClientParams{
+			Pack:   c.Param("pack"),
+			Client: c.Param("client"),
+		},
 	)
 
 	if err != nil {
@@ -326,13 +327,12 @@ func PatchPackClient(c *gin.Context) {
 
 // DeletePackClient deleted a client from a pack
 func DeletePackClient(c *gin.Context) {
-	pack := session.Pack(c)
-	client := session.Client(c)
-
 	assigned := store.GetPackHasClient(
 		c,
-		pack.ID,
-		client.ID,
+		&model.PackClientParams{
+			Pack:   c.Param("pack"),
+			Client: c.Param("client"),
+		},
 	)
 
 	if assigned == false {
@@ -350,8 +350,10 @@ func DeletePackClient(c *gin.Context) {
 
 	err := store.DeletePackClient(
 		c,
-		pack.ID,
-		client.ID,
+		&model.PackClientParams{
+			Pack:   c.Param("pack"),
+			Client: c.Param("client"),
+		},
 	)
 
 	if err != nil {
@@ -378,11 +380,11 @@ func DeletePackClient(c *gin.Context) {
 
 // GetPackUsers retrieves all users related to a pack.
 func GetPackUsers(c *gin.Context) {
-	pack := session.Pack(c)
-
 	records, err := store.GetPackUsers(
 		c,
-		pack.ID,
+		&model.PackUserParams{
+			Pack: c.Param("pack"),
+		},
 	)
 
 	if err != nil {
@@ -406,13 +408,12 @@ func GetPackUsers(c *gin.Context) {
 
 // PatchPackUser appends a user to a pack.
 func PatchPackUser(c *gin.Context) {
-	pack := session.Pack(c)
-	user := session.User(c)
-
 	assigned := store.GetPackHasUser(
 		c,
-		pack.ID,
-		user.ID,
+		&model.PackUserParams{
+			Pack: c.Param("pack"),
+			User: c.Param("user"),
+		},
 	)
 
 	if assigned == true {
@@ -430,8 +431,10 @@ func PatchPackUser(c *gin.Context) {
 
 	err := store.CreatePackUser(
 		c,
-		pack.ID,
-		user.ID,
+		&model.PackUserParams{
+			Pack: c.Param("pack"),
+			User: c.Param("user"),
+		},
 	)
 
 	if err != nil {
@@ -458,13 +461,12 @@ func PatchPackUser(c *gin.Context) {
 
 // DeletePackUser deleted a user from a pack
 func DeletePackUser(c *gin.Context) {
-	pack := session.Pack(c)
-	user := session.User(c)
-
 	assigned := store.GetPackHasUser(
 		c,
-		pack.ID,
-		user.ID,
+		&model.PackUserParams{
+			Pack: c.Param("pack"),
+			User: c.Param("user"),
+		},
 	)
 
 	if assigned == false {
@@ -482,8 +484,10 @@ func DeletePackUser(c *gin.Context) {
 
 	err := store.DeletePackUser(
 		c,
-		pack.ID,
-		user.ID,
+		&model.PackUserParams{
+			Pack: c.Param("pack"),
+			User: c.Param("user"),
+		},
 	)
 
 	if err != nil {

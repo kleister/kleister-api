@@ -63,13 +63,13 @@ func (db *data) GetMod(id string) (*model.Mod, *gorm.DB) {
 }
 
 // GetModUsers retrieves users for a mod.
-func (db *data) GetModUsers(id int) (*model.Users, error) {
+func (db *data) GetModUsers(params *model.ModUserParams) (*model.Users, error) {
+	mod, _ := db.GetMod(params.Mod)
+
 	records := &model.Users{}
 
 	err := db.Model(
-		&model.Mod{
-			ID: id,
-		},
+		mod,
 	).Association(
 		"Users",
 	).Find(
@@ -80,48 +80,43 @@ func (db *data) GetModUsers(id int) (*model.Users, error) {
 }
 
 // GetModHasUser checks if a specific user is assigned to a mod.
-func (db *data) GetModHasUser(parent, id int) bool {
-	record := &model.User{
-		ID: id,
-	}
+func (db *data) GetModHasUser(params *model.ModUserParams) bool {
+	mod, _ := db.GetMod(params.Mod)
+	user, _ := db.GetUser(params.User)
 
 	count := db.Model(
-		&model.Mod{
-			ID: parent,
-		},
+		mod,
 	).Association(
 		"Users",
 	).Find(
-		record,
+		user,
 	).Count()
 
 	return count > 0
 }
 
-func (db *data) CreateModUser(parent, id int) error {
+func (db *data) CreateModUser(params *model.ModUserParams) error {
+	mod, _ := db.GetMod(params.Mod)
+	user, _ := db.GetUser(params.User)
+
 	return db.Model(
-		&model.Mod{
-			ID: id,
-		},
+		mod,
 	).Association(
 		"Users",
 	).Append(
-		&model.User{
-			ID: id,
-		},
+		user,
 	).Error
 }
 
-func (db *data) DeleteModUser(parent, id int) error {
+func (db *data) DeleteModUser(params *model.ModUserParams) error {
+	mod, _ := db.GetMod(params.Mod)
+	user, _ := db.GetUser(params.User)
+
 	return db.Model(
-		&model.Mod{
-			ID: id,
-		},
+		mod,
 	).Association(
 		"Users",
 	).Delete(
-		&model.User{
-			ID: id,
-		},
+		user,
 	).Error
 }

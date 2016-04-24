@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/model/forge"
-	"github.com/solderapp/solder-api/router/middleware/session"
 	"github.com/solderapp/solder-api/store"
 )
 
@@ -92,11 +92,11 @@ func PatchForge(c *gin.Context) {
 
 // GetForgeBuilds retrieves all builds related to a Forge version.
 func GetForgeBuilds(c *gin.Context) {
-	forge := session.Forge(c)
-
 	records, err := store.GetForgeBuilds(
 		c,
-		forge.ID,
+		&model.ForgeBuildParams{
+			Forge: c.Param("forge"),
+		},
 	)
 
 	if err != nil {
@@ -120,13 +120,13 @@ func GetForgeBuilds(c *gin.Context) {
 
 // PatchForgeBuild appends a build to a Forge version.
 func PatchForgeBuild(c *gin.Context) {
-	forge := session.Forge(c)
-	build := session.Build(c)
-
 	assigned := store.GetForgeHasBuild(
 		c,
-		forge.ID,
-		build.ID,
+		&model.ForgeBuildParams{
+			Forge: c.Param("forge"),
+			Pack:  c.Param("pack"),
+			Build: c.Param("build"),
+		},
 	)
 
 	if assigned == true {
@@ -144,8 +144,11 @@ func PatchForgeBuild(c *gin.Context) {
 
 	err := store.CreateForgeBuild(
 		c,
-		forge.ID,
-		build.ID,
+		&model.ForgeBuildParams{
+			Forge: c.Param("forge"),
+			Pack:  c.Param("pack"),
+			Build: c.Param("build"),
+		},
 	)
 
 	if err != nil {
@@ -172,13 +175,13 @@ func PatchForgeBuild(c *gin.Context) {
 
 // DeleteForgeBuild deleted a build from a Forge version
 func DeleteForgeBuild(c *gin.Context) {
-	forge := session.Forge(c)
-	build := session.Build(c)
-
 	assigned := store.GetForgeHasBuild(
 		c,
-		forge.ID,
-		build.ID,
+		&model.ForgeBuildParams{
+			Forge: c.Param("forge"),
+			Pack:  c.Param("pack"),
+			Build: c.Param("build"),
+		},
 	)
 
 	if assigned == false {
@@ -196,8 +199,11 @@ func DeleteForgeBuild(c *gin.Context) {
 
 	err := store.DeleteForgeBuild(
 		c,
-		forge.ID,
-		build.ID,
+		&model.ForgeBuildParams{
+			Forge: c.Param("forge"),
+			Pack:  c.Param("pack"),
+			Build: c.Param("build"),
+		},
 	)
 
 	if err != nil {

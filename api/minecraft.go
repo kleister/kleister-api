@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/model/minecraft"
-	"github.com/solderapp/solder-api/router/middleware/session"
 	"github.com/solderapp/solder-api/store"
 )
 
@@ -92,11 +92,11 @@ func PatchMinecraft(c *gin.Context) {
 
 // GetMinecraftBuilds retrieves all builds related to a Minecraft version.
 func GetMinecraftBuilds(c *gin.Context) {
-	minecraft := session.Minecraft(c)
-
 	records, err := store.GetMinecraftBuilds(
 		c,
-		minecraft.ID,
+		&model.MinecraftBuildParams{
+			Minecraft: c.Param("minecraft"),
+		},
 	)
 
 	if err != nil {
@@ -120,13 +120,13 @@ func GetMinecraftBuilds(c *gin.Context) {
 
 // PatchMinecraftBuild appends a build to a Minecraft version.
 func PatchMinecraftBuild(c *gin.Context) {
-	minecraft := session.Minecraft(c)
-	build := session.Build(c)
-
 	assigned := store.GetMinecraftHasBuild(
 		c,
-		minecraft.ID,
-		build.ID,
+		&model.MinecraftBuildParams{
+			Minecraft: c.Param("minecraft"),
+			Pack:      c.Param("pack"),
+			Build:     c.Param("build"),
+		},
 	)
 
 	if assigned == true {
@@ -144,8 +144,11 @@ func PatchMinecraftBuild(c *gin.Context) {
 
 	err := store.CreateMinecraftBuild(
 		c,
-		minecraft.ID,
-		build.ID,
+		&model.MinecraftBuildParams{
+			Minecraft: c.Param("minecraft"),
+			Pack:      c.Param("pack"),
+			Build:     c.Param("build"),
+		},
 	)
 
 	if err != nil {
@@ -172,13 +175,13 @@ func PatchMinecraftBuild(c *gin.Context) {
 
 // DeleteMinecraftBuild deleted a build from a Minecraft version
 func DeleteMinecraftBuild(c *gin.Context) {
-	minecraft := session.Minecraft(c)
-	build := session.Build(c)
-
 	assigned := store.GetMinecraftHasBuild(
 		c,
-		minecraft.ID,
-		build.ID,
+		&model.MinecraftBuildParams{
+			Minecraft: c.Param("minecraft"),
+			Pack:      c.Param("pack"),
+			Build:     c.Param("build"),
+		},
 	)
 
 	if assigned == false {
@@ -196,8 +199,11 @@ func DeleteMinecraftBuild(c *gin.Context) {
 
 	err := store.DeleteMinecraftBuild(
 		c,
-		minecraft.ID,
-		build.ID,
+		&model.MinecraftBuildParams{
+			Minecraft: c.Param("minecraft"),
+			Pack:      c.Param("pack"),
+			Build:     c.Param("build"),
+		},
 	)
 
 	if err != nil {

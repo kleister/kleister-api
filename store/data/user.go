@@ -63,13 +63,13 @@ func (db *data) GetUser(id string) (*model.User, *gorm.DB) {
 }
 
 // GetUserMods retrieves mods for a user.
-func (db *data) GetUserMods(id int) (*model.Mods, error) {
+func (db *data) GetUserMods(params *model.UserModParams) (*model.Mods, error) {
+	user, _ := db.GetUser(params.User)
+
 	records := &model.Mods{}
 
 	err := db.Model(
-		&model.User{
-			ID: id,
-		},
+		user,
 	).Association(
 		"Mods",
 	).Find(
@@ -80,60 +80,55 @@ func (db *data) GetUserMods(id int) (*model.Mods, error) {
 }
 
 // GetUserHasMod checks if a specific mod is assigned to a user.
-func (db *data) GetUserHasMod(parent, id int) bool {
-	record := &model.Mod{
-		ID: id,
-	}
+func (db *data) GetUserHasMod(params *model.UserModParams) bool {
+	user, _ := db.GetUser(params.User)
+	mod, _ := db.GetMod(params.Mod)
 
 	count := db.Model(
-		&model.User{
-			ID: parent,
-		},
+		user,
 	).Association(
 		"Mods",
 	).Find(
-		record,
+		mod,
 	).Count()
 
 	return count > 0
 }
 
-func (db *data) CreateUserMod(parent, id int) error {
+func (db *data) CreateUserMod(params *model.UserModParams) error {
+	user, _ := db.GetUser(params.User)
+	mod, _ := db.GetMod(params.Mod)
+
 	return db.Model(
-		&model.User{
-			ID: parent,
-		},
+		user,
 	).Association(
 		"Mods",
 	).Append(
-		&model.Mod{
-			ID: id,
-		},
+		mod,
 	).Error
 }
 
-func (db *data) DeleteUserMod(parent, id int) error {
+func (db *data) DeleteUserMod(params *model.UserModParams) error {
+	user, _ := db.GetUser(params.User)
+	mod, _ := db.GetMod(params.Mod)
+
 	return db.Model(
-		&model.User{
-			ID: parent,
-		},
+		user,
 	).Association(
 		"Mods",
 	).Delete(
-		&model.Mod{
-			ID: id,
-		},
+		mod,
 	).Error
 }
 
 // GetUserPacks retrieves packs for a user.
-func (db *data) GetUserPacks(id int) (*model.Packs, error) {
+func (db *data) GetUserPacks(params *model.UserPackParams) (*model.Packs, error) {
+	user, _ := db.GetUser(params.User)
+
 	records := &model.Packs{}
 
 	err := db.Model(
-		&model.User{
-			ID: id,
-		},
+		user,
 	).Association(
 		"Packs",
 	).Find(
@@ -144,48 +139,43 @@ func (db *data) GetUserPacks(id int) (*model.Packs, error) {
 }
 
 // GetUserHasPack checks if a specific pack is assigned to a user.
-func (db *data) GetUserHasPack(parent, id int) bool {
-	record := &model.Pack{
-		ID: id,
-	}
+func (db *data) GetUserHasPack(params *model.UserPackParams) bool {
+	user, _ := db.GetUser(params.User)
+	pack, _ := db.GetPack(params.Pack)
 
 	count := db.Model(
-		&model.User{
-			ID: parent,
-		},
+		user,
 	).Association(
 		"Packs",
 	).Find(
-		record,
+		pack,
 	).Count()
 
 	return count > 0
 }
 
-func (db *data) CreateUserPack(parent, id int) error {
+func (db *data) CreateUserPack(params *model.UserPackParams) error {
+	user, _ := db.GetUser(params.User)
+	pack, _ := db.GetPack(params.Pack)
+
 	return db.Model(
-		&model.User{
-			ID: parent,
-		},
+		user,
 	).Association(
 		"Packs",
 	).Append(
-		&model.Pack{
-			ID: id,
-		},
+		pack,
 	).Error
 }
 
-func (db *data) DeleteUserPack(parent, id int) error {
+func (db *data) DeleteUserPack(params *model.UserPackParams) error {
+	user, _ := db.GetUser(params.User)
+	pack, _ := db.GetPack(params.Pack)
+
 	return db.Model(
-		&model.User{
-			ID: parent,
-		},
+		user,
 	).Association(
 		"Packs",
 	).Delete(
-		&model.Pack{
-			ID: id,
-		},
+		pack,
 	).Error
 }

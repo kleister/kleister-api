@@ -175,11 +175,12 @@ func PostBuild(c *gin.Context) {
 
 // GetBuildVersions retrieves all versions related to a build.
 func GetBuildVersions(c *gin.Context) {
-	build := session.Build(c)
-
 	records, err := store.GetBuildVersions(
 		c,
-		build.ID,
+		&model.BuildVersionParams{
+			Pack:  c.Param("pack"),
+			Build: c.Param("build"),
+		},
 	)
 
 	if err != nil {
@@ -203,13 +204,14 @@ func GetBuildVersions(c *gin.Context) {
 
 // PatchBuildVersion appends a version to a build.
 func PatchBuildVersion(c *gin.Context) {
-	build := session.Build(c)
-	version := session.Version(c)
-
 	assigned := store.GetBuildHasVersion(
 		c,
-		build.ID,
-		version.ID,
+		&model.BuildVersionParams{
+			Pack:    c.Param("pack"),
+			Build:   c.Param("build"),
+			Mod:     c.Param("mod"),
+			Version: c.Param("version"),
+		},
 	)
 
 	if assigned == true {
@@ -227,8 +229,12 @@ func PatchBuildVersion(c *gin.Context) {
 
 	err := store.CreateBuildVersion(
 		c,
-		build.ID,
-		version.ID,
+		&model.BuildVersionParams{
+			Pack:    c.Param("pack"),
+			Build:   c.Param("build"),
+			Mod:     c.Param("mod"),
+			Version: c.Param("version"),
+		},
 	)
 
 	if err != nil {
@@ -255,13 +261,14 @@ func PatchBuildVersion(c *gin.Context) {
 
 // DeleteBuildVersion deleted a version from a build
 func DeleteBuildVersion(c *gin.Context) {
-	build := session.Build(c)
-	version := session.Version(c)
-
 	assigned := store.GetBuildHasVersion(
 		c,
-		build.ID,
-		version.ID,
+		&model.BuildVersionParams{
+			Pack:    c.Param("pack"),
+			Build:   c.Param("build"),
+			Mod:     c.Param("mod"),
+			Version: c.Param("version"),
+		},
 	)
 
 	if assigned == false {
@@ -279,8 +286,12 @@ func DeleteBuildVersion(c *gin.Context) {
 
 	err := store.DeleteBuildVersion(
 		c,
-		build.ID,
-		version.ID,
+		&model.BuildVersionParams{
+			Pack:    c.Param("pack"),
+			Build:   c.Param("build"),
+			Mod:     c.Param("mod"),
+			Version: c.Param("version"),
+		},
 	)
 
 	if err != nil {

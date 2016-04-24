@@ -69,7 +69,7 @@ func (u *Pack) BeforeSave(db *gorm.DB) (err error) {
 // AfterDelete invokes required actions after deletion.
 func (u *Pack) AfterDelete(tx *gorm.DB) error {
 	for _, build := range u.Builds {
-		if err := tx.Delete(&build).Error; err != nil {
+		if err := tx.Delete(build).Error; err != nil {
 			return err
 		}
 	}

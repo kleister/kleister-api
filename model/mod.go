@@ -61,7 +61,7 @@ func (u *Mod) BeforeSave(db *gorm.DB) (err error) {
 // AfterDelete invokes required actions after deletion.
 func (u *Mod) AfterDelete(tx *gorm.DB) error {
 	for _, version := range u.Versions {
-		if err := tx.Delete(&version).Error; err != nil {
+		if err := tx.Delete(version).Error; err != nil {
 			return err
 		}
 	}

@@ -32,19 +32,19 @@ func GetMod(c context.Context, id string) (*model.Mod, *gorm.DB) {
 }
 
 // GetModUsers retrieves users for a mod.
-func GetModUsers(c context.Context, id int) (*model.Users, error) {
-	return FromContext(c).GetModUsers(id)
+func GetModUsers(c context.Context, params *model.ModUserParams) (*model.Users, error) {
+	return FromContext(c).GetModUsers(params)
 }
 
 // GetModHasUser checks if a specific user is assigned to a mod.
-func GetModHasUser(c context.Context, parent, id int) bool {
-	return FromContext(c).GetModHasUser(parent, id)
+func GetModHasUser(c context.Context, params *model.ModUserParams) bool {
+	return FromContext(c).GetModHasUser(params)
 }
 
-func CreateModUser(c context.Context, parent, id int) error {
-	return FromContext(c).CreateModUser(parent, id)
+func CreateModUser(c context.Context, params *model.ModUserParams) error {
+	return FromContext(c).CreateModUser(params)
 }
 
-func DeleteModUser(c context.Context, parent, id int) error {
-	return FromContext(c).DeleteModUser(parent, id)
+func DeleteModUser(c context.Context, params *model.ModUserParams) error {
+	return FromContext(c).DeleteModUser(params)
 }

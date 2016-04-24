@@ -32,19 +32,19 @@ func GetBuild(c context.Context, pack int, id string) (*model.Build, *gorm.DB) {
 }
 
 // GetBuildVersions retrieves versions for a build.
-func GetBuildVersions(c context.Context, id int) (*model.Versions, error) {
-	return FromContext(c).GetBuildVersions(id)
+func GetBuildVersions(c context.Context, params *model.BuildVersionParams) (*model.Versions, error) {
+	return FromContext(c).GetBuildVersions(params)
 }
 
 // GetBuildHasVersion checks if a specific version is assigned to a build.
-func GetBuildHasVersion(c context.Context, parent, id int) bool {
-	return FromContext(c).GetBuildHasVersion(parent, id)
+func GetBuildHasVersion(c context.Context, params *model.BuildVersionParams) bool {
+	return FromContext(c).GetBuildHasVersion(params)
 }
 
-func CreateBuildVersion(c context.Context, parent, id int) error {
-	return FromContext(c).CreateBuildVersion(parent, id)
+func CreateBuildVersion(c context.Context, params *model.BuildVersionParams) error {
+	return FromContext(c).CreateBuildVersion(params)
 }
 
-func DeleteBuildVersion(c context.Context, parent, id int) error {
-	return FromContext(c).DeleteBuildVersion(parent, id)
+func DeleteBuildVersion(c context.Context, params *model.BuildVersionParams) error {
+	return FromContext(c).DeleteBuildVersion(params)
 }

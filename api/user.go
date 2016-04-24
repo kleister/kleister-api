@@ -168,11 +168,11 @@ func PostUser(c *gin.Context) {
 
 // GetUserMods retrieves all mods related to a user.
 func GetUserMods(c *gin.Context) {
-	user := session.User(c)
-
 	records, err := store.GetUserMods(
 		c,
-		user.ID,
+		&model.UserModParams{
+			User: c.Param("user"),
+		},
 	)
 
 	if err != nil {
@@ -196,13 +196,12 @@ func GetUserMods(c *gin.Context) {
 
 // PatchUserMod appends a mod to a user.
 func PatchUserMod(c *gin.Context) {
-	user := session.User(c)
-	mod := session.Mod(c)
-
 	assigned := store.GetUserHasMod(
 		c,
-		user.ID,
-		mod.ID,
+		&model.UserModParams{
+			User: c.Param("user"),
+			Mod:  c.Param("mod"),
+		},
 	)
 
 	if assigned == true {
@@ -220,8 +219,10 @@ func PatchUserMod(c *gin.Context) {
 
 	err := store.CreateUserMod(
 		c,
-		user.ID,
-		mod.ID,
+		&model.UserModParams{
+			User: c.Param("user"),
+			Mod:  c.Param("mod"),
+		},
 	)
 
 	if err != nil {
@@ -248,13 +249,12 @@ func PatchUserMod(c *gin.Context) {
 
 // DeleteUserMod deleted a mod from a user
 func DeleteUserMod(c *gin.Context) {
-	user := session.User(c)
-	mod := session.Mod(c)
-
 	assigned := store.GetUserHasMod(
 		c,
-		user.ID,
-		mod.ID,
+		&model.UserModParams{
+			User: c.Param("user"),
+			Mod:  c.Param("mod"),
+		},
 	)
 
 	if assigned == false {
@@ -272,8 +272,10 @@ func DeleteUserMod(c *gin.Context) {
 
 	err := store.DeleteUserMod(
 		c,
-		user.ID,
-		mod.ID,
+		&model.UserModParams{
+			User: c.Param("user"),
+			Mod:  c.Param("mod"),
+		},
 	)
 
 	if err != nil {
@@ -300,11 +302,12 @@ func DeleteUserMod(c *gin.Context) {
 
 // GetUserPacks retrieves all packs related to a user.
 func GetUserPacks(c *gin.Context) {
-	user := session.User(c)
-
 	records, err := store.GetUserPacks(
 		c,
-		user.ID,
+		&model.UserPackParams{
+			User: c.Param("user"),
+			Pack: c.Param("pack"),
+		},
 	)
 
 	if err != nil {
@@ -328,13 +331,12 @@ func GetUserPacks(c *gin.Context) {
 
 // PatchUserPack appends a pack to a user.
 func PatchUserPack(c *gin.Context) {
-	user := session.User(c)
-	pack := session.Pack(c)
-
 	assigned := store.GetUserHasPack(
 		c,
-		user.ID,
-		pack.ID,
+		&model.UserPackParams{
+			User: c.Param("user"),
+			Pack: c.Param("pack"),
+		},
 	)
 
 	if assigned == true {
@@ -352,8 +354,10 @@ func PatchUserPack(c *gin.Context) {
 
 	err := store.CreateUserPack(
 		c,
-		user.ID,
-		pack.ID,
+		&model.UserPackParams{
+			User: c.Param("user"),
+			Pack: c.Param("pack"),
+		},
 	)
 
 	if err != nil {
@@ -380,13 +384,12 @@ func PatchUserPack(c *gin.Context) {
 
 // DeleteUserPack deleted a pack from a user
 func DeleteUserPack(c *gin.Context) {
-	user := session.User(c)
-	pack := session.Pack(c)
-
 	assigned := store.GetUserHasPack(
 		c,
-		user.ID,
-		pack.ID,
+		&model.UserPackParams{
+			User: c.Param("user"),
+			Pack: c.Param("pack"),
+		},
 	)
 
 	if assigned == false {
@@ -404,8 +407,10 @@ func DeleteUserPack(c *gin.Context) {
 
 	err := store.DeleteUserPack(
 		c,
-		user.ID,
-		pack.ID,
+		&model.UserPackParams{
+			User: c.Param("user"),
+			Pack: c.Param("pack"),
+		},
 	)
 
 	if err != nil {

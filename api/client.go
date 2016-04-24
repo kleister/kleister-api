@@ -166,11 +166,11 @@ func PostClient(c *gin.Context) {
 
 // GetClientPacks retrieves all packs related to a client.
 func GetClientPacks(c *gin.Context) {
-	client := session.Client(c)
-
 	records, err := store.GetClientPacks(
 		c,
-		client.ID,
+		&model.ClientPackParams{
+			Client: c.Param("client"),
+		},
 	)
 
 	if err != nil {
@@ -194,13 +194,12 @@ func GetClientPacks(c *gin.Context) {
 
 // PatchClientPack appends a pack to a client.
 func PatchClientPack(c *gin.Context) {
-	client := session.Client(c)
-	pack := session.Pack(c)
-
 	assigned := store.GetClientHasPack(
 		c,
-		client.ID,
-		pack.ID,
+		&model.ClientPackParams{
+			Client: c.Param("client"),
+			Pack:   c.Param("pack"),
+		},
 	)
 
 	if assigned == true {
@@ -218,8 +217,10 @@ func PatchClientPack(c *gin.Context) {
 
 	err := store.CreateClientPack(
 		c,
-		client.ID,
-		pack.ID,
+		&model.ClientPackParams{
+			Client: c.Param("client"),
+			Pack:   c.Param("pack"),
+		},
 	)
 
 	if err != nil {
@@ -248,13 +249,12 @@ func PatchClientPack(c *gin.Context) {
 
 // DeleteClientPack deleted a pack from a client
 func DeleteClientPack(c *gin.Context) {
-	client := session.Client(c)
-	pack := session.Pack(c)
-
 	assigned := store.GetClientHasPack(
 		c,
-		client.ID,
-		pack.ID,
+		&model.ClientPackParams{
+			Client: c.Param("client"),
+			Pack:   c.Param("pack"),
+		},
 	)
 
 	if assigned == false {
@@ -272,8 +272,10 @@ func DeleteClientPack(c *gin.Context) {
 
 	err := store.DeleteClientPack(
 		c,
-		client.ID,
-		pack.ID,
+		&model.ClientPackParams{
+			Client: c.Param("client"),
+			Pack:   c.Param("pack"),
+		},
 	)
 
 	if err != nil {

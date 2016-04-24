@@ -66,7 +66,7 @@ func (u *Minecraft) BeforeSave(db *gorm.DB) (err error) {
 // AfterDelete invokes required actions after deletion.
 func (u *Minecraft) AfterDelete(tx *gorm.DB) error {
 	for _, build := range u.Builds {
-		if err := tx.Model(&build).Update("minecraft_id", 0).Error; err != nil {
+		if err := tx.Model(build).Update("minecraft_id", 0).Error; err != nil {
 			return err
 		}
 	}

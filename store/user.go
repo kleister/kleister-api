@@ -32,37 +32,37 @@ func GetUser(c context.Context, id string) (*model.User, *gorm.DB) {
 }
 
 // GetUserMods retrieves mods for a user.
-func GetUserMods(c context.Context, id int) (*model.Mods, error) {
-	return FromContext(c).GetUserMods(id)
+func GetUserMods(c context.Context, params *model.UserModParams) (*model.Mods, error) {
+	return FromContext(c).GetUserMods(params)
 }
 
 // GetUserHasMod checks if a specific mod is assigned to a user.
-func GetUserHasMod(c context.Context, parent, id int) bool {
-	return FromContext(c).GetUserHasMod(parent, id)
+func GetUserHasMod(c context.Context, params *model.UserModParams) bool {
+	return FromContext(c).GetUserHasMod(params)
 }
 
-func CreateUserMod(c context.Context, parent, id int) error {
-	return FromContext(c).CreateUserMod(parent, id)
+func CreateUserMod(c context.Context, params *model.UserModParams) error {
+	return FromContext(c).CreateUserMod(params)
 }
 
-func DeleteUserMod(c context.Context, parent, id int) error {
-	return FromContext(c).DeleteUserMod(parent, id)
+func DeleteUserMod(c context.Context, params *model.UserModParams) error {
+	return FromContext(c).DeleteUserMod(params)
 }
 
 // GetUserPacks retrieves packs for a user.
-func GetUserPacks(c context.Context, id int) (*model.Packs, error) {
-	return FromContext(c).GetUserPacks(id)
+func GetUserPacks(c context.Context, params *model.UserPackParams) (*model.Packs, error) {
+	return FromContext(c).GetUserPacks(params)
 }
 
 // GetUserHasPack checks if a specific pack is assigned to a user.
-func GetUserHasPack(c context.Context, parent, id int) bool {
-	return FromContext(c).GetUserHasPack(parent, id)
+func GetUserHasPack(c context.Context, params *model.UserPackParams) bool {
+	return FromContext(c).GetUserHasPack(params)
 }
 
-func CreateUserPack(c context.Context, parent, id int) error {
-	return FromContext(c).CreateUserPack(parent, id)
+func CreateUserPack(c context.Context, params *model.UserPackParams) error {
+	return FromContext(c).CreateUserPack(params)
 }
 
-func DeleteUserPack(c context.Context, parent, id int) error {
-	return FromContext(c).DeleteUserPack(parent, id)
+func DeleteUserPack(c context.Context, params *model.UserPackParams) error {
+	return FromContext(c).DeleteUserPack(params)
 }

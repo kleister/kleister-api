@@ -26,14 +26,14 @@ type Store interface {
 	GetBuild(int, string) (*model.Build, *gorm.DB)
 
 	// GetBuildVersions retrieves versions for a build.
-	GetBuildVersions(int) (*model.Versions, error)
+	GetBuildVersions(*model.BuildVersionParams) (*model.Versions, error)
 
 	// GetBuildHasVersion checks if a specific version is assigned to a build.
-	GetBuildHasVersion(int, int) bool
+	GetBuildHasVersion(*model.BuildVersionParams) bool
 
-	CreateBuildVersion(int, int) error
+	CreateBuildVersion(*model.BuildVersionParams) error
 
-	DeleteBuildVersion(int, int) error
+	DeleteBuildVersion(*model.BuildVersionParams) error
 
 	// GetClients retrieves all available clients from the database.
 	GetClients() (*model.Clients, error)
@@ -51,14 +51,14 @@ type Store interface {
 	GetClient(string) (*model.Client, *gorm.DB)
 
 	// GetClientPacks retrieves packs for a client.
-	GetClientPacks(int) (*model.Packs, error)
+	GetClientPacks(*model.ClientPackParams) (*model.Packs, error)
 
 	// GetClientHasPack checks if a specific pack is assigned to a client.
-	GetClientHasPack(int, int) bool
+	GetClientHasPack(*model.ClientPackParams) bool
 
-	CreateClientPack(int, int) error
+	CreateClientPack(*model.ClientPackParams) error
 
-	DeleteClientPack(int, int) error
+	DeleteClientPack(*model.ClientPackParams) error
 
 	// GetKeys retrieves all available keys from the database.
 	GetKeys() (*model.Keys, error)
@@ -91,14 +91,14 @@ type Store interface {
 	GetMod(string) (*model.Mod, *gorm.DB)
 
 	// GetModUsers retrieves users for a mod.
-	GetModUsers(int) (*model.Users, error)
+	GetModUsers(*model.ModUserParams) (*model.Users, error)
 
 	// GetModHasUser checks if a specific user is assigned to a mod.
-	GetModHasUser(int, int) bool
+	GetModHasUser(*model.ModUserParams) bool
 
-	CreateModUser(int, int) error
+	CreateModUser(*model.ModUserParams) error
 
-	DeleteModUser(int, int) error
+	DeleteModUser(*model.ModUserParams) error
 
 	// GetPacks retrieves all available packs from the database.
 	GetPacks() (*model.Packs, error)
@@ -116,24 +116,24 @@ type Store interface {
 	GetPack(string) (*model.Pack, *gorm.DB)
 
 	// GetPackClients retrieves clients for a pack.
-	GetPackClients(int) (*model.Clients, error)
+	GetPackClients(*model.PackClientParams) (*model.Clients, error)
 
 	// GetPackHasClient checks if a specific client is assigned to a pack.
-	GetPackHasClient(int, int) bool
+	GetPackHasClient(*model.PackClientParams) bool
 
-	CreatePackClient(int, int) error
+	CreatePackClient(*model.PackClientParams) error
 
-	DeletePackClient(int, int) error
+	DeletePackClient(*model.PackClientParams) error
 
 	// GetPackUsers retrieves users for a pack.
-	GetPackUsers(int) (*model.Users, error)
+	GetPackUsers(*model.PackUserParams) (*model.Users, error)
 
 	// GetPackHasUser checks if a specific user is assigned to a pack.
-	GetPackHasUser(int, int) bool
+	GetPackHasUser(*model.PackUserParams) bool
 
-	CreatePackUser(int, int) error
+	CreatePackUser(*model.PackUserParams) error
 
-	DeletePackUser(int, int) error
+	DeletePackUser(*model.PackUserParams) error
 
 	// GetUsers retrieves all available users from the database.
 	GetUsers() (*model.Users, error)
@@ -151,24 +151,24 @@ type Store interface {
 	GetUser(string) (*model.User, *gorm.DB)
 
 	// GetUserMods retrieves mods for a user.
-	GetUserMods(int) (*model.Mods, error)
+	GetUserMods(*model.UserModParams) (*model.Mods, error)
 
 	// GetUserHasMod checks if a specific mod is assigned to a user.
-	GetUserHasMod(int, int) bool
+	GetUserHasMod(*model.UserModParams) bool
 
-	CreateUserMod(int, int) error
+	CreateUserMod(*model.UserModParams) error
 
-	DeleteUserMod(int, int) error
+	DeleteUserMod(*model.UserModParams) error
 
 	// GetUserPacks retrieves packs for a user.
-	GetUserPacks(int) (*model.Packs, error)
+	GetUserPacks(*model.UserPackParams) (*model.Packs, error)
 
 	// GetUserHasPack checks if a specific pack is assigned to a user.
-	GetUserHasPack(int, int) bool
+	GetUserHasPack(*model.UserPackParams) bool
 
-	CreateUserPack(int, int) error
+	CreateUserPack(*model.UserPackParams) error
 
-	DeleteUserPack(int, int) error
+	DeleteUserPack(*model.UserPackParams) error
 
 	// GetVersions retrieves all available versions from the database.
 	GetVersions(int) (*model.Versions, error)
@@ -186,14 +186,14 @@ type Store interface {
 	GetVersion(int, string) (*model.Version, *gorm.DB)
 
 	// GetVersionBuilds retrieves builds for a version.
-	GetVersionBuilds(int) (*model.Builds, error)
+	GetVersionBuilds(*model.VersionBuildParams) (*model.Builds, error)
 
 	// GetVersionHasBuild checks if a specific build is assigned to a version.
-	GetVersionHasBuild(int, int) bool
+	GetVersionHasBuild(*model.VersionBuildParams) bool
 
-	CreateVersionBuild(int, int) error
+	CreateVersionBuild(*model.VersionBuildParams) error
 
-	DeleteVersionBuild(int, int) error
+	DeleteVersionBuild(*model.VersionBuildParams) error
 
 	// GetMinecrafts retrieves all available minecrafts from the database.
 	GetMinecrafts() (*model.Minecrafts, error)
@@ -205,14 +205,14 @@ type Store interface {
 	GetMinecraft(string) (*model.Minecraft, *gorm.DB)
 
 	// GetMinecraftBuilds retrieves builds for a minecraft.
-	GetMinecraftBuilds(int) (*model.Builds, error)
+	GetMinecraftBuilds(*model.MinecraftBuildParams) (*model.Builds, error)
 
 	// GetMinecraftHasBuild checks if a specific build is assigned to a minecraft.
-	GetMinecraftHasBuild(int, int) bool
+	GetMinecraftHasBuild(*model.MinecraftBuildParams) bool
 
-	CreateMinecraftBuild(int, int) error
+	CreateMinecraftBuild(*model.MinecraftBuildParams) error
 
-	DeleteMinecraftBuild(int, int) error
+	DeleteMinecraftBuild(*model.MinecraftBuildParams) error
 
 	// GetForges retrieves all available forges from the database.
 	GetForges() (*model.Forges, error)
@@ -224,12 +224,18 @@ type Store interface {
 	GetForge(string) (*model.Forge, *gorm.DB)
 
 	// GetForgeBuilds retrieves builds for a forge.
-	GetForgeBuilds(int) (*model.Builds, error)
+	GetForgeBuilds(*model.ForgeBuildParams) (*model.Builds, error)
 
 	// GetForgeHasBuild checks if a specific build is assigned to a forge.
-	GetForgeHasBuild(int, int) bool
+	GetForgeHasBuild(*model.ForgeBuildParams) bool
 
-	CreateForgeBuild(int, int) error
+	CreateForgeBuild(*model.ForgeBuildParams) error
 
-	DeleteForgeBuild(int, int) error
+	DeleteForgeBuild(*model.ForgeBuildParams) error
+
+	GetSolderPacks() (*model.Packs, error)
+
+	GetSolderPack(string, string) (*model.Pack, error)
+
+	GetSolderBuild(string, string, string) (*model.Build, error)
 }

@@ -166,11 +166,11 @@ func PostMod(c *gin.Context) {
 
 // GetModUsers retrieves all users related to a mod.
 func GetModUsers(c *gin.Context) {
-	mod := session.Mod(c)
-
 	records, err := store.GetModUsers(
 		c,
-		mod.ID,
+		&model.ModUserParams{
+			Mod: c.Param("mod"),
+		},
 	)
 
 	if err != nil {
@@ -194,13 +194,12 @@ func GetModUsers(c *gin.Context) {
 
 // PatchModUser appends a user to a mod.
 func PatchModUser(c *gin.Context) {
-	mod := session.Mod(c)
-	user := session.User(c)
-
 	assigned := store.GetModHasUser(
 		c,
-		mod.ID,
-		user.ID,
+		&model.ModUserParams{
+			Mod:  c.Param("mod"),
+			User: c.Param("user"),
+		},
 	)
 
 	if assigned == true {
@@ -218,8 +217,10 @@ func PatchModUser(c *gin.Context) {
 
 	err := store.CreateModUser(
 		c,
-		mod.ID,
-		user.ID,
+		&model.ModUserParams{
+			Mod:  c.Param("mod"),
+			User: c.Param("user"),
+		},
 	)
 
 	if err != nil {
@@ -246,13 +247,12 @@ func PatchModUser(c *gin.Context) {
 
 // DeleteModUser deleted a user from a mod
 func DeleteModUser(c *gin.Context) {
-	mod := session.Mod(c)
-	user := session.User(c)
-
 	assigned := store.GetModHasUser(
 		c,
-		mod.ID,
-		user.ID,
+		&model.ModUserParams{
+			Mod:  c.Param("mod"),
+			User: c.Param("user"),
+		},
 	)
 
 	if assigned == false {
@@ -270,8 +270,10 @@ func DeleteModUser(c *gin.Context) {
 
 	err := store.DeleteModUser(
 		c,
-		mod.ID,
-		user.ID,
+		&model.ModUserParams{
+			Mod:  c.Param("mod"),
+			User: c.Param("user"),
+		},
 	)
 
 	if err != nil {

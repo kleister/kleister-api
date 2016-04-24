@@ -23,19 +23,19 @@ func GetForge(c context.Context, id string) (*model.Forge, *gorm.DB) {
 }
 
 // GetForgeBuilds retrieves builds for a forge.
-func GetForgeBuilds(c context.Context, id int) (*model.Builds, error) {
-	return FromContext(c).GetForgeBuilds(id)
+func GetForgeBuilds(c context.Context, params *model.ForgeBuildParams) (*model.Builds, error) {
+	return FromContext(c).GetForgeBuilds(params)
 }
 
 // GetForgeHasBuild checks if a specific build is assigned to a forge.
-func GetForgeHasBuild(c context.Context, parent, id int) bool {
-	return FromContext(c).GetForgeHasBuild(parent, id)
+func GetForgeHasBuild(c context.Context, params *model.ForgeBuildParams) bool {
+	return FromContext(c).GetForgeHasBuild(params)
 }
 
-func CreateForgeBuild(c context.Context, parent, id int) error {
-	return FromContext(c).CreateForgeBuild(parent, id)
+func CreateForgeBuild(c context.Context, params *model.ForgeBuildParams) error {
+	return FromContext(c).CreateForgeBuild(params)
 }
 
-func DeleteForgeBuild(c context.Context, parent, id int) error {
-	return FromContext(c).DeleteForgeBuild(parent, id)
+func DeleteForgeBuild(c context.Context, params *model.ForgeBuildParams) error {
+	return FromContext(c).DeleteForgeBuild(params)
 }

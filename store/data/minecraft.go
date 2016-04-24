@@ -58,13 +58,13 @@ func (db *data) GetMinecraft(id string) (*model.Minecraft, *gorm.DB) {
 }
 
 // GetMinecraftBuilds retrieves builds for a minecraft.
-func (db *data) GetMinecraftBuilds(id int) (*model.Builds, error) {
+func (db *data) GetMinecraftBuilds(params *model.MinecraftBuildParams) (*model.Builds, error) {
+	minecraft, _ := db.GetMinecraft(params.Minecraft)
+
 	records := &model.Builds{}
 
 	err := db.Model(
-		&model.Minecraft{
-			ID: id,
-		},
+		minecraft,
 	).Association(
 		"Builds",
 	).Find(
@@ -75,42 +75,33 @@ func (db *data) GetMinecraftBuilds(id int) (*model.Builds, error) {
 }
 
 // GetMinecraftHasBuild checks if a specific build is assigned to a minecraft.
-func (db *data) GetMinecraftHasBuild(parent, id int) bool {
-	record := &model.Build{
-		ID: id,
-	}
+func (db *data) GetMinecraftHasBuild(params *model.MinecraftBuildParams) bool {
+	minecraft, _ := db.GetMinecraft(params.Minecraft)
+	pack, _ := db.GetPack(params.Pack)
+	build, _ := db.GetBuild(pack.ID, params.Build)
 
-	count := db.Model(
-		&model.Minecraft{
-			ID: parent,
-		},
-	).Association(
-		"Builds",
-	).Find(
-		record,
-	).Count()
-
-	return count > 0
+	return build.MinecraftID == minecraft.ID
 }
 
-func (db *data) CreateMinecraftBuild(parent, id int) error {
+func (db *data) CreateMinecraftBuild(params *model.MinecraftBuildParams) error {
+	minecraft, _ := db.GetMinecraft(params.Minecraft)
+	pack, _ := db.GetPack(params.Pack)
+	build, _ := db.GetBuild(pack.ID, params.Build)
+
 	return db.Model(
-		&model.Build{},
-	).Where(
-		"id = ?",
-		parent,
+		build,
 	).Update(
 		"minecraft_id",
-		id,
+		minecraft.ID,
 	).Error
 }
 
-func (db *data) DeleteMinecraftBuild(parent, id int) error {
+func (db *data) DeleteMinecraftBuild(params *model.MinecraftBuildParams) error {
+	pack, _ := db.GetPack(params.Pack)
+	build, _ := db.GetBuild(pack.ID, params.Build)
+
 	return db.Model(
-		&model.Build{},
-	).Where(
-		"id = ?",
-		parent,
+		build,
 	).Update(
 		"minecraft_id",
 		0,

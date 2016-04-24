@@ -79,13 +79,14 @@ func (db *data) GetVersion(mod int, id string) (*model.Version, *gorm.DB) {
 }
 
 // GetVersionBuilds retrieves builds for a version.
-func (db *data) GetVersionBuilds(id int) (*model.Builds, error) {
+func (db *data) GetVersionBuilds(params *model.VersionBuildParams) (*model.Builds, error) {
+	mod, _ := db.GetMod(params.Mod)
+	version, _ := db.GetVersion(mod.ID, params.Version)
+
 	records := &model.Builds{}
 
 	err := db.Model(
-		&model.Version{
-			ID: id,
-		},
+		version,
 	).Association(
 		"Builds",
 	).Find(
@@ -96,48 +97,49 @@ func (db *data) GetVersionBuilds(id int) (*model.Builds, error) {
 }
 
 // GetVersionHasBuild checks if a specific build is assigned to a version.
-func (db *data) GetVersionHasBuild(parent, id int) bool {
-	record := &model.Build{
-		ID: id,
-	}
+func (db *data) GetVersionHasBuild(params *model.VersionBuildParams) bool {
+	mod, _ := db.GetMod(params.Mod)
+	version, _ := db.GetVersion(mod.ID, params.Version)
+	pack, _ := db.GetPack(params.Pack)
+	build, _ := db.GetBuild(pack.ID, params.Build)
 
 	count := db.Model(
-		&model.Version{
-			ID: parent,
-		},
+		version,
 	).Association(
 		"Builds",
 	).Find(
-		record,
+		build,
 	).Count()
 
 	return count > 0
 }
 
-func (db *data) CreateVersionBuild(parent, id int) error {
+func (db *data) CreateVersionBuild(params *model.VersionBuildParams) error {
+	mod, _ := db.GetMod(params.Mod)
+	version, _ := db.GetVersion(mod.ID, params.Version)
+	pack, _ := db.GetPack(params.Pack)
+	build, _ := db.GetBuild(pack.ID, params.Build)
+
 	return db.Model(
-		&model.Version{
-			ID: parent,
-		},
+		version,
 	).Association(
 		"Builds",
 	).Append(
-		&model.Build{
-			ID: id,
-		},
+		build,
 	).Error
 }
 
-func (db *data) DeleteVersionBuild(parent, id int) error {
+func (db *data) DeleteVersionBuild(params *model.VersionBuildParams) error {
+	mod, _ := db.GetMod(params.Mod)
+	version, _ := db.GetVersion(mod.ID, params.Version)
+	pack, _ := db.GetPack(params.Pack)
+	build, _ := db.GetBuild(pack.ID, params.Build)
+
 	return db.Model(
-		&model.Version{
-			ID: parent,
-		},
+		version,
 	).Association(
 		"Builds",
 	).Delete(
-		&model.Build{
-			ID: id,
-		},
+		build,
 	).Error
 }

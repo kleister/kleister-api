@@ -93,8 +93,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				minecraftBuilds.Use(session.SetMinecraft())
 
 				minecraftBuilds.GET("", api.GetMinecraftBuilds)
-				minecraftBuilds.PATCH("/:build", session.SetBuild(), api.PatchMinecraftBuild)
-				minecraftBuilds.DELETE("/:build", session.SetBuild(), api.DeleteMinecraftBuild)
+				minecraftBuilds.PATCH("", api.PatchMinecraftBuild)
+				minecraftBuilds.DELETE("", api.DeleteMinecraftBuild)
 			}
 
 			//
@@ -115,8 +115,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				forgeBuilds.Use(session.SetForge())
 
 				forgeBuilds.GET("", api.GetForgeBuilds)
-				forgeBuilds.PATCH("/:build", session.SetBuild(), api.PatchForgeBuild)
-				forgeBuilds.DELETE("/:build", session.SetBuild(), api.DeleteForgeBuild)
+				forgeBuilds.PATCH("", api.PatchForgeBuild)
+				forgeBuilds.DELETE("", api.DeleteForgeBuild)
 			}
 
 			//
@@ -139,8 +139,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				packClients.Use(session.SetPack())
 
 				packClients.GET("", api.GetPackClients)
-				packClients.PATCH("/:client", session.SetClient(), api.PatchPackClient)
-				packClients.DELETE("/:client", session.SetClient(), api.DeletePackClient)
+				packClients.PATCH("", api.PatchPackClient)
+				packClients.DELETE("", api.DeletePackClient)
 			}
 
 			packUsers := base.Group("/packs/:pack/users")
@@ -175,8 +175,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				buildVersions.Use(session.SetBuild())
 
 				buildVersions.GET("", api.GetBuildVersions)
-				buildVersions.PATCH("/:version", session.SetVersion(), api.PatchBuildVersion)
-				buildVersions.DELETE("/:version", session.SetVersion(), api.DeleteBuildVersion)
+				buildVersions.PATCH("", api.PatchBuildVersion)
+				buildVersions.DELETE("", api.DeleteBuildVersion)
 			}
 
 			//
@@ -199,8 +199,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				modUsers.Use(session.SetMod())
 
 				modUsers.GET("", api.GetModUsers)
-				modUsers.PATCH("/:user", session.SetUser(), api.PatchModUser)
-				modUsers.DELETE("/:user", session.SetUser(), api.DeleteModUser)
+				modUsers.PATCH("", api.PatchModUser)
+				modUsers.DELETE("", api.DeleteModUser)
 			}
 
 			//
@@ -225,8 +225,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				versionBuilds.Use(session.SetVersion())
 
 				versionBuilds.GET("", api.GetVersionBuilds)
-				versionBuilds.PATCH("/:build", session.SetBuild(), api.PatchVersionBuild)
-				versionBuilds.DELETE("/:build", session.SetBuild(), api.DeleteVersionBuild)
+				versionBuilds.PATCH("", api.PatchVersionBuild)
+				versionBuilds.DELETE("", api.DeleteVersionBuild)
 			}
 
 			//
@@ -249,8 +249,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				clientPacks.Use(session.SetClient())
 
 				clientPacks.GET("", api.GetClientPacks)
-				clientPacks.PATCH("/:pack", session.SetPack(), api.PatchClientPack)
-				clientPacks.DELETE("/:pack", session.SetPack(), api.DeleteClientPack)
+				clientPacks.PATCH("", api.PatchClientPack)
+				clientPacks.DELETE("", api.DeleteClientPack)
 			}
 
 			//
@@ -273,8 +273,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				userMods.Use(session.SetUser())
 
 				userMods.GET("", api.GetUserMods)
-				userMods.PATCH("/:mod", session.SetMod(), api.PatchUserMod)
-				userMods.DELETE("/:mod", session.SetMod(), api.DeleteUserMod)
+				userMods.PATCH("", api.PatchUserMod)
+				userMods.DELETE("", api.DeleteUserMod)
 			}
 
 			userPacks := base.Group("/users/:user/packs")
@@ -283,8 +283,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				userPacks.Use(session.SetUser())
 
 				userPacks.GET("", api.GetUserPacks)
-				userPacks.PATCH("/:pack", session.SetPack(), api.PatchUserPack)
-				userPacks.DELETE("/:pack", session.SetPack(), api.DeleteUserPack)
+				userPacks.PATCH("", api.PatchUserPack)
+				userPacks.DELETE("", api.DeleteUserPack)
 			}
 
 			//
@@ -306,9 +306,11 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			solder := base.Group("/")
 			{
+				solder.GET("/modpack", api.GetSolderPacks)
 				solder.GET("/modpack/:pack", api.GetSolderPack)
 				solder.GET("/modpack/:pack/:build", api.GetSolderBuild)
 
+				solder.GET("/mod", api.GetSolderMods)
 				solder.GET("/mod/:mod", api.GetSolderMod)
 				solder.GET("/mod/:mod/:version", api.GetSolderVersion)
 			}

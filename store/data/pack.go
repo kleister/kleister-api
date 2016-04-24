@@ -79,13 +79,13 @@ func (db *data) GetPack(id string) (*model.Pack, *gorm.DB) {
 }
 
 // GetPackClients retrieves clients for a pack.
-func (db *data) GetPackClients(id int) (*model.Clients, error) {
+func (db *data) GetPackClients(params *model.PackClientParams) (*model.Clients, error) {
+	pack, _ := db.GetPack(params.Pack)
+
 	records := &model.Clients{}
 
 	err := db.Model(
-		&model.Pack{
-			ID: id,
-		},
+		pack,
 	).Association(
 		"Clients",
 	).Find(
@@ -96,60 +96,55 @@ func (db *data) GetPackClients(id int) (*model.Clients, error) {
 }
 
 // GetPackHasClient checks if a specific client is assigned to a pack.
-func (db *data) GetPackHasClient(parent, id int) bool {
-	record := &model.Client{
-		ID: id,
-	}
+func (db *data) GetPackHasClient(params *model.PackClientParams) bool {
+	pack, _ := db.GetPack(params.Pack)
+	client, _ := db.GetClient(params.Client)
 
 	count := db.Model(
-		&model.Pack{
-			ID: parent,
-		},
+		pack,
 	).Association(
 		"Clients",
 	).Find(
-		record,
+		client,
 	).Count()
 
 	return count > 0
 }
 
-func (db *data) CreatePackClient(parent, id int) error {
+func (db *data) CreatePackClient(params *model.PackClientParams) error {
+	pack, _ := db.GetPack(params.Pack)
+	client, _ := db.GetClient(params.Client)
+
 	return db.Model(
-		&model.Pack{
-			ID: parent,
-		},
+		pack,
 	).Association(
 		"Clients",
 	).Append(
-		&model.Client{
-			ID: id,
-		},
+		client,
 	).Error
 }
 
-func (db *data) DeletePackClient(parent, id int) error {
+func (db *data) DeletePackClient(params *model.PackClientParams) error {
+	pack, _ := db.GetPack(params.Pack)
+	client, _ := db.GetClient(params.Client)
+
 	return db.Model(
-		&model.Pack{
-			ID: parent,
-		},
+		pack,
 	).Association(
 		"Clients",
 	).Delete(
-		&model.Client{
-			ID: id,
-		},
+		client,
 	).Error
 }
 
 // GetPackUsers retrieves users for a pack.
-func (db *data) GetPackUsers(id int) (*model.Users, error) {
+func (db *data) GetPackUsers(params *model.PackUserParams) (*model.Users, error) {
+	pack, _ := db.GetPack(params.Pack)
+
 	records := &model.Users{}
 
 	err := db.Model(
-		&model.Pack{
-			ID: id,
-		},
+		pack,
 	).Association(
 		"Users",
 	).Find(
@@ -160,48 +155,43 @@ func (db *data) GetPackUsers(id int) (*model.Users, error) {
 }
 
 // GetPackHasUser checks if a specific user is assigned to a pack.
-func (db *data) GetPackHasUser(parent, id int) bool {
-	record := &model.User{
-		ID: id,
-	}
+func (db *data) GetPackHasUser(params *model.PackUserParams) bool {
+	pack, _ := db.GetPack(params.Pack)
+	user, _ := db.GetUser(params.User)
 
 	count := db.Model(
-		&model.Pack{
-			ID: parent,
-		},
+		pack,
 	).Association(
 		"Users",
 	).Find(
-		record,
+		user,
 	).Count()
 
 	return count > 0
 }
 
-func (db *data) CreatePackUser(parent, id int) error {
+func (db *data) CreatePackUser(params *model.PackUserParams) error {
+	pack, _ := db.GetPack(params.Pack)
+	user, _ := db.GetUser(params.User)
+
 	return db.Model(
-		&model.Pack{
-			ID: parent,
-		},
+		pack,
 	).Association(
 		"Users",
 	).Append(
-		&model.User{
-			ID: id,
-		},
+		user,
 	).Error
 }
 
-func (db *data) DeletePackUser(parent, id int) error {
+func (db *data) DeletePackUser(params *model.PackUserParams) error {
+	pack, _ := db.GetPack(params.Pack)
+	user, _ := db.GetUser(params.User)
+
 	return db.Model(
-		&model.Pack{
-			ID: parent,
-		},
+		pack,
 	).Association(
 		"Users",
 	).Delete(
-		&model.User{
-			ID: id,
-		},
+		user,
 	).Error
 }

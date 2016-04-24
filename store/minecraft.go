@@ -23,19 +23,19 @@ func GetMinecraft(c context.Context, id string) (*model.Minecraft, *gorm.DB) {
 }
 
 // GetMinecraftBuilds retrieves builds for a minecraft.
-func GetMinecraftBuilds(c context.Context, id int) (*model.Builds, error) {
-	return FromContext(c).GetMinecraftBuilds(id)
+func GetMinecraftBuilds(c context.Context, params *model.MinecraftBuildParams) (*model.Builds, error) {
+	return FromContext(c).GetMinecraftBuilds(params)
 }
 
 // GetMinecraftHasBuild checks if a specific build is assigned to a minecraft.
-func GetMinecraftHasBuild(c context.Context, parent, id int) bool {
-	return FromContext(c).GetMinecraftHasBuild(parent, id)
+func GetMinecraftHasBuild(c context.Context, params *model.MinecraftBuildParams) bool {
+	return FromContext(c).GetMinecraftHasBuild(params)
 }
 
-func CreateMinecraftBuild(c context.Context, parent, id int) error {
-	return FromContext(c).CreateMinecraftBuild(parent, id)
+func CreateMinecraftBuild(c context.Context, params *model.MinecraftBuildParams) error {
+	return FromContext(c).CreateMinecraftBuild(params)
 }
 
-func DeleteMinecraftBuild(c context.Context, parent, id int) error {
-	return FromContext(c).DeleteMinecraftBuild(parent, id)
+func DeleteMinecraftBuild(c context.Context, params *model.MinecraftBuildParams) error {
+	return FromContext(c).DeleteMinecraftBuild(params)
 }

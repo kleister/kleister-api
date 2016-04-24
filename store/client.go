@@ -32,19 +32,19 @@ func GetClient(c context.Context, id string) (*model.Client, *gorm.DB) {
 }
 
 // GetClientPacks retrieves packs for a client.
-func GetClientPacks(c context.Context, id int) (*model.Packs, error) {
-	return FromContext(c).GetClientPacks(id)
+func GetClientPacks(c context.Context, params *model.ClientPackParams) (*model.Packs, error) {
+	return FromContext(c).GetClientPacks(params)
 }
 
 // GetClientHasPack checks if a specific pack is assigned to a client.
-func GetClientHasPack(c context.Context, parent, id int) bool {
-	return FromContext(c).GetClientHasPack(parent, id)
+func GetClientHasPack(c context.Context, params *model.ClientPackParams) bool {
+	return FromContext(c).GetClientHasPack(params)
 }
 
-func CreateClientPack(c context.Context, parent, id int) error {
-	return FromContext(c).CreateClientPack(parent, id)
+func CreateClientPack(c context.Context, params *model.ClientPackParams) error {
+	return FromContext(c).CreateClientPack(params)
 }
 
-func DeleteClientPack(c context.Context, parent, id int) error {
-	return FromContext(c).DeleteClientPack(parent, id)
+func DeleteClientPack(c context.Context, params *model.ClientPackParams) error {
+	return FromContext(c).DeleteClientPack(params)
 }

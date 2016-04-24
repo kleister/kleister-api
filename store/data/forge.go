@@ -58,13 +58,13 @@ func (db *data) GetForge(id string) (*model.Forge, *gorm.DB) {
 }
 
 // GetForgeBuilds retrieves builds for a forge.
-func (db *data) GetForgeBuilds(id int) (*model.Builds, error) {
+func (db *data) GetForgeBuilds(params *model.ForgeBuildParams) (*model.Builds, error) {
+	forge, _ := db.GetForge(params.Forge)
+
 	records := &model.Builds{}
 
 	err := db.Model(
-		&model.Forge{
-			ID: id,
-		},
+		forge,
 	).Association(
 		"Builds",
 	).Find(
@@ -75,42 +75,33 @@ func (db *data) GetForgeBuilds(id int) (*model.Builds, error) {
 }
 
 // GetForgeHasBuild checks if a specific build is assigned to a minecraft.
-func (db *data) GetForgeHasBuild(parent, id int) bool {
-	record := &model.Build{
-		ID: id,
-	}
+func (db *data) GetForgeHasBuild(params *model.ForgeBuildParams) bool {
+	forge, _ := db.GetForge(params.Forge)
+	pack, _ := db.GetPack(params.Pack)
+	build, _ := db.GetBuild(pack.ID, params.Build)
 
-	count := db.Model(
-		&model.Forge{
-			ID: parent,
-		},
-	).Association(
-		"Builds",
-	).Find(
-		record,
-	).Count()
-
-	return count > 0
+	return build.ForgeID == forge.ID
 }
 
-func (db *data) CreateForgeBuild(parent, id int) error {
+func (db *data) CreateForgeBuild(params *model.ForgeBuildParams) error {
+	forge, _ := db.GetForge(params.Forge)
+	pack, _ := db.GetPack(params.Pack)
+	build, _ := db.GetBuild(pack.ID, params.Build)
+
 	return db.Model(
-		&model.Build{},
-	).Where(
-		"id = ?",
-		parent,
+		build,
 	).Update(
 		"forge_id",
-		id,
+		forge.ID,
 	).Error
 }
 
-func (db *data) DeleteForgeBuild(parent, id int) error {
+func (db *data) DeleteForgeBuild(params *model.ForgeBuildParams) error {
+	pack, _ := db.GetPack(params.Pack)
+	build, _ := db.GetBuild(pack.ID, params.Build)
+
 	return db.Model(
-		&model.Build{},
-	).Where(
-		"id = ?",
-		parent,
+		build,
 	).Update(
 		"forge_id",
 		0,

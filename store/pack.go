@@ -32,37 +32,37 @@ func GetPack(c context.Context, id string) (*model.Pack, *gorm.DB) {
 }
 
 // GetPackClients retrieves clients for a pack.
-func GetPackClients(c context.Context, id int) (*model.Clients, error) {
-	return FromContext(c).GetPackClients(id)
+func GetPackClients(c context.Context, params *model.PackClientParams) (*model.Clients, error) {
+	return FromContext(c).GetPackClients(params)
 }
 
 // GetPackHasClient checks if a specific client is assigned to a pack.
-func GetPackHasClient(c context.Context, parent, id int) bool {
-	return FromContext(c).GetPackHasClient(parent, id)
+func GetPackHasClient(c context.Context, params *model.PackClientParams) bool {
+	return FromContext(c).GetPackHasClient(params)
 }
 
-func CreatePackClient(c context.Context, parent, id int) error {
-	return FromContext(c).CreatePackClient(parent, id)
+func CreatePackClient(c context.Context, params *model.PackClientParams) error {
+	return FromContext(c).CreatePackClient(params)
 }
 
-func DeletePackClient(c context.Context, parent, id int) error {
-	return FromContext(c).DeletePackClient(parent, id)
+func DeletePackClient(c context.Context, params *model.PackClientParams) error {
+	return FromContext(c).DeletePackClient(params)
 }
 
 // GetPackUsers retrieves users for a pack.
-func GetPackUsers(c context.Context, id int) (*model.Users, error) {
-	return FromContext(c).GetPackUsers(id)
+func GetPackUsers(c context.Context, params *model.PackUserParams) (*model.Users, error) {
+	return FromContext(c).GetPackUsers(params)
 }
 
 // GetPackHasUser checks if a specific user is assigned to a pack.
-func GetPackHasUser(c context.Context, parent, id int) bool {
-	return FromContext(c).GetPackHasUser(parent, id)
+func GetPackHasUser(c context.Context, params *model.PackUserParams) bool {
+	return FromContext(c).GetPackHasUser(params)
 }
 
-func CreatePackUser(c context.Context, parent, id int) error {
-	return FromContext(c).CreatePackUser(parent, id)
+func CreatePackUser(c context.Context, params *model.PackUserParams) error {
+	return FromContext(c).CreatePackUser(params)
 }
 
-func DeletePackUser(c context.Context, parent, id int) error {
-	return FromContext(c).DeletePackUser(parent, id)
+func DeletePackUser(c context.Context, params *model.PackUserParams) error {
+	return FromContext(c).DeletePackUser(params)
 }
