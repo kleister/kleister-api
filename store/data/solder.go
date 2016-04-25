@@ -98,12 +98,28 @@ func (db *data) GetSolderBuild(pack, build, location string) (*model.Build, erro
 		"Versions",
 	).Preload(
 		"Versions.Mod",
+	).Preload(
+		"Versions.File",
 	).Joins(
 		"INNER JOIN packs ON packs.id = builds.pack_id AND packs.slug = ?",
 		pack,
 	).First(
 		record,
 	).Error
+
+	for _, version := range record.Versions {
+		if version.File != nil {
+			version.File.URL = strings.Join(
+				[]string{
+					location,
+					"storage",
+					"version",
+					strconv.Itoa(version.ID),
+				},
+				"/",
+			)
+		}
+	}
 
 	return record, err
 }
