@@ -65,6 +65,8 @@ func (db *data) GetForgeBuilds(params *model.ForgeBuildParams) (*model.Builds, e
 
 	err := db.Model(
 		forge,
+	).Preload(
+		"Pack",
 	).Association(
 		"Builds",
 	).Find(

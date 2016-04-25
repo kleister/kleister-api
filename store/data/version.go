@@ -87,6 +87,8 @@ func (db *data) GetVersionBuilds(params *model.VersionBuildParams) (*model.Build
 
 	err := db.Model(
 		version,
+	).Preload(
+		"Pack",
 	).Association(
 		"Builds",
 	).Find(

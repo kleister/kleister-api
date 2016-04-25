@@ -65,6 +65,8 @@ func (db *data) GetMinecraftBuilds(params *model.MinecraftBuildParams) (*model.B
 
 	err := db.Model(
 		minecraft,
+	).Preload(
+		"Pack",
 	).Association(
 		"Builds",
 	).Find(

@@ -91,6 +91,8 @@ func (db *data) GetBuildVersions(params *model.BuildVersionParams) (*model.Versi
 
 	err := db.Model(
 		build,
+	).Preload(
+		"Mod",
 	).Association(
 		"Versions",
 	).Find(
