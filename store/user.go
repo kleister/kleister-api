@@ -41,10 +41,12 @@ func GetUserHasMod(c context.Context, params *model.UserModParams) bool {
 	return FromContext(c).GetUserHasMod(params)
 }
 
+// CreateUserMod assigns a mod to a specific user.
 func CreateUserMod(c context.Context, params *model.UserModParams) error {
 	return FromContext(c).CreateUserMod(params)
 }
 
+// DeleteUserMod removes a mod from a specific user.
 func DeleteUserMod(c context.Context, params *model.UserModParams) error {
 	return FromContext(c).DeleteUserMod(params)
 }
@@ -59,10 +61,12 @@ func GetUserHasPack(c context.Context, params *model.UserPackParams) bool {
 	return FromContext(c).GetUserHasPack(params)
 }
 
+// CreateUserPack assigns a pack to a specific user.
 func CreateUserPack(c context.Context, params *model.UserPackParams) error {
 	return FromContext(c).CreateUserPack(params)
 }
 
+// DeleteUserPack removes a pack from a specific user.
 func DeleteUserPack(c context.Context, params *model.UserPackParams) error {
 	return FromContext(c).DeleteUserPack(params)
 }

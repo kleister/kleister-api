@@ -32,10 +32,12 @@ func GetMinecraftHasBuild(c context.Context, params *model.MinecraftBuildParams)
 	return FromContext(c).GetMinecraftHasBuild(params)
 }
 
+// CreateMinecraftBuild assigns a build to a specific minecraft.
 func CreateMinecraftBuild(c context.Context, params *model.MinecraftBuildParams) error {
 	return FromContext(c).CreateMinecraftBuild(params)
 }
 
+// DeleteMinecraftBuild removes a build from a specific minecraft.
 func DeleteMinecraftBuild(c context.Context, params *model.MinecraftBuildParams) error {
 	return FromContext(c).DeleteMinecraftBuild(params)
 }

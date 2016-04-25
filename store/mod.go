@@ -41,10 +41,12 @@ func GetModHasUser(c context.Context, params *model.ModUserParams) bool {
 	return FromContext(c).GetModHasUser(params)
 }
 
+// CreateModUser assigns a user to a specific mod.
 func CreateModUser(c context.Context, params *model.ModUserParams) error {
 	return FromContext(c).CreateModUser(params)
 }
 
+// DeleteModUser removes a user from a specific mod.
 func DeleteModUser(c context.Context, params *model.ModUserParams) error {
 	return FromContext(c).DeleteModUser(params)
 }

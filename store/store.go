@@ -9,6 +9,7 @@ import (
 
 //go:generate mockery -all -case=underscore
 
+// Store implements all required data-layer functions for Solder.
 type Store interface {
 	// GetBuilds retrieves all available builds from the database.
 	GetBuilds(int) (*model.Builds, error)
@@ -31,8 +32,10 @@ type Store interface {
 	// GetBuildHasVersion checks if a specific version is assigned to a build.
 	GetBuildHasVersion(*model.BuildVersionParams) bool
 
+	// CreateBuildVersion assigns a version to a specific build.
 	CreateBuildVersion(*model.BuildVersionParams) error
 
+	// DeleteBuildVersion removes a version from a specific build.
 	DeleteBuildVersion(*model.BuildVersionParams) error
 
 	// GetClients retrieves all available clients from the database.
@@ -56,8 +59,10 @@ type Store interface {
 	// GetClientHasPack checks if a specific pack is assigned to a client.
 	GetClientHasPack(*model.ClientPackParams) bool
 
+	// CreateClientPack assigns a pack to a specific client.
 	CreateClientPack(*model.ClientPackParams) error
 
+	// DeleteClientPack removes a pack from a specific client.
 	DeleteClientPack(*model.ClientPackParams) error
 
 	// GetKeys retrieves all available keys from the database.
@@ -96,8 +101,10 @@ type Store interface {
 	// GetModHasUser checks if a specific user is assigned to a mod.
 	GetModHasUser(*model.ModUserParams) bool
 
+	// CreateModUser assigns a user to a specific mod.
 	CreateModUser(*model.ModUserParams) error
 
+	// DeleteModUser removes a user from a specific mod.
 	DeleteModUser(*model.ModUserParams) error
 
 	// GetPacks retrieves all available packs from the database.
@@ -121,8 +128,10 @@ type Store interface {
 	// GetPackHasClient checks if a specific client is assigned to a pack.
 	GetPackHasClient(*model.PackClientParams) bool
 
+	// CreatePackClient assigns a client to a specific pack.
 	CreatePackClient(*model.PackClientParams) error
 
+	// DeletePackClient removes a client from a specific pack.
 	DeletePackClient(*model.PackClientParams) error
 
 	// GetPackUsers retrieves users for a pack.
@@ -131,8 +140,10 @@ type Store interface {
 	// GetPackHasUser checks if a specific user is assigned to a pack.
 	GetPackHasUser(*model.PackUserParams) bool
 
+	// CreatePackUser assigns a user to a specific pack.
 	CreatePackUser(*model.PackUserParams) error
 
+	// DeletePackUser removes a user from a specific pack.
 	DeletePackUser(*model.PackUserParams) error
 
 	// GetUsers retrieves all available users from the database.
@@ -156,8 +167,10 @@ type Store interface {
 	// GetUserHasMod checks if a specific mod is assigned to a user.
 	GetUserHasMod(*model.UserModParams) bool
 
+	// CreateUserMod assigns a mod to a specific user.
 	CreateUserMod(*model.UserModParams) error
 
+	// DeleteUserMod removes a mod from a specific user.
 	DeleteUserMod(*model.UserModParams) error
 
 	// GetUserPacks retrieves packs for a user.
@@ -166,8 +179,10 @@ type Store interface {
 	// GetUserHasPack checks if a specific pack is assigned to a user.
 	GetUserHasPack(*model.UserPackParams) bool
 
+	// CreateUserPack assigns a pack to a specific user.
 	CreateUserPack(*model.UserPackParams) error
 
+	// DeleteUserPack removes a pack from a specific user.
 	DeleteUserPack(*model.UserPackParams) error
 
 	// GetVersions retrieves all available versions from the database.
@@ -191,8 +206,10 @@ type Store interface {
 	// GetVersionHasBuild checks if a specific build is assigned to a version.
 	GetVersionHasBuild(*model.VersionBuildParams) bool
 
+	// CreateVersionBuild assigns a build to a specific version.
 	CreateVersionBuild(*model.VersionBuildParams) error
 
+	// DeleteVersionBuild removes a build from a specific version.
 	DeleteVersionBuild(*model.VersionBuildParams) error
 
 	// GetMinecrafts retrieves all available minecrafts from the database.
@@ -210,8 +227,10 @@ type Store interface {
 	// GetMinecraftHasBuild checks if a specific build is assigned to a minecraft.
 	GetMinecraftHasBuild(*model.MinecraftBuildParams) bool
 
+	// CreateMinecraftBuild assigns a build to a specific minecraft.
 	CreateMinecraftBuild(*model.MinecraftBuildParams) error
 
+	// DeleteMinecraftBuild removes a build from a specific minecraft.
 	DeleteMinecraftBuild(*model.MinecraftBuildParams) error
 
 	// GetForges retrieves all available forges from the database.
@@ -229,8 +248,10 @@ type Store interface {
 	// GetForgeHasBuild checks if a specific build is assigned to a forge.
 	GetForgeHasBuild(*model.ForgeBuildParams) bool
 
+	// CreateForgeBuild assigns a build to a specific forge.
 	CreateForgeBuild(*model.ForgeBuildParams) error
 
+	// DeleteForgeBuild removes a build from a specific forge.
 	DeleteForgeBuild(*model.ForgeBuildParams) error
 
 	GetSolderPacks() (*model.Packs, error)

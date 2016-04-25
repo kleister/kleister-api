@@ -4,6 +4,7 @@ import (
 	"github.com/solderapp/solder-api/model"
 )
 
+// Mod represents a solder mod model definition.
 type Mod struct {
 	Slug        string   `json:"name"`
 	Name        string   `json:"pretty_name"`
@@ -14,6 +15,7 @@ type Mod struct {
 	Versions    []string `json:"versions"`
 }
 
+// NewModFromModel generates a solder model from our used models.
 func NewModFromModel(source *model.Mod) *Mod {
 	result := &Mod{}
 

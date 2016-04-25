@@ -4,12 +4,14 @@ import (
 	"github.com/solderapp/solder-api/model"
 )
 
+// Build represents a solder build model definition.
 type Build struct {
 	Minecraft string   `json:"minecraft"`
 	Forge     string   `json:"forge"`
 	Mods      []*Child `json:"mods"`
 }
 
+// Child represents a build mod model definition.
 type Child struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
@@ -17,6 +19,7 @@ type Child struct {
 	URL     string `json:"url"`
 }
 
+// NewBuildFromModel generates a solder model from our used models.
 func NewBuildFromModel(source *model.Build) *Build {
 	result := &Build{
 		Mods: make([]*Child, 0),

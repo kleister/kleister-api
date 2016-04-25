@@ -41,10 +41,12 @@ func GetBuildHasVersion(c context.Context, params *model.BuildVersionParams) boo
 	return FromContext(c).GetBuildHasVersion(params)
 }
 
+// CreateBuildVersion assigns a version to a specific build.
 func CreateBuildVersion(c context.Context, params *model.BuildVersionParams) error {
 	return FromContext(c).CreateBuildVersion(params)
 }
 
+// DeleteBuildVersion removes a version from a specific build.
 func DeleteBuildVersion(c context.Context, params *model.BuildVersionParams) error {
 	return FromContext(c).DeleteBuildVersion(params)
 }

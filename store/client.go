@@ -41,10 +41,12 @@ func GetClientHasPack(c context.Context, params *model.ClientPackParams) bool {
 	return FromContext(c).GetClientHasPack(params)
 }
 
+// CreateClientPack assigns a pack to a specific client.
 func CreateClientPack(c context.Context, params *model.ClientPackParams) error {
 	return FromContext(c).CreateClientPack(params)
 }
 
+// DeleteClientPack removes a pack from a specific client.
 func DeleteClientPack(c context.Context, params *model.ClientPackParams) error {
 	return FromContext(c).DeleteClientPack(params)
 }

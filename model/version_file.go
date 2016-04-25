@@ -114,7 +114,7 @@ func (u *VersionFile) Validate(db *gorm.DB) {
 	}
 }
 
-// Path generates the absolute path to the file.
+// AbsolutePath generates the absolute path to the file.
 func (u *VersionFile) AbsolutePath() (string, error) {
 	if config.Server.Storage == "" {
 		return "", fmt.Errorf("Missing storage path for file")

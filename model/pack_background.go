@@ -114,7 +114,7 @@ func (u *PackBackground) Validate(db *gorm.DB) {
 	}
 }
 
-// Path generates the absolute path to the background.
+// AbsolutePath generates the absolute path to the background.
 func (u *PackBackground) AbsolutePath() (string, error) {
 	if config.Server.Storage == "" {
 		return "", fmt.Errorf("Missing storage path for background")

@@ -114,7 +114,7 @@ func (u *PackIcon) Validate(db *gorm.DB) {
 	}
 }
 
-// Path generates the absolute path to the icon.
+// AbsolutePath generates the absolute path to the icon.
 func (u *PackIcon) AbsolutePath() (string, error) {
 	if config.Server.Storage == "" {
 		return "", fmt.Errorf("Missing storage path for icon")

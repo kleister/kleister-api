@@ -32,10 +32,12 @@ func GetForgeHasBuild(c context.Context, params *model.ForgeBuildParams) bool {
 	return FromContext(c).GetForgeHasBuild(params)
 }
 
+// CreateForgeBuild assigns a build to a specific forge.
 func CreateForgeBuild(c context.Context, params *model.ForgeBuildParams) error {
 	return FromContext(c).CreateForgeBuild(params)
 }
 
+// DeleteForgeBuild removes a build from a specific forge.
 func DeleteForgeBuild(c context.Context, params *model.ForgeBuildParams) error {
 	return FromContext(c).DeleteForgeBuild(params)
 }

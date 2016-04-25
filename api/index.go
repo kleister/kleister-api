@@ -12,7 +12,7 @@ func GetIndex(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		gin.H{
-			"api":     "Solder",
+			"api":     "Solder API",
 			"version": config.Version,
 		},
 	)

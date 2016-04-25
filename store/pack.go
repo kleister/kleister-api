@@ -41,10 +41,12 @@ func GetPackHasClient(c context.Context, params *model.PackClientParams) bool {
 	return FromContext(c).GetPackHasClient(params)
 }
 
+// CreatePackClient assigns a client to a specific pack.
 func CreatePackClient(c context.Context, params *model.PackClientParams) error {
 	return FromContext(c).CreatePackClient(params)
 }
 
+// DeletePackClient removes a client from a specific pack.
 func DeletePackClient(c context.Context, params *model.PackClientParams) error {
 	return FromContext(c).DeletePackClient(params)
 }
@@ -59,10 +61,12 @@ func GetPackHasUser(c context.Context, params *model.PackUserParams) bool {
 	return FromContext(c).GetPackHasUser(params)
 }
 
+// CreatePackUser assigns a user to a specific pack.
 func CreatePackUser(c context.Context, params *model.PackUserParams) error {
 	return FromContext(c).CreatePackUser(params)
 }
 
+// DeletePackUser removes a user from a specific pack.
 func DeletePackUser(c context.Context, params *model.PackUserParams) error {
 	return FromContext(c).DeletePackUser(params)
 }

@@ -114,7 +114,7 @@ func (u *PackLogo) Validate(db *gorm.DB) {
 	}
 }
 
-// Path generates the absolute path to the logo.
+// AbsolutePath generates the absolute path to the logo.
 func (u *PackLogo) AbsolutePath() (string, error) {
 	if config.Server.Storage == "" {
 		return "", fmt.Errorf("Missing storage path for logo")

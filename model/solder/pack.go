@@ -4,6 +4,7 @@ import (
 	"github.com/solderapp/solder-api/model"
 )
 
+// Pack represents a solder pack model definition.
 type Pack struct {
 	Slug          string   `json:"name"`
 	Name          string   `json:"display_name"`
@@ -19,6 +20,7 @@ type Pack struct {
 	Builds        []string `json:"builds"`
 }
 
+// NewPackFromModel generates a solder model from our used models.
 func NewPackFromModel(source *model.Pack) *Pack {
 	result := &Pack{}
 
@@ -26,12 +28,12 @@ func NewPackFromModel(source *model.Pack) *Pack {
 	result.Name = source.Name
 	result.Website = source.Website
 
-	if source.Recommended != nil {
-		result.Recommended = source.Recommended.Slug
-	}
-
 	if source.Latest != nil {
 		result.Latest = source.Latest.Slug
+	}
+
+	if source.Recommended != nil {
+		result.Recommended = source.Recommended.Slug
 	}
 
 	if source.Icon != nil {
