@@ -8,6 +8,7 @@ import (
 
 //go:generate go-bindata -ignore "\\.go" -pkg assets -prefix dist -o bindata.go ./dist/...
 //go:generate go fmt bindata.go
+//go:generate sed -i "s/Css/CSS/" bindata.go
 
 // Load initializes the static files.
 func Load() http.FileSystem {
