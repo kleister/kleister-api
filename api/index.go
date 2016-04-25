@@ -14,6 +14,7 @@ func GetIndex(c *gin.Context) {
 		gin.H{
 			"api":     "Solder API",
 			"version": config.Version,
+			"stream":  "master",
 		},
 	)
 }
