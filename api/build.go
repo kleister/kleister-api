@@ -204,14 +204,30 @@ func GetBuildVersions(c *gin.Context) {
 
 // PatchBuildVersion appends a version to a build.
 func PatchBuildVersion(c *gin.Context) {
+	form := &model.BuildVersionParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Pack = c.Param("pack")
+	form.Build = c.Param("build")
+
 	assigned := store.GetBuildHasVersion(
 		c,
-		&model.BuildVersionParams{
-			Pack:    c.Param("pack"),
-			Build:   c.Param("build"),
-			Mod:     c.Param("mod"),
-			Version: c.Param("version"),
-		},
+		form,
 	)
 
 	if assigned == true {
@@ -229,12 +245,7 @@ func PatchBuildVersion(c *gin.Context) {
 
 	err := store.CreateBuildVersion(
 		c,
-		&model.BuildVersionParams{
-			Pack:    c.Param("pack"),
-			Build:   c.Param("build"),
-			Mod:     c.Param("mod"),
-			Version: c.Param("version"),
-		},
+		form,
 	)
 
 	if err != nil {
@@ -261,14 +272,30 @@ func PatchBuildVersion(c *gin.Context) {
 
 // DeleteBuildVersion deleted a version from a build
 func DeleteBuildVersion(c *gin.Context) {
+	form := &model.BuildVersionParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Pack = c.Param("pack")
+	form.Build = c.Param("build")
+
 	assigned := store.GetBuildHasVersion(
 		c,
-		&model.BuildVersionParams{
-			Pack:    c.Param("pack"),
-			Build:   c.Param("build"),
-			Mod:     c.Param("mod"),
-			Version: c.Param("version"),
-		},
+		form,
 	)
 
 	if assigned == false {
@@ -286,12 +313,7 @@ func DeleteBuildVersion(c *gin.Context) {
 
 	err := store.DeleteBuildVersion(
 		c,
-		&model.BuildVersionParams{
-			Pack:    c.Param("pack"),
-			Build:   c.Param("build"),
-			Mod:     c.Param("mod"),
-			Version: c.Param("version"),
-		},
+		form,
 	)
 
 	if err != nil {

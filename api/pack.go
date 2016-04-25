@@ -274,12 +274,29 @@ func GetPackClients(c *gin.Context) {
 
 // PatchPackClient appends a client to a pack.
 func PatchPackClient(c *gin.Context) {
+	form := &model.PackClientParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Pack = c.Param("pack")
+
 	assigned := store.GetPackHasClient(
 		c,
-		&model.PackClientParams{
-			Pack:   c.Param("pack"),
-			Client: c.Param("client"),
-		},
+		form,
 	)
 
 	if assigned == true {
@@ -297,10 +314,7 @@ func PatchPackClient(c *gin.Context) {
 
 	err := store.CreatePackClient(
 		c,
-		&model.PackClientParams{
-			Pack:   c.Param("pack"),
-			Client: c.Param("client"),
-		},
+		form,
 	)
 
 	if err != nil {
@@ -327,12 +341,29 @@ func PatchPackClient(c *gin.Context) {
 
 // DeletePackClient deleted a client from a pack
 func DeletePackClient(c *gin.Context) {
+	form := &model.PackClientParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Pack = c.Param("pack")
+
 	assigned := store.GetPackHasClient(
 		c,
-		&model.PackClientParams{
-			Pack:   c.Param("pack"),
-			Client: c.Param("client"),
-		},
+		form,
 	)
 
 	if assigned == false {
@@ -350,10 +381,7 @@ func DeletePackClient(c *gin.Context) {
 
 	err := store.DeletePackClient(
 		c,
-		&model.PackClientParams{
-			Pack:   c.Param("pack"),
-			Client: c.Param("client"),
-		},
+		form,
 	)
 
 	if err != nil {
@@ -408,12 +436,29 @@ func GetPackUsers(c *gin.Context) {
 
 // PatchPackUser appends a user to a pack.
 func PatchPackUser(c *gin.Context) {
+	form := &model.PackUserParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Pack = c.Param("pack")
+
 	assigned := store.GetPackHasUser(
 		c,
-		&model.PackUserParams{
-			Pack: c.Param("pack"),
-			User: c.Param("user"),
-		},
+		form,
 	)
 
 	if assigned == true {
@@ -431,10 +476,7 @@ func PatchPackUser(c *gin.Context) {
 
 	err := store.CreatePackUser(
 		c,
-		&model.PackUserParams{
-			Pack: c.Param("pack"),
-			User: c.Param("user"),
-		},
+		form,
 	)
 
 	if err != nil {
@@ -461,12 +503,29 @@ func PatchPackUser(c *gin.Context) {
 
 // DeletePackUser deleted a user from a pack
 func DeletePackUser(c *gin.Context) {
+	form := &model.PackUserParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Pack = c.Param("pack")
+
 	assigned := store.GetPackHasUser(
 		c,
-		&model.PackUserParams{
-			Pack: c.Param("pack"),
-			User: c.Param("user"),
-		},
+		form,
 	)
 
 	if assigned == false {
@@ -484,10 +543,7 @@ func DeletePackUser(c *gin.Context) {
 
 	err := store.DeletePackUser(
 		c,
-		&model.PackUserParams{
-			Pack: c.Param("pack"),
-			User: c.Param("user"),
-		},
+		form,
 	)
 
 	if err != nil {

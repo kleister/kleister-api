@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/model/minecraft"
@@ -120,13 +121,29 @@ func GetMinecraftBuilds(c *gin.Context) {
 
 // PatchMinecraftBuild appends a build to a Minecraft version.
 func PatchMinecraftBuild(c *gin.Context) {
+	form := &model.MinecraftBuildParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Minecraft = c.Param("minecraft")
+
 	assigned := store.GetMinecraftHasBuild(
 		c,
-		&model.MinecraftBuildParams{
-			Minecraft: c.Param("minecraft"),
-			Pack:      c.Param("pack"),
-			Build:     c.Param("build"),
-		},
+		form,
 	)
 
 	if assigned == true {
@@ -144,11 +161,7 @@ func PatchMinecraftBuild(c *gin.Context) {
 
 	err := store.CreateMinecraftBuild(
 		c,
-		&model.MinecraftBuildParams{
-			Minecraft: c.Param("minecraft"),
-			Pack:      c.Param("pack"),
-			Build:     c.Param("build"),
-		},
+		form,
 	)
 
 	if err != nil {
@@ -175,13 +188,29 @@ func PatchMinecraftBuild(c *gin.Context) {
 
 // DeleteMinecraftBuild deleted a build from a Minecraft version
 func DeleteMinecraftBuild(c *gin.Context) {
+	form := &model.MinecraftBuildParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Minecraft = c.Param("minecraft")
+
 	assigned := store.GetMinecraftHasBuild(
 		c,
-		&model.MinecraftBuildParams{
-			Minecraft: c.Param("minecraft"),
-			Pack:      c.Param("pack"),
-			Build:     c.Param("build"),
-		},
+		form,
 	)
 
 	if assigned == false {
@@ -199,11 +228,7 @@ func DeleteMinecraftBuild(c *gin.Context) {
 
 	err := store.DeleteMinecraftBuild(
 		c,
-		&model.MinecraftBuildParams{
-			Minecraft: c.Param("minecraft"),
-			Pack:      c.Param("pack"),
-			Build:     c.Param("build"),
-		},
+		form,
 	)
 
 	if err != nil {

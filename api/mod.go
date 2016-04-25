@@ -194,12 +194,29 @@ func GetModUsers(c *gin.Context) {
 
 // PatchModUser appends a user to a mod.
 func PatchModUser(c *gin.Context) {
+	form := &model.ModUserParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Mod = c.Param("mod")
+
 	assigned := store.GetModHasUser(
 		c,
-		&model.ModUserParams{
-			Mod:  c.Param("mod"),
-			User: c.Param("user"),
-		},
+		form,
 	)
 
 	if assigned == true {
@@ -217,10 +234,7 @@ func PatchModUser(c *gin.Context) {
 
 	err := store.CreateModUser(
 		c,
-		&model.ModUserParams{
-			Mod:  c.Param("mod"),
-			User: c.Param("user"),
-		},
+		form,
 	)
 
 	if err != nil {
@@ -247,12 +261,29 @@ func PatchModUser(c *gin.Context) {
 
 // DeleteModUser deleted a user from a mod
 func DeleteModUser(c *gin.Context) {
+	form := &model.ModUserParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Mod = c.Param("mod")
+
 	assigned := store.GetModHasUser(
 		c,
-		&model.ModUserParams{
-			Mod:  c.Param("mod"),
-			User: c.Param("user"),
-		},
+		form,
 	)
 
 	if assigned == false {
@@ -270,10 +301,7 @@ func DeleteModUser(c *gin.Context) {
 
 	err := store.DeleteModUser(
 		c,
-		&model.ModUserParams{
-			Mod:  c.Param("mod"),
-			User: c.Param("user"),
-		},
+		form,
 	)
 
 	if err != nil {

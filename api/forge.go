@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/solderapp/solder-api/model"
 	"github.com/solderapp/solder-api/model/forge"
@@ -120,13 +121,29 @@ func GetForgeBuilds(c *gin.Context) {
 
 // PatchForgeBuild appends a build to a Forge version.
 func PatchForgeBuild(c *gin.Context) {
+	form := &model.ForgeBuildParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Forge = c.Param("forge")
+
 	assigned := store.GetForgeHasBuild(
 		c,
-		&model.ForgeBuildParams{
-			Forge: c.Param("forge"),
-			Pack:  c.Param("pack"),
-			Build: c.Param("build"),
-		},
+		form,
 	)
 
 	if assigned == true {
@@ -144,11 +161,7 @@ func PatchForgeBuild(c *gin.Context) {
 
 	err := store.CreateForgeBuild(
 		c,
-		&model.ForgeBuildParams{
-			Forge: c.Param("forge"),
-			Pack:  c.Param("pack"),
-			Build: c.Param("build"),
-		},
+		form,
 	)
 
 	if err != nil {
@@ -175,13 +188,29 @@ func PatchForgeBuild(c *gin.Context) {
 
 // DeleteForgeBuild deleted a build from a Forge version
 func DeleteForgeBuild(c *gin.Context) {
+	form := &model.ForgeBuildParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	form.Forge = c.Param("forge")
+
 	assigned := store.GetForgeHasBuild(
 		c,
-		&model.ForgeBuildParams{
-			Forge: c.Param("forge"),
-			Pack:  c.Param("pack"),
-			Build: c.Param("build"),
-		},
+		form,
 	)
 
 	if assigned == false {
@@ -199,11 +228,7 @@ func DeleteForgeBuild(c *gin.Context) {
 
 	err := store.DeleteForgeBuild(
 		c,
-		&model.ForgeBuildParams{
-			Forge: c.Param("forge"),
-			Pack:  c.Param("pack"),
-			Build: c.Param("build"),
-		},
+		form,
 	)
 
 	if err != nil {
