@@ -17,6 +17,7 @@ type server struct {
 }
 
 var (
+	Update   bool
 	Debug    bool
 	Database = &database{}
 	Server   = &server{}
