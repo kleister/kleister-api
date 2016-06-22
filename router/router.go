@@ -65,14 +65,25 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			base.GET("", api.IndexInfo)
 
 			//
+			// Auth
+			//
+			auth := base.Group("/auth")
+			{
+				auth.GET("/logout", session.MustCurrent(), api.AuthLogout)
+				auth.GET("/refresh", session.MustCurrent(), api.AuthRefresh)
+				auth.POST("/login", session.MustNobody(), api.AuthLogin)
+			}
+
+			//
 			// Profile
 			//
 			profile := base.Group("/profile")
 			{
 				profile.Use(session.MustCurrent())
 
-				profile.GET("", api.ProfileShow)
-				profile.PATCH("", api.ProfileUpdate)
+				profile.GET("/token", api.ProfileToken)
+				profile.GET("/self", api.ProfileShow)
+				profile.PATCH("/self", api.ProfileUpdate)
 			}
 
 			//
