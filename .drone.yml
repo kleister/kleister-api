@@ -3,7 +3,6 @@ build:
     image: webhippie/golang:latest
     commands:
       - make clean
-      - make deps
       - make build
       - make test
       - make release
