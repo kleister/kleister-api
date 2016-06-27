@@ -5,14 +5,15 @@ build:
       - make clean
       - make build
       - make test
-      - make release
 
   updater:
     image: webhippie/golang:latest
     commands:
+      - make release
       - make updater
     when:
-      event: tag
+      event: [ push, tag ]
+      branch: [ master, refs/tags/* ]
 
 publish:
   coverage:
