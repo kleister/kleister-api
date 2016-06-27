@@ -7,8 +7,8 @@ import (
 	"github.com/solderapp/solder-api/config"
 )
 
-// GetIndex represents the API index.
-func GetIndex(c *gin.Context) {
+// IndexInfo represents the API index.
+func IndexInfo(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		gin.H{

@@ -10,8 +10,8 @@ import (
 	"github.com/solderapp/solder-api/store"
 )
 
-// GetClients retrieves all available clients.
-func GetClients(c *gin.Context) {
+// ClientIndex retrieves all available clients.
+func ClientIndex(c *gin.Context) {
 	records, err := store.GetClients(
 		c,
 	)
@@ -35,8 +35,8 @@ func GetClients(c *gin.Context) {
 	)
 }
 
-// GetClient retrieves a specific client.
-func GetClient(c *gin.Context) {
+// ClientShow retrieves a specific client.
+func ClientShow(c *gin.Context) {
 	record := session.Client(c)
 
 	c.JSON(
@@ -45,8 +45,8 @@ func GetClient(c *gin.Context) {
 	)
 }
 
-// DeleteClient removes a specific client.
-func DeleteClient(c *gin.Context) {
+// ClientDelete removes a specific client.
+func ClientDelete(c *gin.Context) {
 	record := session.Client(c)
 
 	err := store.DeleteClient(
@@ -76,8 +76,8 @@ func DeleteClient(c *gin.Context) {
 	)
 }
 
-// PatchClient updates an existing client.
-func PatchClient(c *gin.Context) {
+// ClientUpdate updates an existing client.
+func ClientUpdate(c *gin.Context) {
 	record := session.Client(c)
 
 	if err := c.BindJSON(&record); err != nil {
@@ -120,8 +120,8 @@ func PatchClient(c *gin.Context) {
 	)
 }
 
-// PostClient creates a new client.
-func PostClient(c *gin.Context) {
+// ClientCreate creates a new client.
+func ClientCreate(c *gin.Context) {
 	record := &model.Client{}
 
 	if err := c.BindJSON(&record); err != nil {
@@ -164,8 +164,8 @@ func PostClient(c *gin.Context) {
 	)
 }
 
-// GetClientPacks retrieves all packs related to a client.
-func GetClientPacks(c *gin.Context) {
+// ClientPackIndex retrieves all packs related to a client.
+func ClientPackIndex(c *gin.Context) {
 	records, err := store.GetClientPacks(
 		c,
 		&model.ClientPackParams{
@@ -192,8 +192,8 @@ func GetClientPacks(c *gin.Context) {
 	)
 }
 
-// PatchClientPack appends a pack to a client.
-func PatchClientPack(c *gin.Context) {
+// ClientPackAppend appends a pack to a client.
+func ClientPackAppend(c *gin.Context) {
 	form := &model.ClientPackParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -261,8 +261,8 @@ func PatchClientPack(c *gin.Context) {
 	)
 }
 
-// DeleteClientPack deleted a pack from a client
-func DeleteClientPack(c *gin.Context) {
+// ClientPackDelete deleted a pack from a client
+func ClientPackDelete(c *gin.Context) {
 	form := &model.ClientPackParams{}
 
 	if err := c.BindJSON(&form); err != nil {

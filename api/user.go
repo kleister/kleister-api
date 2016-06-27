@@ -10,8 +10,8 @@ import (
 	"github.com/solderapp/solder-api/store"
 )
 
-// GetUsers retrieves all available users.
-func GetUsers(c *gin.Context) {
+// UserIndex retrieves all available users.
+func UserIndex(c *gin.Context) {
 	records, err := store.GetUsers(
 		c,
 	)
@@ -35,8 +35,8 @@ func GetUsers(c *gin.Context) {
 	)
 }
 
-// GetUser retrieves a specific user.
-func GetUser(c *gin.Context) {
+// UserShow retrieves a specific user.
+func UserShow(c *gin.Context) {
 	record := session.User(c)
 
 	c.JSON(
@@ -45,8 +45,8 @@ func GetUser(c *gin.Context) {
 	)
 }
 
-// DeleteUser removes a specific user.
-func DeleteUser(c *gin.Context) {
+// UserDelete removes a specific user.
+func UserDelete(c *gin.Context) {
 	record := session.User(c)
 
 	err := store.DeleteUser(
@@ -76,8 +76,8 @@ func DeleteUser(c *gin.Context) {
 	)
 }
 
-// PatchUser updates an existing user.
-func PatchUser(c *gin.Context) {
+// UserUpdate updates an existing user.
+func UserUpdate(c *gin.Context) {
 	record := session.User(c)
 
 	if err := c.BindJSON(&record); err != nil {
@@ -120,8 +120,8 @@ func PatchUser(c *gin.Context) {
 	)
 }
 
-// PostUser creates a new user.
-func PostUser(c *gin.Context) {
+// UserCreate creates a new user.
+func UserCreate(c *gin.Context) {
 	record := &model.User{
 		Permission: &model.Permission{},
 	}
@@ -166,8 +166,8 @@ func PostUser(c *gin.Context) {
 	)
 }
 
-// GetUserMods retrieves all mods related to a user.
-func GetUserMods(c *gin.Context) {
+// UserModIndex retrieves all mods related to a user.
+func UserModIndex(c *gin.Context) {
 	records, err := store.GetUserMods(
 		c,
 		&model.UserModParams{
@@ -194,8 +194,8 @@ func GetUserMods(c *gin.Context) {
 	)
 }
 
-// PatchUserMod appends a mod to a user.
-func PatchUserMod(c *gin.Context) {
+// UserModAppend appends a mod to a user.
+func UserModAppend(c *gin.Context) {
 	form := &model.UserModParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -259,8 +259,8 @@ func PatchUserMod(c *gin.Context) {
 	)
 }
 
-// DeleteUserMod deleted a mod from a user
-func DeleteUserMod(c *gin.Context) {
+// UserModDelete deleted a mod from a user
+func UserModDelete(c *gin.Context) {
 	form := &model.UserModParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -324,8 +324,8 @@ func DeleteUserMod(c *gin.Context) {
 	)
 }
 
-// GetUserPacks retrieves all packs related to a user.
-func GetUserPacks(c *gin.Context) {
+// UserPackIndex retrieves all packs related to a user.
+func UserPackIndex(c *gin.Context) {
 	records, err := store.GetUserPacks(
 		c,
 		&model.UserPackParams{
@@ -353,8 +353,8 @@ func GetUserPacks(c *gin.Context) {
 	)
 }
 
-// PatchUserPack appends a pack to a user.
-func PatchUserPack(c *gin.Context) {
+// UserPackAppend appends a pack to a user.
+func UserPackAppend(c *gin.Context) {
 	form := &model.UserPackParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -420,8 +420,8 @@ func PatchUserPack(c *gin.Context) {
 	)
 }
 
-// DeleteUserPack deleted a pack from a user
-func DeleteUserPack(c *gin.Context) {
+// UserPackDelete deleted a pack from a user
+func UserPackDelete(c *gin.Context) {
 	form := &model.UserPackParams{}
 
 	if err := c.BindJSON(&form); err != nil {
