@@ -10,8 +10,8 @@ import (
 	"github.com/solderapp/solder-api/store"
 )
 
-// GetMods retrieves all available mods.
-func GetMods(c *gin.Context) {
+// ModIndex retrieves all available mods.
+func ModIndex(c *gin.Context) {
 	records, err := store.GetMods(
 		c,
 	)
@@ -35,8 +35,8 @@ func GetMods(c *gin.Context) {
 	)
 }
 
-// GetMod retrieves a specific mod.
-func GetMod(c *gin.Context) {
+// ModShow retrieves a specific mod.
+func ModShow(c *gin.Context) {
 	record := session.Mod(c)
 
 	c.JSON(
@@ -45,8 +45,8 @@ func GetMod(c *gin.Context) {
 	)
 }
 
-// DeleteMod removes a specific mod.
-func DeleteMod(c *gin.Context) {
+// ModDelete removes a specific mod.
+func ModDelete(c *gin.Context) {
 	record := session.Mod(c)
 
 	err := store.DeleteMod(
@@ -76,8 +76,8 @@ func DeleteMod(c *gin.Context) {
 	)
 }
 
-// PatchMod updates an existing mod.
-func PatchMod(c *gin.Context) {
+// ModUpdate updates an existing mod.
+func ModUpdate(c *gin.Context) {
 	record := session.Mod(c)
 
 	if err := c.BindJSON(&record); err != nil {
@@ -120,8 +120,8 @@ func PatchMod(c *gin.Context) {
 	)
 }
 
-// PostMod creates a new mod.
-func PostMod(c *gin.Context) {
+// ModCreate creates a new mod.
+func ModCreate(c *gin.Context) {
 	record := &model.Mod{}
 
 	if err := c.BindJSON(&record); err != nil {
@@ -164,8 +164,8 @@ func PostMod(c *gin.Context) {
 	)
 }
 
-// GetModUsers retrieves all users related to a mod.
-func GetModUsers(c *gin.Context) {
+// ModUserIndex retrieves all users related to a mod.
+func ModUserIndex(c *gin.Context) {
 	records, err := store.GetModUsers(
 		c,
 		&model.ModUserParams{
@@ -192,8 +192,8 @@ func GetModUsers(c *gin.Context) {
 	)
 }
 
-// PatchModUser appends a user to a mod.
-func PatchModUser(c *gin.Context) {
+// ModUserAppend appends a user to a mod.
+func ModUserAppend(c *gin.Context) {
 	form := &model.ModUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -259,8 +259,8 @@ func PatchModUser(c *gin.Context) {
 	)
 }
 
-// DeleteModUser deleted a user from a mod
-func DeleteModUser(c *gin.Context) {
+// ModUserDelete deleted a user from a mod
+func ModUserDelete(c *gin.Context) {
 	form := &model.ModUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {

@@ -7,8 +7,8 @@ import (
 	"github.com/solderapp/solder-api/assets"
 )
 
-// GetFavicon represents the favicon.
-func GetFavicon(c *gin.Context) {
+// Favicon represents the favicon.
+func Favicon(c *gin.Context) {
 	c.Data(
 		http.StatusOK,
 		"image/x-icon",

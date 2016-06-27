@@ -11,8 +11,8 @@ import (
 	"github.com/solderapp/solder-api/store"
 )
 
-// GetSolderPacks retrieves the packs compatible to Technic Platform.
-func GetSolderPacks(c *gin.Context) {
+// SolderPacks retrieves the packs compatible to Technic Platform.
+func SolderPacks(c *gin.Context) {
 	records, _ := store.GetSolderPacks(
 		c,
 	)
@@ -33,8 +33,8 @@ func GetSolderPacks(c *gin.Context) {
 	)
 }
 
-// GetSolderPack retrieves the pack compatible to Technic Platform.
-func GetSolderPack(c *gin.Context) {
+// SolderPack retrieves the pack compatible to Technic Platform.
+func SolderPack(c *gin.Context) {
 	record, err := store.GetSolderPack(
 		c,
 		c.Param("pack"),
@@ -60,8 +60,8 @@ func GetSolderPack(c *gin.Context) {
 	)
 }
 
-// GetSolderBuild retrieves the build compatible to Technic Platform.
-func GetSolderBuild(c *gin.Context) {
+// SolderBuild retrieves the build compatible to Technic Platform.
+func SolderBuild(c *gin.Context) {
 	record, err := store.GetSolderBuild(
 		c,
 		c.Param("pack"),
@@ -88,8 +88,8 @@ func GetSolderBuild(c *gin.Context) {
 	)
 }
 
-// GetSolderMods retrieves the mods compatible to Technic Platform.
-func GetSolderMods(c *gin.Context) {
+// SolderMods retrieves the mods compatible to Technic Platform.
+func SolderMods(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		gin.H{
@@ -98,8 +98,8 @@ func GetSolderMods(c *gin.Context) {
 	)
 }
 
-// GetSolderMod retrieves the mod compatible to Technic Platform.
-func GetSolderMod(c *gin.Context) {
+// SolderMod retrieves the mod compatible to Technic Platform.
+func SolderMod(c *gin.Context) {
 	record, res := store.GetMod(
 		c,
 		c.Param("mod"),
@@ -124,8 +124,8 @@ func GetSolderMod(c *gin.Context) {
 	)
 }
 
-// GetSolderVersion retrieves the version compatible to Technic Platform.
-func GetSolderVersion(c *gin.Context) {
+// SolderVersion retrieves the version compatible to Technic Platform.
+func SolderVersion(c *gin.Context) {
 	location := location.Location(c)
 
 	parent, res := store.GetMod(

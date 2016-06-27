@@ -10,8 +10,8 @@ import (
 	"github.com/solderapp/solder-api/store"
 )
 
-// GetMinecrafts retrieves all available Minecraft versions.
-func GetMinecrafts(c *gin.Context) {
+// MinecraftIndex retrieves all available Minecraft versions.
+func MinecraftIndex(c *gin.Context) {
 	records, err := store.GetMinecrafts(
 		c,
 	)
@@ -41,8 +41,8 @@ func GetMinecrafts(c *gin.Context) {
 	)
 }
 
-// PatchMinecraft updates the list of available Minecraft versions.
-func PatchMinecraft(c *gin.Context) {
+// MinecraftUpdate updates the list of available Minecraft versions.
+func MinecraftUpdate(c *gin.Context) {
 	result, err := minecraft.Load()
 
 	if err != nil {
@@ -91,8 +91,8 @@ func PatchMinecraft(c *gin.Context) {
 	)
 }
 
-// GetMinecraftBuilds retrieves all builds related to a Minecraft version.
-func GetMinecraftBuilds(c *gin.Context) {
+// MinecraftBuildIndex retrieves all builds related to a Minecraft version.
+func MinecraftBuildIndex(c *gin.Context) {
 	records, err := store.GetMinecraftBuilds(
 		c,
 		&model.MinecraftBuildParams{
@@ -119,8 +119,8 @@ func GetMinecraftBuilds(c *gin.Context) {
 	)
 }
 
-// PatchMinecraftBuild appends a build to a Minecraft version.
-func PatchMinecraftBuild(c *gin.Context) {
+// MinecraftBuildAppend appends a build to a Minecraft version.
+func MinecraftBuildAppend(c *gin.Context) {
 	form := &model.MinecraftBuildParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -186,8 +186,8 @@ func PatchMinecraftBuild(c *gin.Context) {
 	)
 }
 
-// DeleteMinecraftBuild deleted a build from a Minecraft version
-func DeleteMinecraftBuild(c *gin.Context) {
+// MinecraftBuildDelete deleted a build from a Minecraft version
+func MinecraftBuildDelete(c *gin.Context) {
 	form := &model.MinecraftBuildParams{}
 
 	if err := c.BindJSON(&form); err != nil {

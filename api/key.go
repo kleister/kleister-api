@@ -10,8 +10,8 @@ import (
 	"github.com/solderapp/solder-api/store"
 )
 
-// GetKeys retrieves all available keys.
-func GetKeys(c *gin.Context) {
+// KeyIndex retrieves all available keys.
+func KeyIndex(c *gin.Context) {
 	records, err := store.GetKeys(
 		c,
 	)
@@ -35,8 +35,8 @@ func GetKeys(c *gin.Context) {
 	)
 }
 
-// GetKey retrieves a specific key.
-func GetKey(c *gin.Context) {
+// KeyShow retrieves a specific key.
+func KeyShow(c *gin.Context) {
 	record := session.Key(c)
 
 	c.JSON(
@@ -45,8 +45,8 @@ func GetKey(c *gin.Context) {
 	)
 }
 
-// DeleteKey removes a specific key.
-func DeleteKey(c *gin.Context) {
+// KeyDelete removes a specific key.
+func KeyDelete(c *gin.Context) {
 	record := session.Key(c)
 
 	err := store.DeleteKey(
@@ -76,8 +76,8 @@ func DeleteKey(c *gin.Context) {
 	)
 }
 
-// PatchKey updates an existing key.
-func PatchKey(c *gin.Context) {
+// KeyUpdate updates an existing key.
+func KeyUpdate(c *gin.Context) {
 	record := session.Key(c)
 
 	if err := c.Bind(&record); err != nil {
@@ -120,8 +120,8 @@ func PatchKey(c *gin.Context) {
 	)
 }
 
-// PostKey creates a new key.
-func PostKey(c *gin.Context) {
+// KeyCreate creates a new key.
+func KeyCreate(c *gin.Context) {
 	record := &model.Key{}
 
 	if err := c.Bind(&record); err != nil {

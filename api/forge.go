@@ -10,8 +10,8 @@ import (
 	"github.com/solderapp/solder-api/store"
 )
 
-// GetForges retrieves all available Forge versions.
-func GetForges(c *gin.Context) {
+// ForgeIndex retrieves all available Forge versions.
+func ForgeIndex(c *gin.Context) {
 	records, err := store.GetForges(
 		c,
 	)
@@ -41,8 +41,8 @@ func GetForges(c *gin.Context) {
 	)
 }
 
-// PatchForge updates the list of available Forge versions.
-func PatchForge(c *gin.Context) {
+// ForgeUpdate updates the list of available Forge versions.
+func ForgeUpdate(c *gin.Context) {
 	result, err := forge.Load()
 
 	if err != nil {
@@ -91,8 +91,8 @@ func PatchForge(c *gin.Context) {
 	)
 }
 
-// GetForgeBuilds retrieves all builds related to a Forge version.
-func GetForgeBuilds(c *gin.Context) {
+// ForgeBuildIndex retrieves all builds related to a Forge version.
+func ForgeBuildIndex(c *gin.Context) {
 	records, err := store.GetForgeBuilds(
 		c,
 		&model.ForgeBuildParams{
@@ -119,8 +119,8 @@ func GetForgeBuilds(c *gin.Context) {
 	)
 }
 
-// PatchForgeBuild appends a build to a Forge version.
-func PatchForgeBuild(c *gin.Context) {
+// ForgeBuildAppend appends a build to a Forge version.
+func ForgeBuildAppend(c *gin.Context) {
 	form := &model.ForgeBuildParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -186,8 +186,8 @@ func PatchForgeBuild(c *gin.Context) {
 	)
 }
 
-// DeleteForgeBuild deleted a build from a Forge version
-func DeleteForgeBuild(c *gin.Context) {
+// ForgeBuildDelete deleted a build from a Forge version
+func ForgeBuildDelete(c *gin.Context) {
 	form := &model.ForgeBuildParams{}
 
 	if err := c.BindJSON(&form); err != nil {

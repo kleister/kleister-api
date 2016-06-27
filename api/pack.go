@@ -13,8 +13,8 @@ import (
 	"github.com/solderapp/solder-api/store"
 )
 
-// GetPacks retrieves all available packs.
-func GetPacks(c *gin.Context) {
+// PackIndex retrieves all available packs.
+func PackIndex(c *gin.Context) {
 	location := location.Location(c)
 
 	records, err := store.GetPacks(
@@ -78,8 +78,8 @@ func GetPacks(c *gin.Context) {
 	)
 }
 
-// GetPack retrieves a specific pack.
-func GetPack(c *gin.Context) {
+// PackShow retrieves a specific pack.
+func PackShow(c *gin.Context) {
 	location := location.Location(c)
 	record := session.Pack(c)
 
@@ -125,8 +125,8 @@ func GetPack(c *gin.Context) {
 	)
 }
 
-// DeletePack removes a specific pack.
-func DeletePack(c *gin.Context) {
+// PackDelete removes a specific pack.
+func PackDelete(c *gin.Context) {
 	record := session.Pack(c)
 
 	err := store.DeletePack(
@@ -156,8 +156,8 @@ func DeletePack(c *gin.Context) {
 	)
 }
 
-// PatchPack updates an existing pack.
-func PatchPack(c *gin.Context) {
+// PackUpdate updates an existing pack.
+func PackUpdate(c *gin.Context) {
 	record := session.Pack(c)
 
 	if err := c.BindJSON(&record); err != nil {
@@ -200,8 +200,8 @@ func PatchPack(c *gin.Context) {
 	)
 }
 
-// PostPack creates a new pack.
-func PostPack(c *gin.Context) {
+// PackCreate creates a new pack.
+func PackCreate(c *gin.Context) {
 	record := &model.Pack{}
 
 	if err := c.BindJSON(&record); err != nil {
@@ -244,8 +244,8 @@ func PostPack(c *gin.Context) {
 	)
 }
 
-// GetPackClients retrieves all clients related to a pack.
-func GetPackClients(c *gin.Context) {
+// PackClientIndex retrieves all clients related to a pack.
+func PackClientIndex(c *gin.Context) {
 	records, err := store.GetPackClients(
 		c,
 		&model.PackClientParams{
@@ -272,8 +272,8 @@ func GetPackClients(c *gin.Context) {
 	)
 }
 
-// PatchPackClient appends a client to a pack.
-func PatchPackClient(c *gin.Context) {
+// PackClientAppend appends a client to a pack.
+func PackClientAppend(c *gin.Context) {
 	form := &model.PackClientParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -339,8 +339,8 @@ func PatchPackClient(c *gin.Context) {
 	)
 }
 
-// DeletePackClient deleted a client from a pack
-func DeletePackClient(c *gin.Context) {
+// PackClientDelete deleted a client from a pack
+func PackClientDelete(c *gin.Context) {
 	form := &model.PackClientParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -406,8 +406,8 @@ func DeletePackClient(c *gin.Context) {
 	)
 }
 
-// GetPackUsers retrieves all users related to a pack.
-func GetPackUsers(c *gin.Context) {
+// PackUserIndex retrieves all users related to a pack.
+func PackUserIndex(c *gin.Context) {
 	records, err := store.GetPackUsers(
 		c,
 		&model.PackUserParams{
@@ -434,8 +434,8 @@ func GetPackUsers(c *gin.Context) {
 	)
 }
 
-// PatchPackUser appends a user to a pack.
-func PatchPackUser(c *gin.Context) {
+// PackUserAppend appends a user to a pack.
+func PackUserAppend(c *gin.Context) {
 	form := &model.PackUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -501,8 +501,8 @@ func PatchPackUser(c *gin.Context) {
 	)
 }
 
-// DeletePackUser deleted a user from a pack
-func DeletePackUser(c *gin.Context) {
+// PackUserDelete deleted a user from a pack
+func PackUserDelete(c *gin.Context) {
 	form := &model.PackUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {

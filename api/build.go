@@ -10,8 +10,8 @@ import (
 	"github.com/solderapp/solder-api/store"
 )
 
-// GetBuilds retrieves all available builds.
-func GetBuilds(c *gin.Context) {
+// BuildIndex retrieves all available builds.
+func BuildIndex(c *gin.Context) {
 	pack := session.Pack(c)
 
 	records, err := store.GetBuilds(
@@ -38,8 +38,8 @@ func GetBuilds(c *gin.Context) {
 	)
 }
 
-// GetBuild retrieves a specific build.
-func GetBuild(c *gin.Context) {
+// BuildShow retrieves a specific build.
+func BuildShow(c *gin.Context) {
 	record := session.Build(c)
 
 	c.JSON(
@@ -48,8 +48,8 @@ func GetBuild(c *gin.Context) {
 	)
 }
 
-// DeleteBuild removes a specific build.
-func DeleteBuild(c *gin.Context) {
+// BuildDelete removes a specific build.
+func BuildDelete(c *gin.Context) {
 	pack := session.Pack(c)
 	record := session.Build(c)
 
@@ -81,8 +81,8 @@ func DeleteBuild(c *gin.Context) {
 	)
 }
 
-// PatchBuild updates an existing build.
-func PatchBuild(c *gin.Context) {
+// BuildUpdate updates an existing build.
+func BuildUpdate(c *gin.Context) {
 	pack := session.Pack(c)
 	record := session.Build(c)
 
@@ -127,8 +127,8 @@ func PatchBuild(c *gin.Context) {
 	)
 }
 
-// PostBuild creates a new build.
-func PostBuild(c *gin.Context) {
+// BuildCreate creates a new build.
+func BuildCreate(c *gin.Context) {
 	pack := session.Pack(c)
 	record := &model.Build{}
 
@@ -173,8 +173,8 @@ func PostBuild(c *gin.Context) {
 	)
 }
 
-// GetBuildVersions retrieves all versions related to a build.
-func GetBuildVersions(c *gin.Context) {
+// BuildVersionIndex retrieves all versions related to a build.
+func BuildVersionIndex(c *gin.Context) {
 	records, err := store.GetBuildVersions(
 		c,
 		&model.BuildVersionParams{
@@ -202,8 +202,8 @@ func GetBuildVersions(c *gin.Context) {
 	)
 }
 
-// PatchBuildVersion appends a version to a build.
-func PatchBuildVersion(c *gin.Context) {
+// BuildVersionAppend appends a version to a build.
+func BuildVersionAppend(c *gin.Context) {
 	form := &model.BuildVersionParams{}
 
 	if err := c.BindJSON(&form); err != nil {
@@ -270,8 +270,8 @@ func PatchBuildVersion(c *gin.Context) {
 	)
 }
 
-// DeleteBuildVersion deleted a version from a build
-func DeleteBuildVersion(c *gin.Context) {
+// BuildVersionDelete deleted a version from a build
+func BuildVersionDelete(c *gin.Context) {
 	form := &model.BuildVersionParams{}
 
 	if err := c.BindJSON(&form); err != nil {

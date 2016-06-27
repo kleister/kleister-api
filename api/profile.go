@@ -9,8 +9,8 @@ import (
 	"github.com/solderapp/solder-api/store"
 )
 
-// GetProfile displays the current profile.
-func GetProfile(c *gin.Context) {
+// ProfileShow displays the current profile.
+func ProfileShow(c *gin.Context) {
 	record := session.Current(c)
 
 	c.JSON(
@@ -20,7 +20,7 @@ func GetProfile(c *gin.Context) {
 }
 
 // PatchProfile updates the current profile.
-func PatchProfile(c *gin.Context) {
+func ProfileUpdate(c *gin.Context) {
 	record := session.Current(c)
 
 	if err := c.BindJSON(&record); err != nil {
