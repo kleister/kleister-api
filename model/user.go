@@ -1,11 +1,13 @@
 package model
 
 import (
+	"encoding/base32"
 	"fmt"
 	"time"
 
 	"github.com/Machiel/slugify"
 	"github.com/asaskevich/govalidator"
+	"github.com/gorilla/securecookie"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -20,6 +22,7 @@ type User struct {
 	Slug       string      `json:"slug" sql:"unique_index"`
 	Username   string      `json:"username" sql:"unique_index"`
 	Email      string      `json:"email" sql:"unique_index"`
+	Hash       string      `json:"-" sql:"unique_index"`
 	Password   string      `json:"password,omitempty" sql:"-"`
 	Hashword   string      `json:"-"`
 	Active     bool        `json:"active" sql:"default:false"`
@@ -82,6 +85,12 @@ func (u *User) BeforeSave(db *gorm.DB) (err error) {
 		u.Hashword = string(encrypt)
 	}
 
+	if u.Hash == "" {
+		u.Hash = base32.StdEncoding.EncodeToString(
+			securecookie.GenerateRandomKey(32),
+		)
+	}
+
 	return nil
 }
 
@@ -124,6 +133,22 @@ func (u *User) Validate(db *gorm.DB) {
 		}
 	}
 
+	if u.Hash != "" {
+		notFound := db.Where(
+			"hash = ?",
+			u.Hash,
+		).Not(
+			"id",
+			u.ID,
+		).First(
+			&User{},
+		).RecordNotFound()
+
+		if !notFound {
+			db.AddError(fmt.Errorf("Hash is already present"))
+		}
+	}
+
 	if !govalidator.IsEmail(u.Email) {
 		db.AddError(fmt.Errorf(
 			"Email must be a valid email address",
@@ -155,4 +180,12 @@ func (u *User) Validate(db *gorm.DB) {
 			db.AddError(fmt.Errorf("Password should be longer than 5 and shorter than 255"))
 		}
 	}
+}
+
+// MatchPassword checks if the provided password matches.
+func (u *User) MatchPassword(password string) error {
+	return bcrypt.CompareHashAndPassword(
+		[]byte(u.Hashword),
+		[]byte(password),
+	)
 }

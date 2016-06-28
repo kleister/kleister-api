@@ -1,16 +1,22 @@
 package session
 
 import (
+	"encoding/base32"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"github.com/solderapp/solder-api/model"
+	"github.com/solderapp/solder-api/shared/token"
 	"github.com/solderapp/solder-api/store"
 )
 
 const (
 	// CurrentContextKey defines the context key that stores the user.
 	CurrentContextKey = "current"
+
+	// TokenContextKey defines the context key that stores the token.
+	TokenContextKey = "token"
 )
 
 // Current gets the user from the context.
@@ -33,25 +39,33 @@ func Current(c *gin.Context) *model.User {
 // SetCurrent injects the user into the context.
 func SetCurrent() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		record, res := store.GetUser(
-			c,
-			"admin",
+		var (
+			record *model.User
 		)
 
-		if res.Error != nil || res.RecordNotFound() {
-			c.JSON(
-				http.StatusNotFound,
-				gin.H{
-					"status":  http.StatusNotFound,
-					"message": "Failed to find current",
-				},
-			)
+		parsed, err := token.Parse(
+			c.Request,
+			func(t *token.Token) ([]byte, error) {
+				var (
+					res *gorm.DB
+				)
 
-			c.Abort()
-		} else {
+				record, res = store.GetUser(
+					c,
+					t.Text,
+				)
+
+				signingKey, _ := base32.StdEncoding.DecodeString(record.Hash)
+				return signingKey, res.Error
+			},
+		)
+
+		if err == nil {
+			c.Set(TokenContextKey, parsed)
 			c.Set(CurrentContextKey, record)
-			c.Next()
 		}
+
+		c.Next()
 	}
 }
 
@@ -66,6 +80,27 @@ func MustCurrent() gin.HandlerFunc {
 				gin.H{
 					"status":  http.StatusUnauthorized,
 					"message": "You have to be authenticated",
+				},
+			)
+
+			c.Abort()
+		} else {
+			c.Next()
+		}
+	}
+}
+
+// MustNobody validates anonymous users.
+func MustNobody() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := Current(c)
+
+		if user != nil {
+			c.JSON(
+				http.StatusUnauthorized,
+				gin.H{
+					"status":  http.StatusUnauthorized,
+					"message": "You have to be a guest user",
 				},
 			)
 

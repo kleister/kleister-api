@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
@@ -84,6 +85,13 @@ func Server() cli.Command {
 				Usage:       "Folder for storing uploads",
 				EnvVar:      "SOLDER_SERVER_STORAGE",
 				Destination: &config.Server.Storage,
+			},
+			cli.DurationFlag{
+				Name:        "expire",
+				Value:       time.Hour * 24,
+				Usage:       "Session expire duration",
+				EnvVar:      "SOLDER_SESSION_EXPIRE",
+				Destination: &config.Session.Expire,
 			},
 		},
 		Action: func(c *cli.Context) {

@@ -2,15 +2,17 @@ vendors:
 - path: github.com/Machiel/slugify
   rev: 9c8f186ad6ea352ad2709ad0ec08f2ecc8a1b424
 - path: github.com/Sirupsen/logrus
-  rev: 081307d9bc1364753142d5962fc1d795c742baaf
+  rev: f3cfb454f4c209e6668c95216c4744b8fddb2356
 - path: github.com/asaskevich/govalidator
-  rev: d1e14c504700969ddf41264c7f3e084c7b99de59
+  rev: df81827fdd59d8b4fb93d8910b286ab7a3919520
 - path: github.com/codegangsta/cli
-  rev: 71f57d300dd6a780ac1856c005c4b518cfd498ec
+  rev: 4205e9c4ee9672a8df5bb4fe486a8aa07e1e4037
 - path: github.com/davecgh/go-spew
   rev: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
 - path: github.com/denisenkom/go-mssqldb
-  rev: 8d4984e8baccbf5bfadd7f7e366fd61b7ccac38b
+  rev: c5885153c18c8e4cdde7608f3fa65c2df212d3cb
+- path: github.com/dgrijalva/jwt-go
+  rev: f0777076321ab64f6efc15a82d9d23b98539b943
 - path: github.com/drone/gin-location
   rev: e1daf416045dd20ce962f566fdc79aee41111f21
 - path: github.com/elazarl/go-bindata-assetfs
@@ -20,23 +22,29 @@ vendors:
 - path: github.com/franela/goblin
   rev: 889391d730237f8aca06ce3e62975112983f96b4
 - path: github.com/gin-gonic/gin
-  rev: 542be2fe77724f800fcab7eb6c01a4e597fb8506
+  rev: f931d1ea80ae95a6fc739213cdd9399bd2967fb6
 - path: github.com/go-sql-driver/mysql
-  rev: 7ebe0a500653eeb1859664bed5e48dec1e164e73
+  rev: 3654d25ec346ee8ce71a68431025458d52a38ac0
 - path: github.com/golang/protobuf
-  rev: bf531ff1a004f24ee53329dfd5ce0b41bfdc17df
+  rev: 0c1f6d65b5a189c2250d10e71a5506f06f9fa0a0
+- path: github.com/gorilla/securecookie
+  rev: ff356348f74133a59d3e93aa24b5b4551b6fe90d
 - path: github.com/jinzhu/gorm
-  rev: 5174cc5c242a728b435ea2be8a2f7f998e15429b
+  rev: 321d10b67b7218c5cf3bebc0c01fc8c4536c2bc7
 - path: github.com/jinzhu/inflection
-  rev: 3272df6c21d04180007eb3349844c89a3856bc25
+  rev: 8f4d3a0d04ce0b7c0cf3126fb98524246d00d102
 - path: github.com/jinzhu/now
-  rev: ce80572eb55aa0ac839330041ca9db1afa5f1f6c
+  rev: d9861969c7a7e84746d341c09020c2ef8a617f8f
+- path: github.com/kardianos/osext
+  rev: 29ae4ffbc9a6fe9fb2bc5029050ce6996ea1d3bc
+- path: github.com/kr/binarydist
+  rev: 9955b0ab8708602d411341e55fffd7e0700f86bd
 - path: github.com/lib/pq
-  rev: 3cd0097429be7d611bb644ef85b42bfb102ceea4
+  rev: 4dd446efc17690bc53e154025146f73203b18309
 - path: github.com/manucorporat/sse
   rev: ee05b128a739a0fb76c7ebd3ae4810c1de808d6d
 - path: github.com/mattn/go-sqlite3
-  rev: 467f50b0c026317ad28fc2c0a08aab6f755cfc7a
+  rev: 38ee283dabf11c9cbdb968eebd79b1fa7acbabe6
 - path: github.com/mcuadros/go-version
   rev: d52711f8d6bea8dc01efafdb68ad95a4e2606630
 - path: github.com/o1egl/gormrus
@@ -48,26 +56,30 @@ vendors:
 - path: github.com/pmezard/go-difflib
   rev: 792786c7400a136282c1664665ae0a8db921c6c2
 - path: github.com/qor/inflection
-  rev: 3272df6c21d04180007eb3349844c89a3856bc25
+  rev: 8f4d3a0d04ce0b7c0cf3126fb98524246d00d102
 - path: github.com/qor/qor
-  rev: 704a44a30dc7ffdbb96c63384eca38f3af3f1c56
+  rev: c162de88ddf3ade5548e211a64c3a4969187d772
 - path: github.com/qor/validations
-  rev: 87c1296c75e72a8f3247beab65c48c50b7b66a7a
+  rev: 34d0bd555ecc14192244c061353984b8655ed669
+- path: github.com/sanbornm/go-selfupdate
+  rev: 8d409ca53a740932c8e3a6cd1d8ea4c111f5e539
 - path: github.com/stretchr/testify
-  rev: c5d7a69bf8a2c9c374798160849c071093e41dd1
+  rev: d77da356e56a7428ad25149ca77381849a6a5232
 - path: github.com/vincent-petithory/dataurl
   rev: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - path: golang.org/x/crypto
-  rev: 3305186468e57f6c7535c9e97cb0bde4b2b65908
+  rev: 811831de4c4dd03a0b8737233af3b36852386373
 - path: golang.org/x/net
-  rev: fb93926129b8ec0056f2f458b1f519654814edf0
+  rev: e445b19913b9d40fdbdfe19ac5e3d314aafd6f63
 - path: golang.org/x/sys
-  rev: f64b50fbea64174967a8882830d621a18ee1548e
+  rev: 62bee037599929a6e9146f29d10dd5208c43507d
 - path: gopkg.in/check.v1
   rev: 4f90aeace3a26ad7021961c297b22c42160c7b25
 - path: gopkg.in/go-playground/assert.v1
   rev: 4f4dfbc7d1c48336cf93399deae81aa9067e88af
 - path: gopkg.in/go-playground/validator.v8
-  rev: 014792cf3e266caff1e916876be12282b33059e0
+  rev: 25f1823069d853eccffbde025dca1812fa09c14b
+- path: gopkg.in/inconshreveable/go-update.v0
+  rev: d8b0b1d421aa1cbf392c05869f8abbc669bb7066
 - path: gopkg.in/yaml.v2
   rev: a83829b6f1293c91addabc89d0571c246397bbf4

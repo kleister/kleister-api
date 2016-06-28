@@ -1,5 +1,9 @@
 package config
 
+import (
+	"time"
+)
+
 type database struct {
 	Driver   string
 	Username string
@@ -16,6 +20,10 @@ type server struct {
 	Storage string
 }
 
+type session struct {
+	Expire time.Duration
+}
+
 var (
 	// Update represents the flag to enable or disable auto updates.
 	Update bool
@@ -28,4 +36,7 @@ var (
 
 	// Server represents the informations about the server bindings.
 	Server = &server{}
+
+	// Session represents the informations about the session handling.
+	Session = &session{}
 )
