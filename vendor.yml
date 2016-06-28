@@ -6,7 +6,7 @@ vendors:
 - path: github.com/asaskevich/govalidator
   rev: df81827fdd59d8b4fb93d8910b286ab7a3919520
 - path: github.com/codegangsta/cli
-  rev: 4205e9c4ee9672a8df5bb4fe486a8aa07e1e4037
+  rev: 1efa31f08b9333f1bd4882d61f9d668a70cd902e
 - path: github.com/davecgh/go-spew
   rev: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
 - path: github.com/denisenkom/go-mssqldb
@@ -19,8 +19,6 @@ vendors:
   rev: 57eb5e1fc594ad4b0b1dbea7b286d299e0cb43c2
 - path: github.com/erikstmartin/go-testdb
   rev: 8d10e4a1bae52cd8b81ffdec3445890d6dccab3d
-- path: github.com/franela/goblin
-  rev: 889391d730237f8aca06ce3e62975112983f96b4
 - path: github.com/gin-gonic/gin
   rev: f931d1ea80ae95a6fc739213cdd9399bd2967fb6
 - path: github.com/go-sql-driver/mysql
@@ -30,7 +28,7 @@ vendors:
 - path: github.com/gorilla/securecookie
   rev: ff356348f74133a59d3e93aa24b5b4551b6fe90d
 - path: github.com/jinzhu/gorm
-  rev: 321d10b67b7218c5cf3bebc0c01fc8c4536c2bc7
+  rev: c1c4f9f86e732a042aac9f37e025893d6d6cabec
 - path: github.com/jinzhu/inflection
   rev: 8f4d3a0d04ce0b7c0cf3126fb98524246d00d102
 - path: github.com/jinzhu/now
@@ -49,10 +47,6 @@ vendors:
   rev: d52711f8d6bea8dc01efafdb68ad95a4e2606630
 - path: github.com/o1egl/gormrus
   rev: 57710b0229272260f1fa2b31838a0dc4baa22a0a
-- path: github.com/onsi/ginkgo
-  rev: 2c2e9bb47b4e44067024f29339588cac8b34dd12
-- path: github.com/onsi/gomega
-  rev: 7ce781ea776b2fd506491011353bded2e40c8467
 - path: github.com/pmezard/go-difflib
   rev: 792786c7400a136282c1664665ae0a8db921c6c2
 - path: github.com/qor/inflection
@@ -65,12 +59,14 @@ vendors:
   rev: 8d409ca53a740932c8e3a6cd1d8ea4c111f5e539
 - path: github.com/stretchr/testify
   rev: d77da356e56a7428ad25149ca77381849a6a5232
+- path: github.com/ungerik/go-gravatar
+  rev: 6ab22628222adee0d853df36a2f0783f56ea55ec
 - path: github.com/vincent-petithory/dataurl
   rev: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - path: golang.org/x/crypto
   rev: 811831de4c4dd03a0b8737233af3b36852386373
 - path: golang.org/x/net
-  rev: e445b19913b9d40fdbdfe19ac5e3d314aafd6f63
+  rev: 04557861f124410b768b1ba5bb3a91b705afbfc6
 - path: golang.org/x/sys
   rev: 62bee037599929a6e9146f29d10dd5208c43507d
 - path: gopkg.in/check.v1
