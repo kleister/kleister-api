@@ -24,7 +24,7 @@ vendors:
 - path: github.com/go-sql-driver/mysql
   rev: 3654d25ec346ee8ce71a68431025458d52a38ac0
 - path: github.com/golang/protobuf
-  rev: 0c1f6d65b5a189c2250d10e71a5506f06f9fa0a0
+  rev: 78b168c14fc28c8c711844d210f7ab845083e3b1
 - path: github.com/gorilla/securecookie
   rev: ff356348f74133a59d3e93aa24b5b4551b6fe90d
 - path: github.com/jinzhu/gorm
