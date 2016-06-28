@@ -3,6 +3,9 @@ build:
     image: webhippie/golang:latest
     commands:
       - make clean
+      - make deps
+      - make vet
+      - make lint
       - make build
       - make test
 
