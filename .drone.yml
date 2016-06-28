@@ -93,7 +93,3 @@ notify:
   gitter:
     webhook:
       - $$GITTER_WEBHOOK
-
-cache:
-  mount:
-    - vendor
