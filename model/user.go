@@ -9,6 +9,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/gorilla/securecookie"
 	"github.com/jinzhu/gorm"
+	"github.com/ungerik/go-gravatar"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -25,11 +26,16 @@ type User struct {
 	Hash       string      `json:"-" sql:"unique_index"`
 	Password   string      `json:"password,omitempty" sql:"-"`
 	Hashword   string      `json:"-"`
+	Avatar     string      `json:"avatar,omitempty" sql:"-"`
 	Active     bool        `json:"active" sql:"default:false"`
 	CreatedAt  time.Time   `json:"created_at"`
 	UpdatedAt  time.Time   `json:"updated_at"`
 	Mods       Mods        `json:"mods,omitempty" gorm:"many2many:user_mods;"`
 	Packs      Packs       `json:"packs,omitempty" gorm:"many2many:user_packs;"`
+}
+
+func (u *User) AfterFind(db *gorm.DB) {
+	u.Avatar = gravatar.SecureUrlDefault(u.Email, gravatar.Retro)
 }
 
 // BeforeSave invokes required actions before persisting.
