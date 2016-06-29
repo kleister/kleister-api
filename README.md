@@ -3,7 +3,7 @@
 [![Build Status](http://github.dronehippie.de/api/badges/solderapp/solder-api/status.svg)](http://github.dronehippie.de/solderapp/solder-api)
 [![Coverage Status](http://coverage.dronehippie.de/badges/solderapp/solder-api/coverage.svg)](http://coverage.dronehippie.de/solderapp/solder-api)
 [![Go Doc](https://godoc.org/github.com/solderapp/solder-api?status.svg)](http://godoc.org/github.com/solderapp/solder-api)
-[![Go Report](https://goreportcard.com/badge/github.com/harborapp/harbor-api)](https://goreportcard.com/github.com/harborapp/harbor-api)
+[![Go Report](https://goreportcard.com/badge/github.com/harborapp/harbor-api)](https://goreportcard.com/report/github.com/harborapp/harbor-api)
 [![Join the chat at https://gitter.im/solderapp/solder-api](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/solderapp/solder-api)
 ![Release Status](https://img.shields.io/badge/status-beta-yellow.svg?style=flat)
 
