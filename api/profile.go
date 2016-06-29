@@ -20,7 +20,7 @@ func ProfileShow(c *gin.Context) {
 	)
 }
 
-// PatchProfile updates the current profile.
+// ProfileUpdate updates the current profile.
 func ProfileUpdate(c *gin.Context) {
 	record := session.Current(c)
 
