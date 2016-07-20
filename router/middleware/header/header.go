@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder-api/config"
+	"github.com/kleister/kleister-api/config"
 )
 
 // SetCache writes required cache headers to all requests.
@@ -55,7 +55,7 @@ func SetSecure() gin.HandlerFunc {
 // SetVersion writes the current API version to the headers.
 func SetVersion() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Header("X-SOLDER-VERSION", config.Version)
+		c.Header("X-KLEISTER-VERSION", config.Version)
 		c.Next()
 	}
 }

@@ -2,8 +2,8 @@ package data
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/model/forge"
+	"github.com/kleister/kleister-api/model"
+	"github.com/kleister/kleister-api/model/forge"
 )
 
 // GetForges retrieves all available forges from the database.

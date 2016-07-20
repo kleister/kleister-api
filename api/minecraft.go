@@ -5,9 +5,9 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/model/minecraft"
-	"github.com/solderapp/solder-api/store"
+	"github.com/kleister/kleister-api/model"
+	"github.com/kleister/kleister-api/model/minecraft"
+	"github.com/kleister/kleister-api/store"
 )
 
 // MinecraftIndex retrieves all available Minecraft versions.

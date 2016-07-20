@@ -4,17 +4,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder-api/api"
-	"github.com/solderapp/solder-api/assets"
-	"github.com/solderapp/solder-api/config"
-	"github.com/solderapp/solder-api/router/middleware/header"
-	"github.com/solderapp/solder-api/router/middleware/location"
-	"github.com/solderapp/solder-api/router/middleware/logger"
-	"github.com/solderapp/solder-api/router/middleware/recovery"
-	"github.com/solderapp/solder-api/router/middleware/session"
-	"github.com/solderapp/solder-api/router/middleware/store"
-	"github.com/solderapp/solder-api/template"
-	"github.com/solderapp/solder-api/web"
+	"github.com/kleister/kleister-api/api"
+	"github.com/kleister/kleister-api/assets"
+	"github.com/kleister/kleister-api/config"
+	"github.com/kleister/kleister-api/router/middleware/header"
+	"github.com/kleister/kleister-api/router/middleware/location"
+	"github.com/kleister/kleister-api/router/middleware/logger"
+	"github.com/kleister/kleister-api/router/middleware/recovery"
+	"github.com/kleister/kleister-api/router/middleware/session"
+	"github.com/kleister/kleister-api/router/middleware/store"
+	"github.com/kleister/kleister-api/template"
+	"github.com/kleister/kleister-api/web"
 )
 
 // Load initializes the routing of the application.

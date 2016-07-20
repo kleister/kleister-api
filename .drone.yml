@@ -1,98 +1,109 @@
-build:
-  general:
+workspace:
+  base: /srv/app
+  path: src/github.com/kleister/kleister-api
+
+pipeline:
+  testing:
     image: webhippie/golang:latest
+    pull: true
+    environment:
+      - GOPATH=/srv/app
     commands:
       - make clean
       - make deps
       - make vet
       - make lint
-      - make build
       - make test
+      - make build
 
   updater:
     image: webhippie/golang:latest
+    environment:
+      - GOPATH=/srv/app
     commands:
-      - make release
-      - make updater
+      - make publish
     when:
       event: [ push, tag ]
       branch: [ master, refs/tags/* ]
 
-publish:
-  coverage:
-    server: http://coverage.dronehippie.de
-    token: $$GITHUB_APIKEY
-    when:
-      branch: master
+  # coverage:
+  #   image: plugins/coverage
 
-  rsync:
-    user: deploy
-    host: dl.webhippie.de
-    source: dist/release/
-    target: $$BASE_PATH/solder-api/master
-    recursive: true
-    delete: true
-    when:
-      branch: master
+  # rsync:
+  #   image: plugins/rsync
+  #   user: deploy
+  #   host: dl.webhippie.de
+  #   source: dist/release/
+  #   target: /usr/share/webapps/dl/public_html/kleister-api/master
+  #   recursive: true
+  #   delete: true
+  #   when:
+  #     event: push
+  #     branch: master
 
-  rsync:
-    user: deploy
-    host: dl.webhippie.de
-    source: dist/release/
-    target: $$BASE_PATH/solder-api/$$TAG
-    recursive: true
-    delete: true
-    when:
-      event: tag
+  # rsync:
+  #   image: plugins/rsync
+  #   user: deploy
+  #   host: dl.webhippie.de
+  #   source: dist/release/
+  #   target: /usr/share/webapps/dl/public_html/kleister-api/$$TAG
+  #   recursive: true
+  #   delete: true
+  #   when:
+  #     event: tag
+  #     branch: refs/tags/*
 
-  rsync:
-    user: deploy
-    host: dl.webhippie.de
-    source: dist/latest/
-    target: $$BASE_PATH/solder-api/latest
-    recursive: true
-    delete: true
-    when:
-      event: tag
+  # rsync:
+  #   image: plugins/rsync
+  #   user: deploy
+  #   host: dl.webhippie.de
+  #   source: dist/latest/
+  #   target: /usr/share/webapps/dl/public_html/kleister-api/latest
+  #   recursive: true
+  #   delete: true
+  #   when:
+  #     event: tag
+  #     branch: refs/tags/*
 
-  rsync:
-    user: deploy
-    host: dl.webhippie.de
-    source: dist/publish/
-    target: $$BASE_PATH/solder-api/updates
-    recursive: true
-    delete: false
-    when:
-      event: tag
+  # rsync:
+  #   image: plugins/rsync
+  #   user: deploy
+  #   host: dl.webhippie.de
+  #   source: dist/publish/
+  #   target: /usr/share/webapps/dl/public_html/kleister-api/updates
+  #   recursive: true
+  #   delete: false
+  #   when:
+  #     event: tag
+  #     branch: refs/tags/*
 
-  github_release:
-    api_key: $$GITHUB_APIKEY
-    files:
-      - dist/release/*
-    when:
-      event: tag
-
-  docker:
-    username: $$DOCKER_USER
-    password: $$DOCKER_PASS
-    email: $$DOCKER_EMAIL
-    storage_driver: overlay
-    repo: solderapp/solder-api
-    tag: $$TAG
-    when:
-      event: tag
+  # github_release:
+  #   image: plugins/github-release
+  #   files:
+  #     - dist/release/*
+  #   when:
+  #     event: tag
+  #     branch: refs/tags/*
 
   docker:
-    username: $$DOCKER_USER
-    password: $$DOCKER_PASS
-    email: $$DOCKER_EMAIL
+    image: plugins/docker
     storage_driver: overlay
-    repo: solderapp/solder-api
-    tag: latest
+    debug: true
+    repo: kleister/kleister-api
+    tags: [ '${TAG}' ]
     when:
+      event: tag
+      branch: refs/tags/*
+
+  docker:
+    image: plugins/docker
+    storage_driver: overlay
+    debug: true
+    repo: kleister/kleister-api
+    tags: [ 'latest' ]
+    when:
+      event: push
       branch: master
 
-notify:
-  gitter:
-    webhook:
-      - $$GITTER_WEBHOOK
+  # gitter:
+  #   image: plugins/gitter

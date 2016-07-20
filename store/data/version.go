@@ -2,7 +2,7 @@ package data
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/solderapp/solder-api/model"
+	"github.com/kleister/kleister-api/model"
 )
 
 // GetVersions retrieves all available versions from the database.

@@ -2,8 +2,8 @@ package store
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/model/minecraft"
+	"github.com/kleister/kleister-api/model"
+	"github.com/kleister/kleister-api/model/minecraft"
 	"golang.org/x/net/context"
 )
 

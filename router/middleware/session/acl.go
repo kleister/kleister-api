@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/shared/token"
-	"github.com/solderapp/solder-api/store"
+	"github.com/kleister/kleister-api/model"
+	"github.com/kleister/kleister-api/shared/token"
+	"github.com/kleister/kleister-api/store"
 )
 
 const (

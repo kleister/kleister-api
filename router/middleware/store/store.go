@@ -2,8 +2,8 @@ package store
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder-api/store"
-	"github.com/solderapp/solder-api/store/data"
+	"github.com/kleister/kleister-api/store"
+	"github.com/kleister/kleister-api/store/data"
 )
 
 // SetStore injects the storage into the context.

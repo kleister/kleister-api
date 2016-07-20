@@ -5,9 +5,9 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder-api/router/middleware/session"
-	"github.com/solderapp/solder-api/shared/token"
-	"github.com/solderapp/solder-api/store"
+	"github.com/kleister/kleister-api/router/middleware/session"
+	"github.com/kleister/kleister-api/shared/token"
+	"github.com/kleister/kleister-api/store"
 )
 
 // ProfileShow displays the current profile.

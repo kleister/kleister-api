@@ -1,15 +1,19 @@
-# Solder: API server
+# Kleister: API server
 
-[![Build Status](http://github.dronehippie.de/api/badges/solderapp/solder-api/status.svg)](http://github.dronehippie.de/solderapp/solder-api)
-[![Coverage Status](http://coverage.dronehippie.de/badges/solderapp/solder-api/coverage.svg)](http://coverage.dronehippie.de/solderapp/solder-api)
-[![Go Doc](https://godoc.org/github.com/solderapp/solder-api?status.svg)](http://godoc.org/github.com/solderapp/solder-api)
+[![Build Status](http://github.dronehippie.de/api/badges/kleister/kleister-api/status.svg)](http://github.dronehippie.de/kleister/kleister-api)
+[![Coverage Status](http://coverage.dronehippie.de/badges/kleister/kleister-api/coverage.svg)](http://coverage.dronehippie.de/kleister/kleister-api)
+[![Go Doc](https://godoc.org/github.com/kleister/kleister-api?status.svg)](http://godoc.org/github.com/kleister/kleister-api)
 [![Go Report](https://goreportcard.com/badge/github.com/harborapp/harbor-api)](https://goreportcard.com/report/github.com/harborapp/harbor-api)
-[![Join the chat at https://gitter.im/solderapp/solder-api](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/solderapp/solder-api)
+[![Join the chat at https://gitter.im/kleister/kleister](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kleister/kleister)
 ![Release Status](https://img.shields.io/badge/status-beta-yellow.svg?style=flat)
 
 **This project is under heavy development, it's not in a working state yet!**
 
-Solder is a web UI to manage mod packs for the Minecraft Technic launcher for
+Where does this name come from or what does it mean? It's quite simple, it's one
+german word for paste/glue, I thought it's a good match as it glues together the
+modpacks for Minecraft.
+
+Kleister is a web UI to manage mod packs for the Minecraft Technic launcher for
 the Technic platform. Even if there is an upstream version available at
 [TechnicPack/TechnicSolder](https://github.com/TechnicPack/TechnicSolder) I
 prefered to implement it in Go for the API and with React for the UI including
@@ -25,10 +29,10 @@ this awesome project!
 ## Install
 
 You can download prebuilt binaries from the GitHub releases or from our
-[download site](http://dl.webhippie.de/solder-api). You are a Mac user? Just take
-a look at our [homebrew formula](https://github.com/solderapp/homebrew-solder).
+[download site](http://dl.webhippie.de/kleister-api). You are a Mac user? Just take
+a look at our [homebrew formula](https://github.com/kleister/homebrew-kleister).
 If you are missing an architecture just write us on our nice
-[Gitter](https://gitter.im/solderapp/solder-api) chat. Take a look at the help
+[Gitter](https://gitter.im/kleister/kleister-api) chat. Take a look at the help
 output, you can enable auto updates to the binary to avoid bugs related to old
 versions. If you find a security issue please contact thomas@webhippie.de first.
 
@@ -42,11 +46,11 @@ exporting `GO15VENDOREXPERIMENT=1` within our makefile you have to use a Go
 version `>= 1.6`
 
 ```bash
-go get -d github.com/solderapp/solder-api
-cd $GOPATH/src/github.com/solderapp/solder-api
+go get -d github.com/kleister/kleister-api
+cd $GOPATH/src/github.com/kleister/kleister-api
 make deps build
 
-bin/solder-api -h
+bin/kleister-api -h
 ```
 
 

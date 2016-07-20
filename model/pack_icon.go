@@ -13,7 +13,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
-	"github.com/solderapp/solder-api/config"
+	"github.com/kleister/kleister-api/config"
 	"github.com/vincent-petithory/dataurl"
 )
 

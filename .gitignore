@@ -24,7 +24,6 @@ _testmain.go
 *.prof
 
 coverage.out
-.drone.sec.yml
 
 /storage
 /dist

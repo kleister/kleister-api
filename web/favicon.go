@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder-api/assets"
+	"github.com/kleister/kleister-api/assets"
 )
 
 // Favicon represents the favicon.

@@ -6,7 +6,7 @@ import (
 
 	"github.com/drone/gin-location"
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder-api/config"
+	"github.com/kleister/kleister-api/config"
 )
 
 // Location gets the location from the context.

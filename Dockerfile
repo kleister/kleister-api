@@ -6,6 +6,6 @@ RUN apk update && \
   rm -rf \
     /var/cache/apk/*
 
-ADD bin/solder-api /usr/bin/
-ENTRYPOINT ["/usr/bin/solder-api"]
+ADD bin/kleister-api /usr/bin/
+ENTRYPOINT ["/usr/bin/kleister-api"]
 CMD ["server"]

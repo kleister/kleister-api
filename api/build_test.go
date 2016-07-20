@@ -5,8 +5,8 @@ package api
 // 	"testing"
 
 // 	"github.com/gin-gonic/gin"
-// 	"github.com/solderapp/solder-api/model"
-// 	"github.com/solderapp/solder-api/store/data"
+// 	"github.com/kleister/kleister-api/model"
+// 	"github.com/kleister/kleister-api/store/data"
 
 // 	. "github.com/franela/goblin"
 // )

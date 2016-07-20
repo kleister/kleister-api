@@ -2,7 +2,7 @@ package data
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/solderapp/solder-api/model"
+	"github.com/kleister/kleister-api/model"
 )
 
 // GetKeys retrieves all available keys from the database.

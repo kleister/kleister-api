@@ -5,9 +5,9 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/model/forge"
-	"github.com/solderapp/solder-api/store"
+	"github.com/kleister/kleister-api/model"
+	"github.com/kleister/kleister-api/model/forge"
+	"github.com/kleister/kleister-api/store"
 )
 
 // ForgeIndex retrieves all available Forge versions.

@@ -1,24 +1,12 @@
 DIST := dist
 BIN := bin
-EXECUTABLE := solder-api
-IMAGE := solderapp/solder-api
+EXECUTABLE := kleister-api
 SHA := $(shell git rev-parse --short HEAD)
 
-LDFLAGS += -X "github.com/solderapp/solder-api/config.VersionDev=$(SHA)"
+LDFLAGS += -extldflags "-static" -X "github.com/kleister/kleister-api/config.VersionDev=$(SHA)"
 
-RELEASES ?= $(BIN)/$(EXECUTABLE)-linux-amd64 \
-	$(BIN)/$(EXECUTABLE)-linux-386 \
-	$(BIN)/$(EXECUTABLE)-linux-arm \
-	$(BIN)/$(EXECUTABLE)-linux-arm64 \
-	$(BIN)/$(EXECUTABLE)-darwin-amd64 \
-	$(BIN)/$(EXECUTABLE)-darwin-386 \
-	$(BIN)/$(EXECUTABLE)-windows-amd64 \
-	$(BIN)/$(EXECUTABLE)-windows-386
-
+RELEASES ?= windows/386 windows/amd64 darwin/386 darwin/amd64 linux/386 linux/amd64 linux/arm
 PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
-
-GENERATE ?= github.com/solderapp/solder-api/assets \
-	github.com/solderapp/solder-api/template
 
 ifneq ($(DRONE_TAG),)
 	VERSION ?= $(DRONE_TAG)
@@ -30,7 +18,7 @@ else
 	endif
 endif
 
-all: clean deps build test
+all: clean deps vet lint test build
 
 clean:
 	go clean -i ./...
@@ -38,6 +26,8 @@ clean:
 
 deps:
 	go get -u github.com/golang/lint/golint
+	go get -u github.com/mitchellh/gox
+	go get -u github.com/sanbornm/go-selfupdate
 
 vendor:
 	go get -u github.com/govend/govend
@@ -45,10 +35,6 @@ vendor:
 
 update:
 	govend -vtlu
-
-generate:
-	go get -u github.com/jteeuwen/go-bindata/...
-	go generate $(GENERATE)
 
 fmt:
 	go fmt $(PACKAGES)
@@ -62,36 +48,44 @@ lint:
 test:
 	for PKG in $(PACKAGES); do go test -cover -coverprofile $$GOPATH/src/$$PKG/coverage.out $$PKG || exit 1; done;
 
-docker: clean
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w $(LDFLAGS)' -o $(BIN)/$(EXECUTABLE)
-	docker build --rm -t $(IMAGE) .
-
-build: $(BIN)/$(EXECUTABLE)
-
-release: $(RELEASES)
-
-updater:
-	go get -u github.com/sanbornm/go-selfupdate
-	go-selfupdate -o $(DIST)/publish $(DIST)/updater $(VERSION)
-
 install: $(BIN)/$(EXECUTABLE)
 	cp $< $(GOPATH)/bin/
 
+build: $(BIN)/$(EXECUTABLE)
+
 $(BIN)/$(EXECUTABLE): $(wildcard *.go)
-	CGO_ENABLED=1 go build -ldflags '-s -w $(LDFLAGS)' -o $@
+	CGO_ENABLED=0 go build -ldflags '-s -w $(LDFLAGS)' -o $@
 
-$(BIN)/$(EXECUTABLE)-%: GOOS=$(word 1,$(subst -, ,$*))
-$(BIN)/$(EXECUTABLE)-%: GOARCH=$(subst .exe,,$(word 2,$(subst -, ,$*)))
-$(BIN)/$(EXECUTABLE)-%:
-	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags '-s -w $(LDFLAGS)' -o $@
-	mkdir -p $(DIST)/updater
-	cp $@ $(DIST)/updater/$(GOOS)-$(GOARCH)
+release: release-build release-copy release-check
+
+release-build:
+	gox -osarch='$(RELEASES)' -ldflags='-s -w $(LDFLAGS)' -output='$(BIN)/$(EXECUTABLE)-{{.OS}}-{{.Arch}}'
+
+release-copy:
 	mkdir -p $(DIST)/release
-	cp $@ $(DIST)/release/$(EXECUTABLE)-$(VERSION)-$(GOOS)-$(GOARCH)
-	cd $(DIST)/release && sha256sum $(EXECUTABLE)-$(VERSION)-$(GOOS)-$(GOARCH) > $(EXECUTABLE)-$(VERSION)-$(GOOS)-$(GOARCH).sha256
-	mkdir -p $(DIST)/latest
-	cp $@ $(DIST)/latest/$(EXECUTABLE)-latest-$(GOOS)-$(GOARCH)
-	cd $(DIST)/latest && sha256sum $(EXECUTABLE)-latest-$(GOOS)-$(GOARCH) > $(EXECUTABLE)-latest-$(GOOS)-$(GOARCH).sha256
+	$(foreach file,$(wildcard $(BIN)/$(EXECUTABLE)-*),cp $(file) $(DIST)/release/$(EXECUTABLE)-$(VERSION)-$(word 3,$(subst -, ,$(notdir $(file))))-$(subst .exe,,$(word 4,$(subst -, ,$(notdir $(file)))));)
 
-.PHONY: all clean deps vendor update generate fmt vet lint test docker build
-.PRECIOUS: $(BIN)/$(EXECUTABLE)-%
+release-check:
+	cd $(DIST)/release; $(foreach file,$(wildcard $(DIST)/release/*),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;)
+
+latest: release-build latest-copy latest-check
+
+latest-copy:
+	mkdir -p $(DIST)/latest
+	$(foreach file,$(wildcard $(BIN)/$(EXECUTABLE)-*),cp $(file) $(DIST)/latest/$(EXECUTABLE)-latest-$(word 3,$(subst -, ,$(notdir $(file))))-$(subst .exe,,$(word 4,$(subst -, ,$(notdir $(file)))));)
+
+latest-check:
+	cd $(DIST)/latest; $(foreach file,$(wildcard $(DIST)/latest/*),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;)
+
+updater: release-build updater-copy updater-push
+
+updater-copy:
+	mkdir -p $(DIST)/updater
+	$(foreach file,$(wildcard $(BIN)/$(EXECUTABLE)-*),cp $(file) $(DIST)/updater/$(word 3,$(subst -, ,$(notdir $(file))))-$(subst .exe,,$(word 4,$(subst -, ,$(notdir $(file)))));)
+
+updater-push:
+	go-selfupdate -o $(DIST)/publish $(DIST)/updater $(VERSION)
+
+publish: release latest updater
+
+.PHONY: all clean deps vendor update fmt vet lint test build release latest updater publish

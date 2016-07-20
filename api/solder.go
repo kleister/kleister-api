@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder-api/model/solder"
-	"github.com/solderapp/solder-api/router/middleware/location"
-	"github.com/solderapp/solder-api/store"
+	"github.com/kleister/kleister-api/model/solder"
+	"github.com/kleister/kleister-api/router/middleware/location"
+	"github.com/kleister/kleister-api/store"
 )
 
 // SolderPacks retrieves the packs compatible to Technic Platform.

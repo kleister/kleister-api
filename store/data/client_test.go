@@ -6,7 +6,7 @@ package data
 
 // 	. "github.com/franela/goblin"
 // 	. "github.com/onsi/gomega"
-// 	"github.com/solderapp/solder-api/model"
+// 	"github.com/kleister/kleister-api/model"
 // )
 
 // func TestClients(t *testing.T) {

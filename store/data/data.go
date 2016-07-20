@@ -8,11 +8,11 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
+	"github.com/kleister/kleister-api/config"
+	"github.com/kleister/kleister-api/model"
+	"github.com/kleister/kleister-api/store"
 	"github.com/o1egl/gormrus"
 	"github.com/qor/validations"
-	"github.com/solderapp/solder-api/config"
-	"github.com/solderapp/solder-api/model"
-	"github.com/solderapp/solder-api/store"
 
 	// Register MySQL driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/mysql"

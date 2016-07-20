@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/solderapp/solder-api/config"
+	"github.com/kleister/kleister-api/config"
 )
 
 // Index represents the index page.

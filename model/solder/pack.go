@@ -1,7 +1,7 @@
 package solder
 
 import (
-	"github.com/solderapp/solder-api/model"
+	"github.com/kleister/kleister-api/model"
 )
 
 // Pack represents a solder pack model definition.
