@@ -28,7 +28,7 @@ pipeline:
 
   coverage:
     image: kleister/coverage
-    server: http://coverage.webhippie.de
+    server: http://coverage.dronehippie.de
 
   # rsync:
   #   image: plugins/rsync
