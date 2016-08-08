@@ -26,8 +26,9 @@ pipeline:
       event: [ push, tag ]
       branch: [ master, refs/tags/* ]
 
-  # coverage:
-  #   image: plugins/coverage
+  coverage:
+    image: kleister/coverage
+    server: http://coverage.webhippie.de
 
   # rsync:
   #   image: plugins/rsync
@@ -105,5 +106,5 @@ pipeline:
       event: push
       branch: master
 
-  # gitter:
-  #   image: plugins/gitter
+  gitter:
+    image: kleister/gitter
