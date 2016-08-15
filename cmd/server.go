@@ -14,7 +14,7 @@ import (
 func Server() cli.Command {
 	return cli.Command{
 		Name:  "server",
-		Usage: "Start the Solder server",
+		Usage: "Start the Kleister API",
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:        "db-driver",
@@ -95,7 +95,7 @@ func Server() cli.Command {
 			},
 		},
 		Action: func(c *cli.Context) {
-			logrus.Infof("starting server on %s", config.Server.Addr)
+			logrus.Infof("Starting the API on %s", config.Server.Addr)
 
 			if config.Server.Cert != "" && config.Server.Key != "" {
 				logrus.Fatal(
