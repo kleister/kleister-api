@@ -36,6 +36,9 @@ vendor:
 update:
 	govend -vtlu
 
+generate:
+	go generate $(PACKAGES)
+
 fmt:
 	go fmt $(PACKAGES)
 
@@ -88,4 +91,4 @@ updater-push:
 
 publish: release latest updater
 
-.PHONY: all clean deps vendor update fmt vet lint test build release latest updater publish
+.PHONY: all clean deps vendor update generate fmt vet lint test build release latest updater publish
