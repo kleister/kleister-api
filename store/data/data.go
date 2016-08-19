@@ -189,7 +189,6 @@ func migrateDatabase(driver string, db *gorm.DB) error {
 		&model.Build{},
 		&model.Client{},
 		&model.Forge{},
-		&model.Key{},
 		&model.Minecraft{},
 		&model.Mod{},
 		&model.Pack{},
@@ -240,23 +239,6 @@ func migrateDatabase(driver string, db *gorm.DB) error {
 			Password: "admin",
 			Email:    "admin@example.com",
 			Active:   true,
-			Permission: &model.Permission{
-				DisplayUsers:   true,
-				ChangeUsers:    true,
-				DeleteUsers:    true,
-				DisplayKeys:    true,
-				ChangeKeys:     true,
-				DeleteKeys:     true,
-				DisplayClients: true,
-				ChangeClients:  true,
-				DeleteClients:  true,
-				DisplayPacks:   true,
-				ChangePacks:    true,
-				DeletePacks:    true,
-				DisplayMods:    true,
-				ChangeMods:     true,
-				DeleteMods:     true,
-			},
 		}
 
 		err := db.Create(

@@ -65,21 +65,6 @@ type Store interface {
 	// DeleteClientPack removes a pack from a specific client.
 	DeleteClientPack(*model.ClientPackParams) error
 
-	// GetKeys retrieves all available keys from the database.
-	GetKeys() (*model.Keys, error)
-
-	// CreateKey creates a new key.
-	CreateKey(*model.Key) error
-
-	// UpdateKey updates a key.
-	UpdateKey(*model.Key) error
-
-	// DeleteKey deletes a key.
-	DeleteKey(*model.Key) error
-
-	// GetKey retrieves a specific key from the database.
-	GetKey(string) (*model.Key, *gorm.DB)
-
 	// GetMods retrieves all available mods from the database.
 	GetMods() (*model.Mods, error)
 

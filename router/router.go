@@ -299,20 +299,6 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			}
 
 			//
-			// Keys
-			//
-			keys := base.Group("/keys")
-			{
-				keys.Use(session.MustKeys("display"))
-
-				keys.GET("", api.KeyIndex)
-				keys.GET("/:key", session.SetKey(), api.KeyShow)
-				keys.DELETE("/:key", session.SetKey(), session.MustKeys("delete"), api.KeyDelete)
-				keys.PATCH("/:key", session.SetKey(), session.MustKeys("change"), api.KeyUpdate)
-				keys.POST("", session.MustKeys("change"), api.KeyCreate)
-			}
-
-			//
 			// Solder
 			//
 			solder := base.Group("/")
