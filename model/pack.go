@@ -82,6 +82,10 @@ func (u *Pack) AfterDelete(tx *gorm.DB) error {
 		return err
 	}
 
+	if err := tx.Model(u).Association("Teams").Clear().Error; err != nil {
+		return err
+	}
+
 	if u.Icon != nil {
 		if err := tx.Delete(u.Icon).Error; err != nil {
 			return err

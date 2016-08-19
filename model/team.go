@@ -57,7 +57,15 @@ func (u *Team) BeforeSave(db *gorm.DB) (err error) {
 
 // AfterDelete invokes required actions after deletion.
 func (u *Team) AfterDelete(tx *gorm.DB) error {
-	if err := tx.Model(u).Association("Orgs").Clear().Error; err != nil {
+	if err := tx.Model(u).Association("Users").Clear().Error; err != nil {
+		return err
+	}
+
+	if err := tx.Model(u).Association("Mods").Clear().Error; err != nil {
+		return err
+	}
+
+	if err := tx.Model(u).Association("Packs").Clear().Error; err != nil {
 		return err
 	}
 

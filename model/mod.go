@@ -71,6 +71,10 @@ func (u *Mod) AfterDelete(tx *gorm.DB) error {
 		return err
 	}
 
+	if err := tx.Model(u).Association("Teams").Clear().Error; err != nil {
+		return err
+	}
+
 	return nil
 }
 
