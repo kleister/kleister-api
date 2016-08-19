@@ -25,6 +25,7 @@ type Mod struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 	Versions    Versions  `json:"versions,omitempty"`
 	Users       Users     `json:"users,omitempty" gorm:"many2many:user_mods"`
+	Teams       Teams     `json:"teams,omitempty" gorm:"many2many:team_mods;"`
 }
 
 // BeforeSave invokes required actions before persisting.

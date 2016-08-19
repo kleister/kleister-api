@@ -29,6 +29,7 @@ type User struct {
 	Active    bool      `json:"active" sql:"default:false"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	Teams     Teams     `json:"teams,omitempty" gorm:"many2many:team_users;"`
 	Mods      Mods      `json:"mods,omitempty" gorm:"many2many:user_mods;"`
 	Packs     Packs     `json:"packs,omitempty" gorm:"many2many:user_packs;"`
 }

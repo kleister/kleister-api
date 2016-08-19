@@ -32,6 +32,7 @@ type Pack struct {
 	Builds        Builds          `json:"builds,omitempty"`
 	Clients       Clients         `json:"clients,omitempty" gorm:"many2many:client_packs"`
 	Users         Users           `json:"users,omitempty" gorm:"many2many:user_packs;"`
+	Teams         Teams           `json:"teams,omitempty" gorm:"many2many:team_packs;"`
 }
 
 // BeforeSave invokes required actions before persisting.
