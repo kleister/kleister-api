@@ -120,3 +120,62 @@ func (db *data) DeleteModUser(params *model.ModUserParams) error {
 		user,
 	).Error
 }
+
+// GetModTeams retrieves teams for a mod.
+func (db *data) GetModTeams(params *model.ModTeamParams) (*model.Teams, error) {
+	mod, _ := db.GetMod(params.Mod)
+
+	records := &model.Teams{}
+
+	err := db.Model(
+		mod,
+	).Association(
+		"Teams",
+	).Find(
+		records,
+	).Error
+
+	return records, err
+}
+
+// GetModHasTeam checks if a specific team is assigned to a mod.
+func (db *data) GetModHasTeam(params *model.ModTeamParams) bool {
+	mod, _ := db.GetMod(params.Mod)
+	team, _ := db.GetTeam(params.Team)
+
+	count := db.Model(
+		mod,
+	).Association(
+		"Teams",
+	).Find(
+		team,
+	).Count()
+
+	return count > 0
+}
+
+func (db *data) CreateModTeam(params *model.ModTeamParams) error {
+	mod, _ := db.GetMod(params.Mod)
+	team, _ := db.GetTeam(params.Team)
+
+	return db.Model(
+		mod,
+	).Association(
+		"Teams",
+	).Append(
+		team,
+	).Error
+}
+
+func (db *data) DeleteModTeam(params *model.ModTeamParams) error {
+	mod, _ := db.GetMod(params.Mod)
+	team, _ := db.GetTeam(params.Team)
+
+	return db.Model(
+		mod,
+	).Association(
+		"Teams",
+	).Delete(
+		team,
+	).Error
+}

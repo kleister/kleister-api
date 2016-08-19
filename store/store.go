@@ -92,6 +92,18 @@ type Store interface {
 	// DeleteModUser removes a user from a specific mod.
 	DeleteModUser(*model.ModUserParams) error
 
+	// GetModTeams retrieves teams for a mod.
+	GetModTeams(*model.ModTeamParams) (*model.Teams, error)
+
+	// GetModHasTeam checks if a specific team is assigned to a mod.
+	GetModHasTeam(*model.ModTeamParams) bool
+
+	// CreateModTeam assigns a team to a specific mod.
+	CreateModTeam(*model.ModTeamParams) error
+
+	// DeleteModTeam removes a team from a specific mod.
+	DeleteModTeam(*model.ModTeamParams) error
+
 	// GetPacks retrieves all available packs from the database.
 	GetPacks() (*model.Packs, error)
 
@@ -130,6 +142,18 @@ type Store interface {
 
 	// DeletePackUser removes a user from a specific pack.
 	DeletePackUser(*model.PackUserParams) error
+
+	// GetPackTeams retrieves teams for a pack.
+	GetPackTeams(*model.PackTeamParams) (*model.Teams, error)
+
+	// GetPackHasTeam checks if a specific team is assigned to a pack.
+	GetPackHasTeam(*model.PackTeamParams) bool
+
+	// CreatePackTeam assigns a team to a specific pack.
+	CreatePackTeam(*model.PackTeamParams) error
+
+	// DeletePackTeam removes a team from a specific pack.
+	DeletePackTeam(*model.PackTeamParams) error
 
 	// GetUsers retrieves all available users from the database.
 	GetUsers() (*model.Users, error)
@@ -170,6 +194,18 @@ type Store interface {
 	// DeleteUserPack removes a pack from a specific user.
 	DeleteUserPack(*model.UserPackParams) error
 
+	// GetUserTeams retrieves teams for a user.
+	GetUserTeams(*model.UserTeamParams) (*model.Teams, error)
+
+	// GetUserHasTeam checks if a specific team is assigned to a user.
+	GetUserHasTeam(*model.UserTeamParams) bool
+
+	// CreateUserTeam assigns a team to a specific user.
+	CreateUserTeam(*model.UserTeamParams) error
+
+	// DeleteUserTeam removes a team from a specific user.
+	DeleteUserTeam(*model.UserTeamParams) error
+
 	// GetVersions retrieves all available versions from the database.
 	GetVersions(int) (*model.Versions, error)
 
@@ -196,6 +232,57 @@ type Store interface {
 
 	// DeleteVersionBuild removes a build from a specific version.
 	DeleteVersionBuild(*model.VersionBuildParams) error
+
+	// GetTeams retrieves all available teams from the database.
+	GetTeams() (*model.Teams, error)
+
+	// CreateTeam creates a new team.
+	CreateTeam(*model.Team) error
+
+	// UpdateTeam updates a team.
+	UpdateTeam(*model.Team) error
+
+	// DeleteTeam deletes a team.
+	DeleteTeam(*model.Team) error
+
+	// GetTeam retrieves a specific team from the database.
+	GetTeam(string) (*model.Team, *gorm.DB)
+
+	// GetTeamUsers retrieves users for a team.
+	GetTeamUsers(*model.TeamUserParams) (*model.Users, error)
+
+	// GetTeamHasUser checks if a specific user is assigned to a team.
+	GetTeamHasUser(*model.TeamUserParams) bool
+
+	// CreateTeamUser assigns a user to a specific team.
+	CreateTeamUser(*model.TeamUserParams) error
+
+	// DeleteTeamUser removes a user from a specific team.
+	DeleteTeamUser(*model.TeamUserParams) error
+
+	// GetTeamPacks retrieves packs for a team.
+	GetTeamPacks(*model.TeamPackParams) (*model.Packs, error)
+
+	// GetTeamHasPack checks if a specific pack is assigned to a team.
+	GetTeamHasPack(*model.TeamPackParams) bool
+
+	// CreateTeamPack assigns a pack to a specific team.
+	CreateTeamPack(*model.TeamPackParams) error
+
+	// DeleteTeamPack removes a pack from a specific team.
+	DeleteTeamPack(*model.TeamPackParams) error
+
+	// GetTeamMods retrieves mods for a team.
+	GetTeamMods(*model.TeamModParams) (*model.Mods, error)
+
+	// GetTeamHasMod checks if a specific mod is assigned to a team.
+	GetTeamHasMod(*model.TeamModParams) bool
+
+	// CreateTeamMod assigns a mod to a specific team.
+	CreateTeamMod(*model.TeamModParams) error
+
+	// DeleteTeamMod removes a mod from a specific team.
+	DeleteTeamMod(*model.TeamModParams) error
 
 	// GetMinecrafts retrieves all available minecrafts from the database.
 	GetMinecrafts() (*model.Minecrafts, error)

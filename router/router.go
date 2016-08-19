@@ -164,6 +164,16 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				packUsers.DELETE("/:user", session.SetUser(), api.PackUserDelete)
 			}
 
+			packTeams := base.Group("/packs/:pack/teams")
+			{
+				packTeams.Use(session.MustTeams("change"))
+				packTeams.Use(session.SetPack())
+
+				packTeams.GET("", api.PackTeamIndex)
+				packTeams.PATCH("", api.PackTeamAppend)
+				packTeams.DELETE("", api.PackTeamDelete)
+			}
+
 			//
 			// Builds
 			//
@@ -212,6 +222,16 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				modUsers.GET("", api.ModUserIndex)
 				modUsers.PATCH("", api.ModUserAppend)
 				modUsers.DELETE("", api.ModUserDelete)
+			}
+
+			modTeams := base.Group("/mods/:mod/teams")
+			{
+				modTeams.Use(session.MustTeams("change"))
+				modTeams.Use(session.SetMod())
+
+				modTeams.GET("", api.ModTeamIndex)
+				modTeams.PATCH("", api.ModTeamAppend)
+				modTeams.DELETE("", api.ModTeamDelete)
 			}
 
 			//
@@ -278,6 +298,16 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				users.POST("", session.MustUsers("change"), api.UserCreate)
 			}
 
+			userTeams := base.Group("/users/:user/teams")
+			{
+				userTeams.Use(session.MustTeams("change"))
+				userTeams.Use(session.SetUser())
+
+				userTeams.GET("", api.UserTeamIndex)
+				userTeams.PATCH("", api.UserTeamAppend)
+				userTeams.DELETE("", api.UserTeamDelete)
+			}
+
 			userMods := base.Group("/users/:user/mods")
 			{
 				userMods.Use(session.MustMods("change"))
@@ -296,6 +326,50 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				userPacks.GET("", api.UserPackIndex)
 				userPacks.PATCH("", api.UserPackAppend)
 				userPacks.DELETE("", api.UserPackDelete)
+			}
+
+			//
+			// Teams
+			//
+			teams := base.Group("/teams")
+			{
+				teams.Use(session.MustTeams("display"))
+
+				teams.GET("", api.TeamIndex)
+				teams.GET("/:team", session.SetTeam(), api.TeamShow)
+				teams.DELETE("/:team", session.SetTeam(), session.MustTeams("delete"), api.TeamDelete)
+				teams.PATCH("/:team", session.SetTeam(), session.MustTeams("change"), api.TeamUpdate)
+				teams.POST("", session.MustTeams("change"), api.TeamCreate)
+			}
+
+			teamUsers := base.Group("/teams/:team/users")
+			{
+				teamUsers.Use(session.MustUsers("change"))
+				teamUsers.Use(session.SetTeam())
+
+				teamUsers.GET("", api.TeamUserIndex)
+				teamUsers.PATCH("", api.TeamUserAppend)
+				teamUsers.DELETE("", api.TeamUserDelete)
+			}
+
+			teamPacks := base.Group("/teams/:team/packs")
+			{
+				teamPacks.Use(session.MustPacks("change"))
+				teamPacks.Use(session.SetTeam())
+
+				teamPacks.GET("", api.TeamPackIndex)
+				teamPacks.PATCH("", api.TeamPackAppend)
+				teamPacks.DELETE("", api.TeamPackDelete)
+			}
+
+			teamMods := base.Group("/teams/:team/mods")
+			{
+				teamMods.Use(session.MustMods("change"))
+				teamMods.Use(session.SetTeam())
+
+				teamMods.GET("", api.TeamModIndex)
+				teamMods.PATCH("", api.TeamModAppend)
+				teamMods.DELETE("", api.TeamModDelete)
 			}
 
 			//

@@ -65,3 +65,39 @@ type UserModParams struct {
 	User string `json:"user"`
 	Mod  string `json:"mod"`
 }
+
+// ModTeamParams represents the parameters to connect teams with mods.
+type ModTeamParams struct {
+	Mod  string `json:"mod"`
+	Team string `json:"team"`
+}
+
+// TeamModParams represents the parameters to connect mods with teams.
+type TeamModParams struct {
+	Team string `json:"team"`
+	Mod  string `json:"mod"`
+}
+
+// PackTeamParams represents the parameters to connect teams with packs.
+type PackTeamParams struct {
+	Pack string `json:"pack"`
+	Team string `json:"team"`
+}
+
+// TeamPackParams represents the parameters to connect packs with teams.
+type TeamPackParams struct {
+	Team string `json:"team"`
+	Pack string `json:"pack"`
+}
+
+// UserTeamParams represents the parameters to connect teams with users.
+type UserTeamParams struct {
+	User string `json:"user"`
+	Team string `json:"team"`
+}
+
+// TeamUserParams represents the parameters to connect users with teams.
+type TeamUserParams struct {
+	Team string `json:"team"`
+	User string `json:"user"`
+}

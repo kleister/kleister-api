@@ -50,3 +50,23 @@ func CreateModUser(c context.Context, params *model.ModUserParams) error {
 func DeleteModUser(c context.Context, params *model.ModUserParams) error {
 	return FromContext(c).DeleteModUser(params)
 }
+
+// GetModTeams retrieves teams for a mod.
+func GetModTeams(c context.Context, params *model.ModTeamParams) (*model.Teams, error) {
+	return FromContext(c).GetModTeams(params)
+}
+
+// GetModHasTeam checks if a specific team is assigned to a mod.
+func GetModHasTeam(c context.Context, params *model.ModTeamParams) bool {
+	return FromContext(c).GetModHasTeam(params)
+}
+
+// CreateModTeam assigns a team to a specific mod.
+func CreateModTeam(c context.Context, params *model.ModTeamParams) error {
+	return FromContext(c).CreateModTeam(params)
+}
+
+// DeleteModTeam removes a team from a specific mod.
+func DeleteModTeam(c context.Context, params *model.ModTeamParams) error {
+	return FromContext(c).DeleteModTeam(params)
+}

@@ -179,3 +179,62 @@ func (db *data) DeleteUserPack(params *model.UserPackParams) error {
 		pack,
 	).Error
 }
+
+// GetUserTeams retrieves teams for a user.
+func (db *data) GetUserTeams(params *model.UserTeamParams) (*model.Teams, error) {
+	user, _ := db.GetUser(params.User)
+
+	records := &model.Teams{}
+
+	err := db.Model(
+		user,
+	).Association(
+		"Teams",
+	).Find(
+		records,
+	).Error
+
+	return records, err
+}
+
+// GetUserHasTeam checks if a specific team is assigned to a user.
+func (db *data) GetUserHasTeam(params *model.UserTeamParams) bool {
+	user, _ := db.GetUser(params.User)
+	team, _ := db.GetTeam(params.Team)
+
+	count := db.Model(
+		user,
+	).Association(
+		"Teams",
+	).Find(
+		team,
+	).Count()
+
+	return count > 0
+}
+
+func (db *data) CreateUserTeam(params *model.UserTeamParams) error {
+	user, _ := db.GetUser(params.User)
+	team, _ := db.GetTeam(params.Team)
+
+	return db.Model(
+		user,
+	).Association(
+		"Teams",
+	).Append(
+		team,
+	).Error
+}
+
+func (db *data) DeleteUserTeam(params *model.UserTeamParams) error {
+	user, _ := db.GetUser(params.User)
+	team, _ := db.GetTeam(params.Team)
+
+	return db.Model(
+		user,
+	).Association(
+		"Teams",
+	).Delete(
+		team,
+	).Error
+}

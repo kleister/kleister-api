@@ -2,22 +2,17 @@ package api
 
 import (
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/kleister/kleister-api/model"
-	"github.com/kleister/kleister-api/router/middleware/location"
 	"github.com/kleister/kleister-api/router/middleware/session"
 	"github.com/kleister/kleister-api/store"
 )
 
-// PackIndex retrieves all available packs.
-func PackIndex(c *gin.Context) {
-	location := location.Location(c)
-
-	records, err := store.GetPacks(
+// TeamIndex retrieves all available teams.
+func TeamIndex(c *gin.Context) {
+	records, err := store.GetTeams(
 		c,
 	)
 
@@ -26,50 +21,12 @@ func PackIndex(c *gin.Context) {
 			http.StatusInternalServerError,
 			gin.H{
 				"status":  http.StatusInternalServerError,
-				"message": "Failed to fetch packs",
+				"message": "Failed to fetch teams",
 			},
 		)
 
 		c.Abort()
 		return
-	}
-
-	for _, record := range *records {
-		if record.Icon != nil {
-			record.Icon.URL = strings.Join(
-				[]string{
-					location.String(),
-					"storage",
-					"icon",
-					strconv.Itoa(record.ID),
-				},
-				"/",
-			)
-		}
-
-		if record.Background != nil {
-			record.Background.URL = strings.Join(
-				[]string{
-					location.String(),
-					"storage",
-					"background",
-					strconv.Itoa(record.ID),
-				},
-				"/",
-			)
-		}
-
-		if record.Logo != nil {
-			record.Logo.URL = strings.Join(
-				[]string{
-					location.String(),
-					"storage",
-					"logo",
-					strconv.Itoa(record.ID),
-				},
-				"/",
-			)
-		}
 	}
 
 	c.JSON(
@@ -78,46 +35,9 @@ func PackIndex(c *gin.Context) {
 	)
 }
 
-// PackShow retrieves a specific pack.
-func PackShow(c *gin.Context) {
-	location := location.Location(c)
-	record := session.Pack(c)
-
-	if record.Icon != nil {
-		record.Icon.URL = strings.Join(
-			[]string{
-				location.String(),
-				"storage",
-				"icon",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
-	}
-
-	if record.Background != nil {
-		record.Background.URL = strings.Join(
-			[]string{
-				location.String(),
-				"storage",
-				"background",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
-	}
-
-	if record.Logo != nil {
-		record.Logo.URL = strings.Join(
-			[]string{
-				location.String(),
-				"storage",
-				"logo",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
-	}
+// TeamShow retrieves a specific team.
+func TeamShow(c *gin.Context) {
+	record := session.Team(c)
 
 	c.JSON(
 		http.StatusOK,
@@ -125,11 +45,11 @@ func PackShow(c *gin.Context) {
 	)
 }
 
-// PackDelete removes a specific pack.
-func PackDelete(c *gin.Context) {
-	record := session.Pack(c)
+// TeamDelete removes a specific team.
+func TeamDelete(c *gin.Context) {
+	record := session.Team(c)
 
-	err := store.DeletePack(
+	err := store.DeleteTeam(
 		c,
 		record,
 	)
@@ -139,7 +59,7 @@ func PackDelete(c *gin.Context) {
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
-				"message": "Failed to delete pack",
+				"message": err.Error(),
 			},
 		)
 
@@ -151,24 +71,24 @@ func PackDelete(c *gin.Context) {
 		http.StatusOK,
 		gin.H{
 			"status":  http.StatusOK,
-			"message": "Successfully deleted pack",
+			"message": "Successfully deleted team",
 		},
 	)
 }
 
-// PackUpdate updates an existing pack.
-func PackUpdate(c *gin.Context) {
-	record := session.Pack(c)
+// TeamUpdate updates an existing team.
+func TeamUpdate(c *gin.Context) {
+	record := session.Team(c)
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind pack data")
+		logrus.Warn("Failed to bind team data")
 		logrus.Warn(err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind pack data",
+				"message": "Failed to bind team data",
 			},
 		)
 
@@ -176,7 +96,7 @@ func PackUpdate(c *gin.Context) {
 		return
 	}
 
-	err := store.UpdatePack(
+	err := store.UpdateTeam(
 		c,
 		record,
 	)
@@ -200,19 +120,19 @@ func PackUpdate(c *gin.Context) {
 	)
 }
 
-// PackCreate creates a new pack.
-func PackCreate(c *gin.Context) {
-	record := &model.Pack{}
+// TeamCreate creates a new user.
+func TeamCreate(c *gin.Context) {
+	record := &model.Team{}
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind pack data")
+		logrus.Warn("Failed to bind team data")
 		logrus.Warn(err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind pack data",
+				"message": "Failed to bind team data",
 			},
 		)
 
@@ -220,7 +140,7 @@ func PackCreate(c *gin.Context) {
 		return
 	}
 
-	err := store.CreatePack(
+	err := store.CreateTeam(
 		c,
 		record,
 	)
@@ -244,174 +164,12 @@ func PackCreate(c *gin.Context) {
 	)
 }
 
-// PackClientIndex retrieves all clients related to a pack.
-func PackClientIndex(c *gin.Context) {
-	records, err := store.GetPackClients(
+// TeamUserIndex retrieves all users related to a team.
+func TeamUserIndex(c *gin.Context) {
+	records, err := store.GetTeamUsers(
 		c,
-		&model.PackClientParams{
-			Pack: c.Param("pack"),
-		},
-	)
-
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"status":  http.StatusInternalServerError,
-				"message": "Failed to fetch clients",
-			},
-		)
-
-		c.Abort()
-		return
-	}
-
-	c.JSON(
-		http.StatusOK,
-		records,
-	)
-}
-
-// PackClientAppend appends a client to a pack.
-func PackClientAppend(c *gin.Context) {
-	form := &model.PackClientParams{}
-
-	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
-
-		c.JSON(
-			http.StatusPreconditionFailed,
-			gin.H{
-				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
-			},
-		)
-
-		c.Abort()
-		return
-	}
-
-	form.Pack = c.Param("pack")
-
-	assigned := store.GetPackHasClient(
-		c,
-		form,
-	)
-
-	if assigned == true {
-		c.JSON(
-			http.StatusPreconditionFailed,
-			gin.H{
-				"status":  http.StatusPreconditionFailed,
-				"message": "Client is already appended",
-			},
-		)
-
-		c.Abort()
-		return
-	}
-
-	err := store.CreatePackClient(
-		c,
-		form,
-	)
-
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"status":  http.StatusInternalServerError,
-				"message": "Failed to append client",
-			},
-		)
-
-		c.Abort()
-		return
-	}
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"status":  http.StatusOK,
-			"message": "Successfully appended client",
-		},
-	)
-}
-
-// PackClientDelete deleted a client from a pack
-func PackClientDelete(c *gin.Context) {
-	form := &model.PackClientParams{}
-
-	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
-
-		c.JSON(
-			http.StatusPreconditionFailed,
-			gin.H{
-				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
-			},
-		)
-
-		c.Abort()
-		return
-	}
-
-	form.Pack = c.Param("pack")
-
-	assigned := store.GetPackHasClient(
-		c,
-		form,
-	)
-
-	if assigned == false {
-		c.JSON(
-			http.StatusPreconditionFailed,
-			gin.H{
-				"status":  http.StatusPreconditionFailed,
-				"message": "Client is not assigned",
-			},
-		)
-
-		c.Abort()
-		return
-	}
-
-	err := store.DeletePackClient(
-		c,
-		form,
-	)
-
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"status":  http.StatusInternalServerError,
-				"message": "Failed to unlink client",
-			},
-		)
-
-		c.Abort()
-		return
-	}
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"status":  http.StatusOK,
-			"message": "Successfully unlinked client",
-		},
-	)
-}
-
-// PackUserIndex retrieves all users related to a pack.
-func PackUserIndex(c *gin.Context) {
-	records, err := store.GetPackUsers(
-		c,
-		&model.PackUserParams{
-			Pack: c.Param("pack"),
+		&model.TeamUserParams{
+			Team: c.Param("team"),
 		},
 	)
 
@@ -434,9 +192,9 @@ func PackUserIndex(c *gin.Context) {
 	)
 }
 
-// PackUserAppend appends a user to a pack.
-func PackUserAppend(c *gin.Context) {
-	form := &model.PackUserParams{}
+// TeamUserAppend appends a user to a team.
+func TeamUserAppend(c *gin.Context) {
+	form := &model.TeamUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {
 		logrus.Warn("Failed to bind post data")
@@ -454,9 +212,7 @@ func PackUserAppend(c *gin.Context) {
 		return
 	}
 
-	form.Pack = c.Param("pack")
-
-	assigned := store.GetPackHasUser(
+	assigned := store.GetTeamHasUser(
 		c,
 		form,
 	)
@@ -474,7 +230,7 @@ func PackUserAppend(c *gin.Context) {
 		return
 	}
 
-	err := store.CreatePackUser(
+	err := store.CreateTeamUser(
 		c,
 		form,
 	)
@@ -501,9 +257,9 @@ func PackUserAppend(c *gin.Context) {
 	)
 }
 
-// PackUserDelete deleted a user from a pack
-func PackUserDelete(c *gin.Context) {
-	form := &model.PackUserParams{}
+// TeamUserDelete deleted a user from a team
+func TeamUserDelete(c *gin.Context) {
+	form := &model.TeamUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {
 		logrus.Warn("Failed to bind post data")
@@ -521,9 +277,7 @@ func PackUserDelete(c *gin.Context) {
 		return
 	}
 
-	form.Pack = c.Param("pack")
-
-	assigned := store.GetPackHasUser(
+	assigned := store.GetTeamHasUser(
 		c,
 		form,
 	)
@@ -541,7 +295,7 @@ func PackUserDelete(c *gin.Context) {
 		return
 	}
 
-	err := store.DeletePackUser(
+	err := store.DeleteTeamUser(
 		c,
 		form,
 	)
@@ -568,12 +322,12 @@ func PackUserDelete(c *gin.Context) {
 	)
 }
 
-// PackTeamIndex retrieves all teams related to a pack.
-func PackTeamIndex(c *gin.Context) {
-	records, err := store.GetPackTeams(
+// TeamPackIndex retrieves all packs related to a team.
+func TeamPackIndex(c *gin.Context) {
+	records, err := store.GetTeamPacks(
 		c,
-		&model.PackTeamParams{
-			Pack: c.Param("pack"),
+		&model.TeamPackParams{
+			Team: c.Param("team"),
 		},
 	)
 
@@ -582,7 +336,7 @@ func PackTeamIndex(c *gin.Context) {
 			http.StatusInternalServerError,
 			gin.H{
 				"status":  http.StatusInternalServerError,
-				"message": "Failed to fetch teams",
+				"message": "Failed to fetch packs",
 			},
 		)
 
@@ -596,9 +350,9 @@ func PackTeamIndex(c *gin.Context) {
 	)
 }
 
-// PackTeamAppend appends a team to a pack.
-func PackTeamAppend(c *gin.Context) {
-	form := &model.PackTeamParams{}
+// TeamPackAppend appends a pack to a team.
+func TeamPackAppend(c *gin.Context) {
+	form := &model.TeamPackParams{}
 
 	if err := c.BindJSON(&form); err != nil {
 		logrus.Warn("Failed to bind post data")
@@ -616,7 +370,7 @@ func PackTeamAppend(c *gin.Context) {
 		return
 	}
 
-	assigned := store.GetPackHasTeam(
+	assigned := store.GetTeamHasPack(
 		c,
 		form,
 	)
@@ -626,7 +380,7 @@ func PackTeamAppend(c *gin.Context) {
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Team is already appended",
+				"message": "Pack is already appended",
 			},
 		)
 
@@ -634,7 +388,7 @@ func PackTeamAppend(c *gin.Context) {
 		return
 	}
 
-	err := store.CreatePackTeam(
+	err := store.CreateTeamPack(
 		c,
 		form,
 	)
@@ -644,7 +398,7 @@ func PackTeamAppend(c *gin.Context) {
 			http.StatusInternalServerError,
 			gin.H{
 				"status":  http.StatusInternalServerError,
-				"message": "Failed to append team",
+				"message": "Failed to append pack",
 			},
 		)
 
@@ -656,14 +410,14 @@ func PackTeamAppend(c *gin.Context) {
 		http.StatusOK,
 		gin.H{
 			"status":  http.StatusOK,
-			"message": "Successfully appended team",
+			"message": "Successfully appended pack",
 		},
 	)
 }
 
-// PackTeamDelete deleted a team from a pack
-func PackTeamDelete(c *gin.Context) {
-	form := &model.PackTeamParams{}
+// TeamPackDelete deleted a pack from a team
+func TeamPackDelete(c *gin.Context) {
+	form := &model.TeamPackParams{}
 
 	if err := c.BindJSON(&form); err != nil {
 		logrus.Warn("Failed to bind post data")
@@ -681,7 +435,7 @@ func PackTeamDelete(c *gin.Context) {
 		return
 	}
 
-	assigned := store.GetPackHasTeam(
+	assigned := store.GetTeamHasPack(
 		c,
 		form,
 	)
@@ -691,7 +445,7 @@ func PackTeamDelete(c *gin.Context) {
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Team is not assigned",
+				"message": "Pack is not assigned",
 			},
 		)
 
@@ -699,7 +453,7 @@ func PackTeamDelete(c *gin.Context) {
 		return
 	}
 
-	err := store.DeletePackTeam(
+	err := store.DeleteTeamPack(
 		c,
 		form,
 	)
@@ -709,7 +463,7 @@ func PackTeamDelete(c *gin.Context) {
 			http.StatusInternalServerError,
 			gin.H{
 				"status":  http.StatusInternalServerError,
-				"message": "Failed to unlink team",
+				"message": "Failed to unlink pack",
 			},
 		)
 
@@ -721,7 +475,165 @@ func PackTeamDelete(c *gin.Context) {
 		http.StatusOK,
 		gin.H{
 			"status":  http.StatusOK,
-			"message": "Successfully unlinked team",
+			"message": "Successfully unlinked pack",
+		},
+	)
+}
+
+// TeamModIndex retrieves all mods related to a team.
+func TeamModIndex(c *gin.Context) {
+	records, err := store.GetTeamMods(
+		c,
+		&model.TeamModParams{
+			Team: c.Param("team"),
+		},
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to fetch mods",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		records,
+	)
+}
+
+// TeamModAppend appends a mod to a team.
+func TeamModAppend(c *gin.Context) {
+	form := &model.TeamModParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	assigned := store.GetTeamHasMod(
+		c,
+		form,
+	)
+
+	if assigned == true {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Mod is already appended",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.CreateTeamMod(
+		c,
+		form,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to append mod",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully appended mod",
+		},
+	)
+}
+
+// TeamModDelete deleted a mod from a team
+func TeamModDelete(c *gin.Context) {
+	form := &model.TeamModParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	assigned := store.GetTeamHasMod(
+		c,
+		form,
+	)
+
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Mod is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.DeleteTeamMod(
+		c,
+		form,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to unlink mod",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully unlinked mod",
 		},
 	)
 }

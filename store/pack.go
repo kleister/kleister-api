@@ -70,3 +70,23 @@ func CreatePackUser(c context.Context, params *model.PackUserParams) error {
 func DeletePackUser(c context.Context, params *model.PackUserParams) error {
 	return FromContext(c).DeletePackUser(params)
 }
+
+// GetPackTeams retrieves teams for a pack.
+func GetPackTeams(c context.Context, params *model.PackTeamParams) (*model.Teams, error) {
+	return FromContext(c).GetPackTeams(params)
+}
+
+// GetPackHasTeam checks if a specific team is assigned to a pack.
+func GetPackHasTeam(c context.Context, params *model.PackTeamParams) bool {
+	return FromContext(c).GetPackHasTeam(params)
+}
+
+// CreatePackTeam assigns a team to a specific pack.
+func CreatePackTeam(c context.Context, params *model.PackTeamParams) error {
+	return FromContext(c).CreatePackTeam(params)
+}
+
+// DeletePackTeam removes a team from a specific pack.
+func DeletePackTeam(c context.Context, params *model.PackTeamParams) error {
+	return FromContext(c).DeletePackTeam(params)
+}
