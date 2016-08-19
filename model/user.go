@@ -18,20 +18,19 @@ type Users []*User
 
 // User represents a user model definition.
 type User struct {
-	ID         int         `json:"id" gorm:"primary_key"`
-	Permission *Permission `json:"permission"`
-	Slug       string      `json:"slug" sql:"unique_index"`
-	Username   string      `json:"username" sql:"unique_index"`
-	Email      string      `json:"email" sql:"unique_index"`
-	Hash       string      `json:"-" sql:"unique_index"`
-	Password   string      `json:"password,omitempty" sql:"-"`
-	Hashword   string      `json:"-"`
-	Avatar     string      `json:"avatar,omitempty" sql:"-"`
-	Active     bool        `json:"active" sql:"default:false"`
-	CreatedAt  time.Time   `json:"created_at"`
-	UpdatedAt  time.Time   `json:"updated_at"`
-	Mods       Mods        `json:"mods,omitempty" gorm:"many2many:user_mods;"`
-	Packs      Packs       `json:"packs,omitempty" gorm:"many2many:user_packs;"`
+	ID        int       `json:"id" gorm:"primary_key"`
+	Slug      string    `json:"slug" sql:"unique_index"`
+	Username  string    `json:"username" sql:"unique_index"`
+	Email     string    `json:"email" sql:"unique_index"`
+	Hash      string    `json:"-" sql:"unique_index"`
+	Password  string    `json:"password,omitempty" sql:"-"`
+	Hashword  string    `json:"-"`
+	Avatar    string    `json:"avatar,omitempty" sql:"-"`
+	Active    bool      `json:"active" sql:"default:false"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Mods      Mods      `json:"mods,omitempty" gorm:"many2many:user_mods;"`
+	Packs     Packs     `json:"packs,omitempty" gorm:"many2many:user_packs;"`
 }
 
 // AfterFind invokes required after loading a record from the database.
@@ -103,10 +102,6 @@ func (u *User) BeforeSave(db *gorm.DB) (err error) {
 
 // AfterDelete invokes required actions after deletion.
 func (u *User) AfterDelete(tx *gorm.DB) error {
-	if err := tx.Delete(u.Permission).Error; err != nil {
-		return err
-	}
-
 	if err := tx.Model(u).Association("Mods").Clear().Error; err != nil {
 		return err
 	}

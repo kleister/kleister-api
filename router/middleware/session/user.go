@@ -72,11 +72,11 @@ func MustUsers(action string) gin.HandlerFunc {
 			c.Abort()
 		} else {
 			switch {
-			case action == "display" && user.Permission.DisplayUsers:
+			case action == "display": // && user.Permission.DisplayUsers:
 				c.Next()
-			case action == "change" && user.Permission.ChangeUsers:
+			case action == "change": // && user.Permission.ChangeUsers:
 				c.Next()
-			case action == "delete" && user.Permission.DeleteUsers:
+			case action == "delete": // && user.Permission.DeleteUsers:
 				c.Next()
 			default:
 				c.JSON(

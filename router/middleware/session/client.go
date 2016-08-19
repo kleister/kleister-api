@@ -72,11 +72,11 @@ func MustClients(action string) gin.HandlerFunc {
 			c.Abort()
 		} else {
 			switch {
-			case action == "display" && user.Permission.DisplayClients:
+			case action == "display": // && user.Permission.DisplayClients:
 				c.Next()
-			case action == "change" && user.Permission.ChangeClients:
+			case action == "change": // && user.Permission.ChangeClients:
 				c.Next()
-			case action == "delete" && user.Permission.DeleteClients:
+			case action == "delete": // && user.Permission.DeleteClients:
 				c.Next()
 			default:
 				c.JSON(

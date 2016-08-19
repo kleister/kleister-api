@@ -72,11 +72,11 @@ func MustMods(action string) gin.HandlerFunc {
 			c.Abort()
 		} else {
 			switch {
-			case action == "display" && user.Permission.DisplayMods:
+			case action == "display": // && user.Permission.DisplayMods:
 				c.Next()
-			case action == "change" && user.Permission.ChangeMods:
+			case action == "change": // && user.Permission.ChangeMods:
 				c.Next()
-			case action == "delete" && user.Permission.DeleteMods:
+			case action == "delete": // && user.Permission.DeleteMods:
 				c.Next()
 			default:
 				c.JSON(

@@ -122,9 +122,7 @@ func UserUpdate(c *gin.Context) {
 
 // UserCreate creates a new user.
 func UserCreate(c *gin.Context) {
-	record := &model.User{
-		Permission: &model.Permission{},
-	}
+	record := &model.User{}
 
 	if err := c.BindJSON(&record); err != nil {
 		logrus.Warn("Failed to bind user data")
