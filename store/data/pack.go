@@ -1,6 +1,9 @@
 package data
 
 import (
+	"regexp"
+	"strconv"
+
 	"github.com/jinzhu/gorm"
 	"github.com/kleister/kleister-api/model"
 )
@@ -53,15 +56,26 @@ func (db *data) DeletePack(record *model.Pack) error {
 
 // GetPack retrieves a specific pack from the database.
 func (db *data) GetPack(id string) (*model.Pack, *gorm.DB) {
-	record := &model.Pack{}
+	var (
+		record = &model.Pack{}
+		query  *gorm.DB
+	)
 
-	res := db.Where(
-		"packs.id = ?",
-		id,
-	).Or(
-		"packs.slug = ?",
-		id,
-	).Model(
+	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
+		val, _ := strconv.ParseInt(id, 10, 64)
+
+		query = db.Where(
+			"id = ?",
+			val,
+		)
+	} else {
+		query = db.Where(
+			"slug = ?",
+			id,
+		)
+	}
+
+	res := query.Model(
 		record,
 	).Preload(
 		"Builds",
@@ -100,15 +114,15 @@ func (db *data) GetPackHasClient(params *model.PackClientParams) bool {
 	pack, _ := db.GetPack(params.Pack)
 	client, _ := db.GetClient(params.Client)
 
-	count := db.Model(
+	res := db.Model(
 		pack,
 	).Association(
 		"Clients",
 	).Find(
 		client,
-	).Count()
+	).Error
 
-	return count > 0
+	return res == nil
 }
 
 func (db *data) CreatePackClient(params *model.PackClientParams) error {
@@ -159,15 +173,15 @@ func (db *data) GetPackHasUser(params *model.PackUserParams) bool {
 	pack, _ := db.GetPack(params.Pack)
 	user, _ := db.GetUser(params.User)
 
-	count := db.Model(
+	res := db.Model(
 		pack,
 	).Association(
 		"Users",
 	).Find(
 		user,
-	).Count()
+	).Error
 
-	return count > 0
+	return res == nil
 }
 
 func (db *data) CreatePackUser(params *model.PackUserParams) error {
@@ -218,15 +232,15 @@ func (db *data) GetPackHasTeam(params *model.PackTeamParams) bool {
 	pack, _ := db.GetPack(params.Pack)
 	team, _ := db.GetTeam(params.Team)
 
-	count := db.Model(
+	res := db.Model(
 		pack,
 	).Association(
 		"Teams",
 	).Find(
 		team,
-	).Count()
+	).Error
 
-	return count > 0
+	return res == nil
 }
 
 func (db *data) CreatePackTeam(params *model.PackTeamParams) error {

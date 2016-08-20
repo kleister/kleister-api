@@ -1,6 +1,9 @@
 package data
 
 import (
+	"regexp"
+	"strconv"
+
 	"github.com/jinzhu/gorm"
 	"github.com/kleister/kleister-api/model"
 )
@@ -41,15 +44,26 @@ func (db *data) DeleteClient(record *model.Client) error {
 
 // GetClient retrieves a specific client from the database.
 func (db *data) GetClient(id string) (*model.Client, *gorm.DB) {
-	record := &model.Client{}
+	var (
+		record = &model.Client{}
+		query  *gorm.DB
+	)
 
-	res := db.Where(
-		"id = ?",
-		id,
-	).Or(
-		"slug = ?",
-		id,
-	).First(
+	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
+		val, _ := strconv.ParseInt(id, 10, 64)
+
+		query = db.Where(
+			"id = ?",
+			val,
+		)
+	} else {
+		query = db.Where(
+			"slug = ?",
+			id,
+		)
+	}
+
+	res := query.First(
 		record,
 	)
 
@@ -78,15 +92,15 @@ func (db *data) GetClientHasPack(params *model.ClientPackParams) bool {
 	client, _ := db.GetClient(params.Client)
 	pack, _ := db.GetPack(params.Pack)
 
-	count := db.Model(
+	res := db.Model(
 		client,
 	).Association(
 		"Packs",
 	).Find(
 		pack,
-	).Count()
+	).Error
 
-	return count > 0
+	return res == nil
 }
 
 func (db *data) CreateClientPack(params *model.ClientPackParams) error {

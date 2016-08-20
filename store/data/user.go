@@ -1,6 +1,9 @@
 package data
 
 import (
+	"regexp"
+	"strconv"
+
 	"github.com/jinzhu/gorm"
 	"github.com/kleister/kleister-api/model"
 )
@@ -41,15 +44,26 @@ func (db *data) DeleteUser(record *model.User) error {
 
 // GetUser retrieves a specific user from the database.
 func (db *data) GetUser(id string) (*model.User, *gorm.DB) {
-	record := &model.User{}
+	var (
+		record = &model.User{}
+		query  *gorm.DB
+	)
 
-	res := db.Where(
-		"id = ?",
-		id,
-	).Or(
-		"slug = ?",
-		id,
-	).Model(
+	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
+		val, _ := strconv.ParseInt(id, 10, 64)
+
+		query = db.Where(
+			"id = ?",
+			val,
+		)
+	} else {
+		query = db.Where(
+			"slug = ?",
+			id,
+		)
+	}
+
+	res := query.Model(
 		record,
 	).First(
 		record,
@@ -80,15 +94,15 @@ func (db *data) GetUserHasMod(params *model.UserModParams) bool {
 	user, _ := db.GetUser(params.User)
 	mod, _ := db.GetMod(params.Mod)
 
-	count := db.Model(
+	res := db.Model(
 		user,
 	).Association(
 		"Mods",
 	).Find(
 		mod,
-	).Count()
+	).Error
 
-	return count > 0
+	return res == nil
 }
 
 func (db *data) CreateUserMod(params *model.UserModParams) error {
@@ -139,15 +153,15 @@ func (db *data) GetUserHasPack(params *model.UserPackParams) bool {
 	user, _ := db.GetUser(params.User)
 	pack, _ := db.GetPack(params.Pack)
 
-	count := db.Model(
+	res := db.Model(
 		user,
 	).Association(
 		"Packs",
 	).Find(
 		pack,
-	).Count()
+	).Error
 
-	return count > 0
+	return res == nil
 }
 
 func (db *data) CreateUserPack(params *model.UserPackParams) error {
@@ -198,15 +212,15 @@ func (db *data) GetUserHasTeam(params *model.UserTeamParams) bool {
 	user, _ := db.GetUser(params.User)
 	team, _ := db.GetTeam(params.Team)
 
-	count := db.Model(
+	res := db.Model(
 		user,
 	).Association(
 		"Teams",
 	).Find(
 		team,
-	).Count()
+	).Error
 
-	return count > 0
+	return res == nil
 }
 
 func (db *data) CreateUserTeam(params *model.UserTeamParams) error {

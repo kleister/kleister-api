@@ -1,6 +1,9 @@
 package data
 
 import (
+	"regexp"
+	"strconv"
+
 	"github.com/jinzhu/gorm"
 	"github.com/kleister/kleister-api/model"
 )
@@ -54,17 +57,28 @@ func (db *data) DeleteVersion(mod int, record *model.Version) error {
 
 // GetVersion retrieves a specific version from the database.
 func (db *data) GetVersion(mod int, id string) (*model.Version, *gorm.DB) {
-	record := &model.Version{}
+	var (
+		record = &model.Version{}
+		query  *gorm.DB
+	)
 
-	res := db.Where(
+	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
+		val, _ := strconv.ParseInt(id, 10, 64)
+
+		query = db.Where(
+			"id = ?",
+			val,
+		)
+	} else {
+		query = db.Where(
+			"slug = ?",
+			id,
+		)
+	}
+
+	res := query.Where(
 		"mod_id = ?",
 		mod,
-	).Where(
-		"id = ?",
-		id,
-	).Or(
-		"slug = ?",
-		id,
 	).Model(
 		record,
 	).Preload(
@@ -105,15 +119,15 @@ func (db *data) GetVersionHasBuild(params *model.VersionBuildParams) bool {
 	pack, _ := db.GetPack(params.Pack)
 	build, _ := db.GetBuild(pack.ID, params.Build)
 
-	count := db.Model(
+	res := db.Model(
 		version,
 	).Association(
 		"Builds",
 	).Find(
 		build,
-	).Count()
+	).Error
 
-	return count > 0
+	return res == nil
 }
 
 func (db *data) CreateVersionBuild(params *model.VersionBuildParams) error {

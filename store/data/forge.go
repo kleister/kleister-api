@@ -1,6 +1,9 @@
 package data
 
 import (
+	"regexp"
+	"strconv"
+
 	"github.com/jinzhu/gorm"
 	"github.com/kleister/kleister-api/model"
 	"github.com/kleister/kleister-api/model/forge"
@@ -42,15 +45,26 @@ func (db *data) SyncForge(number *forge.Number) (*model.Forge, error) {
 
 // GetForge retrieves a specific forge from the database.
 func (db *data) GetForge(id string) (*model.Forge, *gorm.DB) {
-	record := &model.Forge{}
+	var (
+		record = &model.Forge{}
+		query  *gorm.DB
+	)
 
-	res := db.Where(
-		"id = ?",
-		id,
-	).Or(
-		"slug = ?",
-		id,
-	).First(
+	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
+		val, _ := strconv.ParseInt(id, 10, 64)
+
+		query = db.Where(
+			"id = ?",
+			val,
+		)
+	} else {
+		query = db.Where(
+			"slug = ?",
+			id,
+		)
+	}
+
+	res := query.First(
 		record,
 	)
 

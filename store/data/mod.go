@@ -1,6 +1,9 @@
 package data
 
 import (
+	"regexp"
+	"strconv"
+
 	"github.com/jinzhu/gorm"
 	"github.com/kleister/kleister-api/model"
 )
@@ -43,15 +46,26 @@ func (db *data) DeleteMod(record *model.Mod) error {
 
 // GetMod retrieves a specific mod from the database.
 func (db *data) GetMod(id string) (*model.Mod, *gorm.DB) {
-	record := &model.Mod{}
+	var (
+		record = &model.Mod{}
+		query  *gorm.DB
+	)
 
-	res := db.Where(
-		"id = ?",
-		id,
-	).Or(
-		"slug = ?",
-		id,
-	).Model(
+	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
+		val, _ := strconv.ParseInt(id, 10, 64)
+
+		query = db.Where(
+			"id = ?",
+			val,
+		)
+	} else {
+		query = db.Where(
+			"slug = ?",
+			id,
+		)
+	}
+
+	res := query.Model(
 		record,
 	).Preload(
 		"Versions",
@@ -84,15 +98,15 @@ func (db *data) GetModHasUser(params *model.ModUserParams) bool {
 	mod, _ := db.GetMod(params.Mod)
 	user, _ := db.GetUser(params.User)
 
-	count := db.Model(
+	res := db.Model(
 		mod,
 	).Association(
 		"Users",
 	).Find(
 		user,
-	).Count()
+	).Error
 
-	return count > 0
+	return res == nil
 }
 
 func (db *data) CreateModUser(params *model.ModUserParams) error {
@@ -143,15 +157,15 @@ func (db *data) GetModHasTeam(params *model.ModTeamParams) bool {
 	mod, _ := db.GetMod(params.Mod)
 	team, _ := db.GetTeam(params.Team)
 
-	count := db.Model(
+	res := db.Model(
 		mod,
 	).Association(
 		"Teams",
 	).Find(
 		team,
-	).Count()
+	).Error
 
-	return count > 0
+	return res == nil
 }
 
 func (db *data) CreateModTeam(params *model.ModTeamParams) error {
