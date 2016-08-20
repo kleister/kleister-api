@@ -196,7 +196,12 @@ func migrateDatabase(driver string, db *gorm.DB) error {
 		&model.PackIcon{},
 		&model.PackLogo{},
 		&model.User{},
+		&model.UserMod{},
+		&model.UserPack{},
 		&model.Team{},
+		&model.TeamUser{},
+		&model.TeamMod{},
+		&model.TeamPack{},
 		&model.Version{},
 		&model.VersionFile{},
 	)

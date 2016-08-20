@@ -31,8 +31,11 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Teams     Teams     `json:"teams,omitempty" gorm:"many2many:team_users;"`
+	TeamUsers TeamUsers `json:"team_users,omitempty"`
 	Mods      Mods      `json:"mods,omitempty" gorm:"many2many:user_mods;"`
+	UserMods  UserMods  `json:"user_mods,omitempty"`
 	Packs     Packs     `json:"packs,omitempty" gorm:"many2many:user_packs;"`
+	UserPacks UserPacks `json:"user_packs,omitempty"`
 }
 
 // AfterFind invokes required after loading a record from the database.
