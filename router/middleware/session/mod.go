@@ -67,17 +67,17 @@ func MustMods(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowModDisplay(current, c) {
+			if allowModDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowModChange(current, c) {
+			if allowModChange(c) {
 				c.Next()
 				return
 			}
 		case action == "delete":
-			if allowModDelete(current, c) {
+			if allowModDelete(c) {
 				c.Next()
 				return
 			}
@@ -88,19 +88,19 @@ func MustMods(action string) gin.HandlerFunc {
 }
 
 // allowModDisplay checks if the given user is allowed to display the resource.
-func allowModDisplay(current *model.User, c *gin.Context) bool {
+func allowModDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowModChange checks if the given user is allowed to change the resource.
-func allowModChange(current *model.User, c *gin.Context) bool {
+func allowModChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowModDelete checks if the given user is allowed to delete the resource.
-func allowModDelete(current *model.User, c *gin.Context) bool {
+func allowModDelete(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
@@ -117,12 +117,12 @@ func MustModUsers(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowModUserDisplay(current, c) {
+			if allowModUserDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowModUserChange(current, c) {
+			if allowModUserChange(c) {
 				c.Next()
 				return
 			}
@@ -133,13 +133,13 @@ func MustModUsers(action string) gin.HandlerFunc {
 }
 
 // allowModUserDisplay checks if the given user is allowed to display the resource.
-func allowModUserDisplay(current *model.User, c *gin.Context) bool {
+func allowModUserDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowModUserChange checks if the given user is allowed to change the resource.
-func allowModUserChange(current *model.User, c *gin.Context) bool {
+func allowModUserChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
@@ -156,12 +156,12 @@ func MustModTeams(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowModTeamDisplay(current, c) {
+			if allowModTeamDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowModTeamChange(current, c) {
+			if allowModTeamChange(c) {
 				c.Next()
 				return
 			}
@@ -172,13 +172,13 @@ func MustModTeams(action string) gin.HandlerFunc {
 }
 
 // allowModTeamDisplay checks if the given user is allowed to display the resource.
-func allowModTeamDisplay(current *model.User, c *gin.Context) bool {
+func allowModTeamDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowModTeamChange checks if the given user is allowed to change the resource.
-func allowModTeamChange(current *model.User, c *gin.Context) bool {
+func allowModTeamChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }

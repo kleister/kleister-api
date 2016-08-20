@@ -67,12 +67,12 @@ func MustMinecraftBuilds(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowMinecraftBuildDisplay(current, c) {
+			if allowMinecraftBuildDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowMinecraftBuildChange(current, c) {
+			if allowMinecraftBuildChange(c) {
 				c.Next()
 				return
 			}
@@ -83,13 +83,13 @@ func MustMinecraftBuilds(action string) gin.HandlerFunc {
 }
 
 // allowMinecraftBuildDisplay checks if the given user is allowed to display the resource.
-func allowMinecraftBuildDisplay(current *model.User, c *gin.Context) bool {
+func allowMinecraftBuildDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowMinecraftBuildChange checks if the given user is allowed to change the resource.
-func allowMinecraftBuildChange(current *model.User, c *gin.Context) bool {
+func allowMinecraftBuildChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }

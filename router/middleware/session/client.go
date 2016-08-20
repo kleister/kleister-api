@@ -67,17 +67,17 @@ func MustClients(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowClientDisplay(current, c) {
+			if allowClientDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowClientChange(current, c) {
+			if allowClientChange(c) {
 				c.Next()
 				return
 			}
 		case action == "delete":
-			if allowClientDelete(current, c) {
+			if allowClientDelete(c) {
 				c.Next()
 				return
 			}
@@ -88,19 +88,19 @@ func MustClients(action string) gin.HandlerFunc {
 }
 
 // allowClientDisplay checks if the given user is allowed to display the resource.
-func allowClientDisplay(current *model.User, c *gin.Context) bool {
+func allowClientDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowClientChange checks if the given user is allowed to change the resource.
-func allowClientChange(current *model.User, c *gin.Context) bool {
+func allowClientChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowClientDelete checks if the given user is allowed to delete the resource.
-func allowClientDelete(current *model.User, c *gin.Context) bool {
+func allowClientDelete(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
@@ -117,12 +117,12 @@ func MustClientPacks(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowClientPackDisplay(current, c) {
+			if allowClientPackDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowClientPackChange(current, c) {
+			if allowClientPackChange(c) {
 				c.Next()
 				return
 			}
@@ -133,13 +133,13 @@ func MustClientPacks(action string) gin.HandlerFunc {
 }
 
 // allowClientPackDisplay checks if the given user is allowed to display the resource.
-func allowClientPackDisplay(current *model.User, c *gin.Context) bool {
+func allowClientPackDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowClientPackChange checks if the given user is allowed to change the resource.
-func allowClientPackChange(current *model.User, c *gin.Context) bool {
+func allowClientPackChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }

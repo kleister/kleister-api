@@ -67,17 +67,17 @@ func MustUsers(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowUserDisplay(current, c) {
+			if allowUserDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowUserChange(current, c) {
+			if allowUserChange(c) {
 				c.Next()
 				return
 			}
 		case action == "delete":
-			if allowUserDelete(current, c) {
+			if allowUserDelete(c) {
 				c.Next()
 				return
 			}
@@ -88,19 +88,19 @@ func MustUsers(action string) gin.HandlerFunc {
 }
 
 // allowUserDisplay checks if the given user is allowed to display the resource.
-func allowUserDisplay(current *model.User, c *gin.Context) bool {
+func allowUserDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowUserChange checks if the given user is allowed to change the resource.
-func allowUserChange(current *model.User, c *gin.Context) bool {
+func allowUserChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowUserDelete checks if the given user is allowed to delete the resource.
-func allowUserDelete(current *model.User, c *gin.Context) bool {
+func allowUserDelete(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
@@ -117,12 +117,12 @@ func MustUserTeams(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowUserTeamDisplay(current, c) {
+			if allowUserTeamDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowUserTeamChange(current, c) {
+			if allowUserTeamChange(c) {
 				c.Next()
 				return
 			}
@@ -133,13 +133,13 @@ func MustUserTeams(action string) gin.HandlerFunc {
 }
 
 // allowUserTeamDisplay checks if the given user is allowed to display the resource.
-func allowUserTeamDisplay(current *model.User, c *gin.Context) bool {
+func allowUserTeamDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowUserTeamChange checks if the given user is allowed to change the resource.
-func allowUserTeamChange(current *model.User, c *gin.Context) bool {
+func allowUserTeamChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
@@ -156,12 +156,12 @@ func MustUserMods(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowUserModDisplay(current, c) {
+			if allowUserModDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowUserModChange(current, c) {
+			if allowUserModChange(c) {
 				c.Next()
 				return
 			}
@@ -172,13 +172,13 @@ func MustUserMods(action string) gin.HandlerFunc {
 }
 
 // allowUserModDisplay checks if the given user is allowed to display the resource.
-func allowUserModDisplay(current *model.User, c *gin.Context) bool {
+func allowUserModDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowUserModChange checks if the given user is allowed to change the resource.
-func allowUserModChange(current *model.User, c *gin.Context) bool {
+func allowUserModChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
@@ -195,12 +195,12 @@ func MustUserPacks(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowUserPackDisplay(current, c) {
+			if allowUserPackDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowUserPackChange(current, c) {
+			if allowUserPackChange(c) {
 				c.Next()
 				return
 			}
@@ -211,13 +211,13 @@ func MustUserPacks(action string) gin.HandlerFunc {
 }
 
 // allowUserPackDisplay checks if the given user is allowed to display the resource.
-func allowUserPackDisplay(current *model.User, c *gin.Context) bool {
+func allowUserPackDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowUserPackChange checks if the given user is allowed to change the resource.
-func allowUserPackChange(current *model.User, c *gin.Context) bool {
+func allowUserPackChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }

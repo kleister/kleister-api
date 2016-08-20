@@ -67,12 +67,12 @@ func MustForgeBuilds(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowForgeBuildDisplay(current, c) {
+			if allowForgeBuildDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowForgeBuildChange(current, c) {
+			if allowForgeBuildChange(c) {
 				c.Next()
 				return
 			}
@@ -83,13 +83,13 @@ func MustForgeBuilds(action string) gin.HandlerFunc {
 }
 
 // allowForgeBuildDisplay checks if the given user is allowed to display the resource.
-func allowForgeBuildDisplay(current *model.User, c *gin.Context) bool {
+func allowForgeBuildDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowForgeBuildChange checks if the given user is allowed to change the resource.
-func allowForgeBuildChange(current *model.User, c *gin.Context) bool {
+func allowForgeBuildChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }

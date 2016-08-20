@@ -83,17 +83,17 @@ func MustBuilds(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowBuildDisplay(current, c) {
+			if allowBuildDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowBuildChange(current, c) {
+			if allowBuildChange(c) {
 				c.Next()
 				return
 			}
 		case action == "delete":
-			if allowBuildDelete(current, c) {
+			if allowBuildDelete(c) {
 				c.Next()
 				return
 			}
@@ -104,19 +104,19 @@ func MustBuilds(action string) gin.HandlerFunc {
 }
 
 // allowBuildDisplay checks if the given user is allowed to display the resource.
-func allowBuildDisplay(current *model.User, c *gin.Context) bool {
+func allowBuildDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowBuildChange checks if the given user is allowed to change the resource.
-func allowBuildChange(current *model.User, c *gin.Context) bool {
+func allowBuildChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowBuildDelete checks if the given user is allowed to delete the resource.
-func allowBuildDelete(current *model.User, c *gin.Context) bool {
+func allowBuildDelete(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
@@ -133,12 +133,12 @@ func MustBuildVersions(action string) gin.HandlerFunc {
 
 		switch {
 		case action == "display":
-			if allowBuildVersionDisplay(current, c) {
+			if allowBuildVersionDisplay(c) {
 				c.Next()
 				return
 			}
 		case action == "change":
-			if allowBuildVersionChange(current, c) {
+			if allowBuildVersionChange(c) {
 				c.Next()
 				return
 			}
@@ -149,13 +149,13 @@ func MustBuildVersions(action string) gin.HandlerFunc {
 }
 
 // allowBuildVersionDisplay checks if the given user is allowed to display the resource.
-func allowBuildVersionDisplay(current *model.User, c *gin.Context) bool {
+func allowBuildVersionDisplay(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
 
 // allowBuildVersionChange checks if the given user is allowed to change the resource.
-func allowBuildVersionChange(current *model.User, c *gin.Context) bool {
+func allowBuildVersionChange(c *gin.Context) bool {
 	// TODO(tboerger): Add real implementation
 	return false
 }
