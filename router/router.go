@@ -160,8 +160,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				packUsers.Use(session.SetPack())
 
 				packUsers.GET("", api.PackUserIndex)
-				packUsers.PATCH("/:user", session.SetUser(), api.PackUserAppend)
-				packUsers.DELETE("/:user", session.SetUser(), api.PackUserDelete)
+				packUsers.PATCH("", api.PackUserAppend)
+				packUsers.DELETE("", api.PackUserDelete)
 			}
 
 			packTeams := base.Group("/packs/:pack/teams")
