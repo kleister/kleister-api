@@ -23,6 +23,8 @@ func (db *data) GetBuilds(pack int) (*model.Builds, error) {
 		"Minecraft",
 	).Preload(
 		"Forge",
+	).Preload(
+		"Versions",
 	).Find(
 		records,
 	).Error
@@ -89,6 +91,8 @@ func (db *data) GetBuild(pack int, id string) (*model.Build, *gorm.DB) {
 		"Minecraft",
 	).Preload(
 		"Forge",
+	).Preload(
+		"Versions",
 	).First(
 		record,
 	)
