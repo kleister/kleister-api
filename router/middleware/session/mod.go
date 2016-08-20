@@ -58,37 +58,127 @@ func SetMod() gin.HandlerFunc {
 // MustMods validates the mods access.
 func MustMods(action string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := Current(c)
+		current := Current(c)
 
-		if user == nil {
-			c.JSON(
-				http.StatusUnauthorized,
-				gin.H{
-					"status":  http.StatusUnauthorized,
-					"message": "You have to be authenticated",
-				},
-			)
+		if current.Admin {
+			c.Next()
+			return
+		}
 
-			c.Abort()
-		} else {
-			switch {
-			case action == "display": // && user.Permission.DisplayMods:
+		switch {
+		case action == "display":
+			if allowModDisplay(current, c) {
 				c.Next()
-			case action == "change": // && user.Permission.ChangeMods:
+				return
+			}
+		case action == "change":
+			if allowModChange(current, c) {
 				c.Next()
-			case action == "delete": // && user.Permission.DeleteMods:
+				return
+			}
+		case action == "delete":
+			if allowModDelete(current, c) {
 				c.Next()
-			default:
-				c.JSON(
-					http.StatusForbidden,
-					gin.H{
-						"status":  http.StatusForbidden,
-						"message": "You are not authorized to request this resource",
-					},
-				)
-
-				c.Abort()
+				return
 			}
 		}
+
+		AbortUnauthorized(c)
 	}
+}
+
+// allowModDisplay checks if the given user is allowed to display the resource.
+func allowModDisplay(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// allowModChange checks if the given user is allowed to change the resource.
+func allowModChange(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// allowModDelete checks if the given user is allowed to delete the resource.
+func allowModDelete(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// MustModUsers validates the minecraft mods access.
+func MustModUsers(action string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		current := Current(c)
+
+		if current.Admin {
+			c.Next()
+			return
+		}
+
+		switch {
+		case action == "display":
+			if allowModUserDisplay(current, c) {
+				c.Next()
+				return
+			}
+		case action == "change":
+			if allowModUserChange(current, c) {
+				c.Next()
+				return
+			}
+		}
+
+		AbortUnauthorized(c)
+	}
+}
+
+// allowModUserDisplay checks if the given user is allowed to display the resource.
+func allowModUserDisplay(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// allowModUserChange checks if the given user is allowed to change the resource.
+func allowModUserChange(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// MustModTeams validates the minecraft mods access.
+func MustModTeams(action string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		current := Current(c)
+
+		if current.Admin {
+			c.Next()
+			return
+		}
+
+		switch {
+		case action == "display":
+			if allowModTeamDisplay(current, c) {
+				c.Next()
+				return
+			}
+		case action == "change":
+			if allowModTeamChange(current, c) {
+				c.Next()
+				return
+			}
+		}
+
+		AbortUnauthorized(c)
+	}
+}
+
+// allowModTeamDisplay checks if the given user is allowed to display the resource.
+func allowModTeamDisplay(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// allowModTeamChange checks if the given user is allowed to change the resource.
+func allowModTeamChange(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
 }

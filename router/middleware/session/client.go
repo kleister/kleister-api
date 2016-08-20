@@ -58,37 +58,88 @@ func SetClient() gin.HandlerFunc {
 // MustClients validates the clients access.
 func MustClients(action string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := Current(c)
+		current := Current(c)
 
-		if user == nil {
-			c.JSON(
-				http.StatusUnauthorized,
-				gin.H{
-					"status":  http.StatusUnauthorized,
-					"message": "You have to be authenticated",
-				},
-			)
+		if current.Admin {
+			c.Next()
+			return
+		}
 
-			c.Abort()
-		} else {
-			switch {
-			case action == "display": // && user.Permission.DisplayClients:
+		switch {
+		case action == "display":
+			if allowClientDisplay(current, c) {
 				c.Next()
-			case action == "change": // && user.Permission.ChangeClients:
+				return
+			}
+		case action == "change":
+			if allowClientChange(current, c) {
 				c.Next()
-			case action == "delete": // && user.Permission.DeleteClients:
+				return
+			}
+		case action == "delete":
+			if allowClientDelete(current, c) {
 				c.Next()
-			default:
-				c.JSON(
-					http.StatusForbidden,
-					gin.H{
-						"status":  http.StatusForbidden,
-						"message": "You are not authorized to request this resource",
-					},
-				)
-
-				c.Abort()
+				return
 			}
 		}
+
+		AbortUnauthorized(c)
 	}
+}
+
+// allowClientDisplay checks if the given user is allowed to display the resource.
+func allowClientDisplay(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// allowClientChange checks if the given user is allowed to change the resource.
+func allowClientChange(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// allowClientDelete checks if the given user is allowed to delete the resource.
+func allowClientDelete(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// MustClientPacks validates the minecraft packs access.
+func MustClientPacks(action string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		current := Current(c)
+
+		if current.Admin {
+			c.Next()
+			return
+		}
+
+		switch {
+		case action == "display":
+			if allowClientPackDisplay(current, c) {
+				c.Next()
+				return
+			}
+		case action == "change":
+			if allowClientPackChange(current, c) {
+				c.Next()
+				return
+			}
+		}
+
+		AbortUnauthorized(c)
+	}
+}
+
+// allowClientPackDisplay checks if the given user is allowed to display the resource.
+func allowClientPackDisplay(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// allowClientPackChange checks if the given user is allowed to change the resource.
+func allowClientPackChange(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
 }

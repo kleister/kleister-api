@@ -84,9 +84,32 @@ func MustCurrent() gin.HandlerFunc {
 			)
 
 			c.Abort()
-		} else {
-			c.Next()
+			return
 		}
+
+		c.Next()
+	}
+}
+
+// MustAdmin validates the admin access.
+func MustAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := Current(c)
+
+		if user == nil || !user.Admin {
+			c.JSON(
+				http.StatusUnauthorized,
+				gin.H{
+					"status":  http.StatusUnauthorized,
+					"message": "You have to be an admin user",
+				},
+			)
+
+			c.Abort()
+			return
+		}
+
+		c.Next()
 	}
 }
 
@@ -105,8 +128,22 @@ func MustNobody() gin.HandlerFunc {
 			)
 
 			c.Abort()
-		} else {
-			c.Next()
+			return
 		}
+
+		c.Next()
 	}
+}
+
+// AbortUnauthorized stops the middleware execution with JSON error.
+func AbortUnauthorized(c *gin.Context) {
+	c.JSON(
+		http.StatusForbidden,
+		gin.H{
+			"status":  http.StatusForbidden,
+			"message": "You are not authorized to request this resource",
+		},
+	)
+
+	c.Abort()
 }

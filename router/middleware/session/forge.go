@@ -54,3 +54,42 @@ func SetForge() gin.HandlerFunc {
 		}
 	}
 }
+
+// MustForgeBuilds validates the forge builds access.
+func MustForgeBuilds(action string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		current := Current(c)
+
+		if current.Admin {
+			c.Next()
+			return
+		}
+
+		switch {
+		case action == "display":
+			if allowForgeBuildDisplay(current, c) {
+				c.Next()
+				return
+			}
+		case action == "change":
+			if allowForgeBuildChange(current, c) {
+				c.Next()
+				return
+			}
+		}
+
+		AbortUnauthorized(c)
+	}
+}
+
+// allowForgeBuildDisplay checks if the given user is allowed to display the resource.
+func allowForgeBuildDisplay(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// allowForgeBuildChange checks if the given user is allowed to change the resource.
+func allowForgeBuildChange(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}

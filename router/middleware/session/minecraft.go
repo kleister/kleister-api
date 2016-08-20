@@ -54,3 +54,42 @@ func SetMinecraft() gin.HandlerFunc {
 		}
 	}
 }
+
+// MustMinecraftBuilds validates the minecraft builds access.
+func MustMinecraftBuilds(action string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		current := Current(c)
+
+		if current.Admin {
+			c.Next()
+			return
+		}
+
+		switch {
+		case action == "display":
+			if allowMinecraftBuildDisplay(current, c) {
+				c.Next()
+				return
+			}
+		case action == "change":
+			if allowMinecraftBuildChange(current, c) {
+				c.Next()
+				return
+			}
+		}
+
+		AbortUnauthorized(c)
+	}
+}
+
+// allowMinecraftBuildDisplay checks if the given user is allowed to display the resource.
+func allowMinecraftBuildDisplay(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}
+
+// allowMinecraftBuildChange checks if the given user is allowed to change the resource.
+func allowMinecraftBuildChange(current *model.User, c *gin.Context) bool {
+	// TODO(tboerger): Add real implementation
+	return false
+}

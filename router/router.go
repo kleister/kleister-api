@@ -95,17 +95,16 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 				minecraft.GET("", api.MinecraftIndex)
 				minecraft.GET("/:minecraft", api.MinecraftIndex)
-				minecraft.PATCH("", session.MustPacks("change"), api.MinecraftUpdate)
+				minecraft.PATCH("", session.MustAdmin(), api.MinecraftUpdate)
 			}
 
 			minecraftBuilds := base.Group("/minecraft/:minecraft/builds")
 			{
-				minecraftBuilds.Use(session.MustPacks("change"))
 				minecraftBuilds.Use(session.SetMinecraft())
 
-				minecraftBuilds.GET("", api.MinecraftBuildIndex)
-				minecraftBuilds.PATCH("", api.MinecraftBuildAppend)
-				minecraftBuilds.DELETE("", api.MinecraftBuildDelete)
+				minecraftBuilds.GET("", session.MustMinecraftBuilds("display"), api.MinecraftBuildIndex)
+				minecraftBuilds.PATCH("", session.MustMinecraftBuilds("change"), api.MinecraftBuildAppend)
+				minecraftBuilds.DELETE("", session.MustMinecraftBuilds("change"), api.MinecraftBuildDelete)
 			}
 
 			//
@@ -117,17 +116,16 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 				forge.GET("", api.ForgeIndex)
 				forge.GET("/:forge", api.ForgeIndex)
-				forge.PATCH("", session.MustPacks("change"), api.ForgeUpdate)
+				forge.PATCH("", session.MustAdmin(), api.ForgeUpdate)
 			}
 
 			forgeBuilds := base.Group("/forge/:forge/builds")
 			{
-				forgeBuilds.Use(session.MustPacks("change"))
 				forgeBuilds.Use(session.SetForge())
 
-				forgeBuilds.GET("", api.ForgeBuildIndex)
-				forgeBuilds.PATCH("", api.ForgeBuildAppend)
-				forgeBuilds.DELETE("", api.ForgeBuildDelete)
+				forgeBuilds.GET("", session.MustForgeBuilds("display"), api.ForgeBuildIndex)
+				forgeBuilds.PATCH("", session.MustForgeBuilds("change"), api.ForgeBuildAppend)
+				forgeBuilds.DELETE("", session.MustForgeBuilds("change"), api.ForgeBuildDelete)
 			}
 
 			//
@@ -146,32 +144,29 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			packClients := base.Group("/packs/:pack/clients")
 			{
-				packClients.Use(session.MustPacks("change"))
 				packClients.Use(session.SetPack())
 
-				packClients.GET("", api.PackClientIndex)
-				packClients.PATCH("", api.PackClientAppend)
-				packClients.DELETE("", api.PackClientDelete)
+				packClients.GET("", session.MustPackClients("display"), api.PackClientIndex)
+				packClients.PATCH("", session.MustPackClients("change"), api.PackClientAppend)
+				packClients.DELETE("", session.MustPackClients("change"), api.PackClientDelete)
 			}
 
 			packUsers := base.Group("/packs/:pack/users")
 			{
-				packUsers.Use(session.MustPacks("change"))
 				packUsers.Use(session.SetPack())
 
-				packUsers.GET("", api.PackUserIndex)
-				packUsers.PATCH("", api.PackUserAppend)
-				packUsers.DELETE("", api.PackUserDelete)
+				packUsers.GET("", session.MustPackUsers("display"), api.PackUserIndex)
+				packUsers.PATCH("", session.MustPackUsers("change"), api.PackUserAppend)
+				packUsers.DELETE("", session.MustPackUsers("change"), api.PackUserDelete)
 			}
 
 			packTeams := base.Group("/packs/:pack/teams")
 			{
-				packTeams.Use(session.MustTeams("change"))
 				packTeams.Use(session.SetPack())
 
-				packTeams.GET("", api.PackTeamIndex)
-				packTeams.PATCH("", api.PackTeamAppend)
-				packTeams.DELETE("", api.PackTeamDelete)
+				packTeams.GET("", session.MustPackTeams("display"), api.PackTeamIndex)
+				packTeams.PATCH("", session.MustPackTeams("change"), api.PackTeamAppend)
+				packTeams.DELETE("", session.MustPackTeams("change"), api.PackTeamDelete)
 			}
 
 			//
@@ -179,25 +174,24 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			builds := base.Group("/packs/:pack/builds")
 			{
-				builds.Use(session.MustPacks("display"))
 				builds.Use(session.SetPack())
+				builds.Use(session.MustBuilds("display"))
 
 				builds.GET("", api.BuildIndex)
 				builds.GET("/:build", session.SetBuild(), api.BuildShow)
-				builds.DELETE("/:build", session.SetBuild(), session.MustPacks("delete"), api.BuildDelete)
-				builds.PATCH("/:build", session.SetBuild(), session.MustPacks("change"), api.BuildUpdate)
-				builds.POST("", session.MustPacks("change"), api.BuildCreate)
+				builds.DELETE("/:build", session.SetBuild(), session.MustBuilds("delete"), api.BuildDelete)
+				builds.PATCH("/:build", session.SetBuild(), session.MustBuilds("change"), api.BuildUpdate)
+				builds.POST("", session.MustBuilds("change"), api.BuildCreate)
 			}
 
 			buildVersions := base.Group("/packs/:pack/builds/:build/versions")
 			{
-				buildVersions.Use(session.MustPacks("change"))
 				buildVersions.Use(session.SetPack())
 				buildVersions.Use(session.SetBuild())
 
-				buildVersions.GET("", api.BuildVersionIndex)
-				buildVersions.PATCH("", api.BuildVersionAppend)
-				buildVersions.DELETE("", api.BuildVersionDelete)
+				buildVersions.GET("", session.MustBuildVersions("display"), api.BuildVersionIndex)
+				buildVersions.PATCH("", session.MustBuildVersions("change"), api.BuildVersionAppend)
+				buildVersions.DELETE("", session.MustBuildVersions("change"), api.BuildVersionDelete)
 			}
 
 			//
@@ -216,22 +210,20 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			modUsers := base.Group("/mods/:mod/users")
 			{
-				modUsers.Use(session.MustMods("change"))
 				modUsers.Use(session.SetMod())
 
-				modUsers.GET("", api.ModUserIndex)
-				modUsers.PATCH("", api.ModUserAppend)
-				modUsers.DELETE("", api.ModUserDelete)
+				modUsers.GET("", session.MustModUsers("display"), api.ModUserIndex)
+				modUsers.PATCH("", session.MustModUsers("change"), api.ModUserAppend)
+				modUsers.DELETE("", session.MustModUsers("change"), api.ModUserDelete)
 			}
 
 			modTeams := base.Group("/mods/:mod/teams")
 			{
-				modTeams.Use(session.MustTeams("change"))
 				modTeams.Use(session.SetMod())
 
-				modTeams.GET("", api.ModTeamIndex)
-				modTeams.PATCH("", api.ModTeamAppend)
-				modTeams.DELETE("", api.ModTeamDelete)
+				modTeams.GET("", session.MustModTeams("display"), api.ModTeamIndex)
+				modTeams.PATCH("", session.MustTeams("change"), api.ModTeamAppend)
+				modTeams.DELETE("", session.MustModTeams("change"), api.ModTeamDelete)
 			}
 
 			//
@@ -239,25 +231,24 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			versions := base.Group("/mods/:mod/versions")
 			{
-				versions.Use(session.MustMods("display"))
 				versions.Use(session.SetMod())
+				versions.Use(session.MustVersions("display"))
 
 				versions.GET("", api.VersionIndex)
 				versions.GET("/:version", session.SetVersion(), api.VersionShow)
-				versions.DELETE("/:version", session.SetVersion(), session.MustMods("delete"), api.VersionDelete)
-				versions.PATCH("/:version", session.SetVersion(), session.MustMods("change"), api.VersionUpdate)
-				versions.POST("", session.MustMods("change"), api.VersionCreate)
+				versions.DELETE("/:version", session.SetVersion(), session.MustVersions("delete"), api.VersionDelete)
+				versions.PATCH("/:version", session.SetVersion(), session.MustVersions("change"), api.VersionUpdate)
+				versions.POST("", session.MustVersions("change"), api.VersionCreate)
 			}
 
 			versionBuilds := base.Group("/mods/:mod/versions/:version/builds")
 			{
-				versionBuilds.Use(session.MustMods("change"))
 				versionBuilds.Use(session.SetMod())
 				versionBuilds.Use(session.SetVersion())
 
-				versionBuilds.GET("", api.VersionBuildIndex)
-				versionBuilds.PATCH("", api.VersionBuildAppend)
-				versionBuilds.DELETE("", api.VersionBuildDelete)
+				versionBuilds.GET("", session.MustVersionBuilds("display"), api.VersionBuildIndex)
+				versionBuilds.PATCH("", session.MustVersionBuilds("change"), api.VersionBuildAppend)
+				versionBuilds.DELETE("", session.MustVersionBuilds("change"), api.VersionBuildDelete)
 			}
 
 			//
@@ -276,12 +267,11 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			clientPacks := base.Group("/clients/:client/packs")
 			{
-				clientPacks.Use(session.MustClients("change"))
 				clientPacks.Use(session.SetClient())
 
-				clientPacks.GET("", api.ClientPackIndex)
-				clientPacks.PATCH("", api.ClientPackAppend)
-				clientPacks.DELETE("", api.ClientPackDelete)
+				clientPacks.GET("", session.MustClientPacks("display"), api.ClientPackIndex)
+				clientPacks.PATCH("", session.MustClientPacks("change"), api.ClientPackAppend)
+				clientPacks.DELETE("", session.MustClientPacks("change"), api.ClientPackDelete)
 			}
 
 			//
@@ -300,32 +290,29 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			userTeams := base.Group("/users/:user/teams")
 			{
-				userTeams.Use(session.MustTeams("change"))
 				userTeams.Use(session.SetUser())
 
-				userTeams.GET("", api.UserTeamIndex)
-				userTeams.PATCH("", api.UserTeamAppend)
-				userTeams.DELETE("", api.UserTeamDelete)
+				userTeams.GET("", session.MustUserTeams("display"), api.UserTeamIndex)
+				userTeams.PATCH("", session.MustUserTeams("change"), api.UserTeamAppend)
+				userTeams.DELETE("", session.MustUserTeams("change"), api.UserTeamDelete)
 			}
 
 			userMods := base.Group("/users/:user/mods")
 			{
-				userMods.Use(session.MustMods("change"))
 				userMods.Use(session.SetUser())
 
-				userMods.GET("", api.UserModIndex)
-				userMods.PATCH("", api.UserModAppend)
-				userMods.DELETE("", api.UserModDelete)
+				userMods.GET("", session.MustUserMods("display"), api.UserModIndex)
+				userMods.PATCH("", session.MustUserMods("change"), api.UserModAppend)
+				userMods.DELETE("", session.MustUserMods("change"), api.UserModDelete)
 			}
 
 			userPacks := base.Group("/users/:user/packs")
 			{
-				userPacks.Use(session.MustPacks("change"))
 				userPacks.Use(session.SetUser())
 
-				userPacks.GET("", api.UserPackIndex)
-				userPacks.PATCH("", api.UserPackAppend)
-				userPacks.DELETE("", api.UserPackDelete)
+				userPacks.GET("", session.MustUserPacks("display"), api.UserPackIndex)
+				userPacks.PATCH("", session.MustUserPacks("change"), api.UserPackAppend)
+				userPacks.DELETE("", session.MustUserPacks("change"), api.UserPackDelete)
 			}
 
 			//
@@ -344,32 +331,29 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			teamUsers := base.Group("/teams/:team/users")
 			{
-				teamUsers.Use(session.MustUsers("change"))
 				teamUsers.Use(session.SetTeam())
 
-				teamUsers.GET("", api.TeamUserIndex)
-				teamUsers.PATCH("", api.TeamUserAppend)
-				teamUsers.DELETE("", api.TeamUserDelete)
+				teamUsers.GET("", session.MustTeamUsers("display"), api.TeamUserIndex)
+				teamUsers.PATCH("", session.MustTeamUsers("change"), api.TeamUserAppend)
+				teamUsers.DELETE("", session.MustTeamUsers("change"), api.TeamUserDelete)
 			}
 
 			teamPacks := base.Group("/teams/:team/packs")
 			{
-				teamPacks.Use(session.MustPacks("change"))
 				teamPacks.Use(session.SetTeam())
 
-				teamPacks.GET("", api.TeamPackIndex)
-				teamPacks.PATCH("", api.TeamPackAppend)
-				teamPacks.DELETE("", api.TeamPackDelete)
+				teamPacks.GET("", session.MustTeamPacks("display"), api.TeamPackIndex)
+				teamPacks.PATCH("", session.MustTeamPacks("change"), api.TeamPackAppend)
+				teamPacks.DELETE("", session.MustTeamPacks("change"), api.TeamPackDelete)
 			}
 
 			teamMods := base.Group("/teams/:team/mods")
 			{
-				teamMods.Use(session.MustMods("change"))
 				teamMods.Use(session.SetTeam())
 
-				teamMods.GET("", api.TeamModIndex)
-				teamMods.PATCH("", api.TeamModAppend)
-				teamMods.DELETE("", api.TeamModDelete)
+				teamMods.GET("", session.MustTeamMods("display"), api.TeamModIndex)
+				teamMods.PATCH("", session.MustTeamMods("change"), api.TeamModAppend)
+				teamMods.DELETE("", session.MustTeamMods("change"), api.TeamModDelete)
 			}
 
 			//
