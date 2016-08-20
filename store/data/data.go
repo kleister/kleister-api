@@ -239,6 +239,7 @@ func migrateDatabase(driver string, db *gorm.DB) error {
 			Password: "admin",
 			Email:    "admin@example.com",
 			Active:   true,
+			Admin:    true,
 		}
 
 		err := db.Create(

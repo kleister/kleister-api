@@ -27,6 +27,7 @@ type User struct {
 	Hashword  string    `json:"-"`
 	Avatar    string    `json:"avatar,omitempty" sql:"-"`
 	Active    bool      `json:"active" sql:"default:false"`
+	Admin     bool      `json:"admin" sql:"default:false"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Teams     Teams     `json:"teams,omitempty" gorm:"many2many:team_users;"`
