@@ -14,6 +14,12 @@ func (db *data) GetUsers() (*model.Users, error) {
 
 	err := db.Order(
 		"username ASC",
+	).Preload(
+		"Teams",
+	).Preload(
+		"Packs",
+	).Preload(
+		"Mods",
 	).Find(
 		records,
 	).Error
@@ -65,6 +71,12 @@ func (db *data) GetUser(id string) (*model.User, *gorm.DB) {
 
 	res := query.Model(
 		record,
+	).Preload(
+		"Teams",
+	).Preload(
+		"Packs",
+	).Preload(
+		"Mods",
 	).First(
 		record,
 	)

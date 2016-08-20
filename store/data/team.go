@@ -14,6 +14,12 @@ func (db *data) GetTeams() (*model.Teams, error) {
 
 	err := db.Order(
 		"name ASC",
+	).Preload(
+		"Users",
+	).Preload(
+		"Packs",
+	).Preload(
+		"Mods",
 	).Find(
 		records,
 	).Error
@@ -65,6 +71,12 @@ func (db *data) GetTeam(id string) (*model.Team, *gorm.DB) {
 
 	res := query.Model(
 		record,
+	).Preload(
+		"Users",
+	).Preload(
+		"Packs",
+	).Preload(
+		"Mods",
 	).First(
 		record,
 	)

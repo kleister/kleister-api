@@ -16,6 +16,10 @@ func (db *data) GetMods() (*model.Mods, error) {
 		"name ASC",
 	).Preload(
 		"Versions",
+	).Preload(
+		"Users",
+	).Preload(
+		"Teams",
 	).Find(
 		records,
 	).Error
@@ -69,6 +73,10 @@ func (db *data) GetMod(id string) (*model.Mod, *gorm.DB) {
 		record,
 	).Preload(
 		"Versions",
+	).Preload(
+		"Users",
+	).Preload(
+		"Teams",
 	).First(
 		record,
 	)

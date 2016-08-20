@@ -15,6 +15,12 @@ func (db *data) GetPacks() (*model.Packs, error) {
 	err := db.Order(
 		"name ASC",
 	).Preload(
+		"Clients",
+	).Preload(
+		"Users",
+	).Preload(
+		"Teams",
+	).Preload(
 		"Builds",
 	).Preload(
 		"Icon",
@@ -22,6 +28,10 @@ func (db *data) GetPacks() (*model.Packs, error) {
 		"Background",
 	).Preload(
 		"Logo",
+	).Preload(
+		"Recommended",
+	).Preload(
+		"Latest",
 	).Preload(
 		"Builds.Forge",
 	).Preload(
@@ -78,6 +88,12 @@ func (db *data) GetPack(id string) (*model.Pack, *gorm.DB) {
 	res := query.Model(
 		record,
 	).Preload(
+		"Clients",
+	).Preload(
+		"Users",
+	).Preload(
+		"Teams",
+	).Preload(
 		"Builds",
 	).Preload(
 		"Icon",
@@ -85,6 +101,14 @@ func (db *data) GetPack(id string) (*model.Pack, *gorm.DB) {
 		"Background",
 	).Preload(
 		"Logo",
+	).Preload(
+		"Recommended",
+	).Preload(
+		"Latest",
+	).Preload(
+		"Builds.Forge",
+	).Preload(
+		"Builds.Minecraft",
 	).First(
 		record,
 	)

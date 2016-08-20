@@ -21,6 +21,8 @@ func (db *data) GetVersions(mod int) (*model.Versions, error) {
 		"Mod",
 	).Preload(
 		"File",
+	).Preload(
+		"Builds",
 	).Find(
 		records,
 	).Error
@@ -85,6 +87,8 @@ func (db *data) GetVersion(mod int, id string) (*model.Version, *gorm.DB) {
 		"Mod",
 	).Preload(
 		"File",
+	).Preload(
+		"Builds",
 	).First(
 		record,
 	)

@@ -14,6 +14,8 @@ func (db *data) GetClients() (*model.Clients, error) {
 
 	err := db.Order(
 		"name ASC",
+	).Preload(
+		"Packs",
 	).Find(
 		records,
 	).Error
@@ -63,7 +65,9 @@ func (db *data) GetClient(id string) (*model.Client, *gorm.DB) {
 		)
 	}
 
-	res := query.First(
+	res := query.Preload(
+		"Packs",
+	).First(
 		record,
 	)
 
