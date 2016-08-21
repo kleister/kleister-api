@@ -100,6 +100,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			minecraftBuilds := base.Group("/minecraft/:minecraft/builds")
 			{
+				minecraftBuilds.Use(session.MustCurrent())
 				minecraftBuilds.Use(session.SetMinecraft())
 
 				minecraftBuilds.GET("", session.MustMinecraftBuilds("display"), api.MinecraftBuildIndex)
@@ -121,6 +122,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			forgeBuilds := base.Group("/forge/:forge/builds")
 			{
+				forgeBuilds.Use(session.MustCurrent())
 				forgeBuilds.Use(session.SetForge())
 
 				forgeBuilds.GET("", session.MustForgeBuilds("display"), api.ForgeBuildIndex)
@@ -133,6 +135,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			packs := base.Group("/packs")
 			{
+				packs.Use(session.MustCurrent())
 				packs.Use(session.MustPacks("display"))
 
 				packs.GET("", api.PackIndex)
@@ -144,6 +147,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			packClients := base.Group("/packs/:pack/clients")
 			{
+				packClients.Use(session.MustCurrent())
 				packClients.Use(session.SetPack())
 
 				packClients.GET("", session.MustPackClients("display"), api.PackClientIndex)
@@ -153,6 +157,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			packUsers := base.Group("/packs/:pack/users")
 			{
+				packUsers.Use(session.MustCurrent())
 				packUsers.Use(session.SetPack())
 
 				packUsers.GET("", session.MustPackUsers("display"), api.PackUserIndex)
@@ -162,6 +167,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			packTeams := base.Group("/packs/:pack/teams")
 			{
+				packTeams.Use(session.MustCurrent())
 				packTeams.Use(session.SetPack())
 
 				packTeams.GET("", session.MustPackTeams("display"), api.PackTeamIndex)
@@ -174,6 +180,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			builds := base.Group("/packs/:pack/builds")
 			{
+				builds.Use(session.MustCurrent())
 				builds.Use(session.SetPack())
 				builds.Use(session.MustBuilds("display"))
 
@@ -186,6 +193,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			buildVersions := base.Group("/packs/:pack/builds/:build/versions")
 			{
+				buildVersions.Use(session.MustCurrent())
 				buildVersions.Use(session.SetPack())
 				buildVersions.Use(session.SetBuild())
 
@@ -199,6 +207,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			mods := base.Group("/mods")
 			{
+				mods.Use(session.MustCurrent())
 				mods.Use(session.MustMods("display"))
 
 				mods.GET("", api.ModIndex)
@@ -210,6 +219,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			modUsers := base.Group("/mods/:mod/users")
 			{
+				modUsers.Use(session.MustCurrent())
 				modUsers.Use(session.SetMod())
 
 				modUsers.GET("", session.MustModUsers("display"), api.ModUserIndex)
@@ -219,6 +229,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			modTeams := base.Group("/mods/:mod/teams")
 			{
+				modTeams.Use(session.MustCurrent())
 				modTeams.Use(session.SetMod())
 
 				modTeams.GET("", session.MustModTeams("display"), api.ModTeamIndex)
@@ -231,6 +242,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			versions := base.Group("/mods/:mod/versions")
 			{
+				versions.Use(session.MustCurrent())
 				versions.Use(session.SetMod())
 				versions.Use(session.MustVersions("display"))
 
@@ -243,6 +255,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			versionBuilds := base.Group("/mods/:mod/versions/:version/builds")
 			{
+				versionBuilds.Use(session.MustCurrent())
 				versionBuilds.Use(session.SetMod())
 				versionBuilds.Use(session.SetVersion())
 
@@ -256,6 +269,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			clients := base.Group("/clients")
 			{
+				clients.Use(session.MustCurrent())
 				clients.Use(session.MustClients("display"))
 
 				clients.GET("", api.ClientIndex)
@@ -267,6 +281,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			clientPacks := base.Group("/clients/:client/packs")
 			{
+				clientPacks.Use(session.MustCurrent())
 				clientPacks.Use(session.SetClient())
 
 				clientPacks.GET("", session.MustClientPacks("display"), api.ClientPackIndex)
@@ -279,6 +294,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			users := base.Group("/users")
 			{
+				users.Use(session.MustCurrent())
 				users.Use(session.MustUsers("display"))
 
 				users.GET("", api.UserIndex)
@@ -290,6 +306,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			userTeams := base.Group("/users/:user/teams")
 			{
+				userTeams.Use(session.MustCurrent())
 				userTeams.Use(session.SetUser())
 
 				userTeams.GET("", session.MustUserTeams("display"), api.UserTeamIndex)
@@ -299,6 +316,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			userMods := base.Group("/users/:user/mods")
 			{
+				userMods.Use(session.MustCurrent())
 				userMods.Use(session.SetUser())
 
 				userMods.GET("", session.MustUserMods("display"), api.UserModIndex)
@@ -308,6 +326,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			userPacks := base.Group("/users/:user/packs")
 			{
+				userPacks.Use(session.MustCurrent())
 				userPacks.Use(session.SetUser())
 
 				userPacks.GET("", session.MustUserPacks("display"), api.UserPackIndex)
@@ -320,6 +339,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			teams := base.Group("/teams")
 			{
+				teams.Use(session.MustCurrent())
 				teams.Use(session.MustTeams("display"))
 
 				teams.GET("", api.TeamIndex)
@@ -331,6 +351,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			teamUsers := base.Group("/teams/:team/users")
 			{
+				teamUsers.Use(session.MustCurrent())
 				teamUsers.Use(session.SetTeam())
 
 				teamUsers.GET("", session.MustTeamUsers("display"), api.TeamUserIndex)
@@ -340,6 +361,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			teamPacks := base.Group("/teams/:team/packs")
 			{
+				teamPacks.Use(session.MustCurrent())
 				teamPacks.Use(session.SetTeam())
 
 				teamPacks.GET("", session.MustTeamPacks("display"), api.TeamPackIndex)
@@ -349,6 +371,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 			teamMods := base.Group("/teams/:team/mods")
 			{
+				teamMods.Use(session.MustCurrent())
 				teamMods.Use(session.SetTeam())
 
 				teamMods.GET("", session.MustTeamMods("display"), api.TeamModIndex)
