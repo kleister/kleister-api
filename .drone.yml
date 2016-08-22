@@ -27,7 +27,7 @@ pipeline:
       branch: [ master, refs/tags/* ]
 
   coverage:
-    image: kleister/coverage
+    image: plugins/coverage
     server: http://coverage.dronehippie.de
 
   # rsync:
@@ -95,4 +95,4 @@ pipeline:
       branch: master
 
   gitter:
-    image: kleister/gitter
+    image: plugins/gitter
