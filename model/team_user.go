@@ -5,7 +5,9 @@ type TeamUsers []*TeamUser
 
 // TeamUser represents a team user model definition.
 type TeamUser struct {
-	Team *Team  `json:"team,omitempty"`
-	User *User  `json:"user,omitempty"`
-	Perm string `json:"perm,omitempty"`
+	TeamID int    `json:"team_id" sql:"index"`
+	Team   *Team  `json:"team,omitempty"`
+	UserID int    `json:"user_id" sql:"index"`
+	User   *User  `json:"user,omitempty"`
+	Perm   string `json:"perm,omitempty"`
 }
