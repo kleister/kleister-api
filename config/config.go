@@ -25,9 +25,6 @@ type session struct {
 }
 
 var (
-	// Update represents the flag to enable or disable auto updates.
-	Update bool
-
 	// Debug represents the flag to enable or disable debug logging.
 	Debug bool
 
