@@ -75,15 +75,19 @@ func (db *data) GetClient(id string) (*model.Client, *gorm.DB) {
 }
 
 // GetClientPacks retrieves packs for a client.
-func (db *data) GetClientPacks(params *model.ClientPackParams) (*model.Packs, error) {
+func (db *data) GetClientPacks(params *model.ClientPackParams) (*model.ClientPacks, error) {
 	client, _ := db.GetClient(params.Client)
+	records := &model.ClientPacks{}
 
-	records := &model.Packs{}
-
-	err := db.Model(
-		client,
-	).Association(
-		"Packs",
+	err := db.Where(
+		"client_id = ?",
+		client.ID,
+	).Model(
+		&model.ClientPack{},
+	).Preload(
+		"Client",
+	).Preload(
+		"Pack",
 	).Find(
 		records,
 	).Error

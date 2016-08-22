@@ -32,7 +32,7 @@ func GetTeam(c context.Context, id string) (*model.Team, *gorm.DB) {
 }
 
 // GetTeamUsers retrieves users for a team.
-func GetTeamUsers(c context.Context, params *model.TeamUserParams) (*model.Users, error) {
+func GetTeamUsers(c context.Context, params *model.TeamUserParams) (*model.TeamUsers, error) {
 	return FromContext(c).GetTeamUsers(params)
 }
 
@@ -52,7 +52,7 @@ func DeleteTeamUser(c context.Context, params *model.TeamUserParams) error {
 }
 
 // GetTeamPacks retrieves packs for a team.
-func GetTeamPacks(c context.Context, params *model.TeamPackParams) (*model.Packs, error) {
+func GetTeamPacks(c context.Context, params *model.TeamPackParams) (*model.TeamPacks, error) {
 	return FromContext(c).GetTeamPacks(params)
 }
 
@@ -72,7 +72,7 @@ func DeleteTeamPack(c context.Context, params *model.TeamPackParams) error {
 }
 
 // GetTeamMods retrieves mods for a team.
-func GetTeamMods(c context.Context, params *model.TeamModParams) (*model.Mods, error) {
+func GetTeamMods(c context.Context, params *model.TeamModParams) (*model.TeamMods, error) {
 	return FromContext(c).GetTeamMods(params)
 }
 

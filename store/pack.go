@@ -32,7 +32,7 @@ func GetPack(c context.Context, id string) (*model.Pack, *gorm.DB) {
 }
 
 // GetPackClients retrieves clients for a pack.
-func GetPackClients(c context.Context, params *model.PackClientParams) (*model.Clients, error) {
+func GetPackClients(c context.Context, params *model.PackClientParams) (*model.ClientPacks, error) {
 	return FromContext(c).GetPackClients(params)
 }
 
@@ -52,7 +52,7 @@ func DeletePackClient(c context.Context, params *model.PackClientParams) error {
 }
 
 // GetPackUsers retrieves users for a pack.
-func GetPackUsers(c context.Context, params *model.PackUserParams) (*model.Users, error) {
+func GetPackUsers(c context.Context, params *model.PackUserParams) (*model.UserPacks, error) {
 	return FromContext(c).GetPackUsers(params)
 }
 
@@ -72,7 +72,7 @@ func DeletePackUser(c context.Context, params *model.PackUserParams) error {
 }
 
 // GetPackTeams retrieves teams for a pack.
-func GetPackTeams(c context.Context, params *model.PackTeamParams) (*model.Teams, error) {
+func GetPackTeams(c context.Context, params *model.PackTeamParams) (*model.TeamPacks, error) {
 	return FromContext(c).GetPackTeams(params)
 }
 

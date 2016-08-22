@@ -27,7 +27,7 @@ type Store interface {
 	GetBuild(int, string) (*model.Build, *gorm.DB)
 
 	// GetBuildVersions retrieves versions for a build.
-	GetBuildVersions(*model.BuildVersionParams) (*model.Versions, error)
+	GetBuildVersions(*model.BuildVersionParams) (*model.BuildVersions, error)
 
 	// GetBuildHasVersion checks if a specific version is assigned to a build.
 	GetBuildHasVersion(*model.BuildVersionParams) bool
@@ -54,7 +54,7 @@ type Store interface {
 	GetClient(string) (*model.Client, *gorm.DB)
 
 	// GetClientPacks retrieves packs for a client.
-	GetClientPacks(*model.ClientPackParams) (*model.Packs, error)
+	GetClientPacks(*model.ClientPackParams) (*model.ClientPacks, error)
 
 	// GetClientHasPack checks if a specific pack is assigned to a client.
 	GetClientHasPack(*model.ClientPackParams) bool
@@ -81,7 +81,7 @@ type Store interface {
 	GetMod(string) (*model.Mod, *gorm.DB)
 
 	// GetModUsers retrieves users for a mod.
-	GetModUsers(*model.ModUserParams) (*model.Users, error)
+	GetModUsers(*model.ModUserParams) (*model.UserMods, error)
 
 	// GetModHasUser checks if a specific user is assigned to a mod.
 	GetModHasUser(*model.ModUserParams) bool
@@ -93,7 +93,7 @@ type Store interface {
 	DeleteModUser(*model.ModUserParams) error
 
 	// GetModTeams retrieves teams for a mod.
-	GetModTeams(*model.ModTeamParams) (*model.Teams, error)
+	GetModTeams(*model.ModTeamParams) (*model.TeamMods, error)
 
 	// GetModHasTeam checks if a specific team is assigned to a mod.
 	GetModHasTeam(*model.ModTeamParams) bool
@@ -120,7 +120,7 @@ type Store interface {
 	GetPack(string) (*model.Pack, *gorm.DB)
 
 	// GetPackClients retrieves clients for a pack.
-	GetPackClients(*model.PackClientParams) (*model.Clients, error)
+	GetPackClients(*model.PackClientParams) (*model.ClientPacks, error)
 
 	// GetPackHasClient checks if a specific client is assigned to a pack.
 	GetPackHasClient(*model.PackClientParams) bool
@@ -132,7 +132,7 @@ type Store interface {
 	DeletePackClient(*model.PackClientParams) error
 
 	// GetPackUsers retrieves users for a pack.
-	GetPackUsers(*model.PackUserParams) (*model.Users, error)
+	GetPackUsers(*model.PackUserParams) (*model.UserPacks, error)
 
 	// GetPackHasUser checks if a specific user is assigned to a pack.
 	GetPackHasUser(*model.PackUserParams) bool
@@ -144,7 +144,7 @@ type Store interface {
 	DeletePackUser(*model.PackUserParams) error
 
 	// GetPackTeams retrieves teams for a pack.
-	GetPackTeams(*model.PackTeamParams) (*model.Teams, error)
+	GetPackTeams(*model.PackTeamParams) (*model.TeamPacks, error)
 
 	// GetPackHasTeam checks if a specific team is assigned to a pack.
 	GetPackHasTeam(*model.PackTeamParams) bool
@@ -171,7 +171,7 @@ type Store interface {
 	GetUser(string) (*model.User, *gorm.DB)
 
 	// GetUserMods retrieves mods for a user.
-	GetUserMods(*model.UserModParams) (*model.Mods, error)
+	GetUserMods(*model.UserModParams) (*model.UserMods, error)
 
 	// GetUserHasMod checks if a specific mod is assigned to a user.
 	GetUserHasMod(*model.UserModParams) bool
@@ -183,7 +183,7 @@ type Store interface {
 	DeleteUserMod(*model.UserModParams) error
 
 	// GetUserPacks retrieves packs for a user.
-	GetUserPacks(*model.UserPackParams) (*model.Packs, error)
+	GetUserPacks(*model.UserPackParams) (*model.UserPacks, error)
 
 	// GetUserHasPack checks if a specific pack is assigned to a user.
 	GetUserHasPack(*model.UserPackParams) bool
@@ -195,7 +195,7 @@ type Store interface {
 	DeleteUserPack(*model.UserPackParams) error
 
 	// GetUserTeams retrieves teams for a user.
-	GetUserTeams(*model.UserTeamParams) (*model.Teams, error)
+	GetUserTeams(*model.UserTeamParams) (*model.TeamUsers, error)
 
 	// GetUserHasTeam checks if a specific team is assigned to a user.
 	GetUserHasTeam(*model.UserTeamParams) bool
@@ -222,7 +222,7 @@ type Store interface {
 	GetVersion(int, string) (*model.Version, *gorm.DB)
 
 	// GetVersionBuilds retrieves builds for a version.
-	GetVersionBuilds(*model.VersionBuildParams) (*model.Builds, error)
+	GetVersionBuilds(*model.VersionBuildParams) (*model.BuildVersions, error)
 
 	// GetVersionHasBuild checks if a specific build is assigned to a version.
 	GetVersionHasBuild(*model.VersionBuildParams) bool
@@ -249,7 +249,7 @@ type Store interface {
 	GetTeam(string) (*model.Team, *gorm.DB)
 
 	// GetTeamUsers retrieves users for a team.
-	GetTeamUsers(*model.TeamUserParams) (*model.Users, error)
+	GetTeamUsers(*model.TeamUserParams) (*model.TeamUsers, error)
 
 	// GetTeamHasUser checks if a specific user is assigned to a team.
 	GetTeamHasUser(*model.TeamUserParams) bool
@@ -261,7 +261,7 @@ type Store interface {
 	DeleteTeamUser(*model.TeamUserParams) error
 
 	// GetTeamPacks retrieves packs for a team.
-	GetTeamPacks(*model.TeamPackParams) (*model.Packs, error)
+	GetTeamPacks(*model.TeamPackParams) (*model.TeamPacks, error)
 
 	// GetTeamHasPack checks if a specific pack is assigned to a team.
 	GetTeamHasPack(*model.TeamPackParams) bool
@@ -273,7 +273,7 @@ type Store interface {
 	DeleteTeamPack(*model.TeamPackParams) error
 
 	// GetTeamMods retrieves mods for a team.
-	GetTeamMods(*model.TeamModParams) (*model.Mods, error)
+	GetTeamMods(*model.TeamModParams) (*model.TeamMods, error)
 
 	// GetTeamHasMod checks if a specific mod is assigned to a team.
 	GetTeamHasMod(*model.TeamModParams) bool

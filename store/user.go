@@ -32,7 +32,7 @@ func GetUser(c context.Context, id string) (*model.User, *gorm.DB) {
 }
 
 // GetUserMods retrieves mods for a user.
-func GetUserMods(c context.Context, params *model.UserModParams) (*model.Mods, error) {
+func GetUserMods(c context.Context, params *model.UserModParams) (*model.UserMods, error) {
 	return FromContext(c).GetUserMods(params)
 }
 
@@ -52,7 +52,7 @@ func DeleteUserMod(c context.Context, params *model.UserModParams) error {
 }
 
 // GetUserPacks retrieves packs for a user.
-func GetUserPacks(c context.Context, params *model.UserPackParams) (*model.Packs, error) {
+func GetUserPacks(c context.Context, params *model.UserPackParams) (*model.UserPacks, error) {
 	return FromContext(c).GetUserPacks(params)
 }
 
@@ -72,7 +72,7 @@ func DeleteUserPack(c context.Context, params *model.UserPackParams) error {
 }
 
 // GetUserTeams retrieves teams for a user.
-func GetUserTeams(c context.Context, params *model.UserTeamParams) (*model.Teams, error) {
+func GetUserTeams(c context.Context, params *model.UserTeamParams) (*model.TeamUsers, error) {
 	return FromContext(c).GetUserTeams(params)
 }
 

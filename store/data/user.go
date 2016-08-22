@@ -85,15 +85,19 @@ func (db *data) GetUser(id string) (*model.User, *gorm.DB) {
 }
 
 // GetUserMods retrieves mods for a user.
-func (db *data) GetUserMods(params *model.UserModParams) (*model.Mods, error) {
+func (db *data) GetUserMods(params *model.UserModParams) (*model.UserMods, error) {
 	user, _ := db.GetUser(params.User)
+	records := &model.UserMods{}
 
-	records := &model.Mods{}
-
-	err := db.Model(
-		user,
-	).Association(
-		"Mods",
+	err := db.Where(
+		"user_id = ?",
+		user.ID,
+	).Model(
+		&model.UserMod{},
+	).Preload(
+		"User",
+	).Preload(
+		"Mod",
 	).Find(
 		records,
 	).Error
@@ -144,15 +148,19 @@ func (db *data) DeleteUserMod(params *model.UserModParams) error {
 }
 
 // GetUserPacks retrieves packs for a user.
-func (db *data) GetUserPacks(params *model.UserPackParams) (*model.Packs, error) {
+func (db *data) GetUserPacks(params *model.UserPackParams) (*model.UserPacks, error) {
 	user, _ := db.GetUser(params.User)
+	records := &model.UserPacks{}
 
-	records := &model.Packs{}
-
-	err := db.Model(
-		user,
-	).Association(
-		"Packs",
+	err := db.Where(
+		"user_id = ?",
+		user.ID,
+	).Model(
+		&model.UserPack{},
+	).Preload(
+		"User",
+	).Preload(
+		"Pack",
 	).Find(
 		records,
 	).Error
@@ -203,15 +211,19 @@ func (db *data) DeleteUserPack(params *model.UserPackParams) error {
 }
 
 // GetUserTeams retrieves teams for a user.
-func (db *data) GetUserTeams(params *model.UserTeamParams) (*model.Teams, error) {
+func (db *data) GetUserTeams(params *model.UserTeamParams) (*model.TeamUsers, error) {
 	user, _ := db.GetUser(params.User)
+	records := &model.TeamUsers{}
 
-	records := &model.Teams{}
-
-	err := db.Model(
-		user,
-	).Association(
-		"Teams",
+	err := db.Where(
+		"user_id = ?",
+		user.ID,
+	).Model(
+		&model.TeamUser{},
+	).Preload(
+		"User",
+	).Preload(
+		"Team",
 	).Find(
 		records,
 	).Error

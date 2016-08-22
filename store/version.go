@@ -32,7 +32,7 @@ func GetVersion(c context.Context, mod int, id string) (*model.Version, *gorm.DB
 }
 
 // GetVersionBuilds retrieves builds for a version.
-func GetVersionBuilds(c context.Context, params *model.VersionBuildParams) (*model.Builds, error) {
+func GetVersionBuilds(c context.Context, params *model.VersionBuildParams) (*model.BuildVersions, error) {
 	return FromContext(c).GetVersionBuilds(params)
 }
 

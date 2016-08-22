@@ -117,15 +117,19 @@ func (db *data) GetPack(id string) (*model.Pack, *gorm.DB) {
 }
 
 // GetPackClients retrieves clients for a pack.
-func (db *data) GetPackClients(params *model.PackClientParams) (*model.Clients, error) {
+func (db *data) GetPackClients(params *model.PackClientParams) (*model.ClientPacks, error) {
 	pack, _ := db.GetPack(params.Pack)
+	records := &model.ClientPacks{}
 
-	records := &model.Clients{}
-
-	err := db.Model(
-		pack,
-	).Association(
-		"Clients",
+	err := db.Where(
+		"pack_id = ?",
+		pack.ID,
+	).Model(
+		&model.ClientPack{},
+	).Preload(
+		"Client",
+	).Preload(
+		"Pack",
 	).Find(
 		records,
 	).Error
@@ -176,15 +180,19 @@ func (db *data) DeletePackClient(params *model.PackClientParams) error {
 }
 
 // GetPackUsers retrieves users for a pack.
-func (db *data) GetPackUsers(params *model.PackUserParams) (*model.Users, error) {
+func (db *data) GetPackUsers(params *model.PackUserParams) (*model.UserPacks, error) {
 	pack, _ := db.GetPack(params.Pack)
+	records := &model.UserPacks{}
 
-	records := &model.Users{}
-
-	err := db.Model(
-		pack,
-	).Association(
-		"Users",
+	err := db.Where(
+		"pack_id = ?",
+		pack.ID,
+	).Model(
+		&model.UserPack{},
+	).Preload(
+		"User",
+	).Preload(
+		"Pack",
 	).Find(
 		records,
 	).Error
@@ -235,15 +243,19 @@ func (db *data) DeletePackUser(params *model.PackUserParams) error {
 }
 
 // GetPackTeams retrieves teams for a pack.
-func (db *data) GetPackTeams(params *model.PackTeamParams) (*model.Teams, error) {
+func (db *data) GetPackTeams(params *model.PackTeamParams) (*model.TeamPacks, error) {
 	pack, _ := db.GetPack(params.Pack)
+	records := &model.TeamPacks{}
 
-	records := &model.Teams{}
-
-	err := db.Model(
-		pack,
-	).Association(
-		"Teams",
+	err := db.Where(
+		"pack_id = ?",
+		pack.ID,
+	).Model(
+		&model.TeamPack{},
+	).Preload(
+		"Team",
+	).Preload(
+		"Pack",
 	).Find(
 		records,
 	).Error

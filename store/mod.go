@@ -32,7 +32,7 @@ func GetMod(c context.Context, id string) (*model.Mod, *gorm.DB) {
 }
 
 // GetModUsers retrieves users for a mod.
-func GetModUsers(c context.Context, params *model.ModUserParams) (*model.Users, error) {
+func GetModUsers(c context.Context, params *model.ModUserParams) (*model.UserMods, error) {
 	return FromContext(c).GetModUsers(params)
 }
 
@@ -52,7 +52,7 @@ func DeleteModUser(c context.Context, params *model.ModUserParams) error {
 }
 
 // GetModTeams retrieves teams for a mod.
-func GetModTeams(c context.Context, params *model.ModTeamParams) (*model.Teams, error) {
+func GetModTeams(c context.Context, params *model.ModTeamParams) (*model.TeamMods, error) {
 	return FromContext(c).GetModTeams(params)
 }
 

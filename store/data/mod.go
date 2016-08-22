@@ -85,15 +85,19 @@ func (db *data) GetMod(id string) (*model.Mod, *gorm.DB) {
 }
 
 // GetModUsers retrieves users for a mod.
-func (db *data) GetModUsers(params *model.ModUserParams) (*model.Users, error) {
+func (db *data) GetModUsers(params *model.ModUserParams) (*model.UserMods, error) {
 	mod, _ := db.GetMod(params.Mod)
+	records := &model.UserMods{}
 
-	records := &model.Users{}
-
-	err := db.Model(
-		mod,
-	).Association(
-		"Users",
+	err := db.Where(
+		"mod_id = ?",
+		mod.ID,
+	).Model(
+		&model.UserMod{},
+	).Preload(
+		"Mod",
+	).Preload(
+		"User",
 	).Find(
 		records,
 	).Error
@@ -144,15 +148,19 @@ func (db *data) DeleteModUser(params *model.ModUserParams) error {
 }
 
 // GetModTeams retrieves teams for a mod.
-func (db *data) GetModTeams(params *model.ModTeamParams) (*model.Teams, error) {
+func (db *data) GetModTeams(params *model.ModTeamParams) (*model.TeamMods, error) {
 	mod, _ := db.GetMod(params.Mod)
+	records := &model.TeamMods{}
 
-	records := &model.Teams{}
-
-	err := db.Model(
-		mod,
-	).Association(
-		"Teams",
+	err := db.Where(
+		"mod_id = ?",
+		mod.ID,
+	).Model(
+		&model.TeamMod{},
+	).Preload(
+		"Mod",
+	).Preload(
+		"Team",
 	).Find(
 		records,
 	).Error

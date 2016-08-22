@@ -32,7 +32,7 @@ func GetClient(c context.Context, id string) (*model.Client, *gorm.DB) {
 }
 
 // GetClientPacks retrieves packs for a client.
-func GetClientPacks(c context.Context, params *model.ClientPackParams) (*model.Packs, error) {
+func GetClientPacks(c context.Context, params *model.ClientPackParams) (*model.ClientPacks, error) {
 	return FromContext(c).GetClientPacks(params)
 }
 

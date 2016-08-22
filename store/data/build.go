@@ -101,18 +101,24 @@ func (db *data) GetBuild(pack int, id string) (*model.Build, *gorm.DB) {
 }
 
 // GetBuildVersions retrieves versions for a build.
-func (db *data) GetBuildVersions(params *model.BuildVersionParams) (*model.Versions, error) {
+func (db *data) GetBuildVersions(params *model.BuildVersionParams) (*model.BuildVersions, error) {
 	pack, _ := db.GetPack(params.Pack)
 	build, _ := db.GetBuild(pack.ID, params.Build)
+	records := &model.BuildVersions{}
 
-	records := &model.Versions{}
-
-	err := db.Model(
-		build,
+	err := db.Where(
+		"build_id = ?",
+		build.ID,
+	).Model(
+		&model.BuildVersion{},
 	).Preload(
-		"Mod",
-	).Association(
-		"Versions",
+		"Build",
+	).Preload(
+		"Build.Pack",
+	).Preload(
+		"Version",
+	).Preload(
+		"Version.Mod",
 	).Find(
 		records,
 	).Error
