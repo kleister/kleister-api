@@ -207,7 +207,7 @@ func (meta *Meta) Initialize() error {
 				return ""
 			}
 		} else {
-			utils.ExitWithMsg("Unsupported meta name %v for resource %v", meta.FieldName, reflect.TypeOf(meta.Resource.GetResource().Value))
+			utils.ExitWithMsg("Meta %v is not supported for resource %v, no `Valuer` configured for it", meta.FieldName, reflect.TypeOf(meta.Resource.GetResource().Value))
 		}
 	}
 
@@ -273,7 +273,7 @@ func (meta *Meta) Initialize() error {
 
 				field := reflect.Indirect(reflect.ValueOf(resource)).FieldByName(fieldName)
 				if field.Kind() == reflect.Ptr {
-					if field.IsNil() {
+					if field.IsNil() && utils.ToString(value) != "" {
 						field.Set(utils.NewValue(field.Type()).Elem())
 					}
 

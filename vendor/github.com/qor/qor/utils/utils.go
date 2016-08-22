@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -121,7 +122,13 @@ func Stringify(object interface{}) string {
 	scope := gorm.Scope{Value: object}
 	for _, column := range []string{"Name", "Title", "Code"} {
 		if field, ok := scope.FieldByName(column); ok {
-			return fmt.Sprintf("%v", field.Field.Interface())
+			result := field.Field.Interface()
+			if valuer, ok := result.(driver.Valuer); ok {
+				if result, err := valuer.Value(); err == nil {
+					return fmt.Sprint(result)
+				}
+			}
+			return fmt.Sprint(result)
 		}
 	}
 
@@ -164,7 +171,7 @@ func ParseTagOption(str string) map[string]string {
 
 // ExitWithMsg debug error messages and print stack
 func ExitWithMsg(msg interface{}, value ...interface{}) {
-	fmt.Printf("\n"+filenameWithLineNum()+"\n%v\n", append([]interface{}{msg}, value...)...)
+	fmt.Printf("\n"+filenameWithLineNum()+"\n"+fmt.Sprint(msg)+"\n", value...)
 	debug.PrintStack()
 }
 
