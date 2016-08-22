@@ -257,6 +257,71 @@ func UserModAppend(c *gin.Context) {
 	)
 }
 
+// UserModPerm updates the user mod permission.
+func UserModPerm(c *gin.Context) {
+	form := &model.UserModParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	assigned := store.GetUserHasMod(
+		c,
+		form,
+	)
+
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Mod is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.UpdateUserMod(
+		c,
+		form,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to update permissions",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully updated permissions",
+		},
+	)
+}
+
 // UserModDelete deleted a mod from a user
 func UserModDelete(c *gin.Context) {
 	form := &model.UserModParams{}
@@ -418,6 +483,71 @@ func UserPackAppend(c *gin.Context) {
 	)
 }
 
+// UserPackPerm updates the user pack permission.
+func UserPackPerm(c *gin.Context) {
+	form := &model.UserPackParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	assigned := store.GetUserHasPack(
+		c,
+		form,
+	)
+
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Pack is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.UpdateUserPack(
+		c,
+		form,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to update permissions",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully updated permissions",
+		},
+	)
+}
+
 // UserPackDelete deleted a pack from a user
 func UserPackDelete(c *gin.Context) {
 	form := &model.UserPackParams{}
@@ -574,6 +704,71 @@ func UserTeamAppend(c *gin.Context) {
 		gin.H{
 			"status":  http.StatusOK,
 			"message": "Successfully appended team",
+		},
+	)
+}
+
+// UserTeamPerm updates the user team permission.
+func UserTeamPerm(c *gin.Context) {
+	form := &model.UserTeamParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	assigned := store.GetUserHasTeam(
+		c,
+		form,
+	)
+
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Team is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.UpdateUserTeam(
+		c,
+		form,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to update permissions",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully updated permissions",
 		},
 	)
 }

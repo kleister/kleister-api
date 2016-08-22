@@ -104,7 +104,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				minecraftBuilds.Use(session.SetMinecraft())
 
 				minecraftBuilds.GET("", session.MustMinecraftBuilds("display"), api.MinecraftBuildIndex)
-				minecraftBuilds.PATCH("", session.MustMinecraftBuilds("change"), api.MinecraftBuildAppend)
+				minecraftBuilds.POST("", session.MustMinecraftBuilds("change"), api.MinecraftBuildAppend)
 				minecraftBuilds.DELETE("", session.MustMinecraftBuilds("change"), api.MinecraftBuildDelete)
 			}
 
@@ -126,7 +126,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				forgeBuilds.Use(session.SetForge())
 
 				forgeBuilds.GET("", session.MustForgeBuilds("display"), api.ForgeBuildIndex)
-				forgeBuilds.PATCH("", session.MustForgeBuilds("change"), api.ForgeBuildAppend)
+				forgeBuilds.POST("", session.MustForgeBuilds("change"), api.ForgeBuildAppend)
 				forgeBuilds.DELETE("", session.MustForgeBuilds("change"), api.ForgeBuildDelete)
 			}
 
@@ -151,7 +151,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				packClients.Use(session.SetPack())
 
 				packClients.GET("", session.MustPackClients("display"), api.PackClientIndex)
-				packClients.PATCH("", session.MustPackClients("change"), api.PackClientAppend)
+				packClients.POST("", session.MustPackClients("change"), api.PackClientAppend)
 				packClients.DELETE("", session.MustPackClients("change"), api.PackClientDelete)
 			}
 
@@ -161,7 +161,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				packUsers.Use(session.SetPack())
 
 				packUsers.GET("", session.MustPackUsers("display"), api.PackUserIndex)
-				packUsers.PATCH("", session.MustPackUsers("change"), api.PackUserAppend)
+				packUsers.POST("", session.MustPackUsers("change"), api.PackUserAppend)
+				packUsers.PATCH("", session.MustPackUsers("change"), api.PackUserPerm)
 				packUsers.DELETE("", session.MustPackUsers("change"), api.PackUserDelete)
 			}
 
@@ -171,7 +172,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				packTeams.Use(session.SetPack())
 
 				packTeams.GET("", session.MustPackTeams("display"), api.PackTeamIndex)
-				packTeams.PATCH("", session.MustPackTeams("change"), api.PackTeamAppend)
+				packTeams.POST("", session.MustPackTeams("change"), api.PackTeamAppend)
+				packTeams.PATCH("", session.MustPackTeams("change"), api.PackTeamPerm)
 				packTeams.DELETE("", session.MustPackTeams("change"), api.PackTeamDelete)
 			}
 
@@ -198,7 +200,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				buildVersions.Use(session.SetBuild())
 
 				buildVersions.GET("", session.MustBuildVersions("display"), api.BuildVersionIndex)
-				buildVersions.PATCH("", session.MustBuildVersions("change"), api.BuildVersionAppend)
+				buildVersions.POST("", session.MustBuildVersions("change"), api.BuildVersionAppend)
 				buildVersions.DELETE("", session.MustBuildVersions("change"), api.BuildVersionDelete)
 			}
 
@@ -223,7 +225,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				modUsers.Use(session.SetMod())
 
 				modUsers.GET("", session.MustModUsers("display"), api.ModUserIndex)
-				modUsers.PATCH("", session.MustModUsers("change"), api.ModUserAppend)
+				modUsers.POST("", session.MustModUsers("change"), api.ModUserAppend)
+				modUsers.PATCH("", session.MustModUsers("change"), api.ModUserPerm)
 				modUsers.DELETE("", session.MustModUsers("change"), api.ModUserDelete)
 			}
 
@@ -233,7 +236,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				modTeams.Use(session.SetMod())
 
 				modTeams.GET("", session.MustModTeams("display"), api.ModTeamIndex)
-				modTeams.PATCH("", session.MustTeams("change"), api.ModTeamAppend)
+				modTeams.POST("", session.MustTeams("change"), api.ModTeamAppend)
+				modTeams.PATCH("", session.MustTeams("change"), api.ModTeamPerm)
 				modTeams.DELETE("", session.MustModTeams("change"), api.ModTeamDelete)
 			}
 
@@ -260,7 +264,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				versionBuilds.Use(session.SetVersion())
 
 				versionBuilds.GET("", session.MustVersionBuilds("display"), api.VersionBuildIndex)
-				versionBuilds.PATCH("", session.MustVersionBuilds("change"), api.VersionBuildAppend)
+				versionBuilds.POST("", session.MustVersionBuilds("change"), api.VersionBuildAppend)
 				versionBuilds.DELETE("", session.MustVersionBuilds("change"), api.VersionBuildDelete)
 			}
 
@@ -285,7 +289,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				clientPacks.Use(session.SetClient())
 
 				clientPacks.GET("", session.MustClientPacks("display"), api.ClientPackIndex)
-				clientPacks.PATCH("", session.MustClientPacks("change"), api.ClientPackAppend)
+				clientPacks.POST("", session.MustClientPacks("change"), api.ClientPackAppend)
 				clientPacks.DELETE("", session.MustClientPacks("change"), api.ClientPackDelete)
 			}
 
@@ -310,7 +314,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				userTeams.Use(session.SetUser())
 
 				userTeams.GET("", session.MustUserTeams("display"), api.UserTeamIndex)
-				userTeams.PATCH("", session.MustUserTeams("change"), api.UserTeamAppend)
+				userTeams.POST("", session.MustUserTeams("change"), api.UserTeamAppend)
+				userTeams.PATCH("", session.MustUserTeams("change"), api.UserTeamPerm)
 				userTeams.DELETE("", session.MustUserTeams("change"), api.UserTeamDelete)
 			}
 
@@ -320,7 +325,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				userMods.Use(session.SetUser())
 
 				userMods.GET("", session.MustUserMods("display"), api.UserModIndex)
-				userMods.PATCH("", session.MustUserMods("change"), api.UserModAppend)
+				userMods.POST("", session.MustUserMods("change"), api.UserModAppend)
+				userMods.PATCH("", session.MustUserMods("change"), api.UserModPerm)
 				userMods.DELETE("", session.MustUserMods("change"), api.UserModDelete)
 			}
 
@@ -330,7 +336,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				userPacks.Use(session.SetUser())
 
 				userPacks.GET("", session.MustUserPacks("display"), api.UserPackIndex)
-				userPacks.PATCH("", session.MustUserPacks("change"), api.UserPackAppend)
+				userPacks.POST("", session.MustUserPacks("change"), api.UserPackAppend)
+				userPacks.PATCH("", session.MustUserPacks("change"), api.UserPackPerm)
 				userPacks.DELETE("", session.MustUserPacks("change"), api.UserPackDelete)
 			}
 
@@ -355,7 +362,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				teamUsers.Use(session.SetTeam())
 
 				teamUsers.GET("", session.MustTeamUsers("display"), api.TeamUserIndex)
-				teamUsers.PATCH("", session.MustTeamUsers("change"), api.TeamUserAppend)
+				teamUsers.POST("", session.MustTeamUsers("change"), api.TeamUserAppend)
+				teamUsers.PATCH("", session.MustTeamUsers("change"), api.TeamUserPerm)
 				teamUsers.DELETE("", session.MustTeamUsers("change"), api.TeamUserDelete)
 			}
 
@@ -365,7 +373,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				teamPacks.Use(session.SetTeam())
 
 				teamPacks.GET("", session.MustTeamPacks("display"), api.TeamPackIndex)
-				teamPacks.PATCH("", session.MustTeamPacks("change"), api.TeamPackAppend)
+				teamPacks.POST("", session.MustTeamPacks("change"), api.TeamPackAppend)
+				teamPacks.PATCH("", session.MustTeamPacks("change"), api.TeamPackPerm)
 				teamPacks.DELETE("", session.MustTeamPacks("change"), api.TeamPackDelete)
 			}
 
@@ -375,7 +384,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				teamMods.Use(session.SetTeam())
 
 				teamMods.GET("", session.MustTeamMods("display"), api.TeamModIndex)
-				teamMods.PATCH("", session.MustTeamMods("change"), api.TeamModAppend)
+				teamMods.POST("", session.MustTeamMods("change"), api.TeamModAppend)
+				teamMods.PATCH("", session.MustTeamMods("change"), api.TeamModPerm)
 				teamMods.DELETE("", session.MustTeamMods("change"), api.TeamModDelete)
 			}
 

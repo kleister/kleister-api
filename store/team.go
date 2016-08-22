@@ -46,6 +46,11 @@ func CreateTeamUser(c context.Context, params *model.TeamUserParams) error {
 	return FromContext(c).CreateTeamUser(params)
 }
 
+// UpdateTeamUser updates the team user permission.
+func UpdateTeamUser(c context.Context, params *model.TeamUserParams) error {
+	return FromContext(c).UpdateTeamUser(params)
+}
+
 // DeleteTeamUser removes a user from a specific team.
 func DeleteTeamUser(c context.Context, params *model.TeamUserParams) error {
 	return FromContext(c).DeleteTeamUser(params)
@@ -66,6 +71,11 @@ func CreateTeamPack(c context.Context, params *model.TeamPackParams) error {
 	return FromContext(c).CreateTeamPack(params)
 }
 
+// UpdateTeamPack updates the team pack permission.
+func UpdateTeamPack(c context.Context, params *model.TeamPackParams) error {
+	return FromContext(c).UpdateTeamPack(params)
+}
+
 // DeleteTeamPack removes a pack from a specific team.
 func DeleteTeamPack(c context.Context, params *model.TeamPackParams) error {
 	return FromContext(c).DeleteTeamPack(params)
@@ -84,6 +94,11 @@ func GetTeamHasMod(c context.Context, params *model.TeamModParams) bool {
 // CreateTeamMod assigns a mod to a specific team.
 func CreateTeamMod(c context.Context, params *model.TeamModParams) error {
 	return FromContext(c).CreateTeamMod(params)
+}
+
+// UpdateTeamMod updates the team mod permission.
+func UpdateTeamMod(c context.Context, params *model.TeamModParams) error {
+	return FromContext(c).UpdateTeamMod(params)
 }
 
 // DeleteTeamMod removes a mod from a specific team.

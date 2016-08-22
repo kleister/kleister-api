@@ -134,6 +134,22 @@ func (db *data) CreateModUser(params *model.ModUserParams) error {
 	).Error
 }
 
+func (db *data) UpdateModUser(params *model.ModUserParams) error {
+	mod, _ := db.GetMod(params.Mod)
+	user, _ := db.GetUser(params.User)
+
+	return db.Model(
+		&model.UserMod{},
+	).Where(
+		"mod_id = ? AND user_id = ?",
+		mod.ID,
+		user.ID,
+	).Update(
+		"perm",
+		params.Perm,
+	).Error
+}
+
 func (db *data) DeleteModUser(params *model.ModUserParams) error {
 	mod, _ := db.GetMod(params.Mod)
 	user, _ := db.GetUser(params.User)
@@ -194,6 +210,22 @@ func (db *data) CreateModTeam(params *model.ModTeamParams) error {
 		"Teams",
 	).Append(
 		team,
+	).Error
+}
+
+func (db *data) UpdateModTeam(params *model.ModTeamParams) error {
+	mod, _ := db.GetMod(params.Mod)
+	team, _ := db.GetTeam(params.Team)
+
+	return db.Model(
+		&model.TeamMod{},
+	).Where(
+		"mod_id = ? AND team_id = ?",
+		mod.ID,
+		team.ID,
+	).Update(
+		"perm",
+		params.Perm,
 	).Error
 }
 

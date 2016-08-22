@@ -46,6 +46,11 @@ func CreateModUser(c context.Context, params *model.ModUserParams) error {
 	return FromContext(c).CreateModUser(params)
 }
 
+// UpdateModUser updates the mod user permission.
+func UpdateModUser(c context.Context, params *model.ModUserParams) error {
+	return FromContext(c).UpdateModUser(params)
+}
+
 // DeleteModUser removes a user from a specific mod.
 func DeleteModUser(c context.Context, params *model.ModUserParams) error {
 	return FromContext(c).DeleteModUser(params)
@@ -64,6 +69,11 @@ func GetModHasTeam(c context.Context, params *model.ModTeamParams) bool {
 // CreateModTeam assigns a team to a specific mod.
 func CreateModTeam(c context.Context, params *model.ModTeamParams) error {
 	return FromContext(c).CreateModTeam(params)
+}
+
+// UpdateModTeam updates the mod team permission.
+func UpdateModTeam(c context.Context, params *model.ModTeamParams) error {
+	return FromContext(c).UpdateModTeam(params)
 }
 
 // DeleteModTeam removes a team from a specific mod.

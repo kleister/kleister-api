@@ -66,6 +66,11 @@ func CreatePackUser(c context.Context, params *model.PackUserParams) error {
 	return FromContext(c).CreatePackUser(params)
 }
 
+// UpdatePackUser updates the pack user permission.
+func UpdatePackUser(c context.Context, params *model.PackUserParams) error {
+	return FromContext(c).UpdatePackUser(params)
+}
+
 // DeletePackUser removes a user from a specific pack.
 func DeletePackUser(c context.Context, params *model.PackUserParams) error {
 	return FromContext(c).DeletePackUser(params)
@@ -84,6 +89,11 @@ func GetPackHasTeam(c context.Context, params *model.PackTeamParams) bool {
 // CreatePackTeam assigns a team to a specific pack.
 func CreatePackTeam(c context.Context, params *model.PackTeamParams) error {
 	return FromContext(c).CreatePackTeam(params)
+}
+
+// UpdatePackTeam updates the pack team permission.
+func UpdatePackTeam(c context.Context, params *model.PackTeamParams) error {
+	return FromContext(c).UpdatePackTeam(params)
 }
 
 // DeletePackTeam removes a team from a specific pack.

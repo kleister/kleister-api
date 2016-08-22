@@ -501,6 +501,71 @@ func PackUserAppend(c *gin.Context) {
 	)
 }
 
+// PackUserPerm updates the pack user permission.
+func PackUserPerm(c *gin.Context) {
+	form := &model.PackUserParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	assigned := store.GetPackHasUser(
+		c,
+		form,
+	)
+
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "User is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.UpdatePackUser(
+		c,
+		form,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to update permissions",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully updated permissions",
+		},
+	)
+}
+
 // PackUserDelete deleted a user from a pack
 func PackUserDelete(c *gin.Context) {
 	form := &model.PackUserParams{}
@@ -657,6 +722,71 @@ func PackTeamAppend(c *gin.Context) {
 		gin.H{
 			"status":  http.StatusOK,
 			"message": "Successfully appended team",
+		},
+	)
+}
+
+// PackTeamPerm updates the pack team permission.
+func PackTeamPerm(c *gin.Context) {
+	form := &model.PackTeamParams{}
+
+	if err := c.BindJSON(&form); err != nil {
+		logrus.Warn("Failed to bind post data")
+		logrus.Warn(err)
+
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Failed to bind form data",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	assigned := store.GetPackHasTeam(
+		c,
+		form,
+	)
+
+	if assigned == false {
+		c.JSON(
+			http.StatusPreconditionFailed,
+			gin.H{
+				"status":  http.StatusPreconditionFailed,
+				"message": "Team is not assigned",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	err := store.UpdatePackTeam(
+		c,
+		form,
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to update permissions",
+			},
+		)
+
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"status":  http.StatusOK,
+			"message": "Successfully updated permissions",
 		},
 	)
 }

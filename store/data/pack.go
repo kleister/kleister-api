@@ -229,6 +229,22 @@ func (db *data) CreatePackUser(params *model.PackUserParams) error {
 	).Error
 }
 
+func (db *data) UpdatePackUser(params *model.PackUserParams) error {
+	pack, _ := db.GetPack(params.Pack)
+	user, _ := db.GetUser(params.User)
+
+	return db.Model(
+		&model.UserPack{},
+	).Where(
+		"pack_id = ? AND user_id = ?",
+		pack.ID,
+		user.ID,
+	).Update(
+		"perm",
+		params.Perm,
+	).Error
+}
+
 func (db *data) DeletePackUser(params *model.PackUserParams) error {
 	pack, _ := db.GetPack(params.Pack)
 	user, _ := db.GetUser(params.User)
@@ -289,6 +305,22 @@ func (db *data) CreatePackTeam(params *model.PackTeamParams) error {
 		"Teams",
 	).Append(
 		team,
+	).Error
+}
+
+func (db *data) UpdatePackTeam(params *model.PackTeamParams) error {
+	pack, _ := db.GetPack(params.Pack)
+	team, _ := db.GetTeam(params.Team)
+
+	return db.Model(
+		&model.TeamUser{},
+	).Where(
+		"pack_id = ? AND team_id = ?",
+		pack.ID,
+		team.ID,
+	).Update(
+		"perm",
+		params.Perm,
 	).Error
 }
 

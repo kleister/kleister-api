@@ -46,58 +46,68 @@ type ClientPackParams struct {
 type PackUserParams struct {
 	Pack string `json:"pack"`
 	User string `json:"user"`
+	Perm string `json:"perm"`
 }
 
 // UserPackParams represents the parameters to connect packs with users.
 type UserPackParams struct {
 	User string `json:"user"`
 	Pack string `json:"pack"`
+	Perm string `json:"perm"`
 }
 
 // ModUserParams represents the parameters to connect users with mods.
 type ModUserParams struct {
 	Mod  string `json:"mod"`
 	User string `json:"user"`
+	Perm string `json:"perm"`
 }
 
 // UserModParams represents the parameters to connect mods with users.
 type UserModParams struct {
 	User string `json:"user"`
 	Mod  string `json:"mod"`
+	Perm string `json:"perm"`
 }
 
 // ModTeamParams represents the parameters to connect teams with mods.
 type ModTeamParams struct {
 	Mod  string `json:"mod"`
 	Team string `json:"team"`
+	Perm string `json:"perm"`
 }
 
 // TeamModParams represents the parameters to connect mods with teams.
 type TeamModParams struct {
 	Team string `json:"team"`
 	Mod  string `json:"mod"`
+	Perm string `json:"perm"`
 }
 
 // PackTeamParams represents the parameters to connect teams with packs.
 type PackTeamParams struct {
 	Pack string `json:"pack"`
 	Team string `json:"team"`
+	Perm string `json:"perm"`
 }
 
 // TeamPackParams represents the parameters to connect packs with teams.
 type TeamPackParams struct {
 	Team string `json:"team"`
 	Pack string `json:"pack"`
+	Perm string `json:"perm"`
 }
 
 // UserTeamParams represents the parameters to connect teams with users.
 type UserTeamParams struct {
 	User string `json:"user"`
 	Team string `json:"team"`
+	Perm string `json:"perm"`
 }
 
 // TeamUserParams represents the parameters to connect users with teams.
 type TeamUserParams struct {
 	Team string `json:"team"`
 	User string `json:"user"`
+	Perm string `json:"perm"`
 }

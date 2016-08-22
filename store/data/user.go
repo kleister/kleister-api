@@ -134,6 +134,22 @@ func (db *data) CreateUserMod(params *model.UserModParams) error {
 	).Error
 }
 
+func (db *data) UpdateUserMod(params *model.UserModParams) error {
+	user, _ := db.GetUser(params.User)
+	mod, _ := db.GetMod(params.Mod)
+
+	return db.Model(
+		&model.UserMod{},
+	).Where(
+		"user_id = ? AND mod_id = ?",
+		user.ID,
+		mod.ID,
+	).Update(
+		"perm",
+		params.Perm,
+	).Error
+}
+
 func (db *data) DeleteUserMod(params *model.UserModParams) error {
 	user, _ := db.GetUser(params.User)
 	mod, _ := db.GetMod(params.Mod)
@@ -197,6 +213,22 @@ func (db *data) CreateUserPack(params *model.UserPackParams) error {
 	).Error
 }
 
+func (db *data) UpdateUserPack(params *model.UserPackParams) error {
+	user, _ := db.GetUser(params.User)
+	pack, _ := db.GetPack(params.Pack)
+
+	return db.Model(
+		&model.UserPack{},
+	).Where(
+		"user_id = ? AND pack_id = ?",
+		user.ID,
+		pack.ID,
+	).Update(
+		"perm",
+		params.Perm,
+	).Error
+}
+
 func (db *data) DeleteUserPack(params *model.UserPackParams) error {
 	user, _ := db.GetUser(params.User)
 	pack, _ := db.GetPack(params.Pack)
@@ -257,6 +289,22 @@ func (db *data) CreateUserTeam(params *model.UserTeamParams) error {
 		"Teams",
 	).Append(
 		team,
+	).Error
+}
+
+func (db *data) UpdateUserTeam(params *model.UserTeamParams) error {
+	user, _ := db.GetUser(params.User)
+	team, _ := db.GetTeam(params.Team)
+
+	return db.Model(
+		&model.TeamUser{},
+	).Where(
+		"user_id = ? AND team_id = ?",
+		user.ID,
+		team.ID,
+	).Update(
+		"perm",
+		params.Perm,
 	).Error
 }
 

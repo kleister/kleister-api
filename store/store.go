@@ -89,6 +89,9 @@ type Store interface {
 	// CreateModUser assigns a user to a specific mod.
 	CreateModUser(*model.ModUserParams) error
 
+	// UpdateModUser updates the mod user permission.
+	UpdateModUser(*model.ModUserParams) error
+
 	// DeleteModUser removes a user from a specific mod.
 	DeleteModUser(*model.ModUserParams) error
 
@@ -100,6 +103,9 @@ type Store interface {
 
 	// CreateModTeam assigns a team to a specific mod.
 	CreateModTeam(*model.ModTeamParams) error
+
+	// UpdateModTeam updates the mod team permission.
+	UpdateModTeam(*model.ModTeamParams) error
 
 	// DeleteModTeam removes a team from a specific mod.
 	DeleteModTeam(*model.ModTeamParams) error
@@ -140,6 +146,9 @@ type Store interface {
 	// CreatePackUser assigns a user to a specific pack.
 	CreatePackUser(*model.PackUserParams) error
 
+	// UpdatePackUser updates the pack user permission.
+	UpdatePackUser(*model.PackUserParams) error
+
 	// DeletePackUser removes a user from a specific pack.
 	DeletePackUser(*model.PackUserParams) error
 
@@ -151,6 +160,9 @@ type Store interface {
 
 	// CreatePackTeam assigns a team to a specific pack.
 	CreatePackTeam(*model.PackTeamParams) error
+
+	// UpdatePackTeam updates the pack team permission.
+	UpdatePackTeam(*model.PackTeamParams) error
 
 	// DeletePackTeam removes a team from a specific pack.
 	DeletePackTeam(*model.PackTeamParams) error
@@ -179,6 +191,9 @@ type Store interface {
 	// CreateUserMod assigns a mod to a specific user.
 	CreateUserMod(*model.UserModParams) error
 
+	// UpdateUserMod updates the user mod permission.
+	UpdateUserMod(*model.UserModParams) error
+
 	// DeleteUserMod removes a mod from a specific user.
 	DeleteUserMod(*model.UserModParams) error
 
@@ -191,6 +206,9 @@ type Store interface {
 	// CreateUserPack assigns a pack to a specific user.
 	CreateUserPack(*model.UserPackParams) error
 
+	// UpdateUserPack updates the user pack permission.
+	UpdateUserPack(*model.UserPackParams) error
+
 	// DeleteUserPack removes a pack from a specific user.
 	DeleteUserPack(*model.UserPackParams) error
 
@@ -202,6 +220,9 @@ type Store interface {
 
 	// CreateUserTeam assigns a team to a specific user.
 	CreateUserTeam(*model.UserTeamParams) error
+
+	// UpdateUserTeam updates the user team permission.
+	UpdateUserTeam(*model.UserTeamParams) error
 
 	// DeleteUserTeam removes a team from a specific user.
 	DeleteUserTeam(*model.UserTeamParams) error
@@ -257,6 +278,9 @@ type Store interface {
 	// CreateTeamUser assigns a user to a specific team.
 	CreateTeamUser(*model.TeamUserParams) error
 
+	// UpdateTeamUser updates the team user permission.
+	UpdateTeamUser(*model.TeamUserParams) error
+
 	// DeleteTeamUser removes a user from a specific team.
 	DeleteTeamUser(*model.TeamUserParams) error
 
@@ -269,6 +293,9 @@ type Store interface {
 	// CreateTeamPack assigns a pack to a specific team.
 	CreateTeamPack(*model.TeamPackParams) error
 
+	// UpdateTeamPack updates the team pack permission.
+	UpdateTeamPack(*model.TeamPackParams) error
+
 	// DeleteTeamPack removes a pack from a specific team.
 	DeleteTeamPack(*model.TeamPackParams) error
 
@@ -280,6 +307,9 @@ type Store interface {
 
 	// CreateTeamMod assigns a mod to a specific team.
 	CreateTeamMod(*model.TeamModParams) error
+
+	// UpdateTeamMod updates the team mod permission.
+	UpdateTeamMod(*model.TeamModParams) error
 
 	// DeleteTeamMod removes a mod from a specific team.
 	DeleteTeamMod(*model.TeamModParams) error
@@ -326,9 +356,12 @@ type Store interface {
 	// DeleteForgeBuild removes a build from a specific forge.
 	DeleteForgeBuild(*model.ForgeBuildParams) error
 
+	// GetSolderPacks retrieves all available packs optimized for the solder compatible API.
 	GetSolderPacks() (*model.Packs, error)
 
+	// GetSolderPack retrieves a specific pack optimized for the solder compatible API.
 	GetSolderPack(string, string) (*model.Pack, error)
 
+	// GetSolderBuild retrieves a specific build optimized for the solder compatible API.
 	GetSolderBuild(string, string, string) (*model.Build, error)
 }
