@@ -115,12 +115,11 @@ func (db *data) CreateClientPack(params *model.ClientPackParams) error {
 	client, _ := db.GetClient(params.Client)
 	pack, _ := db.GetPack(params.Pack)
 
-	return db.Model(
-		client,
-	).Association(
-		"Packs",
-	).Append(
-		pack,
+	return db.Create(
+		&model.ClientPack{
+			ClientID: client.ID,
+			PackID:   pack.ID,
+		},
 	).Error
 }
 

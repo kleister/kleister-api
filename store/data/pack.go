@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 
@@ -157,12 +158,11 @@ func (db *data) CreatePackClient(params *model.PackClientParams) error {
 	pack, _ := db.GetPack(params.Pack)
 	client, _ := db.GetClient(params.Client)
 
-	return db.Model(
-		pack,
-	).Association(
-		"Clients",
-	).Append(
-		client,
+	return db.Create(
+		&model.ClientPack{
+			PackID:   pack.ID,
+			ClientID: client.ID,
+		},
 	).Error
 }
 
@@ -220,13 +220,19 @@ func (db *data) CreatePackUser(params *model.PackUserParams) error {
 	pack, _ := db.GetPack(params.Pack)
 	user, _ := db.GetUser(params.User)
 
-	return db.Model(
-		pack,
-	).Association(
-		"Users",
-	).Append(
-		user,
-	).Error
+	for _, perm := range []string{"user", "admin", "owner"} {
+		if params.Perm == perm {
+			return db.Create(
+				&model.UserPack{
+					PackID: pack.ID,
+					UserID: user.ID,
+					Perm:   params.Perm,
+				},
+			).Error
+		}
+	}
+
+	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
 func (db *data) UpdatePackUser(params *model.PackUserParams) error {
@@ -299,13 +305,19 @@ func (db *data) CreatePackTeam(params *model.PackTeamParams) error {
 	pack, _ := db.GetPack(params.Pack)
 	team, _ := db.GetTeam(params.Team)
 
-	return db.Model(
-		pack,
-	).Association(
-		"Teams",
-	).Append(
-		team,
-	).Error
+	for _, perm := range []string{"user", "admin", "owner"} {
+		if params.Perm == perm {
+			return db.Create(
+				&model.TeamPack{
+					PackID: pack.ID,
+					TeamID: team.ID,
+					Perm:   params.Perm,
+				},
+			).Error
+		}
+	}
+
+	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
 func (db *data) UpdatePackTeam(params *model.PackTeamParams) error {

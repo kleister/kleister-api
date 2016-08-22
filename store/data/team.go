@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 
@@ -125,13 +126,19 @@ func (db *data) CreateTeamUser(params *model.TeamUserParams) error {
 	team, _ := db.GetTeam(params.Team)
 	user, _ := db.GetUser(params.User)
 
-	return db.Model(
-		team,
-	).Association(
-		"Users",
-	).Append(
-		user,
-	).Error
+	for _, perm := range []string{"user", "admin", "owner"} {
+		if params.Perm == perm {
+			return db.Create(
+				&model.TeamUser{
+					TeamID: team.ID,
+					UserID: user.ID,
+					Perm:   params.Perm,
+				},
+			).Error
+		}
+	}
+
+	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
 func (db *data) UpdateTeamUser(params *model.TeamUserParams) error {
@@ -204,13 +211,19 @@ func (db *data) CreateTeamPack(params *model.TeamPackParams) error {
 	team, _ := db.GetTeam(params.Team)
 	pack, _ := db.GetPack(params.Pack)
 
-	return db.Model(
-		team,
-	).Association(
-		"Packs",
-	).Append(
-		pack,
-	).Error
+	for _, perm := range []string{"user", "admin", "owner"} {
+		if params.Perm == perm {
+			return db.Create(
+				&model.TeamPack{
+					TeamID: team.ID,
+					PackID: pack.ID,
+					Perm:   params.Perm,
+				},
+			).Error
+		}
+	}
+
+	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
 func (db *data) UpdateTeamPack(params *model.TeamPackParams) error {
@@ -283,13 +296,19 @@ func (db *data) CreateTeamMod(params *model.TeamModParams) error {
 	team, _ := db.GetTeam(params.Team)
 	mod, _ := db.GetMod(params.Mod)
 
-	return db.Model(
-		team,
-	).Association(
-		"Mods",
-	).Append(
-		mod,
-	).Error
+	for _, perm := range []string{"user", "admin", "owner"} {
+		if params.Perm == perm {
+			return db.Create(
+				&model.TeamMod{
+					TeamID: team.ID,
+					ModID:  mod.ID,
+					Perm:   params.Perm,
+				},
+			).Error
+		}
+	}
+
+	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
 func (db *data) UpdateTeamMod(params *model.TeamModParams) error {

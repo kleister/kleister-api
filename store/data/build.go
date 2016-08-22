@@ -150,12 +150,11 @@ func (db *data) CreateBuildVersion(params *model.BuildVersionParams) error {
 	mod, _ := db.GetMod(params.Mod)
 	version, _ := db.GetVersion(mod.ID, params.Version)
 
-	return db.Model(
-		build,
-	).Association(
-		"Versions",
-	).Append(
-		version,
+	return db.Create(
+		&model.BuildVersion{
+			BuildID:   build.ID,
+			VersionID: version.ID,
+		},
 	).Error
 }
 

@@ -146,12 +146,11 @@ func (db *data) CreateVersionBuild(params *model.VersionBuildParams) error {
 	pack, _ := db.GetPack(params.Pack)
 	build, _ := db.GetBuild(pack.ID, params.Build)
 
-	return db.Model(
-		version,
-	).Association(
-		"Builds",
-	).Append(
-		build,
+	return db.Create(
+		&model.BuildVersion{
+			VersionID: version.ID,
+			BuildID:   build.ID,
+		},
 	).Error
 }
 
