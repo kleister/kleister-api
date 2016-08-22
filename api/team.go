@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -140,12 +141,26 @@ func TeamCreate(c *gin.Context) {
 		return
 	}
 
-	err := store.CreateTeam(
-		c,
-		record,
-	)
+	if err := store.CreateTeam(c, record); err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err.Error(),
+			},
+		)
 
-	if err != nil {
+		c.Abort()
+		return
+	}
+
+	params := &model.TeamUserParams{
+		Team: strconv.Itoa(record.ID),
+		User: strconv.Itoa(session.Current(c).ID),
+		Perm: "owner",
+	}
+
+	if err := store.CreateTeamUser(c, params); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{

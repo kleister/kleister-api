@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -140,12 +141,26 @@ func ModCreate(c *gin.Context) {
 		return
 	}
 
-	err := store.CreateMod(
-		c,
-		record,
-	)
+	if err := store.CreateMod(c, record); err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"status":  http.StatusBadRequest,
+				"message": err.Error(),
+			},
+		)
 
-	if err != nil {
+		c.Abort()
+		return
+	}
+
+	params := &model.ModUserParams{
+		Mod:  strconv.Itoa(record.ID),
+		User: strconv.Itoa(session.Current(c).ID),
+		Perm: "owner",
+	}
+
+	if err := store.CreateModUser(c, params); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
