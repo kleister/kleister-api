@@ -27,10 +27,9 @@ clean:
 deps:
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/mitchellh/gox
-	go get -u github.com/sanbornm/go-selfupdate
+	go get -u github.com/govend/govend
 
 vendor:
-	go get -u github.com/govend/govend
 	govend -v
 
 update:
@@ -80,15 +79,6 @@ latest-copy:
 latest-check:
 	cd $(DIST)/latest; $(foreach file,$(wildcard $(DIST)/latest/*),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;)
 
-updater: release-build updater-copy updater-push
+publish: release latest
 
-updater-copy:
-	mkdir -p $(DIST)/updater
-	$(foreach file,$(wildcard $(BIN)/$(EXECUTABLE)-*),cp $(file) $(DIST)/updater/$(word 3,$(subst -, ,$(notdir $(file))))-$(subst .exe,,$(word 4,$(subst -, ,$(notdir $(file)))));)
-
-updater-push:
-	go-selfupdate -o $(DIST)/publish $(DIST)/updater $(VERSION)
-
-publish: release latest updater
-
-.PHONY: all clean deps vendor update generate fmt vet lint test build release latest updater publish
+.PHONY: all clean deps vendor update generate fmt vet lint test build release latest publish

@@ -66,18 +66,6 @@ pipeline:
   #     event: tag
   #     branch: refs/tags/*
 
-  # rsync:
-  #   image: plugins/rsync
-  #   user: deploy
-  #   host: dl.webhippie.de
-  #   source: dist/publish/
-  #   target: /usr/share/webapps/dl/public_html/kleister-api/updates
-  #   recursive: true
-  #   delete: false
-  #   when:
-  #     event: tag
-  #     branch: refs/tags/*
-
   # github_release:
   #   image: plugins/github-release
   #   files:
