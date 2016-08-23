@@ -12,8 +12,9 @@ package acme
 import (
 	"bytes"
 	"crypto"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
-	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
@@ -197,10 +198,7 @@ func (c *Client) FetchCert(ctx context.Context, url string, bundle bool) ([][]by
 		if res.StatusCode > 299 {
 			return nil, responseError(res)
 		}
-		d, err := retryAfter(res.Header.Get("retry-after"))
-		if err != nil {
-			d = 3 * time.Second
-		}
+		d := retryAfter(res.Header.Get("retry-after"), 3*time.Second)
 		select {
 		case <-time.After(d):
 			// retry
@@ -301,6 +299,10 @@ func (c *Client) UpdateReg(ctx context.Context, a *Account) (*Account, error) {
 // Authorize performs the initial step in an authorization flow.
 // The caller will then need to choose from and perform a set of returned
 // challenges using c.Accept in order to successfully complete authorization.
+//
+// If an authorization has been previously granted, the CA may return
+// a valid authorization (Authorization.Status is StatusValid). If so, the caller
+// need not fulfill any challenge and can proceed to requesting a certificate.
 func (c *Client) Authorize(ctx context.Context, domain string) (*Authorization, error) {
 	if _, err := c.Discover(ctx); err != nil {
 		return nil, err
@@ -330,16 +332,17 @@ func (c *Client) Authorize(ctx context.Context, domain string) (*Authorization, 
 	if err := json.NewDecoder(res.Body).Decode(&v); err != nil {
 		return nil, fmt.Errorf("acme: invalid response: %v", err)
 	}
-	if v.Status != StatusPending {
+	if v.Status != StatusPending && v.Status != StatusValid {
 		return nil, fmt.Errorf("acme: unexpected status: %s", v.Status)
 	}
 	return v.authorization(res.Header.Get("Location")), nil
 }
 
-// GetAuthz retrieves the current status of an authorization flow.
+// GetAuthorization retrieves an authorization identified by the given URL.
 //
-// A client typically polls an authz status using this method.
-func (c *Client) GetAuthz(ctx context.Context, url string) (*Authorization, error) {
+// If a caller needs to poll an authorization until its status is final,
+// see the WaitAuthorization method.
+func (c *Client) GetAuthorization(ctx context.Context, url string) (*Authorization, error) {
 	res, err := ctxhttp.Get(ctx, c.HTTPClient, url)
 	if err != nil {
 		return nil, err
@@ -353,6 +356,63 @@ func (c *Client) GetAuthz(ctx context.Context, url string) (*Authorization, erro
 		return nil, fmt.Errorf("acme: invalid response: %v", err)
 	}
 	return v.authorization(url), nil
+}
+
+// WaitAuthorization polls an authorization at the given URL
+// until it is in one of the final states, StatusValid or StatusInvalid,
+// or the context is done.
+//
+// It returns a non-nil Authorization only if its Status is StatusValid.
+// In all other cases WaitAuthorization returns an error.
+// If the Status is StatusInvalid, the returned error is ErrAuthorizationFailed.
+func (c *Client) WaitAuthorization(ctx context.Context, url string) (*Authorization, error) {
+	var count int
+	sleep := func(v string, inc int) error {
+		count += inc
+		d := backoff(count, 10*time.Second)
+		d = retryAfter(v, d)
+		wakeup := time.NewTimer(d)
+		defer wakeup.Stop()
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-wakeup.C:
+			return nil
+		}
+	}
+
+	for {
+		res, err := ctxhttp.Get(ctx, c.HTTPClient, url)
+		if err != nil {
+			return nil, err
+		}
+		retry := res.Header.Get("retry-after")
+		if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusAccepted {
+			res.Body.Close()
+			if err := sleep(retry, 1); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		var raw wireAuthz
+		err = json.NewDecoder(res.Body).Decode(&raw)
+		res.Body.Close()
+		if err != nil {
+			if err := sleep(retry, 0); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		if raw.Status == StatusValid {
+			return raw.authorization(url), nil
+		}
+		if raw.Status == StatusInvalid {
+			return nil, ErrAuthorizationFailed
+		}
+		if err := sleep(retry, 0); err != nil {
+			return nil, err
+		}
+	}
 }
 
 // GetChallenge retrieves the current status of an challenge.
@@ -694,15 +754,41 @@ func linkHeader(h http.Header, rel string) []string {
 	return links
 }
 
-func retryAfter(v string) (time.Duration, error) {
+// retryAfter parses a Retry-After HTTP header value,
+// trying to convert v into an int (seconds) or use http.ParseTime otherwise.
+// It returns d if v cannot be parsed.
+func retryAfter(v string, d time.Duration) time.Duration {
 	if i, err := strconv.Atoi(v); err == nil {
-		return time.Duration(i) * time.Second, nil
+		return time.Duration(i) * time.Second
 	}
 	t, err := http.ParseTime(v)
 	if err != nil {
-		return 0, err
+		return d
 	}
-	return t.Sub(timeNow()), nil
+	return t.Sub(timeNow())
+}
+
+// backoff computes a duration after which an n+1 retry iteration should occur
+// using truncated exponential backoff algorithm.
+//
+// The n argument is always bounded between 0 and 30.
+// The max argument defines upper bound for the returned value.
+func backoff(n int, max time.Duration) time.Duration {
+	if n < 0 {
+		n = 0
+	}
+	if n > 30 {
+		n = 30
+	}
+	var d time.Duration
+	if x, err := rand.Int(rand.Reader, big.NewInt(1000)); err == nil {
+		d = time.Duration(x.Int64()) * time.Millisecond
+	}
+	d += time.Duration(1<<uint(n)) * time.Second
+	if d > max {
+		return max
+	}
+	return d
 }
 
 // keyAuth generates a key authorization string for a given token.
@@ -717,7 +803,7 @@ func keyAuth(pub crypto.PublicKey, token string) (string, error) {
 // tlsChallengeCert creates a temporary certificate for TLS-SNI challenges
 // with the given SANs.
 func tlsChallengeCert(san ...string) (tls.Certificate, error) {
-	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return tls.Certificate{}, err
 	}

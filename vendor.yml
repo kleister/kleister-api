@@ -5,6 +5,8 @@ vendors:
   rev: 08a8a7c27e3d058a8989316a850daad1c10bf4ab
 - path: github.com/asaskevich/govalidator
   rev: 593d64559f7600f29581a3ee42177f5dbded27a9
+- path: github.com/aws/aws-sdk-go
+  rev: 1f24fa1f3e1eabad0d613513d2adf3c4ec58e667
 - path: github.com/davecgh/go-spew
   rev: 6cf5744a041a0022271cefed95ba843f6d87fd51
 - path: github.com/denisenkom/go-mssqldb
@@ -14,15 +16,19 @@ vendors:
 - path: github.com/drone/gin-location
   rev: e1daf416045dd20ce962f566fdc79aee41111f21
 - path: github.com/elazarl/go-bindata-assetfs
-  rev: e1a2a7ec64b07d04ac9ebb072404fe8b7b60de1b
+  rev: 9a6736ed45b44bf3835afeebb3034b57ed329f3e
 - path: github.com/erikstmartin/go-testdb
   rev: 8d10e4a1bae52cd8b81ffdec3445890d6dccab3d
 - path: github.com/gin-gonic/gin
   rev: f931d1ea80ae95a6fc739213cdd9399bd2967fb6
+- path: github.com/go-ini/ini
+  rev: a2610b3a793cfa7fdf0b07038068af5ddc12aba1
 - path: github.com/go-sql-driver/mysql
   rev: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
 - path: github.com/golang/protobuf
   rev: f592bd283e9ef86337a432eb50e592278c3d534d
+- path: github.com/gopherjs/gopherjs
+  rev: 45518c130e5bd1525f20110830a4986365a153de
 - path: github.com/gorilla/securecookie
   rev: c13558c2b1c44da35e0eb043053609a5ba3a1f19
 - path: github.com/jinzhu/gorm
@@ -31,10 +37,10 @@ vendors:
   rev: 74387dc39a75e970e7a3ae6a3386b5bd2e5c5cff
 - path: github.com/jinzhu/now
   rev: d9861969c7a7e84746d341c09020c2ef8a617f8f
-- path: github.com/kardianos/osext
-  rev: 29ae4ffbc9a6fe9fb2bc5029050ce6996ea1d3bc
-- path: github.com/kr/binarydist
-  rev: 9955b0ab8708602d411341e55fffd7e0700f86bd
+- path: github.com/jmespath/go-jmespath
+  rev: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
+- path: github.com/jtolds/gls
+  rev: 8ddce2a84170772b95dd5d576c48d517b22cac63
 - path: github.com/lib/pq
   rev: 80f8150043c80fb52dee6bc863a709cdac7ec8f8
 - path: github.com/manucorporat/sse
@@ -47,24 +53,24 @@ vendors:
   rev: 57710b0229272260f1fa2b31838a0dc4baa22a0a
 - path: github.com/pmezard/go-difflib
   rev: 792786c7400a136282c1664665ae0a8db921c6c2
-- path: github.com/qor/inflection
-  rev: 8f4d3a0d04ce0b7c0cf3126fb98524246d00d102
 - path: github.com/qor/qor
   rev: 4f88b0f73dff67d696047118283329fde8d35019
 - path: github.com/qor/validations
   rev: aa83180452b83a2325f13a30a2a8f4740c43c792
-- path: github.com/sanbornm/go-selfupdate
-  rev: 8d409ca53a740932c8e3a6cd1d8ea4c111f5e539
+- path: github.com/smartystreets/assertions
+  rev: 2063fd1cc7c975db70502811a34b06ad034ccdf2
+- path: github.com/smartystreets/goconvey
+  rev: 4622128e06c77c0174e17a7f0ed2db19a989b473
 - path: github.com/stretchr/testify
   rev: d77da356e56a7428ad25149ca77381849a6a5232
 - path: github.com/ungerik/go-gravatar
   rev: 6ab22628222adee0d853df36a2f0783f56ea55ec
 - path: github.com/urfave/cli
-  rev: 168c95418e66e019fe17b8f4f5c45aa62ff80e23
+  rev: 05fe449c81eb7305a34e9253c321c960a1c5e057
 - path: github.com/vincent-petithory/dataurl
   rev: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - path: golang.org/x/crypto
-  rev: b3cc7317554b3e708b116d997899e612bab100d6
+  rev: b35ccbc95a0eaae49fb65c5d627cb7149ed8d1ab
 - path: golang.org/x/net
   rev: 7394c112eae4dba7e96bfcfe738e6373d61772b4
 - path: golang.org/x/sys
@@ -75,7 +81,5 @@ vendors:
   rev: 4f4dfbc7d1c48336cf93399deae81aa9067e88af
 - path: gopkg.in/go-playground/validator.v8
   rev: 5f57d2222ad794d0dffb07e664ea05e2ee07d60c
-- path: gopkg.in/inconshreveable/go-update.v0
-  rev: d8b0b1d421aa1cbf392c05869f8abbc669bb7066
 - path: gopkg.in/yaml.v2
   rev: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
