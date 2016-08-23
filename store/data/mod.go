@@ -30,6 +30,13 @@ func (db *data) GetMods() (*model.Mods, error) {
 
 // CreateMod creates a new mod.
 func (db *data) CreateMod(record *model.Mod, current *model.User) error {
+	record.UserMods = model.UserMods{
+		&model.UserMod{
+			UserID: current.ID,
+			Perm:   "owner",
+		},
+	}
+
 	return db.Create(
 		record,
 	).Error

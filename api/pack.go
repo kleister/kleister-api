@@ -220,26 +220,12 @@ func PackCreate(c *gin.Context) {
 		return
 	}
 
-	if err := store.CreatePack(c, record); err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"status":  http.StatusBadRequest,
-				"message": err.Error(),
-			},
-		)
+	err := store.CreatePack(
+		c,
+		record,
+	)
 
-		c.Abort()
-		return
-	}
-
-	params := &model.PackUserParams{
-		Pack: strconv.Itoa(record.ID),
-		User: strconv.Itoa(session.Current(c).ID),
-		Perm: "owner",
-	}
-
-	if err := store.CreatePackUser(c, params); err != nil {
+	if err != nil {
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{

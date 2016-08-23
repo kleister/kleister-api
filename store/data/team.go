@@ -30,6 +30,13 @@ func (db *data) GetTeams() (*model.Teams, error) {
 
 // CreateTeam creates a new team.
 func (db *data) CreateTeam(record *model.Team, current *model.User) error {
+	record.TeamUsers = model.TeamUsers{
+		&model.TeamUser{
+			UserID: current.ID,
+			Perm:   "owner",
+		},
+	}
+
 	return db.Create(
 		record,
 	).Error

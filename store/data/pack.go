@@ -46,6 +46,13 @@ func (db *data) GetPacks() (*model.Packs, error) {
 
 // CreatePack creates a new pack.
 func (db *data) CreatePack(record *model.Pack, current *model.User) error {
+	record.UserPacks = model.UserPacks{
+		&model.UserPack{
+			UserID: current.ID,
+			Perm:   "owner",
+		},
+	}
+
 	return db.Create(
 		record,
 	).Error
