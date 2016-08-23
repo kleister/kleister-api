@@ -13,17 +13,17 @@ func GetUsers(c context.Context) (*model.Users, error) {
 
 // CreateUser creates a new user.
 func CreateUser(c context.Context, record *model.User) error {
-	return FromContext(c).CreateUser(record)
+	return FromContext(c).CreateUser(record, Current(c))
 }
 
 // UpdateUser updates a user.
 func UpdateUser(c context.Context, record *model.User) error {
-	return FromContext(c).UpdateUser(record)
+	return FromContext(c).UpdateUser(record, Current(c))
 }
 
 // DeleteUser deletes a user.
 func DeleteUser(c context.Context, record *model.User) error {
-	return FromContext(c).DeleteUser(record)
+	return FromContext(c).DeleteUser(record, Current(c))
 }
 
 // GetUser retrieves a specific user from the database.
@@ -43,17 +43,17 @@ func GetUserHasMod(c context.Context, params *model.UserModParams) bool {
 
 // CreateUserMod assigns a mod to a specific user.
 func CreateUserMod(c context.Context, params *model.UserModParams) error {
-	return FromContext(c).CreateUserMod(params)
+	return FromContext(c).CreateUserMod(params, Current(c))
 }
 
 // UpdateUserMod updates the user mod permission.
 func UpdateUserMod(c context.Context, params *model.UserModParams) error {
-	return FromContext(c).UpdateUserMod(params)
+	return FromContext(c).UpdateUserMod(params, Current(c))
 }
 
 // DeleteUserMod removes a mod from a specific user.
 func DeleteUserMod(c context.Context, params *model.UserModParams) error {
-	return FromContext(c).DeleteUserMod(params)
+	return FromContext(c).DeleteUserMod(params, Current(c))
 }
 
 // GetUserPacks retrieves packs for a user.
@@ -68,17 +68,17 @@ func GetUserHasPack(c context.Context, params *model.UserPackParams) bool {
 
 // CreateUserPack assigns a pack to a specific user.
 func CreateUserPack(c context.Context, params *model.UserPackParams) error {
-	return FromContext(c).CreateUserPack(params)
+	return FromContext(c).CreateUserPack(params, Current(c))
 }
 
 // UpdateUserPack updates the user mod permission.
 func UpdateUserPack(c context.Context, params *model.UserPackParams) error {
-	return FromContext(c).UpdateUserPack(params)
+	return FromContext(c).UpdateUserPack(params, Current(c))
 }
 
 // DeleteUserPack removes a pack from a specific user.
 func DeleteUserPack(c context.Context, params *model.UserPackParams) error {
-	return FromContext(c).DeleteUserPack(params)
+	return FromContext(c).DeleteUserPack(params, Current(c))
 }
 
 // GetUserTeams retrieves teams for a user.
@@ -93,15 +93,15 @@ func GetUserHasTeam(c context.Context, params *model.UserTeamParams) bool {
 
 // CreateUserTeam assigns a team to a specific user.
 func CreateUserTeam(c context.Context, params *model.UserTeamParams) error {
-	return FromContext(c).CreateUserTeam(params)
+	return FromContext(c).CreateUserTeam(params, Current(c))
 }
 
 // UpdateUserTeam updates the user team permission.
 func UpdateUserTeam(c context.Context, params *model.UserTeamParams) error {
-	return FromContext(c).UpdateUserTeam(params)
+	return FromContext(c).UpdateUserTeam(params, Current(c))
 }
 
 // DeleteUserTeam removes a team from a specific user.
 func DeleteUserTeam(c context.Context, params *model.UserTeamParams) error {
-	return FromContext(c).DeleteUserTeam(params)
+	return FromContext(c).DeleteUserTeam(params, Current(c))
 }

@@ -14,7 +14,7 @@ func GetForges(c context.Context) (*model.Forges, error) {
 
 // SyncForge creates or updates a forge record.
 func SyncForge(c context.Context, number *forge.Number) (*model.Forge, error) {
-	return FromContext(c).SyncForge(number)
+	return FromContext(c).SyncForge(number, Current(c))
 }
 
 // GetForge retrieves a specific forge from the database.
@@ -34,10 +34,10 @@ func GetForgeHasBuild(c context.Context, params *model.ForgeBuildParams) bool {
 
 // CreateForgeBuild assigns a build to a specific forge.
 func CreateForgeBuild(c context.Context, params *model.ForgeBuildParams) error {
-	return FromContext(c).CreateForgeBuild(params)
+	return FromContext(c).CreateForgeBuild(params, Current(c))
 }
 
 // DeleteForgeBuild removes a build from a specific forge.
 func DeleteForgeBuild(c context.Context, params *model.ForgeBuildParams) error {
-	return FromContext(c).DeleteForgeBuild(params)
+	return FromContext(c).DeleteForgeBuild(params, Current(c))
 }

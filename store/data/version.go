@@ -31,7 +31,7 @@ func (db *data) GetVersions(mod int) (*model.Versions, error) {
 }
 
 // CreateVersion creates a new version.
-func (db *data) CreateVersion(mod int, record *model.Version) error {
+func (db *data) CreateVersion(mod int, record *model.Version, current *model.User) error {
 	record.ModID = mod
 
 	return db.Create(
@@ -40,7 +40,7 @@ func (db *data) CreateVersion(mod int, record *model.Version) error {
 }
 
 // UpdateVersion updates a version.
-func (db *data) UpdateVersion(mod int, record *model.Version) error {
+func (db *data) UpdateVersion(mod int, record *model.Version, current *model.User) error {
 	record.ModID = mod
 
 	return db.Save(
@@ -49,7 +49,7 @@ func (db *data) UpdateVersion(mod int, record *model.Version) error {
 }
 
 // DeleteVersion deletes a version.
-func (db *data) DeleteVersion(mod int, record *model.Version) error {
+func (db *data) DeleteVersion(mod int, record *model.Version, current *model.User) error {
 	record.ModID = mod
 
 	return db.Delete(
@@ -140,7 +140,7 @@ func (db *data) GetVersionHasBuild(params *model.VersionBuildParams) bool {
 	return res == nil
 }
 
-func (db *data) CreateVersionBuild(params *model.VersionBuildParams) error {
+func (db *data) CreateVersionBuild(params *model.VersionBuildParams, current *model.User) error {
 	mod, _ := db.GetMod(params.Mod)
 	version, _ := db.GetVersion(mod.ID, params.Version)
 	pack, _ := db.GetPack(params.Pack)
@@ -154,7 +154,7 @@ func (db *data) CreateVersionBuild(params *model.VersionBuildParams) error {
 	).Error
 }
 
-func (db *data) DeleteVersionBuild(params *model.VersionBuildParams) error {
+func (db *data) DeleteVersionBuild(params *model.VersionBuildParams, current *model.User) error {
 	mod, _ := db.GetMod(params.Mod)
 	version, _ := db.GetVersion(mod.ID, params.Version)
 	pack, _ := db.GetPack(params.Pack)

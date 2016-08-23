@@ -13,17 +13,17 @@ func GetClients(c context.Context) (*model.Clients, error) {
 
 // CreateClient creates a new client.
 func CreateClient(c context.Context, record *model.Client) error {
-	return FromContext(c).CreateClient(record)
+	return FromContext(c).CreateClient(record, Current(c))
 }
 
 // UpdateClient updates a client.
 func UpdateClient(c context.Context, record *model.Client) error {
-	return FromContext(c).UpdateClient(record)
+	return FromContext(c).UpdateClient(record, Current(c))
 }
 
 // DeleteClient deletes a client.
 func DeleteClient(c context.Context, record *model.Client) error {
-	return FromContext(c).DeleteClient(record)
+	return FromContext(c).DeleteClient(record, Current(c))
 }
 
 // GetClient retrieves a specific client from the database.
@@ -43,10 +43,10 @@ func GetClientHasPack(c context.Context, params *model.ClientPackParams) bool {
 
 // CreateClientPack assigns a pack to a specific client.
 func CreateClientPack(c context.Context, params *model.ClientPackParams) error {
-	return FromContext(c).CreateClientPack(params)
+	return FromContext(c).CreateClientPack(params, Current(c))
 }
 
 // DeleteClientPack removes a pack from a specific client.
 func DeleteClientPack(c context.Context, params *model.ClientPackParams) error {
-	return FromContext(c).DeleteClientPack(params)
+	return FromContext(c).DeleteClientPack(params, Current(c))
 }

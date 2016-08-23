@@ -14,7 +14,7 @@ func GetMinecrafts(c context.Context) (*model.Minecrafts, error) {
 
 // SyncMinecraft creates or updates a minecraft record.
 func SyncMinecraft(c context.Context, number *minecraft.Version) (*model.Minecraft, error) {
-	return FromContext(c).SyncMinecraft(number)
+	return FromContext(c).SyncMinecraft(number, Current(c))
 }
 
 // GetMinecraft retrieves a specific minecraft from the database.
@@ -34,10 +34,10 @@ func GetMinecraftHasBuild(c context.Context, params *model.MinecraftBuildParams)
 
 // CreateMinecraftBuild assigns a build to a specific minecraft.
 func CreateMinecraftBuild(c context.Context, params *model.MinecraftBuildParams) error {
-	return FromContext(c).CreateMinecraftBuild(params)
+	return FromContext(c).CreateMinecraftBuild(params, Current(c))
 }
 
 // DeleteMinecraftBuild removes a build from a specific minecraft.
 func DeleteMinecraftBuild(c context.Context, params *model.MinecraftBuildParams) error {
-	return FromContext(c).DeleteMinecraftBuild(params)
+	return FromContext(c).DeleteMinecraftBuild(params, Current(c))
 }

@@ -25,7 +25,7 @@ func (db *data) GetMinecrafts() (*model.Minecrafts, error) {
 }
 
 // SyncMinecraft creates or updates a minecraft record.
-func (db *data) SyncMinecraft(version *minecraft.Version) (*model.Minecraft, error) {
+func (db *data) SyncMinecraft(version *minecraft.Version, current *model.User) (*model.Minecraft, error) {
 	record := &model.Minecraft{}
 
 	err := db.Where(
@@ -99,7 +99,7 @@ func (db *data) GetMinecraftHasBuild(params *model.MinecraftBuildParams) bool {
 	return build.MinecraftID == minecraft.ID
 }
 
-func (db *data) CreateMinecraftBuild(params *model.MinecraftBuildParams) error {
+func (db *data) CreateMinecraftBuild(params *model.MinecraftBuildParams, current *model.User) error {
 	minecraft, _ := db.GetMinecraft(params.Minecraft)
 	pack, _ := db.GetPack(params.Pack)
 	build, _ := db.GetBuild(pack.ID, params.Build)
@@ -112,7 +112,7 @@ func (db *data) CreateMinecraftBuild(params *model.MinecraftBuildParams) error {
 	).Error
 }
 
-func (db *data) DeleteMinecraftBuild(params *model.MinecraftBuildParams) error {
+func (db *data) DeleteMinecraftBuild(params *model.MinecraftBuildParams, current *model.User) error {
 	pack, _ := db.GetPack(params.Pack)
 	build, _ := db.GetBuild(pack.ID, params.Build)
 

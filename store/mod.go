@@ -13,17 +13,17 @@ func GetMods(c context.Context) (*model.Mods, error) {
 
 // CreateMod creates a new mod.
 func CreateMod(c context.Context, record *model.Mod) error {
-	return FromContext(c).CreateMod(record)
+	return FromContext(c).CreateMod(record, Current(c))
 }
 
 // UpdateMod updates a mod.
 func UpdateMod(c context.Context, record *model.Mod) error {
-	return FromContext(c).UpdateMod(record)
+	return FromContext(c).UpdateMod(record, Current(c))
 }
 
 // DeleteMod deletes a mod.
 func DeleteMod(c context.Context, record *model.Mod) error {
-	return FromContext(c).DeleteMod(record)
+	return FromContext(c).DeleteMod(record, Current(c))
 }
 
 // GetMod retrieves a specific mod from the database.
@@ -43,17 +43,17 @@ func GetModHasUser(c context.Context, params *model.ModUserParams) bool {
 
 // CreateModUser assigns a user to a specific mod.
 func CreateModUser(c context.Context, params *model.ModUserParams) error {
-	return FromContext(c).CreateModUser(params)
+	return FromContext(c).CreateModUser(params, Current(c))
 }
 
 // UpdateModUser updates the mod user permission.
 func UpdateModUser(c context.Context, params *model.ModUserParams) error {
-	return FromContext(c).UpdateModUser(params)
+	return FromContext(c).UpdateModUser(params, Current(c))
 }
 
 // DeleteModUser removes a user from a specific mod.
 func DeleteModUser(c context.Context, params *model.ModUserParams) error {
-	return FromContext(c).DeleteModUser(params)
+	return FromContext(c).DeleteModUser(params, Current(c))
 }
 
 // GetModTeams retrieves teams for a mod.
@@ -68,15 +68,15 @@ func GetModHasTeam(c context.Context, params *model.ModTeamParams) bool {
 
 // CreateModTeam assigns a team to a specific mod.
 func CreateModTeam(c context.Context, params *model.ModTeamParams) error {
-	return FromContext(c).CreateModTeam(params)
+	return FromContext(c).CreateModTeam(params, Current(c))
 }
 
 // UpdateModTeam updates the mod team permission.
 func UpdateModTeam(c context.Context, params *model.ModTeamParams) error {
-	return FromContext(c).UpdateModTeam(params)
+	return FromContext(c).UpdateModTeam(params, Current(c))
 }
 
 // DeleteModTeam removes a team from a specific mod.
 func DeleteModTeam(c context.Context, params *model.ModTeamParams) error {
-	return FromContext(c).DeleteModTeam(params)
+	return FromContext(c).DeleteModTeam(params, Current(c))
 }

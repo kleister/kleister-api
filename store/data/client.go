@@ -24,21 +24,21 @@ func (db *data) GetClients() (*model.Clients, error) {
 }
 
 // CreateClient creates a new client.
-func (db *data) CreateClient(record *model.Client) error {
+func (db *data) CreateClient(record *model.Client, current *model.User) error {
 	return db.Create(
 		record,
 	).Error
 }
 
 // UpdateClient updates a client.
-func (db *data) UpdateClient(record *model.Client) error {
+func (db *data) UpdateClient(record *model.Client, current *model.User) error {
 	return db.Save(
 		record,
 	).Error
 }
 
 // DeleteClient deletes a client.
-func (db *data) DeleteClient(record *model.Client) error {
+func (db *data) DeleteClient(record *model.Client, current *model.User) error {
 	return db.Delete(
 		record,
 	).Error
@@ -111,7 +111,7 @@ func (db *data) GetClientHasPack(params *model.ClientPackParams) bool {
 	return res == nil
 }
 
-func (db *data) CreateClientPack(params *model.ClientPackParams) error {
+func (db *data) CreateClientPack(params *model.ClientPackParams, current *model.User) error {
 	client, _ := db.GetClient(params.Client)
 	pack, _ := db.GetPack(params.Pack)
 
@@ -123,7 +123,7 @@ func (db *data) CreateClientPack(params *model.ClientPackParams) error {
 	).Error
 }
 
-func (db *data) DeleteClientPack(params *model.ClientPackParams) error {
+func (db *data) DeleteClientPack(params *model.ClientPackParams, current *model.User) error {
 	client, _ := db.GetClient(params.Client)
 	pack, _ := db.GetPack(params.Pack)
 

@@ -13,17 +13,17 @@ func GetVersions(c context.Context, mod int) (*model.Versions, error) {
 
 // CreateVersion creates a new version.
 func CreateVersion(c context.Context, mod int, record *model.Version) error {
-	return FromContext(c).CreateVersion(mod, record)
+	return FromContext(c).CreateVersion(mod, record, Current(c))
 }
 
 // UpdateVersion updates a version.
 func UpdateVersion(c context.Context, mod int, record *model.Version) error {
-	return FromContext(c).UpdateVersion(mod, record)
+	return FromContext(c).UpdateVersion(mod, record, Current(c))
 }
 
 // DeleteVersion deletes a version.
 func DeleteVersion(c context.Context, mod int, record *model.Version) error {
-	return FromContext(c).DeleteVersion(mod, record)
+	return FromContext(c).DeleteVersion(mod, record, Current(c))
 }
 
 // GetVersion retrieves a specific version from the database.
@@ -43,10 +43,10 @@ func GetVersionHasBuild(c context.Context, params *model.VersionBuildParams) boo
 
 // CreateVersionBuild assigns a build to a specific version.
 func CreateVersionBuild(c context.Context, params *model.VersionBuildParams) error {
-	return FromContext(c).CreateVersionBuild(params)
+	return FromContext(c).CreateVersionBuild(params, Current(c))
 }
 
 // DeleteVersionBuild removes a build from a specific version.
 func DeleteVersionBuild(c context.Context, params *model.VersionBuildParams) error {
-	return FromContext(c).DeleteVersionBuild(params)
+	return FromContext(c).DeleteVersionBuild(params, Current(c))
 }

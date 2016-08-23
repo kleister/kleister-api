@@ -15,13 +15,13 @@ type Store interface {
 	GetBuilds(int) (*model.Builds, error)
 
 	// CreateBuild creates a new build.
-	CreateBuild(int, *model.Build) error
+	CreateBuild(int, *model.Build, *model.User) error
 
 	// UpdateBuild updates a build.
-	UpdateBuild(int, *model.Build) error
+	UpdateBuild(int, *model.Build, *model.User) error
 
 	// DeleteBuild deletes a build.
-	DeleteBuild(int, *model.Build) error
+	DeleteBuild(int, *model.Build, *model.User) error
 
 	// GetBuild retrieves a specific build from the database.
 	GetBuild(int, string) (*model.Build, *gorm.DB)
@@ -33,22 +33,22 @@ type Store interface {
 	GetBuildHasVersion(*model.BuildVersionParams) bool
 
 	// CreateBuildVersion assigns a version to a specific build.
-	CreateBuildVersion(*model.BuildVersionParams) error
+	CreateBuildVersion(*model.BuildVersionParams, *model.User) error
 
 	// DeleteBuildVersion removes a version from a specific build.
-	DeleteBuildVersion(*model.BuildVersionParams) error
+	DeleteBuildVersion(*model.BuildVersionParams, *model.User) error
 
 	// GetClients retrieves all available clients from the database.
 	GetClients() (*model.Clients, error)
 
 	// CreateClient creates a new client.
-	CreateClient(*model.Client) error
+	CreateClient(*model.Client, *model.User) error
 
 	// UpdateClient updates a client.
-	UpdateClient(*model.Client) error
+	UpdateClient(*model.Client, *model.User) error
 
 	// DeleteClient deletes a client.
-	DeleteClient(*model.Client) error
+	DeleteClient(*model.Client, *model.User) error
 
 	// GetClient retrieves a specific client from the database.
 	GetClient(string) (*model.Client, *gorm.DB)
@@ -60,22 +60,22 @@ type Store interface {
 	GetClientHasPack(*model.ClientPackParams) bool
 
 	// CreateClientPack assigns a pack to a specific client.
-	CreateClientPack(*model.ClientPackParams) error
+	CreateClientPack(*model.ClientPackParams, *model.User) error
 
 	// DeleteClientPack removes a pack from a specific client.
-	DeleteClientPack(*model.ClientPackParams) error
+	DeleteClientPack(*model.ClientPackParams, *model.User) error
 
 	// GetMods retrieves all available mods from the database.
 	GetMods() (*model.Mods, error)
 
 	// CreateMod creates a new mod.
-	CreateMod(*model.Mod) error
+	CreateMod(*model.Mod, *model.User) error
 
 	// UpdateMod updates a mod.
-	UpdateMod(*model.Mod) error
+	UpdateMod(*model.Mod, *model.User) error
 
 	// DeleteMod deletes a mod.
-	DeleteMod(*model.Mod) error
+	DeleteMod(*model.Mod, *model.User) error
 
 	// GetMod retrieves a specific mod from the database.
 	GetMod(string) (*model.Mod, *gorm.DB)
@@ -87,13 +87,13 @@ type Store interface {
 	GetModHasUser(*model.ModUserParams) bool
 
 	// CreateModUser assigns a user to a specific mod.
-	CreateModUser(*model.ModUserParams) error
+	CreateModUser(*model.ModUserParams, *model.User) error
 
 	// UpdateModUser updates the mod user permission.
-	UpdateModUser(*model.ModUserParams) error
+	UpdateModUser(*model.ModUserParams, *model.User) error
 
 	// DeleteModUser removes a user from a specific mod.
-	DeleteModUser(*model.ModUserParams) error
+	DeleteModUser(*model.ModUserParams, *model.User) error
 
 	// GetModTeams retrieves teams for a mod.
 	GetModTeams(*model.ModTeamParams) (*model.TeamMods, error)
@@ -102,25 +102,25 @@ type Store interface {
 	GetModHasTeam(*model.ModTeamParams) bool
 
 	// CreateModTeam assigns a team to a specific mod.
-	CreateModTeam(*model.ModTeamParams) error
+	CreateModTeam(*model.ModTeamParams, *model.User) error
 
 	// UpdateModTeam updates the mod team permission.
-	UpdateModTeam(*model.ModTeamParams) error
+	UpdateModTeam(*model.ModTeamParams, *model.User) error
 
 	// DeleteModTeam removes a team from a specific mod.
-	DeleteModTeam(*model.ModTeamParams) error
+	DeleteModTeam(*model.ModTeamParams, *model.User) error
 
 	// GetPacks retrieves all available packs from the database.
 	GetPacks() (*model.Packs, error)
 
 	// CreatePack creates a new pack.
-	CreatePack(*model.Pack) error
+	CreatePack(*model.Pack, *model.User) error
 
 	// UpdatePack updates a pack.
-	UpdatePack(*model.Pack) error
+	UpdatePack(*model.Pack, *model.User) error
 
 	// DeletePack deletes a pack.
-	DeletePack(*model.Pack) error
+	DeletePack(*model.Pack, *model.User) error
 
 	// GetPack retrieves a specific pack from the database.
 	GetPack(string) (*model.Pack, *gorm.DB)
@@ -132,10 +132,10 @@ type Store interface {
 	GetPackHasClient(*model.PackClientParams) bool
 
 	// CreatePackClient assigns a client to a specific pack.
-	CreatePackClient(*model.PackClientParams) error
+	CreatePackClient(*model.PackClientParams, *model.User) error
 
 	// DeletePackClient removes a client from a specific pack.
-	DeletePackClient(*model.PackClientParams) error
+	DeletePackClient(*model.PackClientParams, *model.User) error
 
 	// GetPackUsers retrieves users for a pack.
 	GetPackUsers(*model.PackUserParams) (*model.UserPacks, error)
@@ -144,13 +144,13 @@ type Store interface {
 	GetPackHasUser(*model.PackUserParams) bool
 
 	// CreatePackUser assigns a user to a specific pack.
-	CreatePackUser(*model.PackUserParams) error
+	CreatePackUser(*model.PackUserParams, *model.User) error
 
 	// UpdatePackUser updates the pack user permission.
-	UpdatePackUser(*model.PackUserParams) error
+	UpdatePackUser(*model.PackUserParams, *model.User) error
 
 	// DeletePackUser removes a user from a specific pack.
-	DeletePackUser(*model.PackUserParams) error
+	DeletePackUser(*model.PackUserParams, *model.User) error
 
 	// GetPackTeams retrieves teams for a pack.
 	GetPackTeams(*model.PackTeamParams) (*model.TeamPacks, error)
@@ -159,25 +159,25 @@ type Store interface {
 	GetPackHasTeam(*model.PackTeamParams) bool
 
 	// CreatePackTeam assigns a team to a specific pack.
-	CreatePackTeam(*model.PackTeamParams) error
+	CreatePackTeam(*model.PackTeamParams, *model.User) error
 
 	// UpdatePackTeam updates the pack team permission.
-	UpdatePackTeam(*model.PackTeamParams) error
+	UpdatePackTeam(*model.PackTeamParams, *model.User) error
 
 	// DeletePackTeam removes a team from a specific pack.
-	DeletePackTeam(*model.PackTeamParams) error
+	DeletePackTeam(*model.PackTeamParams, *model.User) error
 
 	// GetUsers retrieves all available users from the database.
 	GetUsers() (*model.Users, error)
 
 	// CreateUser creates a new user.
-	CreateUser(*model.User) error
+	CreateUser(*model.User, *model.User) error
 
 	// UpdateUser updates a user.
-	UpdateUser(*model.User) error
+	UpdateUser(*model.User, *model.User) error
 
 	// DeleteUser deletes a user.
-	DeleteUser(*model.User) error
+	DeleteUser(*model.User, *model.User) error
 
 	// GetUser retrieves a specific user from the database.
 	GetUser(string) (*model.User, *gorm.DB)
@@ -189,13 +189,13 @@ type Store interface {
 	GetUserHasMod(*model.UserModParams) bool
 
 	// CreateUserMod assigns a mod to a specific user.
-	CreateUserMod(*model.UserModParams) error
+	CreateUserMod(*model.UserModParams, *model.User) error
 
 	// UpdateUserMod updates the user mod permission.
-	UpdateUserMod(*model.UserModParams) error
+	UpdateUserMod(*model.UserModParams, *model.User) error
 
 	// DeleteUserMod removes a mod from a specific user.
-	DeleteUserMod(*model.UserModParams) error
+	DeleteUserMod(*model.UserModParams, *model.User) error
 
 	// GetUserPacks retrieves packs for a user.
 	GetUserPacks(*model.UserPackParams) (*model.UserPacks, error)
@@ -204,13 +204,13 @@ type Store interface {
 	GetUserHasPack(*model.UserPackParams) bool
 
 	// CreateUserPack assigns a pack to a specific user.
-	CreateUserPack(*model.UserPackParams) error
+	CreateUserPack(*model.UserPackParams, *model.User) error
 
 	// UpdateUserPack updates the user pack permission.
-	UpdateUserPack(*model.UserPackParams) error
+	UpdateUserPack(*model.UserPackParams, *model.User) error
 
 	// DeleteUserPack removes a pack from a specific user.
-	DeleteUserPack(*model.UserPackParams) error
+	DeleteUserPack(*model.UserPackParams, *model.User) error
 
 	// GetUserTeams retrieves teams for a user.
 	GetUserTeams(*model.UserTeamParams) (*model.TeamUsers, error)
@@ -219,25 +219,25 @@ type Store interface {
 	GetUserHasTeam(*model.UserTeamParams) bool
 
 	// CreateUserTeam assigns a team to a specific user.
-	CreateUserTeam(*model.UserTeamParams) error
+	CreateUserTeam(*model.UserTeamParams, *model.User) error
 
 	// UpdateUserTeam updates the user team permission.
-	UpdateUserTeam(*model.UserTeamParams) error
+	UpdateUserTeam(*model.UserTeamParams, *model.User) error
 
 	// DeleteUserTeam removes a team from a specific user.
-	DeleteUserTeam(*model.UserTeamParams) error
+	DeleteUserTeam(*model.UserTeamParams, *model.User) error
 
 	// GetVersions retrieves all available versions from the database.
 	GetVersions(int) (*model.Versions, error)
 
 	// CreateVersion creates a new version.
-	CreateVersion(int, *model.Version) error
+	CreateVersion(int, *model.Version, *model.User) error
 
 	// UpdateVersion updates a version.
-	UpdateVersion(int, *model.Version) error
+	UpdateVersion(int, *model.Version, *model.User) error
 
 	// DeleteVersion deletes a version.
-	DeleteVersion(int, *model.Version) error
+	DeleteVersion(int, *model.Version, *model.User) error
 
 	// GetVersion retrieves a specific version from the database.
 	GetVersion(int, string) (*model.Version, *gorm.DB)
@@ -249,22 +249,22 @@ type Store interface {
 	GetVersionHasBuild(*model.VersionBuildParams) bool
 
 	// CreateVersionBuild assigns a build to a specific version.
-	CreateVersionBuild(*model.VersionBuildParams) error
+	CreateVersionBuild(*model.VersionBuildParams, *model.User) error
 
 	// DeleteVersionBuild removes a build from a specific version.
-	DeleteVersionBuild(*model.VersionBuildParams) error
+	DeleteVersionBuild(*model.VersionBuildParams, *model.User) error
 
 	// GetTeams retrieves all available teams from the database.
 	GetTeams() (*model.Teams, error)
 
 	// CreateTeam creates a new team.
-	CreateTeam(*model.Team) error
+	CreateTeam(*model.Team, *model.User) error
 
 	// UpdateTeam updates a team.
-	UpdateTeam(*model.Team) error
+	UpdateTeam(*model.Team, *model.User) error
 
 	// DeleteTeam deletes a team.
-	DeleteTeam(*model.Team) error
+	DeleteTeam(*model.Team, *model.User) error
 
 	// GetTeam retrieves a specific team from the database.
 	GetTeam(string) (*model.Team, *gorm.DB)
@@ -276,13 +276,13 @@ type Store interface {
 	GetTeamHasUser(*model.TeamUserParams) bool
 
 	// CreateTeamUser assigns a user to a specific team.
-	CreateTeamUser(*model.TeamUserParams) error
+	CreateTeamUser(*model.TeamUserParams, *model.User) error
 
 	// UpdateTeamUser updates the team user permission.
-	UpdateTeamUser(*model.TeamUserParams) error
+	UpdateTeamUser(*model.TeamUserParams, *model.User) error
 
 	// DeleteTeamUser removes a user from a specific team.
-	DeleteTeamUser(*model.TeamUserParams) error
+	DeleteTeamUser(*model.TeamUserParams, *model.User) error
 
 	// GetTeamPacks retrieves packs for a team.
 	GetTeamPacks(*model.TeamPackParams) (*model.TeamPacks, error)
@@ -291,13 +291,13 @@ type Store interface {
 	GetTeamHasPack(*model.TeamPackParams) bool
 
 	// CreateTeamPack assigns a pack to a specific team.
-	CreateTeamPack(*model.TeamPackParams) error
+	CreateTeamPack(*model.TeamPackParams, *model.User) error
 
 	// UpdateTeamPack updates the team pack permission.
-	UpdateTeamPack(*model.TeamPackParams) error
+	UpdateTeamPack(*model.TeamPackParams, *model.User) error
 
 	// DeleteTeamPack removes a pack from a specific team.
-	DeleteTeamPack(*model.TeamPackParams) error
+	DeleteTeamPack(*model.TeamPackParams, *model.User) error
 
 	// GetTeamMods retrieves mods for a team.
 	GetTeamMods(*model.TeamModParams) (*model.TeamMods, error)
@@ -306,19 +306,19 @@ type Store interface {
 	GetTeamHasMod(*model.TeamModParams) bool
 
 	// CreateTeamMod assigns a mod to a specific team.
-	CreateTeamMod(*model.TeamModParams) error
+	CreateTeamMod(*model.TeamModParams, *model.User) error
 
 	// UpdateTeamMod updates the team mod permission.
-	UpdateTeamMod(*model.TeamModParams) error
+	UpdateTeamMod(*model.TeamModParams, *model.User) error
 
 	// DeleteTeamMod removes a mod from a specific team.
-	DeleteTeamMod(*model.TeamModParams) error
+	DeleteTeamMod(*model.TeamModParams, *model.User) error
 
 	// GetMinecrafts retrieves all available minecrafts from the database.
 	GetMinecrafts() (*model.Minecrafts, error)
 
 	// SyncMinecraft creates or updates a minecraft record.
-	SyncMinecraft(*minecraft.Version) (*model.Minecraft, error)
+	SyncMinecraft(*minecraft.Version, *model.User) (*model.Minecraft, error)
 
 	// GetMinecraft retrieves a specific minecraft from the database.
 	GetMinecraft(string) (*model.Minecraft, *gorm.DB)
@@ -330,16 +330,16 @@ type Store interface {
 	GetMinecraftHasBuild(*model.MinecraftBuildParams) bool
 
 	// CreateMinecraftBuild assigns a build to a specific minecraft.
-	CreateMinecraftBuild(*model.MinecraftBuildParams) error
+	CreateMinecraftBuild(*model.MinecraftBuildParams, *model.User) error
 
 	// DeleteMinecraftBuild removes a build from a specific minecraft.
-	DeleteMinecraftBuild(*model.MinecraftBuildParams) error
+	DeleteMinecraftBuild(*model.MinecraftBuildParams, *model.User) error
 
 	// GetForges retrieves all available forges from the database.
 	GetForges() (*model.Forges, error)
 
 	// SyncForge creates or updates a forge record.
-	SyncForge(*forge.Number) (*model.Forge, error)
+	SyncForge(*forge.Number, *model.User) (*model.Forge, error)
 
 	// GetForge retrieves a specific forge from the database.
 	GetForge(string) (*model.Forge, *gorm.DB)
@@ -351,10 +351,10 @@ type Store interface {
 	GetForgeHasBuild(*model.ForgeBuildParams) bool
 
 	// CreateForgeBuild assigns a build to a specific forge.
-	CreateForgeBuild(*model.ForgeBuildParams) error
+	CreateForgeBuild(*model.ForgeBuildParams, *model.User) error
 
 	// DeleteForgeBuild removes a build from a specific forge.
-	DeleteForgeBuild(*model.ForgeBuildParams) error
+	DeleteForgeBuild(*model.ForgeBuildParams, *model.User) error
 
 	// GetSolderPacks retrieves all available packs optimized for the solder compatible API.
 	GetSolderPacks() (*model.Packs, error)

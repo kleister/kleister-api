@@ -13,17 +13,17 @@ func GetTeams(c context.Context) (*model.Teams, error) {
 
 // CreateTeam creates a new team.
 func CreateTeam(c context.Context, record *model.Team) error {
-	return FromContext(c).CreateTeam(record)
+	return FromContext(c).CreateTeam(record, Current(c))
 }
 
 // UpdateTeam updates a team.
 func UpdateTeam(c context.Context, record *model.Team) error {
-	return FromContext(c).UpdateTeam(record)
+	return FromContext(c).UpdateTeam(record, Current(c))
 }
 
 // DeleteTeam deletes a team.
 func DeleteTeam(c context.Context, record *model.Team) error {
-	return FromContext(c).DeleteTeam(record)
+	return FromContext(c).DeleteTeam(record, Current(c))
 }
 
 // GetTeam retrieves a specific team from the database.
@@ -43,17 +43,17 @@ func GetTeamHasUser(c context.Context, params *model.TeamUserParams) bool {
 
 // CreateTeamUser assigns a user to a specific team.
 func CreateTeamUser(c context.Context, params *model.TeamUserParams) error {
-	return FromContext(c).CreateTeamUser(params)
+	return FromContext(c).CreateTeamUser(params, Current(c))
 }
 
 // UpdateTeamUser updates the team user permission.
 func UpdateTeamUser(c context.Context, params *model.TeamUserParams) error {
-	return FromContext(c).UpdateTeamUser(params)
+	return FromContext(c).UpdateTeamUser(params, Current(c))
 }
 
 // DeleteTeamUser removes a user from a specific team.
 func DeleteTeamUser(c context.Context, params *model.TeamUserParams) error {
-	return FromContext(c).DeleteTeamUser(params)
+	return FromContext(c).DeleteTeamUser(params, Current(c))
 }
 
 // GetTeamPacks retrieves packs for a team.
@@ -68,17 +68,17 @@ func GetTeamHasPack(c context.Context, params *model.TeamPackParams) bool {
 
 // CreateTeamPack assigns a pack to a specific team.
 func CreateTeamPack(c context.Context, params *model.TeamPackParams) error {
-	return FromContext(c).CreateTeamPack(params)
+	return FromContext(c).CreateTeamPack(params, Current(c))
 }
 
 // UpdateTeamPack updates the team pack permission.
 func UpdateTeamPack(c context.Context, params *model.TeamPackParams) error {
-	return FromContext(c).UpdateTeamPack(params)
+	return FromContext(c).UpdateTeamPack(params, Current(c))
 }
 
 // DeleteTeamPack removes a pack from a specific team.
 func DeleteTeamPack(c context.Context, params *model.TeamPackParams) error {
-	return FromContext(c).DeleteTeamPack(params)
+	return FromContext(c).DeleteTeamPack(params, Current(c))
 }
 
 // GetTeamMods retrieves mods for a team.
@@ -93,15 +93,15 @@ func GetTeamHasMod(c context.Context, params *model.TeamModParams) bool {
 
 // CreateTeamMod assigns a mod to a specific team.
 func CreateTeamMod(c context.Context, params *model.TeamModParams) error {
-	return FromContext(c).CreateTeamMod(params)
+	return FromContext(c).CreateTeamMod(params, Current(c))
 }
 
 // UpdateTeamMod updates the team mod permission.
 func UpdateTeamMod(c context.Context, params *model.TeamModParams) error {
-	return FromContext(c).UpdateTeamMod(params)
+	return FromContext(c).UpdateTeamMod(params, Current(c))
 }
 
 // DeleteTeamMod removes a mod from a specific team.
 func DeleteTeamMod(c context.Context, params *model.TeamModParams) error {
-	return FromContext(c).DeleteTeamMod(params)
+	return FromContext(c).DeleteTeamMod(params, Current(c))
 }

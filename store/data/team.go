@@ -29,21 +29,21 @@ func (db *data) GetTeams() (*model.Teams, error) {
 }
 
 // CreateTeam creates a new team.
-func (db *data) CreateTeam(record *model.Team) error {
+func (db *data) CreateTeam(record *model.Team, current *model.User) error {
 	return db.Create(
 		record,
 	).Error
 }
 
 // UpdateTeam updates a team.
-func (db *data) UpdateTeam(record *model.Team) error {
+func (db *data) UpdateTeam(record *model.Team, current *model.User) error {
 	return db.Save(
 		record,
 	).Error
 }
 
 // DeleteTeam deletes a team.
-func (db *data) DeleteTeam(record *model.Team) error {
+func (db *data) DeleteTeam(record *model.Team, current *model.User) error {
 	return db.Delete(
 		record,
 	).Error
@@ -122,7 +122,7 @@ func (db *data) GetTeamHasUser(params *model.TeamUserParams) bool {
 	return res == nil
 }
 
-func (db *data) CreateTeamUser(params *model.TeamUserParams) error {
+func (db *data) CreateTeamUser(params *model.TeamUserParams, current *model.User) error {
 	team, _ := db.GetTeam(params.Team)
 	user, _ := db.GetUser(params.User)
 
@@ -141,7 +141,7 @@ func (db *data) CreateTeamUser(params *model.TeamUserParams) error {
 	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
-func (db *data) UpdateTeamUser(params *model.TeamUserParams) error {
+func (db *data) UpdateTeamUser(params *model.TeamUserParams, current *model.User) error {
 	team, _ := db.GetTeam(params.Team)
 	user, _ := db.GetUser(params.User)
 
@@ -157,7 +157,7 @@ func (db *data) UpdateTeamUser(params *model.TeamUserParams) error {
 	).Error
 }
 
-func (db *data) DeleteTeamUser(params *model.TeamUserParams) error {
+func (db *data) DeleteTeamUser(params *model.TeamUserParams, current *model.User) error {
 	team, _ := db.GetTeam(params.Team)
 	user, _ := db.GetUser(params.User)
 
@@ -207,7 +207,7 @@ func (db *data) GetTeamHasPack(params *model.TeamPackParams) bool {
 	return res == nil
 }
 
-func (db *data) CreateTeamPack(params *model.TeamPackParams) error {
+func (db *data) CreateTeamPack(params *model.TeamPackParams, current *model.User) error {
 	team, _ := db.GetTeam(params.Team)
 	pack, _ := db.GetPack(params.Pack)
 
@@ -226,7 +226,7 @@ func (db *data) CreateTeamPack(params *model.TeamPackParams) error {
 	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
-func (db *data) UpdateTeamPack(params *model.TeamPackParams) error {
+func (db *data) UpdateTeamPack(params *model.TeamPackParams, current *model.User) error {
 	team, _ := db.GetTeam(params.Team)
 	pack, _ := db.GetPack(params.Pack)
 
@@ -242,7 +242,7 @@ func (db *data) UpdateTeamPack(params *model.TeamPackParams) error {
 	).Error
 }
 
-func (db *data) DeleteTeamPack(params *model.TeamPackParams) error {
+func (db *data) DeleteTeamPack(params *model.TeamPackParams, current *model.User) error {
 	team, _ := db.GetTeam(params.Team)
 	pack, _ := db.GetPack(params.Pack)
 
@@ -292,7 +292,7 @@ func (db *data) GetTeamHasMod(params *model.TeamModParams) bool {
 	return res == nil
 }
 
-func (db *data) CreateTeamMod(params *model.TeamModParams) error {
+func (db *data) CreateTeamMod(params *model.TeamModParams, current *model.User) error {
 	team, _ := db.GetTeam(params.Team)
 	mod, _ := db.GetMod(params.Mod)
 
@@ -311,7 +311,7 @@ func (db *data) CreateTeamMod(params *model.TeamModParams) error {
 	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
-func (db *data) UpdateTeamMod(params *model.TeamModParams) error {
+func (db *data) UpdateTeamMod(params *model.TeamModParams, current *model.User) error {
 	team, _ := db.GetTeam(params.Team)
 	mod, _ := db.GetMod(params.Mod)
 
@@ -327,7 +327,7 @@ func (db *data) UpdateTeamMod(params *model.TeamModParams) error {
 	).Error
 }
 
-func (db *data) DeleteTeamMod(params *model.TeamModParams) error {
+func (db *data) DeleteTeamMod(params *model.TeamModParams, current *model.User) error {
 	team, _ := db.GetTeam(params.Team)
 	mod, _ := db.GetMod(params.Mod)
 

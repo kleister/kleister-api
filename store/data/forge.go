@@ -25,7 +25,7 @@ func (db *data) GetForges() (*model.Forges, error) {
 }
 
 // SyncForge creates or updates a forge record.
-func (db *data) SyncForge(number *forge.Number) (*model.Forge, error) {
+func (db *data) SyncForge(number *forge.Number, current *model.User) (*model.Forge, error) {
 	record := &model.Forge{}
 
 	err := db.Where(
@@ -99,7 +99,7 @@ func (db *data) GetForgeHasBuild(params *model.ForgeBuildParams) bool {
 	return build.ForgeID == forge.ID
 }
 
-func (db *data) CreateForgeBuild(params *model.ForgeBuildParams) error {
+func (db *data) CreateForgeBuild(params *model.ForgeBuildParams, current *model.User) error {
 	forge, _ := db.GetForge(params.Forge)
 	pack, _ := db.GetPack(params.Pack)
 	build, _ := db.GetBuild(pack.ID, params.Build)
@@ -112,7 +112,7 @@ func (db *data) CreateForgeBuild(params *model.ForgeBuildParams) error {
 	).Error
 }
 
-func (db *data) DeleteForgeBuild(params *model.ForgeBuildParams) error {
+func (db *data) DeleteForgeBuild(params *model.ForgeBuildParams, current *model.User) error {
 	pack, _ := db.GetPack(params.Pack)
 	build, _ := db.GetBuild(pack.ID, params.Build)
 

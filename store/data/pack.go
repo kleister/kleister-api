@@ -45,21 +45,21 @@ func (db *data) GetPacks() (*model.Packs, error) {
 }
 
 // CreatePack creates a new pack.
-func (db *data) CreatePack(record *model.Pack) error {
+func (db *data) CreatePack(record *model.Pack, current *model.User) error {
 	return db.Create(
 		record,
 	).Error
 }
 
 // UpdatePack updates a pack.
-func (db *data) UpdatePack(record *model.Pack) error {
+func (db *data) UpdatePack(record *model.Pack, current *model.User) error {
 	return db.Save(
 		record,
 	).Error
 }
 
 // DeletePack deletes a pack.
-func (db *data) DeletePack(record *model.Pack) error {
+func (db *data) DeletePack(record *model.Pack, current *model.User) error {
 	return db.Delete(
 		record,
 	).Error
@@ -154,7 +154,7 @@ func (db *data) GetPackHasClient(params *model.PackClientParams) bool {
 	return res == nil
 }
 
-func (db *data) CreatePackClient(params *model.PackClientParams) error {
+func (db *data) CreatePackClient(params *model.PackClientParams, current *model.User) error {
 	pack, _ := db.GetPack(params.Pack)
 	client, _ := db.GetClient(params.Client)
 
@@ -166,7 +166,7 @@ func (db *data) CreatePackClient(params *model.PackClientParams) error {
 	).Error
 }
 
-func (db *data) DeletePackClient(params *model.PackClientParams) error {
+func (db *data) DeletePackClient(params *model.PackClientParams, current *model.User) error {
 	pack, _ := db.GetPack(params.Pack)
 	client, _ := db.GetClient(params.Client)
 
@@ -216,7 +216,7 @@ func (db *data) GetPackHasUser(params *model.PackUserParams) bool {
 	return res == nil
 }
 
-func (db *data) CreatePackUser(params *model.PackUserParams) error {
+func (db *data) CreatePackUser(params *model.PackUserParams, current *model.User) error {
 	pack, _ := db.GetPack(params.Pack)
 	user, _ := db.GetUser(params.User)
 
@@ -235,7 +235,7 @@ func (db *data) CreatePackUser(params *model.PackUserParams) error {
 	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
-func (db *data) UpdatePackUser(params *model.PackUserParams) error {
+func (db *data) UpdatePackUser(params *model.PackUserParams, current *model.User) error {
 	pack, _ := db.GetPack(params.Pack)
 	user, _ := db.GetUser(params.User)
 
@@ -251,7 +251,7 @@ func (db *data) UpdatePackUser(params *model.PackUserParams) error {
 	).Error
 }
 
-func (db *data) DeletePackUser(params *model.PackUserParams) error {
+func (db *data) DeletePackUser(params *model.PackUserParams, current *model.User) error {
 	pack, _ := db.GetPack(params.Pack)
 	user, _ := db.GetUser(params.User)
 
@@ -301,7 +301,7 @@ func (db *data) GetPackHasTeam(params *model.PackTeamParams) bool {
 	return res == nil
 }
 
-func (db *data) CreatePackTeam(params *model.PackTeamParams) error {
+func (db *data) CreatePackTeam(params *model.PackTeamParams, current *model.User) error {
 	pack, _ := db.GetPack(params.Pack)
 	team, _ := db.GetTeam(params.Team)
 
@@ -320,7 +320,7 @@ func (db *data) CreatePackTeam(params *model.PackTeamParams) error {
 	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
-func (db *data) UpdatePackTeam(params *model.PackTeamParams) error {
+func (db *data) UpdatePackTeam(params *model.PackTeamParams, current *model.User) error {
 	pack, _ := db.GetPack(params.Pack)
 	team, _ := db.GetTeam(params.Team)
 
@@ -336,7 +336,7 @@ func (db *data) UpdatePackTeam(params *model.PackTeamParams) error {
 	).Error
 }
 
-func (db *data) DeletePackTeam(params *model.PackTeamParams) error {
+func (db *data) DeletePackTeam(params *model.PackTeamParams, current *model.User) error {
 	pack, _ := db.GetPack(params.Pack)
 	team, _ := db.GetTeam(params.Team)
 

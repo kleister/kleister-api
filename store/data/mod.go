@@ -29,21 +29,21 @@ func (db *data) GetMods() (*model.Mods, error) {
 }
 
 // CreateMod creates a new mod.
-func (db *data) CreateMod(record *model.Mod) error {
+func (db *data) CreateMod(record *model.Mod, current *model.User) error {
 	return db.Create(
 		record,
 	).Error
 }
 
 // UpdateMod updates a mod.
-func (db *data) UpdateMod(record *model.Mod) error {
+func (db *data) UpdateMod(record *model.Mod, current *model.User) error {
 	return db.Save(
 		record,
 	).Error
 }
 
 // DeleteMod deletes a mod.
-func (db *data) DeleteMod(record *model.Mod) error {
+func (db *data) DeleteMod(record *model.Mod, current *model.User) error {
 	return db.Delete(
 		record,
 	).Error
@@ -122,7 +122,7 @@ func (db *data) GetModHasUser(params *model.ModUserParams) bool {
 	return res == nil
 }
 
-func (db *data) CreateModUser(params *model.ModUserParams) error {
+func (db *data) CreateModUser(params *model.ModUserParams, current *model.User) error {
 	mod, _ := db.GetMod(params.Mod)
 	user, _ := db.GetUser(params.User)
 
@@ -141,7 +141,7 @@ func (db *data) CreateModUser(params *model.ModUserParams) error {
 	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
-func (db *data) UpdateModUser(params *model.ModUserParams) error {
+func (db *data) UpdateModUser(params *model.ModUserParams, current *model.User) error {
 	mod, _ := db.GetMod(params.Mod)
 	user, _ := db.GetUser(params.User)
 
@@ -157,7 +157,7 @@ func (db *data) UpdateModUser(params *model.ModUserParams) error {
 	).Error
 }
 
-func (db *data) DeleteModUser(params *model.ModUserParams) error {
+func (db *data) DeleteModUser(params *model.ModUserParams, current *model.User) error {
 	mod, _ := db.GetMod(params.Mod)
 	user, _ := db.GetUser(params.User)
 
@@ -207,7 +207,7 @@ func (db *data) GetModHasTeam(params *model.ModTeamParams) bool {
 	return res == nil
 }
 
-func (db *data) CreateModTeam(params *model.ModTeamParams) error {
+func (db *data) CreateModTeam(params *model.ModTeamParams, current *model.User) error {
 	mod, _ := db.GetMod(params.Mod)
 	team, _ := db.GetTeam(params.Team)
 
@@ -226,7 +226,7 @@ func (db *data) CreateModTeam(params *model.ModTeamParams) error {
 	return fmt.Errorf("Invalid permission, can be user, admin or owner")
 }
 
-func (db *data) UpdateModTeam(params *model.ModTeamParams) error {
+func (db *data) UpdateModTeam(params *model.ModTeamParams, current *model.User) error {
 	mod, _ := db.GetMod(params.Mod)
 	team, _ := db.GetTeam(params.Team)
 
@@ -242,7 +242,7 @@ func (db *data) UpdateModTeam(params *model.ModTeamParams) error {
 	).Error
 }
 
-func (db *data) DeleteModTeam(params *model.ModTeamParams) error {
+func (db *data) DeleteModTeam(params *model.ModTeamParams, current *model.User) error {
 	mod, _ := db.GetMod(params.Mod)
 	team, _ := db.GetTeam(params.Team)
 
