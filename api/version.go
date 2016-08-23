@@ -2,8 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -38,15 +36,7 @@ func VersionIndex(c *gin.Context) {
 
 	for _, record := range *records {
 		if record.File != nil {
-			record.File.URL = strings.Join(
-				[]string{
-					location.String(),
-					"storage",
-					"version",
-					strconv.Itoa(record.ID),
-				},
-				"/",
-			)
+			record.File.SetURL(location.String())
 		}
 	}
 
@@ -62,15 +52,7 @@ func VersionShow(c *gin.Context) {
 	record := session.Version(c)
 
 	if record.File != nil {
-		record.File.URL = strings.Join(
-			[]string{
-				location.String(),
-				"storage",
-				"version",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
+		record.File.SetURL(location.String())
 	}
 
 	c.JSON(

@@ -9,11 +9,13 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
 	"github.com/kleister/kleister-api/config"
+	"github.com/kleister/kleister-api/shared/s3client"
 	"github.com/vincent-petithory/dataurl"
 )
 
@@ -55,31 +57,43 @@ func (u *PackBackground) BeforeSave(db *gorm.DB) error {
 // AfterSave invokes required actions after persisting.
 func (u *PackBackground) AfterSave(db *gorm.DB) error {
 	if u.Upload != nil {
-		absolutePath, err := u.AbsolutePath()
+		if config.S3.Enabled {
+			_, err := s3client.New().Upload(
+				u.RelativePath(),
+				u.ContentType,
+				u.Upload.Data,
+			)
 
-		if err != nil {
-			return err
-		}
+			if err != nil {
+				return fmt.Errorf("Failed to upload background to S3. %s", err)
+			}
+		} else {
+			absolutePath, err := u.AbsolutePath()
 
-		errDir := os.MkdirAll(
-			filepath.Dir(
+			if err != nil {
+				return err
+			}
+
+			errDir := os.MkdirAll(
+				filepath.Dir(
+					absolutePath,
+				),
+				os.ModePerm,
+			)
+
+			if errDir != nil {
+				return fmt.Errorf("Failed to create background directory")
+			}
+
+			errWrite := ioutil.WriteFile(
 				absolutePath,
-			),
-			os.ModePerm,
-		)
+				u.Upload.Data,
+				0644,
+			)
 
-		if errDir != nil {
-			return fmt.Errorf("Failed to create background directory")
-		}
-
-		errWrite := ioutil.WriteFile(
-			absolutePath,
-			u.Upload.Data,
-			0644,
-		)
-
-		if errWrite != nil {
-			return fmt.Errorf("Failed to write background at %s", absolutePath)
+			if errWrite != nil {
+				return fmt.Errorf("Failed to write background at %s", absolutePath)
+			}
 		}
 	}
 
@@ -88,18 +102,26 @@ func (u *PackBackground) AfterSave(db *gorm.DB) error {
 
 // AfterDelete invokes required actions after deletion.
 func (u *PackBackground) AfterDelete(tx *gorm.DB) error {
-	absolutePath, err := u.AbsolutePath()
+	if config.S3.Enabled {
+		_, err := s3client.New().Delete(
+			u.RelativePath(),
+		)
 
-	if err != nil {
-		return err
-	}
+		return fmt.Errorf("Failed to remove background from S3. %s", err)
+	} else {
+		absolutePath, err := u.AbsolutePath()
 
-	errRemove := os.Remove(
-		absolutePath,
-	)
+		if err != nil {
+			return err
+		}
 
-	if errRemove != nil {
-		return fmt.Errorf("Failed to remove background")
+		errRemove := os.Remove(
+			absolutePath,
+		)
+
+		if errRemove != nil {
+			return fmt.Errorf("Failed to remove background")
+		}
 	}
 
 	return nil
@@ -122,9 +144,46 @@ func (u *PackBackground) AbsolutePath() (string, error) {
 
 	return path.Join(
 		config.Server.Storage,
+		u.RelativePath(),
+	), nil
+}
+
+// RelativePath generates the relative path to the background.
+func (u *PackBackground) RelativePath() string {
+	return path.Join(
 		"background",
 		strconv.Itoa(u.PackID),
-	), nil
+	)
+}
+
+// SetURL generates the absolute URL to access this background.
+func (u *PackBackground) SetURL(location string) {
+	if config.S3.Enabled {
+		if config.S3.Endpoint == "" {
+			u.URL = fmt.Sprintf(
+				"https://s3-%s.amazonaws.com/%s/%s",
+				config.S3.Region,
+				config.S3.Bucket,
+				u.RelativePath(),
+			)
+		} else {
+			u.URL = fmt.Sprintf(
+				"%s/%s/%s",
+				config.S3.Endpoint,
+				config.S3.Bucket,
+				u.RelativePath(),
+			)
+		}
+	} else {
+		u.URL = strings.Join(
+			[]string{
+				location,
+				"storage",
+				u.RelativePath(),
+			},
+			"/",
+		)
+	}
 }
 
 func isInvalidPackBackgroundType(mediaType string) bool {

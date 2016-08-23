@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/kleister/kleister-api/config"
 	"github.com/kleister/kleister-api/router"
+	"github.com/kleister/kleister-api/shared/s3client"
 	"github.com/urfave/cli"
 )
 
@@ -93,6 +95,68 @@ func Server() cli.Command {
 				EnvVar:      "KLEISTER_SESSION_EXPIRE",
 				Destination: &config.Session.Expire,
 			},
+			cli.BoolFlag{
+				Name:        "s3-enabled",
+				Usage:       "Enable S3 uploads",
+				EnvVar:      "KLEISTER_S3_ENABLED",
+				Destination: &config.S3.Enabled,
+			},
+			cli.StringFlag{
+				Name:        "s3-endpoint",
+				Value:       "",
+				Usage:       "S3 API endpoint",
+				EnvVar:      "KLEISTER_S3_ENDPOINT",
+				Destination: &config.S3.Endpoint,
+			},
+			cli.StringFlag{
+				Name:        "s3-bucket",
+				Value:       "kleister",
+				Usage:       "S3 bucket name",
+				EnvVar:      "KLEISTER_S3_BUCKET",
+				Destination: &config.S3.Bucket,
+			},
+			cli.StringFlag{
+				Name:        "s3-region",
+				Value:       "us-east-1",
+				Usage:       "S3 region name",
+				EnvVar:      "KLEISTER_S3_REGION",
+				Destination: &config.S3.Region,
+			},
+			cli.StringFlag{
+				Name:        "s3-access",
+				Value:       "",
+				Usage:       "S3 public key",
+				EnvVar:      "KLEISTER_S3_ACCESS_KEY",
+				Destination: &config.S3.Access,
+			},
+			cli.StringFlag{
+				Name:        "s3-secret",
+				Value:       "",
+				Usage:       "S3 secret key",
+				EnvVar:      "KLEISTER_S3_SECRET_KEY",
+				Destination: &config.S3.Secret,
+			},
+			cli.BoolFlag{
+				Name:        "s3-path-style",
+				Usage:       "S3 path style",
+				EnvVar:      "KLEISTER_S3_PATH_STYLE",
+				Destination: &config.S3.PathStyle,
+			},
+		},
+		Before: func(c *cli.Context) error {
+			if config.S3.Enabled {
+				_, err := s3client.New().List()
+
+				if err != nil {
+					if config.Debug {
+						return fmt.Errorf("Failed to connect to S3. %s", err)
+					} else {
+						return fmt.Errorf("Failed to connect to S3.")
+					}
+				}
+			}
+
+			return nil
 		},
 		Action: func(c *cli.Context) {
 			logrus.Infof("Starting the API on %s", config.Server.Addr)

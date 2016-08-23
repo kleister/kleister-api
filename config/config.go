@@ -20,6 +20,16 @@ type server struct {
 	Storage string
 }
 
+type s3 struct {
+	Enabled   bool
+	Endpoint  string
+	Bucket    string
+	PathStyle bool
+	Region    string
+	Access    string
+	Secret    string
+}
+
 type session struct {
 	Expire time.Duration
 }
@@ -33,6 +43,9 @@ var (
 
 	// Server represents the informations about the server bindings.
 	Server = &server{}
+
+	// S3 represents the informations about s3 storage connections.
+	S3 = &s3{}
 
 	// Session represents the informations about the session handling.
 	Session = &session{}

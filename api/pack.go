@@ -2,8 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -36,39 +34,15 @@ func PackIndex(c *gin.Context) {
 
 	for _, record := range *records {
 		if record.Icon != nil {
-			record.Icon.URL = strings.Join(
-				[]string{
-					location.String(),
-					"storage",
-					"icon",
-					strconv.Itoa(record.ID),
-				},
-				"/",
-			)
+			record.Icon.SetURL(location.String())
 		}
 
 		if record.Background != nil {
-			record.Background.URL = strings.Join(
-				[]string{
-					location.String(),
-					"storage",
-					"background",
-					strconv.Itoa(record.ID),
-				},
-				"/",
-			)
+			record.Background.SetURL(location.String())
 		}
 
 		if record.Logo != nil {
-			record.Logo.URL = strings.Join(
-				[]string{
-					location.String(),
-					"storage",
-					"logo",
-					strconv.Itoa(record.ID),
-				},
-				"/",
-			)
+			record.Logo.SetURL(location.String())
 		}
 	}
 
@@ -84,39 +58,15 @@ func PackShow(c *gin.Context) {
 	record := session.Pack(c)
 
 	if record.Icon != nil {
-		record.Icon.URL = strings.Join(
-			[]string{
-				location.String(),
-				"storage",
-				"icon",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
+		record.Icon.SetURL(location.String())
 	}
 
 	if record.Background != nil {
-		record.Background.URL = strings.Join(
-			[]string{
-				location.String(),
-				"storage",
-				"background",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
+		record.Background.SetURL(location.String())
 	}
 
 	if record.Logo != nil {
-		record.Logo.URL = strings.Join(
-			[]string{
-				location.String(),
-				"storage",
-				"logo",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
+		record.Logo.SetURL(location.String())
 	}
 
 	c.JSON(
