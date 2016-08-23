@@ -44,12 +44,14 @@ Make sure you have a working Go environment, for further reference or a guide
 take a look at the [install instructions](http://golang.org/doc/install.html).
 As this project relies on vendoring of the dependencies and we are not
 exporting `GO15VENDOREXPERIMENT=1` within our makefile you have to use a Go
-version `>= 1.6`
+version `>= 1.6`. It is also possible to just simply execute the
+`go get github.com/kleister/kleister-api` command, but we prefer to use our
+`Makefile`:
 
 ```bash
 go get -d github.com/kleister/kleister-api
 cd $GOPATH/src/github.com/kleister/kleister-api
-make deps build
+make clean build
 
 bin/kleister-api -h
 ```
