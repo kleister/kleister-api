@@ -13,6 +13,7 @@ type database struct {
 }
 
 type server struct {
+	Host    string
 	Addr    string
 	Cert    string
 	Key     string

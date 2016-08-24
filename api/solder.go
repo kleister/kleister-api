@@ -2,12 +2,9 @@ package api
 
 import (
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kleister/kleister-api/model/solder"
-	"github.com/kleister/kleister-api/router/middleware/location"
 	"github.com/kleister/kleister-api/store"
 )
 
@@ -38,7 +35,6 @@ func SolderPack(c *gin.Context) {
 	record, err := store.GetSolderPack(
 		c,
 		c.Param("pack"),
-		location.Location(c).String(),
 	)
 
 	if err != nil {
@@ -66,7 +62,6 @@ func SolderBuild(c *gin.Context) {
 		c,
 		c.Param("pack"),
 		c.Param("build"),
-		location.Location(c).String(),
 	)
 
 	if err != nil {
@@ -126,8 +121,6 @@ func SolderMod(c *gin.Context) {
 
 // SolderVersion retrieves the version compatible to Technic Platform.
 func SolderVersion(c *gin.Context) {
-	location := location.Location(c)
-
 	parent, res := store.GetMod(
 		c,
 		c.Param("mod"),
@@ -159,18 +152,6 @@ func SolderVersion(c *gin.Context) {
 		)
 
 		return
-	}
-
-	if record.File != nil {
-		record.File.URL = strings.Join(
-			[]string{
-				location.String(),
-				"storage",
-				"version",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
 	}
 
 	c.JSON(

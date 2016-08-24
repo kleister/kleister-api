@@ -6,15 +6,12 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/kleister/kleister-api/model"
-	"github.com/kleister/kleister-api/router/middleware/location"
 	"github.com/kleister/kleister-api/router/middleware/session"
 	"github.com/kleister/kleister-api/store"
 )
 
 // PackIndex retrieves all available packs.
 func PackIndex(c *gin.Context) {
-	location := location.Location(c)
-
 	records, err := store.GetPacks(
 		c,
 	)
@@ -32,20 +29,6 @@ func PackIndex(c *gin.Context) {
 		return
 	}
 
-	for _, record := range *records {
-		if record.Icon != nil {
-			record.Icon.SetURL(location.String())
-		}
-
-		if record.Background != nil {
-			record.Background.SetURL(location.String())
-		}
-
-		if record.Logo != nil {
-			record.Logo.SetURL(location.String())
-		}
-	}
-
 	c.JSON(
 		http.StatusOK,
 		records,
@@ -54,20 +37,7 @@ func PackIndex(c *gin.Context) {
 
 // PackShow retrieves a specific pack.
 func PackShow(c *gin.Context) {
-	location := location.Location(c)
 	record := session.Pack(c)
-
-	if record.Icon != nil {
-		record.Icon.SetURL(location.String())
-	}
-
-	if record.Background != nil {
-		record.Background.SetURL(location.String())
-	}
-
-	if record.Logo != nil {
-		record.Logo.SetURL(location.String())
-	}
 
 	c.JSON(
 		http.StatusOK,

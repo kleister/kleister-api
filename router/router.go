@@ -8,7 +8,6 @@ import (
 	"github.com/kleister/kleister-api/assets"
 	"github.com/kleister/kleister-api/config"
 	"github.com/kleister/kleister-api/router/middleware/header"
-	"github.com/kleister/kleister-api/router/middleware/location"
 	"github.com/kleister/kleister-api/router/middleware/logger"
 	"github.com/kleister/kleister-api/router/middleware/recovery"
 	"github.com/kleister/kleister-api/router/middleware/session"
@@ -34,7 +33,6 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 	e.Use(middleware...)
 	e.Use(logger.SetLogger())
 	e.Use(recovery.SetRecovery())
-	e.Use(location.SetLocation())
 	e.Use(store.SetStore())
 	e.Use(header.SetCache())
 	e.Use(header.SetOptions())

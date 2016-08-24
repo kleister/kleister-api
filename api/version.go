@@ -6,14 +6,12 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/kleister/kleister-api/model"
-	"github.com/kleister/kleister-api/router/middleware/location"
 	"github.com/kleister/kleister-api/router/middleware/session"
 	"github.com/kleister/kleister-api/store"
 )
 
 // VersionIndex retrieves all available versions.
 func VersionIndex(c *gin.Context) {
-	location := location.Location(c)
 	mod := session.Mod(c)
 
 	records, err := store.GetVersions(
@@ -34,12 +32,6 @@ func VersionIndex(c *gin.Context) {
 		return
 	}
 
-	for _, record := range *records {
-		if record.File != nil {
-			record.File.SetURL(location.String())
-		}
-	}
-
 	c.JSON(
 		http.StatusOK,
 		records,
@@ -48,12 +40,7 @@ func VersionIndex(c *gin.Context) {
 
 // VersionShow retrieves a specific version.
 func VersionShow(c *gin.Context) {
-	location := location.Location(c)
 	record := session.Version(c)
-
-	if record.File != nil {
-		record.File.SetURL(location.String())
-	}
 
 	c.JSON(
 		http.StatusOK,

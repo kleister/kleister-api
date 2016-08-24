@@ -1,9 +1,6 @@
 package data
 
 import (
-	"strconv"
-	"strings"
-
 	"github.com/kleister/kleister-api/model"
 )
 
@@ -19,7 +16,7 @@ func (db *data) GetSolderPacks() (*model.Packs, error) {
 	return records, err
 }
 
-func (db *data) GetSolderPack(pack, location string) (*model.Pack, error) {
+func (db *data) GetSolderPack(pack string) (*model.Pack, error) {
 	record := &model.Pack{}
 
 	err := db.Where(
@@ -43,46 +40,10 @@ func (db *data) GetSolderPack(pack, location string) (*model.Pack, error) {
 		record,
 	).Error
 
-	if record.Logo != nil {
-		record.Logo.URL = strings.Join(
-			[]string{
-				location,
-				"storage",
-				"logo",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
-	}
-
-	if record.Background != nil {
-		record.Background.URL = strings.Join(
-			[]string{
-				location,
-				"storage",
-				"background",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
-	}
-
-	if record.Icon != nil {
-		record.Icon.URL = strings.Join(
-			[]string{
-				location,
-				"storage",
-				"icon",
-				strconv.Itoa(record.ID),
-			},
-			"/",
-		)
-	}
-
 	return record, err
 }
 
-func (db *data) GetSolderBuild(pack, build, location string) (*model.Build, error) {
+func (db *data) GetSolderBuild(pack, build string) (*model.Build, error) {
 	record := &model.Build{}
 
 	err := db.Where(
@@ -106,20 +67,6 @@ func (db *data) GetSolderBuild(pack, build, location string) (*model.Build, erro
 	).First(
 		record,
 	).Error
-
-	for _, version := range record.Versions {
-		if version.File != nil {
-			version.File.URL = strings.Join(
-				[]string{
-					location,
-					"storage",
-					"version",
-					strconv.Itoa(version.ID),
-				},
-				"/",
-			)
-		}
-	}
 
 	return record, err
 }

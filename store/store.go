@@ -360,8 +360,8 @@ type Store interface {
 	GetSolderPacks() (*model.Packs, error)
 
 	// GetSolderPack retrieves a specific pack optimized for the solder compatible API.
-	GetSolderPack(string, string) (*model.Pack, error)
+	GetSolderPack(string) (*model.Pack, error)
 
 	// GetSolderBuild retrieves a specific build optimized for the solder compatible API.
-	GetSolderBuild(string, string, string) (*model.Build, error)
+	GetSolderBuild(string, string) (*model.Build, error)
 }

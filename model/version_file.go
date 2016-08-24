@@ -36,6 +36,11 @@ type VersionFile struct {
 	UpdatedAt   time.Time        `json:"-"`
 }
 
+// AfterFind invokes required after loading a record from the database.
+func (u *VersionFile) AfterFind(db *gorm.DB) {
+	u.SetURL()
+}
+
 // BeforeSave invokes required actions before persisting.
 func (u *VersionFile) BeforeSave(db *gorm.DB) error {
 	if u.Slug == "" {
@@ -178,7 +183,7 @@ func (u *VersionFile) RelativePath() string {
 }
 
 // SetURL generates the absolute URL to access this file.
-func (u *VersionFile) SetURL(location string) {
+func (u *VersionFile) SetURL() {
 	if config.S3.Enabled {
 		if config.S3.Endpoint == "" {
 			u.URL = fmt.Sprintf(
@@ -198,7 +203,7 @@ func (u *VersionFile) SetURL(location string) {
 	} else {
 		u.URL = strings.Join(
 			[]string{
-				location,
+				config.Server.Host,
 				"storage",
 				u.RelativePath(),
 			},

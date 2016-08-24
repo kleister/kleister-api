@@ -36,6 +36,11 @@ type PackLogo struct {
 	UpdatedAt   time.Time        `json:"-"`
 }
 
+// AfterFind invokes required after loading a record from the database.
+func (u *PackLogo) AfterFind(db *gorm.DB) {
+	u.SetURL()
+}
+
 // BeforeSave invokes required actions before persisting.
 func (u *PackLogo) BeforeSave(db *gorm.DB) error {
 	if u.Slug == "" {
@@ -178,7 +183,7 @@ func (u *PackLogo) RelativePath() string {
 }
 
 // SetURL generates the absolute URL to access this logo.
-func (u *PackLogo) SetURL(location string) {
+func (u *PackLogo) SetURL() {
 	if config.S3.Enabled {
 		if config.S3.Endpoint == "" {
 			u.URL = fmt.Sprintf(
@@ -198,7 +203,7 @@ func (u *PackLogo) SetURL(location string) {
 	} else {
 		u.URL = strings.Join(
 			[]string{
-				location,
+				config.Server.Host,
 				"storage",
 				u.RelativePath(),
 			},
