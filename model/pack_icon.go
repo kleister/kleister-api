@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -27,6 +26,7 @@ type PackIcon struct {
 	ID          int              `json:"-" gorm:"primary_key"`
 	PackID      int              `json:"-"`
 	Pack        *Pack            `json:"-"`
+	Slug        string           `json:"slug" sql:"unique_index"`
 	ContentType string           `json:"content_type"`
 	Path        string           `json:"-" sql:"-"`
 	URL         string           `json:"url" sql:"-"`
@@ -38,6 +38,27 @@ type PackIcon struct {
 
 // BeforeSave invokes required actions before persisting.
 func (u *PackIcon) BeforeSave(db *gorm.DB) error {
+	if u.Slug == "" {
+		for i := 0; true; i++ {
+			hash := md5.Sum([]byte(fmt.Sprintf("%s", time.Now().Unix())))
+			u.Slug = hex.EncodeToString(hash[:])
+
+			notFound := db.Where(
+				"slug = ?",
+				u.Slug,
+			).Not(
+				"id",
+				u.ID,
+			).First(
+				&PackIcon{},
+			).RecordNotFound()
+
+			if notFound {
+				break
+			}
+		}
+	}
+
 	if u.Upload != nil {
 		check := md5.Sum(
 			u.Upload.Data,
@@ -152,7 +173,7 @@ func (u *PackIcon) AbsolutePath() (string, error) {
 func (u *PackIcon) RelativePath() string {
 	return path.Join(
 		"icon",
-		strconv.Itoa(u.PackID),
+		u.Slug,
 	)
 }
 
