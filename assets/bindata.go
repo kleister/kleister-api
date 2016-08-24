@@ -88,7 +88,7 @@ func imagesFaviconIco() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/favicon.ico", size: 4286, mode: os.FileMode(420), modTime: time.Unix(1460986863, 0)}
+	info := bindataFileInfo{name: "images/favicon.ico", size: 4286, mode: os.FileMode(420), modTime: time.Unix(1460817042, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -108,7 +108,7 @@ func imagesWrenchSvg() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/wrench.svg", size: 1284, mode: os.FileMode(420), modTime: time.Unix(1460986863, 0)}
+	info := bindataFileInfo{name: "images/wrench.svg", size: 1284, mode: os.FileMode(420), modTime: time.Unix(1460817042, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -128,7 +128,7 @@ func scriptsApplicationJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "scripts/application.js", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460986863, 0)}
+	info := bindataFileInfo{name: "scripts/application.js", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460817042, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -148,7 +148,7 @@ func scriptsVendorJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "scripts/vendor.js", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460986863, 0)}
+	info := bindataFileInfo{name: "scripts/vendor.js", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460817042, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -168,7 +168,7 @@ func stylesApplicationCSS() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "styles/application.css", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460986863, 0)}
+	info := bindataFileInfo{name: "styles/application.css", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460817042, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -188,7 +188,7 @@ func stylesVendorCSS() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "styles/vendor.css", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460986863, 0)}
+	info := bindataFileInfo{name: "styles/vendor.css", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460817042, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
