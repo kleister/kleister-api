@@ -28,6 +28,7 @@ deps:
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/mitchellh/gox
 	go get -u github.com/govend/govend
+	go get -u github.com/vektra/mockery/...
 
 vendor:
 	govend -v
