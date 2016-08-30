@@ -7,8 +7,6 @@ import (
 	"github.com/kleister/kleister-api/model/minecraft"
 )
 
-//go:generate mockery -all -case=underscore
-
 // Store implements all required data-layer functions for Solder.
 type Store interface {
 	// GetBuilds retrieves all available builds from the database.

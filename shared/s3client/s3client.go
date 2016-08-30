@@ -11,10 +11,12 @@ import (
 	"github.com/kleister/kleister-api/config"
 )
 
+// S3Client is a simple wrapper around a real S3 client.
 type S3Client struct {
 	client *s3.S3
 }
 
+// List retrieves a list of available objects in the bucket.
 func (u *S3Client) List() (*s3.ListObjectsOutput, error) {
 	params := &s3.ListObjectsInput{
 		Bucket: aws.String(config.S3.Bucket),
@@ -25,6 +27,7 @@ func (u *S3Client) List() (*s3.ListObjectsOutput, error) {
 	)
 }
 
+// Upload stores an attachment within the defined S3 bucket.
 func (u *S3Client) Upload(path string, ctype string, content []byte) (*s3.PutObjectOutput, error) {
 	params := &s3.PutObjectInput{
 		ACL:         aws.String("public-read"),
@@ -39,6 +42,7 @@ func (u *S3Client) Upload(path string, ctype string, content []byte) (*s3.PutObj
 	)
 }
 
+// Delete removes an attachment from the defined S3 bucket.
 func (u *S3Client) Delete(path string) (*s3.DeleteObjectOutput, error) {
 	params := &s3.DeleteObjectInput{
 		Bucket: aws.String(config.S3.Bucket),
@@ -50,6 +54,7 @@ func (u *S3Client) Delete(path string) (*s3.DeleteObjectOutput, error) {
 	)
 }
 
+// New initializes a new S3 client connection based on config.
 func New() *S3Client {
 	var (
 		cfg *aws.Config
