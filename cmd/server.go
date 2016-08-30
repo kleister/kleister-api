@@ -155,11 +155,7 @@ func Server() cli.Command {
 				_, err := s3client.New().List()
 
 				if err != nil {
-					if config.Debug {
-						return fmt.Errorf("Failed to connect to S3. %s", err)
-					} else {
-						return fmt.Errorf("Failed to connect to S3.")
-					}
+					return fmt.Errorf("Failed to connect to S3. %s", err)
 				}
 			}
 
