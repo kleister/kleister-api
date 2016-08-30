@@ -1,20 +1,13 @@
 package model
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"path"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
 	"github.com/kleister/kleister-api/config"
-	"github.com/kleister/kleister-api/shared/s3client"
 	"github.com/vincent-petithory/dataurl"
 )
 
@@ -45,8 +38,7 @@ func (u *PackIcon) AfterFind(db *gorm.DB) {
 func (u *PackIcon) BeforeSave(db *gorm.DB) error {
 	if u.Slug == "" {
 		for i := 0; true; i++ {
-			hash := md5.Sum([]byte(fmt.Sprintf("%s", time.Now().Unix())))
-			u.Slug = hex.EncodeToString(hash[:])
+			u.Slug = RandomHash()
 
 			notFound := db.Where(
 				"slug = ?",
@@ -65,16 +57,7 @@ func (u *PackIcon) BeforeSave(db *gorm.DB) error {
 	}
 
 	if u.Upload != nil {
-		check := md5.Sum(
-			u.Upload.Data,
-		)
-
-		hash := hex.EncodeToString(
-			check[:],
-		)
-
-		u.MD5 = hash
-		u.ContentType = u.Upload.MediaType.String()
+		u.MD5, u.ContentType = AttachmentHash(u.Upload)
 	}
 
 	return nil
@@ -83,43 +66,23 @@ func (u *PackIcon) BeforeSave(db *gorm.DB) error {
 // AfterSave invokes required actions after persisting.
 func (u *PackIcon) AfterSave(db *gorm.DB) error {
 	if u.Upload != nil {
-		if config.S3.Enabled {
-			_, err := s3client.New().Upload(
-				u.RelativePath(),
-				u.ContentType,
-				u.Upload.Data,
-			)
+		var (
+			err  error
+			dest string
+		)
 
-			if err != nil {
-				return fmt.Errorf("Failed to upload icon to S3. %s", err)
-			}
+		if config.S3.Enabled {
+			dest = u.RelativePath()
 		} else {
-			absolutePath, err := u.AbsolutePath()
+			dest, err = u.AbsolutePath()
 
 			if err != nil {
 				return err
 			}
+		}
 
-			errDir := os.MkdirAll(
-				filepath.Dir(
-					absolutePath,
-				),
-				os.ModePerm,
-			)
-
-			if errDir != nil {
-				return fmt.Errorf("Failed to create icon directory")
-			}
-
-			errWrite := ioutil.WriteFile(
-				absolutePath,
-				u.Upload.Data,
-				0644,
-			)
-
-			if errWrite != nil {
-				return fmt.Errorf("Failed to write icon at %s", absolutePath)
-			}
+		if err := AttachmentUpload(dest, u.ContentType, u.Upload.Data); err != nil {
+			return fmt.Errorf("Failed to store icon. %s", err)
 		}
 	}
 
@@ -128,26 +91,23 @@ func (u *PackIcon) AfterSave(db *gorm.DB) error {
 
 // AfterDelete invokes required actions after deletion.
 func (u *PackIcon) AfterDelete(tx *gorm.DB) error {
-	if config.S3.Enabled {
-		_, err := s3client.New().Delete(
-			u.RelativePath(),
-		)
+	var (
+		err  error
+		dest string
+	)
 
-		return fmt.Errorf("Failed to remove icon from S3. %s", err)
+	if config.S3.Enabled {
+		dest = u.RelativePath()
 	} else {
-		absolutePath, err := u.AbsolutePath()
+		dest, err = u.AbsolutePath()
 
 		if err != nil {
 			return err
 		}
+	}
 
-		errRemove := os.Remove(
-			absolutePath,
-		)
-
-		if errRemove != nil {
-			return fmt.Errorf("Failed to remove icon")
-		}
+	if err := AttachmentDelete(dest); err != nil {
+		return fmt.Errorf("Failed to remove icon. %s", err)
 	}
 
 	return nil
@@ -184,32 +144,9 @@ func (u *PackIcon) RelativePath() string {
 
 // SetURL generates the absolute URL to access this icon.
 func (u *PackIcon) SetURL() {
-	if config.S3.Enabled {
-		if config.S3.Endpoint == "" {
-			u.URL = fmt.Sprintf(
-				"https://s3-%s.amazonaws.com/%s/%s",
-				config.S3.Region,
-				config.S3.Bucket,
-				u.RelativePath(),
-			)
-		} else {
-			u.URL = fmt.Sprintf(
-				"%s/%s/%s",
-				config.S3.Endpoint,
-				config.S3.Bucket,
-				u.RelativePath(),
-			)
-		}
-	} else {
-		u.URL = strings.Join(
-			[]string{
-				config.Server.Host,
-				"storage",
-				u.RelativePath(),
-			},
-			"/",
-		)
-	}
+	u.URL = AttachmentURL(
+		u.RelativePath(),
+	)
 }
 
 func isInvalidPackIconType(mediaType string) bool {
