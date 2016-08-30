@@ -6,7 +6,7 @@
 [![Go Report](https://goreportcard.com/badge/github.com/harborapp/harbor-api)](https://goreportcard.com/report/github.com/harborapp/harbor-api)
 [![](https://images.microbadger.com/badges/image/kleister/kleister-api.svg)](http://microbadger.com/images/kleister/kleister-api "Get your own image badge on microbadger.com")
 [![Join the chat at https://gitter.im/kleister/kleister](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kleister/kleister)
-![Release Status](https://img.shields.io/badge/status-beta-yellow.svg?style=flat)
+[![Stories in Ready](https://badge.waffle.io/kleister/kleister-api.svg?label=ready&title=Ready)](http://waffle.io/kleister/kleister-api)
 
 **This project is under heavy development, it's not in a working state yet!**
 
