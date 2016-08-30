@@ -60,7 +60,7 @@ func New(driver string, config string) store.Store {
 
 	if err != nil {
 		logrus.Errorln(err)
-		logrus.Fatalln("database connection failed")
+		logrus.Fatalln("Database connection failed")
 	}
 
 	return &data{
@@ -74,7 +74,7 @@ func From(driver string, handle *sql.DB) store.Store {
 
 	if err != nil {
 		logrus.Errorln(err)
-		logrus.Fatalln("database connection failed")
+		logrus.Fatalln("Database connection failed")
 	}
 
 	return &data{
@@ -112,8 +112,8 @@ func Load() store.Store {
 		connect = config.Database.Name
 	}
 
-	logrus.Infof("using database driver %s", driver)
-	logrus.Infof("using database config %s", connect)
+	logrus.Infof("Using database driver %s", driver)
+	logrus.Infof("Using database config %s", connect)
 
 	return New(
 		driver,
@@ -141,17 +141,17 @@ func setupDatabase(driver string, db *gorm.DB) *gorm.DB {
 
 	if err := prepareDatabase(driver, db); err != nil {
 		logrus.Errorln(err)
-		logrus.Fatalln("database preparation failed")
+		logrus.Fatalln("Database preparation failed")
 	}
 
 	if err := pingDatabase(driver, db); err != nil {
 		logrus.Errorln(err)
-		logrus.Fatalln("database ping attempts failed")
+		logrus.Fatalln("Database ping attempts failed")
 	}
 
 	if err := migrateDatabase(driver, db); err != nil {
 		logrus.Errorln(err)
-		logrus.Fatalln("database migration failed")
+		logrus.Fatalln("Database migration failed")
 	}
 
 	return db
@@ -177,7 +177,7 @@ func pingDatabase(driver string, db *gorm.DB) error {
 			return nil
 		}
 
-		logrus.Infof("database ping failed, retry in 1s")
+		logrus.Infof("Database ping failed, retry in 1s")
 		time.Sleep(time.Second)
 	}
 
