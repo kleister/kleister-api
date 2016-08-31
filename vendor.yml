@@ -6,7 +6,7 @@ vendors:
 - path: github.com/asaskevich/govalidator
   rev: 593d64559f7600f29581a3ee42177f5dbded27a9
 - path: github.com/aws/aws-sdk-go
-  rev: e39222bf4583af667250cfd83a41388937ba56d4
+  rev: d6b4bfeba6997082629986cac2a932a233ba745e
 - path: github.com/davecgh/go-spew
   rev: 6cf5744a041a0022271cefed95ba843f6d87fd51
 - path: github.com/denisenkom/go-mssqldb
@@ -54,7 +54,7 @@ vendors:
 - path: github.com/pmezard/go-difflib
   rev: 792786c7400a136282c1664665ae0a8db921c6c2
 - path: github.com/qor/qor
-  rev: 0dd0f9c7ec1f94f879192e8a06efe956fd9a4c48
+  rev: dd91c8debf49008a5704ca2ba8c13330e1a41838
 - path: github.com/qor/validations
   rev: aa83180452b83a2325f13a30a2a8f4740c43c792
 - path: github.com/smartystreets/assertions
@@ -70,9 +70,9 @@ vendors:
 - path: github.com/vincent-petithory/dataurl
   rev: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - path: golang.org/x/crypto
-  rev: 351dc6a5bf92a5f2ae22fadeee08eb6a45aa2d93
+  rev: 055d4bfb5c396e3c3dcd9aad97c9086d48b23189
 - path: golang.org/x/net
-  rev: 6250b412798208e6c90b03b7c4f226de5aa299e2
+  rev: 9bc2a3340c92c17a20edcd0080e93851ed58f5d5
 - path: golang.org/x/sys
   rev: a646d33e2ee3172a661fc09bca23bb4889a41bc8
 - path: gopkg.in/check.v1
@@ -81,5 +81,9 @@ vendors:
   rev: 4f4dfbc7d1c48336cf93399deae81aa9067e88af
 - path: gopkg.in/go-playground/validator.v8
   rev: 5f57d2222ad794d0dffb07e664ea05e2ee07d60c
+- path: gopkg.in/gormigrate.v1
+  rev: 92a8cdffde84870ead5aeca2891ad14112a29005
+- path: gopkg.in/stretchr/testify.v1
+  rev: f390dcf405f7b83c997eac1b06768bb9f44dec18
 - path: gopkg.in/yaml.v2
   rev: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
