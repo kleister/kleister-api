@@ -17,7 +17,7 @@ type PackLogos []*PackLogo
 // PackLogo represents a pack logo model definition.
 type PackLogo struct {
 	ID          int              `json:"-" gorm:"primary_key"`
-	PackID      int              `json:"-"`
+	PackID      int              `json:"-" sql:"index"`
 	Pack        *Pack            `json:"-"`
 	Slug        string           `json:"slug" sql:"unique_index"`
 	ContentType string           `json:"content_type"`
