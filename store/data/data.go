@@ -13,6 +13,7 @@ import (
 	"github.com/kleister/kleister-api/store"
 	"github.com/o1egl/gormrus"
 	"github.com/qor/validations"
+	"gopkg.in/gormigrate.v1"
 
 	// Register MySQL driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -60,7 +61,7 @@ func New(driver string, config string) store.Store {
 
 	if err != nil {
 		logrus.Errorln(err)
-		logrus.Fatalln("database connection failed")
+		logrus.Fatalln("Database connection failed")
 	}
 
 	return &data{
@@ -74,7 +75,7 @@ func From(driver string, handle *sql.DB) store.Store {
 
 	if err != nil {
 		logrus.Errorln(err)
-		logrus.Fatalln("database connection failed")
+		logrus.Fatalln("Database connection failed")
 	}
 
 	return &data{
@@ -112,8 +113,8 @@ func Load() store.Store {
 		connect = config.Database.Name
 	}
 
-	logrus.Infof("using database driver %s", driver)
-	logrus.Infof("using database config %s", connect)
+	logrus.Infof("Using database driver %s", driver)
+	logrus.Infof("Using database config %s", connect)
 
 	return New(
 		driver,
@@ -140,18 +141,15 @@ func setupDatabase(driver string, db *gorm.DB) *gorm.DB {
 	}
 
 	if err := prepareDatabase(driver, db); err != nil {
-		logrus.Errorln(err)
-		logrus.Fatalln("database preparation failed")
+		logrus.Fatalln(err)
 	}
 
 	if err := pingDatabase(driver, db); err != nil {
-		logrus.Errorln(err)
-		logrus.Fatalln("database ping attempts failed")
+		logrus.Fatalln(err)
 	}
 
 	if err := migrateDatabase(driver, db); err != nil {
-		logrus.Errorln(err)
-		logrus.Fatalln("database migration failed")
+		logrus.Fatalln(err)
 	}
 
 	return db
@@ -177,66 +175,26 @@ func pingDatabase(driver string, db *gorm.DB) error {
 			return nil
 		}
 
-		logrus.Infof("database ping failed, retry in 1s")
+		logrus.Infof("Database ping failed, retry in 1s")
 		time.Sleep(time.Second)
 	}
 
-	return nil
+	return fmt.Errorf("Database ping attempts failed")
 }
 
 func migrateDatabase(driver string, db *gorm.DB) error {
-	db.AutoMigrate(
-		&model.Build{},
-		&model.Client{},
-		&model.Forge{},
-		&model.Minecraft{},
-		&model.Mod{},
-		&model.Pack{},
-		&model.PackBackground{},
-		&model.PackIcon{},
-		&model.PackLogo{},
-		&model.User{},
-		&model.UserMod{},
-		&model.UserPack{},
-		&model.Team{},
-		&model.TeamUser{},
-		&model.TeamMod{},
-		&model.TeamPack{},
-		&model.Version{},
-		&model.VersionFile{},
+	migrate := gormigrate.New(
+		db,
+		gormigrate.DefaultOptions,
+		migrations,
 	)
 
-	db.Model(
-		&model.Build{},
-	).AddUniqueIndex(
-		"uix_builds_pack_id_slug",
-		"pack_id",
-		"slug",
-	)
-
-	db.Model(
-		&model.Build{},
-	).AddUniqueIndex(
-		"uix_builds_pack_id_name",
-		"pack_id",
-		"name",
-	)
-
-	db.Model(
-		&model.Version{},
-	).AddUniqueIndex(
-		"uix_versions_mod_id_slug",
-		"mod_id",
-		"slug",
-	)
-
-	db.Model(
-		&model.Version{},
-	).AddUniqueIndex(
-		"uix_versions_mod_id_name",
-		"mod_id",
-		"name",
-	)
+	if err := migrate.Migrate(); err != nil {
+		return fmt.Errorf(
+			"Failed to migrate database. %s",
+			err,
+		)
+	}
 
 	if db.First(&model.User{}).RecordNotFound() {
 		record := &model.User{
@@ -248,7 +206,7 @@ func migrateDatabase(driver string, db *gorm.DB) error {
 		}
 
 		err := db.Create(
-			&record,
+			record,
 		).Error
 
 		if err != nil {
