@@ -3,9 +3,7 @@
 // dist/images/favicon.ico
 // dist/images/wrench.svg
 // dist/scripts/application.js
-// dist/scripts/vendor.js
 // dist/styles/application.css
-// dist/styles/vendor.css
 // DO NOT EDIT!
 
 package assets
@@ -133,26 +131,6 @@ func scriptsApplicationJs() (*asset, error) {
 	return a, nil
 }
 
-var _scriptsVendorJs = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x01\x00\x00\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00")
-
-func scriptsVendorJsBytes() ([]byte, error) {
-	return bindataRead(
-		_scriptsVendorJs,
-		"scripts/vendor.js",
-	)
-}
-
-func scriptsVendorJs() (*asset, error) {
-	bytes, err := scriptsVendorJsBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "scripts/vendor.js", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460817042, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
 var _stylesApplicationCSS = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x01\x00\x00\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00")
 
 func stylesApplicationCSSBytes() ([]byte, error) {
@@ -169,26 +147,6 @@ func stylesApplicationCSS() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "styles/application.css", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460817042, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
-var _stylesVendorCSS = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x01\x00\x00\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00")
-
-func stylesVendorCSSBytes() ([]byte, error) {
-	return bindataRead(
-		_stylesVendorCSS,
-		"styles/vendor.css",
-	)
-}
-
-func stylesVendorCSS() (*asset, error) {
-	bytes, err := stylesVendorCSSBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "styles/vendor.css", size: 0, mode: os.FileMode(420), modTime: time.Unix(1460817042, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -248,9 +206,7 @@ var _bindata = map[string]func() (*asset, error){
 	"images/favicon.ico":     imagesFaviconIco,
 	"images/wrench.svg":      imagesWrenchSvg,
 	"scripts/application.js": scriptsApplicationJs,
-	"scripts/vendor.js":      scriptsVendorJs,
 	"styles/application.css": stylesApplicationCSS,
-	"styles/vendor.css":      stylesVendorCSS,
 }
 
 // AssetDir returns the file names below a certain
@@ -300,11 +256,9 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	}},
 	"scripts": &bintree{nil, map[string]*bintree{
 		"application.js": &bintree{scriptsApplicationJs, map[string]*bintree{}},
-		"vendor.js":      &bintree{scriptsVendorJs, map[string]*bintree{}},
 	}},
 	"styles": &bintree{nil, map[string]*bintree{
 		"application.css": &bintree{stylesApplicationCSS, map[string]*bintree{}},
-		"vendor.css":      &bintree{stylesVendorCSS, map[string]*bintree{}},
 	}},
 }}
 
