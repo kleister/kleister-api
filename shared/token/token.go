@@ -95,6 +95,21 @@ func Parse(r *http.Request, fn SecretFunc) (*Token, error) {
 	return token, nil
 }
 
+// Direct can parse the token directly without a request.
+func Direct(val string, fn SecretFunc) (*Token, error) {
+	token := &Token{}
+
+	parsed, err := jwt.Parse(val, keyFunc(token, fn))
+
+	if err != nil {
+		return nil, err
+	} else if !parsed.Valid {
+		return nil, jwt.ValidationError{}
+	}
+
+	return token, nil
+}
+
 func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 	return func(t *jwt.Token) (interface{}, error) {
 		if t.Method.Alg() != SignerAlgo {

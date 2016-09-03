@@ -1,10 +1,12 @@
 package api
 
 import (
+	"encoding/base32"
 	"net/http"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"github.com/kleister/kleister-api/config"
 	"github.com/kleister/kleister-api/model"
 	"github.com/kleister/kleister-api/router/middleware/session"
@@ -124,4 +126,46 @@ func AuthLogin(c *gin.Context) {
 		http.StatusOK,
 		result,
 	)
+}
+
+// AuthVerify is a handler to verify an JWT token.
+func AuthVerify(c *gin.Context) {
+	var (
+		record *model.User
+	)
+
+	_, err := token.Direct(
+		c.Param("token"),
+		func(t *token.Token) ([]byte, error) {
+			var (
+				res *gorm.DB
+			)
+
+			record, res = store.GetUser(
+				c,
+				t.Text,
+			)
+
+			signingKey, _ := base32.StdEncoding.DecodeString(record.Hash)
+			return signingKey, res.Error
+		},
+	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"error":  "Invalid token provided",
+			},
+		)
+	} else {
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"valid":      "Valid token provided",
+				"name":       record.Username,
+				"created_at": record.CreatedAt,
+			},
+		)
+	}
 }
