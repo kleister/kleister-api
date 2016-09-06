@@ -1,4 +1,4 @@
-// Gormigrate is a migration helper for Gorm (http://jinzhu.me/gorm/).
+// Package gormigrate is a migration helper for Gorm (http://jinzhu.me/gorm/).
 // Gorm already have useful migrate functions
 // (http://jinzhu.me/gorm/database.html#migration), just misses
 // proper schema versioning and rollback cababilities.
@@ -74,8 +74,14 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// MigrateFunc is the func signature for migrating.
 type MigrateFunc func(*gorm.DB) error
+
+// RollbackFunc is the func signature for rollbacking.
 type RollbackFunc func(*gorm.DB) error
+
+// InitSchemaFunc is the func signature for initializing the schema.
+type InitSchemaFunc func(*gorm.DB) error
 
 // Options define options for all migrations.
 type Options struct {
@@ -88,7 +94,7 @@ type Options struct {
 	UseTransaction bool
 }
 
-// Migrate represents a database migration (a modification to be made on the database).
+// Migration represents a database migration (a modification to be made on the database).
 type Migration struct {
 	// ID is the migration identifier. Usually a timestamp like "201601021504".
 	ID string
@@ -98,10 +104,12 @@ type Migration struct {
 	Rollback RollbackFunc
 }
 
+// Gormigrate represents a collection of all migrations of a database schema.
 type Gormigrate struct {
 	db         *gorm.DB
 	options    *Options
 	migrations []*Migration
+	initSchema InitSchemaFunc
 }
 
 var (
@@ -112,7 +120,11 @@ var (
 		UseTransaction: false,
 	}
 
+	// ErrRollbackImpossible is returned when trying to rollback a migration
+	// that has no rollback function.
 	ErrRollbackImpossible = errors.New("It's impossible to rollback this migration")
+
+	// ErrNoMigrationDefined is returned when no migration is defined.
 	ErrNoMigrationDefined = errors.New("No migration defined")
 )
 
@@ -134,17 +146,29 @@ func (g *Gormigrate) migrationDidRun(m *Migration) bool {
 	return count > 0
 }
 
+func (g *Gormigrate) isFirstRun() bool {
+	var count int
+	g.db.
+		Table(g.options.TableName).
+		Count(&count)
+	return count == 0
+}
+
 func (g *Gormigrate) createMigrationTableIfNotExists() error {
 	if g.db.HasTable(g.options.TableName) {
 		return nil
 	}
 
 	sql := fmt.Sprintf("CREATE TABLE %s (%s VARCHAR(255) PRIMARY KEY)", g.options.TableName, g.options.IDColumnName)
-	err := g.db.Exec(sql).Error
-	if err != nil {
+	if err := g.db.Exec(sql).Error; err != nil {
 		return err
 	}
 	return nil
+}
+
+func (g *Gormigrate) insertMigration(id string) error {
+	sql := fmt.Sprintf("INSERT INTO %s (%s) VALUES (?)", g.options.TableName, g.options.IDColumnName)
+	return g.db.Exec(sql, id).Error
 }
 
 // Migrate executes all migrations that did not run yet.
@@ -163,18 +187,44 @@ func (g *Gormigrate) Migrate() error {
 		tx = g.db
 	}
 
+	if g.isFirstRun() && g.initSchema != nil {
+		if err := g.initSchema(tx); err != nil {
+			if g.options.UseTransaction {
+				tx.Rollback()
+			}
+			return err
+		}
+		for _, migration := range g.migrations {
+			if err := g.insertMigration(migration.ID); err != nil {
+				if g.options.UseTransaction {
+					tx.Rollback()
+				}
+				return err
+			}
+		}
+		if g.options.UseTransaction {
+			if err := tx.Commit().Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
 	for _, migration := range g.migrations {
 		if g.migrationDidRun(migration) {
 			continue
 		}
 
 		if err := migration.Migrate(tx); err != nil {
-			tx.Rollback()
+			if g.options.UseTransaction {
+				tx.Rollback()
+			}
 			return err
 		}
-		sql := fmt.Sprintf("INSERT INTO %s (%s) VALUES (?)", g.options.TableName, g.options.IDColumnName)
-		if err := g.db.Exec(sql, migration.ID).Error; err != nil {
-			tx.Rollback()
+		if err := g.insertMigration(migration.ID); err != nil {
+			if g.options.UseTransaction {
+				tx.Rollback()
+			}
 			return err
 		}
 	}
@@ -204,7 +254,9 @@ func (g *Gormigrate) RollbackMigration(m *Migration) error {
 	}
 	sql := fmt.Sprintf("DELETE FROM %s WHERE %s = ?", g.options.TableName, g.options.IDColumnName)
 	if err := g.db.Exec(sql, m.ID).Error; err != nil {
-		tx.Rollback()
+		if g.options.UseTransaction {
+			tx.Rollback()
+		}
 		return err
 	}
 
@@ -227,4 +279,12 @@ func (g *Gormigrate) RollbackLast() error {
 		return err
 	}
 	return nil
+}
+
+// InitSchema sets a function that is run if no migration is found.
+// The idea is preventing to run all migrations when a new clean database
+// is being migrating. In this function you should create all tables and
+// foreign key necessary to your application.
+func (g *Gormigrate) InitSchema(initSchema InitSchemaFunc) {
+	g.initSchema = initSchema
 }

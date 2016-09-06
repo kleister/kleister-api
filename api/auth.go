@@ -155,7 +155,7 @@ func AuthVerify(c *gin.Context) {
 		c.JSON(
 			http.StatusOK,
 			gin.H{
-				"error":  "Invalid token provided",
+				"error": "Invalid token provided",
 			},
 		)
 	} else {

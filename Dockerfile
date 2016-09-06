@@ -2,7 +2,8 @@ FROM alpine:edge
 
 RUN apk update && \
   apk add \
-    ca-certificates && \
+    ca-certificates \
+    sqlite && \
   rm -rf \
     /var/cache/apk/*
 

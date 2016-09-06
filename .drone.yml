@@ -4,22 +4,17 @@ workspace:
 
 pipeline:
   testing:
-    image: webhippie/golang:latest
+    image: webhippie/golang:edge
     pull: true
-    environment:
-      - GOPATH=/srv/app
     commands:
       - make clean
-      - make deps
       - make vet
       - make lint
       - make test
       - make build
 
   updater:
-    image: webhippie/golang:latest
-    environment:
-      - GOPATH=/srv/app
+    image: webhippie/golang:edge
     commands:
       - make publish
     when:
@@ -29,6 +24,22 @@ pipeline:
   coverage:
     image: plugins/coverage
     server: http://coverage.dronehippie.de
+
+  docker1:
+    image: plugins/docker
+    repo: kleister/kleister-api
+    tags: [ '${TAG}' ]
+    when:
+      event: tag
+      branch: refs/tags/*
+
+  docker2:
+    image: plugins/docker
+    repo: kleister/kleister-api
+    tags: [ 'latest' ]
+    when:
+      event: push
+      branch: master
 
   # rsync:
   #   image: plugins/rsync
@@ -73,26 +84,6 @@ pipeline:
   #   when:
   #     event: tag
   #     branch: refs/tags/*
-
-  docker:
-    image: plugins/docker
-    storage_driver: overlay
-    debug: true
-    repo: kleister/kleister-api
-    tags: [ '${TAG}' ]
-    when:
-      event: tag
-      branch: refs/tags/*
-
-  docker:
-    image: plugins/docker
-    storage_driver: overlay
-    debug: true
-    repo: kleister/kleister-api
-    tags: [ 'latest' ]
-    when:
-      event: push
-      branch: master
 
   gitter:
     image: plugins/gitter

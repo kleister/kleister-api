@@ -8,5 +8,5 @@ import (
 )
 
 func init() {
-	dialects = append(dialects, "sqlite3")
+	EnableSQLite3 = true
 }

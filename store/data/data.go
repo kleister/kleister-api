@@ -20,10 +20,14 @@ import (
 
 	// Register Postgres driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+
+	// Register MSSQL driver for GORM
+	_ "github.com/jinzhu/gorm/dialects/mssql"
 )
 
 var (
-	dialects []string
+	// EnableSQLite3 controls the SQLite3 integration.
+	EnableSQLite3 bool
 )
 
 // Store is a basic struct to represent the database handle.
@@ -109,6 +113,14 @@ func Load() store.Store {
 			config.Database.Host,
 			config.Database.Name,
 		)
+	case "mssql":
+		connect = fmt.Sprintf(
+			"mssql://%s:%s@%s/%s",
+			config.Database.Username,
+			config.Database.Password,
+			config.Database.Host,
+			config.Database.Name,
+		)
 	case "sqlite3":
 		connect = config.Database.Name
 	}
@@ -123,12 +135,26 @@ func Load() store.Store {
 }
 
 func invalidDriver(driver string) bool {
-	for _, dialect := range dialects {
-		logrus.Debugf("Checking if %s matches %s database driver", dialect, driver)
+	logrus.Debugf("Checking %s driver for validity", driver)
 
-		if dialect == driver {
-			return false
-		}
+	if EnableSQLite3 && driver == "sqlite3" {
+		logrus.Debugf("Detected successfully SQLite driver")
+		return false
+	}
+
+	if driver == "mysql" {
+		logrus.Debugf("Detected successfully MySQL driver")
+		return false
+	}
+
+	if driver == "postgres" {
+		logrus.Debugf("Detected successfully Postgres driver")
+		return false
+	}
+
+	if driver == "mssql" {
+		logrus.Debugf("Detected successfully MSSQL driver")
+		return false
 	}
 
 	return true
@@ -218,9 +244,4 @@ func migrateDatabase(driver string, db *gorm.DB) error {
 	}
 
 	return nil
-}
-
-func init() {
-	dialects = append(dialects, "mysql")
-	dialects = append(dialects, "postgres")
 }
