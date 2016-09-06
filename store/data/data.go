@@ -26,6 +26,7 @@ import (
 )
 
 var (
+	// EnableSQLite3 controls the SQLite3 integration.
 	EnableSQLite3 bool
 )
 
