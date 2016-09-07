@@ -63,12 +63,18 @@ func (u *Minecraft) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
-// AfterDelete invokes required actions after deletion.
-func (u *Minecraft) AfterDelete(tx *gorm.DB) error {
-	for _, build := range u.Builds {
-		if err := tx.Model(build).Update("minecraft_id", 0).Error; err != nil {
-			return err
-		}
+// BeforeDelete invokes required actions before deletion.
+func (u *Minecraft) BeforeDelete(tx *gorm.DB) error {
+	builds := Builds{}
+
+	tx.Model(
+		u,
+	).Related(
+		&builds,
+	)
+
+	if len(builds) > 0 {
+		return fmt.Errorf("Can't delete, still assigned to builds.")
 	}
 
 	return nil

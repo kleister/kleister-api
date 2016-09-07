@@ -68,16 +68,18 @@ func (u *Pack) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
-// AfterDelete invokes required actions after deletion.
-func (u *Pack) AfterDelete(tx *gorm.DB) error {
-	for _, build := range u.Builds {
-		if err := tx.Delete(build).Error; err != nil {
-			return err
-		}
-	}
+// BeforeDelete invokes required actions before deletion.
+func (u *Pack) BeforeDelete(tx *gorm.DB) error {
+	builds := Builds{}
 
-	if err := tx.Model(u).Association("Clients").Clear().Error; err != nil {
-		return err
+	tx.Model(
+		u,
+	).Related(
+		&builds,
+	)
+
+	if len(builds) > 0 {
+		return fmt.Errorf("Can't delete, still assigned to builds.")
 	}
 
 	if err := tx.Model(u).Association("Users").Clear().Error; err != nil {
@@ -88,22 +90,20 @@ func (u *Pack) AfterDelete(tx *gorm.DB) error {
 		return err
 	}
 
-	if u.Icon != nil {
-		if err := tx.Delete(u.Icon).Error; err != nil {
-			return err
-		}
+	if err := tx.Model(u).Association("Clients").Clear().Error; err != nil {
+		return err
 	}
 
-	if u.Background != nil {
-		if err := tx.Delete(u.Background).Error; err != nil {
-			return err
-		}
+	if err := tx.Delete(&PackIcon{}, "pack_id = ?", u.ID).Error; err != nil {
+		return err
 	}
 
-	if u.Logo != nil {
-		if err := tx.Delete(u.Logo).Error; err != nil {
-			return err
-		}
+	if err := tx.Delete(&PackBackground{}, "pack_id = ?", u.ID).Error; err != nil {
+		return err
+	}
+
+	if err := tx.Delete(&PackLogo{}, "pack_id = ?", u.ID).Error; err != nil {
+		return err
 	}
 
 	return nil

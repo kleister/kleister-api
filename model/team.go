@@ -58,16 +58,18 @@ func (u *Team) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
-// AfterDelete invokes required actions after deletion.
-func (u *Team) AfterDelete(tx *gorm.DB) error {
+// BeforeDelete invokes required actions before deletion.
+func (u *Team) BeforeDelete(tx *gorm.DB) error {
 	if err := tx.Model(u).Association("Users").Clear().Error; err != nil {
 		return err
 	}
 
+	// TODO(tboerger): Prevent delete if team is last owner
 	if err := tx.Model(u).Association("Mods").Clear().Error; err != nil {
 		return err
 	}
 
+	// TODO(tboerger): Prevent delete if team is last owner
 	if err := tx.Model(u).Association("Packs").Clear().Error; err != nil {
 		return err
 	}
