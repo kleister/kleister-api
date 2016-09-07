@@ -66,8 +66,8 @@ func (u *Build) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
-// AfterDelete invokes required actions after deletion.
-func (u *Build) AfterDelete(tx *gorm.DB) error {
+// BeforeDelete invokes required actions before deletion.
+func (u *Build) BeforeDelete(tx *gorm.DB) error {
 	if err := tx.Model(u).Association("Versions").Clear().Error; err != nil {
 		return err
 	}

@@ -54,8 +54,8 @@ func (u *Client) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
-// AfterDelete invokes required actions after deletion.
-func (u *Client) AfterDelete(tx *gorm.DB) error {
+// BeforeDelete invokes required actions before deletion.
+func (u *Client) BeforeDelete(tx *gorm.DB) error {
 	if err := tx.Model(u).Association("Packs").Clear().Error; err != nil {
 		return err
 	}

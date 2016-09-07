@@ -61,12 +61,18 @@ func (u *Mod) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
-// AfterDelete invokes required actions after deletion.
-func (u *Mod) AfterDelete(tx *gorm.DB) error {
-	for _, version := range u.Versions {
-		if err := tx.Delete(version).Error; err != nil {
-			return err
-		}
+// BeforeDelete invokes required actions before deletion.
+func (u *Mod) BeforeDelete(tx *gorm.DB) error {
+	versions := Versions{}
+
+	tx.Model(
+		u,
+	).Related(
+		&versions,
+	)
+
+	if len(versions) > 0 {
+		return fmt.Errorf("Can't delete, still assigned to versions.")
 	}
 
 	if err := tx.Model(u).Association("Users").Clear().Error; err != nil {

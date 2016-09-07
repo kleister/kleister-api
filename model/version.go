@@ -59,16 +59,14 @@ func (u *Version) BeforeSave(db *gorm.DB) (err error) {
 	return nil
 }
 
-// AfterDelete invokes required actions after deletion.
-func (u *Version) AfterDelete(tx *gorm.DB) error {
+// BeforeDelete invokes required actions before deletion.
+func (u *Version) BeforeDelete(tx *gorm.DB) error {
 	if err := tx.Model(u).Association("Builds").Clear().Error; err != nil {
 		return err
 	}
 
-	if u.File != nil {
-		if err := tx.Delete(u.File).Error; err != nil {
-			return err
-		}
+	if err := tx.Delete(&VersionFile{}, "version_id = ?", u.ID).Error; err != nil {
+		return err
 	}
 
 	return nil
