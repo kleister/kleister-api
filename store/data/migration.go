@@ -826,5 +826,23 @@ var (
 				return gormigrate.ErrRollbackImpossible
 			},
 		},
+		{
+			ID: "201609091338",
+			Migrate: func(tx *gorm.DB) error {
+				type Key struct {
+					ID        int    `gorm:"primary_key"`
+					Slug      string `sql:"unique_index"`
+					Name      string `sql:"unique_index"`
+					Value     string `sql:"unique_index"`
+					CreatedAt time.Time
+					UpdatedAt time.Time
+				}
+
+				return tx.CreateTable(&Key{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.DropTable("keys").Error
+			},
+		},
 	}
 )

@@ -9,6 +9,21 @@ import (
 
 // Store implements all required data-layer functions for Solder.
 type Store interface {
+	// GetKeys retrieves all available keys from the database.
+	GetKeys() (*model.Keys, error)
+
+	// CreateKey creates a new key.
+	CreateKey(*model.Key, *model.User) error
+
+	// UpdateKey updates a key.
+	UpdateKey(*model.Key, *model.User) error
+
+	// DeleteKey deletes a key.
+	DeleteKey(*model.Key, *model.User) error
+
+	// GetKey retrieves a specific key from the database.
+	GetKey(string) (*model.Key, *gorm.DB)
+
 	// GetBuilds retrieves all available builds from the database.
 	GetBuilds(int) (*model.Builds, error)
 

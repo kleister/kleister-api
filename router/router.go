@@ -89,6 +89,21 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			}
 
 			//
+			// Keys
+			//
+			keys := base.Group("/keys")
+			{
+				keys.Use(session.MustCurrent())
+				keys.Use(session.MustKeys("display"))
+
+				keys.GET("", api.KeyIndex)
+				keys.GET("/:client", session.SetKey(), api.KeyShow)
+				keys.DELETE("/:client", session.SetKey(), session.MustKeys("delete"), api.KeyDelete)
+				keys.PATCH("/:client", session.SetKey(), session.MustKeys("change"), api.KeyUpdate)
+				keys.POST("", session.MustKeys("change"), api.KeyCreate)
+			}
+
+			//
 			// Minecraft
 			//
 			minecraft := base.Group("/minecraft")
