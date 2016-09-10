@@ -62,9 +62,6 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 		{
 			base.GET("", api.IndexInfo)
 
-			// Shortcut to auth
-			base.GET("/verify/:token", api.AuthVerify)
-
 			//
 			// Auth
 			//
@@ -419,6 +416,11 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				solder.GET("/mod/:mod", api.SolderMod)
 				solder.GET("/mod/:mod/:version", api.SolderVersion)
 			}
+
+			//
+			// Verify
+			//
+			base.GET("/verify/:key", api.KeyVerify)
 		}
 	}
 
