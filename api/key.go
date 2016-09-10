@@ -163,3 +163,29 @@ func KeyCreate(c *gin.Context) {
 		record,
 	)
 }
+
+// KeyVerify is a handler to verify a key for Technic.
+func KeyVerify(c *gin.Context) {
+	record, res := store.GetKey(
+		c,
+		c.Param("key"),
+	)
+
+	if res.Error != nil || res.RecordNotFound() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"error": "Invalid key provided",
+			},
+		)
+	} else {
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"valid":      "Valid key provided",
+				"name":       record.Name,
+				"created_at": record.CreatedAt,
+			},
+		)
+	}
+}
