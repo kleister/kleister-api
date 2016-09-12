@@ -31,6 +31,11 @@ func GetClient(c context.Context, id string) (*model.Client, *gorm.DB) {
 	return FromContext(c).GetClient(id)
 }
 
+// GetClientByValue retrieves a specific client by value from the database.
+func GetClientByValue(c context.Context, id string) (*model.Client, *gorm.DB) {
+	return FromContext(c).GetClientByValue(id)
+}
+
 // GetClientPacks retrieves packs for a client.
 func GetClientPacks(c context.Context, params *model.ClientPackParams) (*model.ClientPacks, error) {
 	return FromContext(c).GetClientPacks(params)

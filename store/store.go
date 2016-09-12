@@ -69,6 +69,9 @@ type Store interface {
 	// GetClient retrieves a specific client from the database.
 	GetClient(string) (*model.Client, *gorm.DB)
 
+	// GetClientByValue retrieves a specific client by value from the database.
+	GetClientByValue(string) (*model.Client, *gorm.DB)
+
 	// GetClientPacks retrieves packs for a client.
 	GetClientPacks(*model.ClientPackParams) (*model.ClientPacks, error)
 
