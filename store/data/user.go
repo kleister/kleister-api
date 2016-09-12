@@ -57,16 +57,18 @@ func (db *data) GetUser(id string) (*model.User, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.ParseInt(id, 10, 64)
+		val, _ := strconv.Atoi(id)
 
 		query = db.Where(
-			"id = ?",
-			val,
+			&model.User{
+				ID: val,
+			},
 		)
 	} else {
 		query = db.Where(
-			"slug = ?",
-			id,
+			&model.User{
+				Slug: id,
+			},
 		)
 	}
 
@@ -91,8 +93,9 @@ func (db *data) GetUserMods(params *model.UserModParams) (*model.UserMods, error
 	records := &model.UserMods{}
 
 	err := db.Where(
-		"user_id = ?",
-		user.ID,
+		&model.UserMod{
+			UserID: user.ID,
+		},
 	).Model(
 		&model.UserMod{},
 	).Preload(
@@ -148,9 +151,10 @@ func (db *data) UpdateUserMod(params *model.UserModParams, current *model.User) 
 	return db.Model(
 		&model.UserMod{},
 	).Where(
-		"user_id = ? AND mod_id = ?",
-		user.ID,
-		mod.ID,
+		&model.UserMod{
+			UserID: user.ID,
+			ModID:  mod.ID,
+		},
 	).Update(
 		"perm",
 		params.Perm,
@@ -176,8 +180,9 @@ func (db *data) GetUserPacks(params *model.UserPackParams) (*model.UserPacks, er
 	records := &model.UserPacks{}
 
 	err := db.Where(
-		"user_id = ?",
-		user.ID,
+		&model.UserPack{
+			UserID: user.ID,
+		},
 	).Model(
 		&model.UserPack{},
 	).Preload(
@@ -233,9 +238,10 @@ func (db *data) UpdateUserPack(params *model.UserPackParams, current *model.User
 	return db.Model(
 		&model.UserPack{},
 	).Where(
-		"user_id = ? AND pack_id = ?",
-		user.ID,
-		pack.ID,
+		&model.UserPack{
+			UserID: user.ID,
+			PackID: pack.ID,
+		},
 	).Update(
 		"perm",
 		params.Perm,
@@ -261,8 +267,9 @@ func (db *data) GetUserTeams(params *model.UserTeamParams) (*model.TeamUsers, er
 	records := &model.TeamUsers{}
 
 	err := db.Where(
-		"user_id = ?",
-		user.ID,
+		&model.TeamUser{
+			UserID: user.ID,
+		},
 	).Model(
 		&model.TeamUser{},
 	).Preload(
@@ -318,9 +325,10 @@ func (db *data) UpdateUserTeam(params *model.UserTeamParams, current *model.User
 	return db.Model(
 		&model.TeamUser{},
 	).Where(
-		"user_id = ? AND team_id = ?",
-		user.ID,
-		team.ID,
+		&model.TeamUser{
+			UserID: user.ID,
+			TeamID: team.ID,
+		},
 	).Update(
 		"perm",
 		params.Perm,

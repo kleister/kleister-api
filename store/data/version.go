@@ -15,8 +15,9 @@ func (db *data) GetVersions(mod int) (*model.Versions, error) {
 	err := db.Order(
 		"name ASC",
 	).Where(
-		"mod_id = ?",
-		mod,
+		&model.Version{
+			ModID: mod,
+		},
 	).Preload(
 		"Mod",
 	).Preload(
@@ -65,23 +66,24 @@ func (db *data) GetVersion(mod int, id string) (*model.Version, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.ParseInt(id, 10, 64)
+		val, _ := strconv.Atoi(id)
 
 		query = db.Where(
-			"id = ?",
-			val,
+			&model.Version{
+				ID:    val,
+				ModID: mod,
+			},
 		)
 	} else {
 		query = db.Where(
-			"slug = ?",
-			id,
+			&model.Version{
+				Slug:  id,
+				ModID: mod,
+			},
 		)
 	}
 
-	res := query.Where(
-		"mod_id = ?",
-		mod,
-	).Model(
+	res := query.Model(
 		record,
 	).Preload(
 		"Mod",
@@ -103,8 +105,9 @@ func (db *data) GetVersionBuilds(params *model.VersionBuildParams) (*model.Build
 	records := &model.BuildVersions{}
 
 	err := db.Where(
-		"version_id = ?",
-		version.ID,
+		&model.BuildVersion{
+			VersionID: version.ID,
+		},
 	).Model(
 		&model.BuildVersion{},
 	).Preload(

@@ -52,16 +52,18 @@ func (db *data) GetClient(id string) (*model.Client, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.ParseInt(id, 10, 64)
+		val, _ := strconv.Atoi(id)
 
 		query = db.Where(
-			"id = ?",
-			val,
+			&model.Client{
+				ID: val,
+			},
 		)
 	} else {
 		query = db.Where(
-			"slug = ?",
-			id,
+			&model.Client{
+				Slug: id,
+			},
 		)
 	}
 
@@ -79,8 +81,9 @@ func (db *data) GetClientByValue(id string) (*model.Client, *gorm.DB) {
 	record := &model.Client{}
 
 	res := db.Where(
-		"uuid = ?",
-		id,
+		&model.Client{
+			Value: id,
+		},
 	).Model(
 		record,
 	).Preload(
@@ -98,8 +101,9 @@ func (db *data) GetClientPacks(params *model.ClientPackParams) (*model.ClientPac
 	records := &model.ClientPacks{}
 
 	err := db.Where(
-		"client_id = ?",
-		client.ID,
+		&model.ClientPack{
+			ClientID: client.ID,
+		},
 	).Model(
 		&model.ClientPack{},
 	).Preload(

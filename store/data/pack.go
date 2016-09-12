@@ -80,16 +80,18 @@ func (db *data) GetPack(id string) (*model.Pack, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.ParseInt(id, 10, 64)
+		val, _ := strconv.Atoi(id)
 
 		query = db.Where(
-			"id = ?",
-			val,
+			&model.Pack{
+				ID: val,
+			},
 		)
 	} else {
 		query = db.Where(
-			"slug = ?",
-			id,
+			&model.Pack{
+				Slug: id,
+			},
 		)
 	}
 
@@ -130,8 +132,9 @@ func (db *data) GetPackClients(params *model.PackClientParams) (*model.ClientPac
 	records := &model.ClientPacks{}
 
 	err := db.Where(
-		"pack_id = ?",
-		pack.ID,
+		&model.ClientPack{
+			PackID: pack.ID,
+		},
 	).Model(
 		&model.ClientPack{},
 	).Preload(
@@ -192,8 +195,9 @@ func (db *data) GetPackUsers(params *model.PackUserParams) (*model.UserPacks, er
 	records := &model.UserPacks{}
 
 	err := db.Where(
-		"pack_id = ?",
-		pack.ID,
+		&model.UserPack{
+			PackID: pack.ID,
+		},
 	).Model(
 		&model.UserPack{},
 	).Preload(
@@ -249,9 +253,10 @@ func (db *data) UpdatePackUser(params *model.PackUserParams, current *model.User
 	return db.Model(
 		&model.UserPack{},
 	).Where(
-		"pack_id = ? AND user_id = ?",
-		pack.ID,
-		user.ID,
+		&model.UserPack{
+			PackID: pack.ID,
+			UserID: user.ID,
+		},
 	).Update(
 		"perm",
 		params.Perm,
@@ -277,8 +282,9 @@ func (db *data) GetPackTeams(params *model.PackTeamParams) (*model.TeamPacks, er
 	records := &model.TeamPacks{}
 
 	err := db.Where(
-		"pack_id = ?",
-		pack.ID,
+		&model.TeamPack{
+			PackID: pack.ID,
+		},
 	).Model(
 		&model.TeamPack{},
 	).Preload(
@@ -332,11 +338,12 @@ func (db *data) UpdatePackTeam(params *model.PackTeamParams, current *model.User
 	team, _ := db.GetTeam(params.Team)
 
 	return db.Model(
-		&model.TeamUser{},
+		&model.TeamPack{},
 	).Where(
-		"pack_id = ? AND team_id = ?",
-		pack.ID,
-		team.ID,
+		&model.TeamPack{
+			PackID: pack.ID,
+			TeamID: team.ID,
+		},
 	).Update(
 		"perm",
 		params.Perm,

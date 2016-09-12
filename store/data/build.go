@@ -15,8 +15,9 @@ func (db *data) GetBuilds(pack int) (*model.Builds, error) {
 	err := db.Order(
 		"name ASC",
 	).Where(
-		"pack_id = ?",
-		pack,
+		&model.Build{
+			PackID: pack,
+		},
 	).Preload(
 		"Pack",
 	).Preload(
@@ -67,23 +68,24 @@ func (db *data) GetBuild(pack int, id string) (*model.Build, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.ParseInt(id, 10, 64)
+		val, _ := strconv.Atoi(id)
 
 		query = db.Where(
-			"id = ?",
-			val,
+			&model.Build{
+				ID:     val,
+				PackID: pack,
+			},
 		)
 	} else {
 		query = db.Where(
-			"slug = ?",
-			id,
+			&model.Build{
+				Slug:   id,
+				PackID: pack,
+			},
 		)
 	}
 
-	res := query.Where(
-		"pack_id = ?",
-		pack,
-	).Model(
+	res := query.Model(
 		record,
 	).Preload(
 		"Pack",
@@ -107,8 +109,9 @@ func (db *data) GetBuildVersions(params *model.BuildVersionParams) (*model.Build
 	records := &model.BuildVersions{}
 
 	err := db.Where(
-		"build_id = ?",
-		build.ID,
+		&model.BuildVersion{
+			BuildID: build.ID,
+		},
 	).Model(
 		&model.BuildVersion{},
 	).Preload(

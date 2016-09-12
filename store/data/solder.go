@@ -20,8 +20,9 @@ func (db *data) GetSolderPack(pack string) (*model.Pack, error) {
 	record := &model.Pack{}
 
 	err := db.Where(
-		"packs.slug = ?",
-		pack,
+		&model.Pack{
+			Slug: pack,
+		},
 	).Model(
 		record,
 	).Preload(
@@ -47,8 +48,9 @@ func (db *data) GetSolderBuild(pack, build string) (*model.Build, error) {
 	record := &model.Build{}
 
 	err := db.Where(
-		"builds.slug = ?",
-		build,
+		&model.Build{
+			Slug: build,
+		},
 	).Model(
 		record,
 	).Preload(
