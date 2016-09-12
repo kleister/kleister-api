@@ -71,3 +71,19 @@ func (db *data) GetKey(id string) (*model.Key, *gorm.DB) {
 
 	return record, res
 }
+
+// GetKeyByValue retrieves a specific key by value from the database.
+func (db *data) GetKeyByValue(id string) (*model.Key, *gorm.DB) {
+	record := &model.Key{}
+
+	res := db.Where(
+		"key = ?",
+		id,
+	).Model(
+		record,
+	).First(
+		record,
+	)
+
+	return record, res
+}
