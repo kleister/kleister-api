@@ -24,6 +24,9 @@ type Store interface {
 	// GetKey retrieves a specific key from the database.
 	GetKey(string) (*model.Key, *gorm.DB)
 
+	// GetKeyByValue retrieves a specific key by value from the database.
+	GetKeyByValue(string) (*model.Key, *gorm.DB)
+
 	// GetBuilds retrieves all available builds from the database.
 	GetBuilds(int) (*model.Builds, error)
 
@@ -65,6 +68,9 @@ type Store interface {
 
 	// GetClient retrieves a specific client from the database.
 	GetClient(string) (*model.Client, *gorm.DB)
+
+	// GetClientByValue retrieves a specific client by value from the database.
+	GetClientByValue(string) (*model.Client, *gorm.DB)
 
 	// GetClientPacks retrieves packs for a client.
 	GetClientPacks(*model.ClientPackParams) (*model.ClientPacks, error)

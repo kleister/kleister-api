@@ -74,6 +74,24 @@ func (db *data) GetClient(id string) (*model.Client, *gorm.DB) {
 	return record, res
 }
 
+// GetClientByValue retrieves a specific client by value from the database.
+func (db *data) GetClientByValue(id string) (*model.Client, *gorm.DB) {
+	record := &model.Client{}
+
+	res := db.Where(
+		"uuid = ?",
+		id,
+	).Model(
+		record,
+	).Preload(
+		"Packs",
+	).First(
+		record,
+	)
+
+	return record, res
+}
+
 // GetClientPacks retrieves packs for a client.
 func (db *data) GetClientPacks(params *model.ClientPackParams) (*model.ClientPacks, error) {
 	client, _ := db.GetClient(params.Client)

@@ -166,7 +166,7 @@ func KeyCreate(c *gin.Context) {
 
 // KeyVerify is a handler to verify a key for Technic.
 func KeyVerify(c *gin.Context) {
-	record, res := store.GetKey(
+	record, res := store.GetKeyByValue(
 		c,
 		c.Param("key"),
 	)

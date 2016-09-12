@@ -30,3 +30,8 @@ func DeleteKey(c context.Context, record *model.Key) error {
 func GetKey(c context.Context, id string) (*model.Key, *gorm.DB) {
 	return FromContext(c).GetKey(id)
 }
+
+// GetKeyByValue retrieves a specific key by value from the database.
+func GetKeyByValue(c context.Context, id string) (*model.Key, *gorm.DB) {
+	return FromContext(c).GetKeyByValue(id)
+}
