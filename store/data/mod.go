@@ -64,16 +64,18 @@ func (db *data) GetMod(id string) (*model.Mod, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.ParseInt(id, 10, 64)
+		val, _ := strconv.Atoi(id)
 
 		query = db.Where(
-			"id = ?",
-			val,
+			&model.Mod{
+				ID: val,
+			},
 		)
 	} else {
 		query = db.Where(
-			"slug = ?",
-			id,
+			&model.Mod{
+				Slug: id,
+			},
 		)
 	}
 
@@ -98,8 +100,9 @@ func (db *data) GetModUsers(params *model.ModUserParams) (*model.UserMods, error
 	records := &model.UserMods{}
 
 	err := db.Where(
-		"mod_id = ?",
-		mod.ID,
+		&model.UserMod{
+			ModID: mod.ID,
+		},
 	).Model(
 		&model.UserMod{},
 	).Preload(
@@ -155,9 +158,10 @@ func (db *data) UpdateModUser(params *model.ModUserParams, current *model.User) 
 	return db.Model(
 		&model.UserMod{},
 	).Where(
-		"mod_id = ? AND user_id = ?",
-		mod.ID,
-		user.ID,
+		&model.UserMod{
+			ModID:  mod.ID,
+			UserID: user.ID,
+		},
 	).Update(
 		"perm",
 		params.Perm,
@@ -183,8 +187,9 @@ func (db *data) GetModTeams(params *model.ModTeamParams) (*model.TeamMods, error
 	records := &model.TeamMods{}
 
 	err := db.Where(
-		"mod_id = ?",
-		mod.ID,
+		&model.TeamMod{
+			ModID: mod.ID,
+		},
 	).Model(
 		&model.TeamMod{},
 	).Preload(
@@ -240,9 +245,10 @@ func (db *data) UpdateModTeam(params *model.ModTeamParams, current *model.User) 
 	return db.Model(
 		&model.TeamMod{},
 	).Where(
-		"mod_id = ? AND team_id = ?",
-		mod.ID,
-		team.ID,
+		&model.TeamMod{
+			ModID:  mod.ID,
+			TeamID: team.ID,
+		},
 	).Update(
 		"perm",
 		params.Perm,

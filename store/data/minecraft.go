@@ -29,15 +29,15 @@ func (db *data) SyncMinecraft(version *minecraft.Version, current *model.User) (
 	record := &model.Minecraft{}
 
 	err := db.Where(
-		model.Minecraft{
+		&model.Minecraft{
 			Name: version.ID,
 		},
 	).Attrs(
-		model.Minecraft{
+		&model.Minecraft{
 			Type: version.Type,
 		},
 	).FirstOrCreate(
-		&record,
+		record,
 	).Error
 
 	return record, err
@@ -51,16 +51,18 @@ func (db *data) GetMinecraft(id string) (*model.Minecraft, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.ParseInt(id, 10, 64)
+		val, _ := strconv.Atoi(id)
 
 		query = db.Where(
-			"id = ?",
-			val,
+			&model.Minecraft{
+				ID: val,
+			},
 		)
 	} else {
 		query = db.Where(
-			"slug = ?",
-			id,
+			&model.Minecraft{
+				Slug: id,
+			},
 		)
 	}
 

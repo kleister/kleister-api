@@ -29,15 +29,15 @@ func (db *data) SyncForge(number *forge.Number, current *model.User) (*model.For
 	record := &model.Forge{}
 
 	err := db.Where(
-		model.Forge{
+		&model.Forge{
 			Name: number.ID,
 		},
 	).Attrs(
-		model.Forge{
+		&model.Forge{
 			Minecraft: number.Minecraft,
 		},
 	).FirstOrCreate(
-		&record,
+		record,
 	).Error
 
 	return record, err
@@ -51,16 +51,18 @@ func (db *data) GetForge(id string) (*model.Forge, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.ParseInt(id, 10, 64)
+		val, _ := strconv.Atoi(id)
 
 		query = db.Where(
-			"id = ?",
-			val,
+			&model.Forge{
+				ID: val,
+			},
 		)
 	} else {
 		query = db.Where(
-			"slug = ?",
-			id,
+			&model.Forge{
+				Slug: id,
+			},
 		)
 	}
 

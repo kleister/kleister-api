@@ -64,16 +64,18 @@ func (db *data) GetTeam(id string) (*model.Team, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.ParseInt(id, 10, 64)
+		val, _ := strconv.Atoi(id)
 
 		query = db.Where(
-			"id = ?",
-			val,
+			&model.Team{
+				ID: val,
+			},
 		)
 	} else {
 		query = db.Where(
-			"slug = ?",
-			id,
+			&model.Team{
+				Slug: id,
+			},
 		)
 	}
 
@@ -98,8 +100,9 @@ func (db *data) GetTeamUsers(params *model.TeamUserParams) (*model.TeamUsers, er
 	records := &model.TeamUsers{}
 
 	err := db.Where(
-		"team_id = ?",
-		team.ID,
+		&model.TeamUser{
+			TeamID: team.ID,
+		},
 	).Model(
 		&model.TeamUser{},
 	).Preload(
@@ -155,9 +158,10 @@ func (db *data) UpdateTeamUser(params *model.TeamUserParams, current *model.User
 	return db.Model(
 		&model.TeamUser{},
 	).Where(
-		"team_id = ? AND user_id = ?",
-		team.ID,
-		user.ID,
+		&model.TeamUser{
+			TeamID: team.ID,
+			UserID: user.ID,
+		},
 	).Update(
 		"perm",
 		params.Perm,
@@ -183,8 +187,9 @@ func (db *data) GetTeamPacks(params *model.TeamPackParams) (*model.TeamPacks, er
 	records := &model.TeamPacks{}
 
 	err := db.Where(
-		"team_id = ?",
-		team.ID,
+		&model.TeamPack{
+			TeamID: team.ID,
+		},
 	).Model(
 		&model.TeamPack{},
 	).Preload(
@@ -240,9 +245,10 @@ func (db *data) UpdateTeamPack(params *model.TeamPackParams, current *model.User
 	return db.Model(
 		&model.TeamPack{},
 	).Where(
-		"team_id = ? AND pack_id = ?",
-		team.ID,
-		pack.ID,
+		&model.TeamPack{
+			TeamID: team.ID,
+			PackID: pack.ID,
+		},
 	).Update(
 		"perm",
 		params.Perm,
@@ -268,8 +274,9 @@ func (db *data) GetTeamMods(params *model.TeamModParams) (*model.TeamMods, error
 	records := &model.TeamMods{}
 
 	err := db.Where(
-		"team_id = ?",
-		team.ID,
+		&model.TeamMod{
+			TeamID: team.ID,
+		},
 	).Model(
 		&model.TeamMod{},
 	).Preload(
@@ -325,9 +332,10 @@ func (db *data) UpdateTeamMod(params *model.TeamModParams, current *model.User) 
 	return db.Model(
 		&model.TeamMod{},
 	).Where(
-		"team_id = ? AND mod_id = ?",
-		team.ID,
-		mod.ID,
+		&model.TeamMod{
+			TeamID: team.ID,
+			ModID:  mod.ID,
+		},
 	).Update(
 		"perm",
 		params.Perm,

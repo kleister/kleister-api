@@ -50,16 +50,18 @@ func (db *data) GetKey(id string) (*model.Key, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.ParseInt(id, 10, 64)
+		val, _ := strconv.Atoi(id)
 
 		query = db.Where(
-			"id = ?",
-			val,
+			&model.Key{
+				ID: val,
+			},
 		)
 	} else {
 		query = db.Where(
-			"slug = ?",
-			id,
+			&model.Key{
+				Slug: id,
+			},
 		)
 	}
 
@@ -77,8 +79,9 @@ func (db *data) GetKeyByValue(id string) (*model.Key, *gorm.DB) {
 	record := &model.Key{}
 
 	res := db.Where(
-		"key = ?",
-		id,
+		&model.Key{
+			Value: id,
+		},
 	).Model(
 		record,
 	).First(
