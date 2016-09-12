@@ -14,7 +14,8 @@ pipeline:
       - make build
 
   updater:
-    image: webhippie/golang:edge
+    image: karalabe/xgo-latest:latest
+    pull: true
     commands:
       - make publish
     when:

@@ -1,11 +1,12 @@
 DIST := dist
 BIN := bin
 EXECUTABLE := kleister-api
+IMPORT := github.com/kleister/kleister-api
 SHA := $(shell git rev-parse --short HEAD)
 
 LDFLAGS += -X "github.com/kleister/kleister-api/config.VersionDev=$(SHA)"
 
-RELEASES ?= windows/386 windows/amd64 darwin/386 darwin/amd64 linux/386 linux/amd64 linux/arm
+TARGETS ?= linux/*,darwin/*,windows/*
 PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 TAGS ?=
@@ -20,7 +21,7 @@ else
 	endif
 endif
 
-all: clean vet lint test build
+all: clean test build
 
 clean:
 	go clean -i ./...
@@ -50,31 +51,31 @@ install: $(BIN)/$(EXECUTABLE)
 build: $(BIN)/$(EXECUTABLE)
 
 $(BIN)/$(EXECUTABLE): $(wildcard *.go)
-	go build -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@
+	go build -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS)' -o $@
 
 release: release-build release-copy release-check
 
 release-build:
-	@which gox > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/mitchellh/gox; \
+	@which xgo > /dev/null; if [ $$? -ne 0 ]; then \
+		go get -u github.com/karalabe/xgo; \
 	fi
-	gox -osarch='$(RELEASES)' -tags='$(TAGS)' -ldflags='-s -w -extldflags "-static" $(LDFLAGS)' -output='$(BIN)/$(EXECUTABLE)-{{.OS}}-{{.Arch}}'
+	xgo -dest $(BIN) -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS)' -targets '$(TARGETS)' -out $(EXECUTABLE)-$(VERSION) $(IMPORT)
 
 release-copy:
 	mkdir -p $(DIST)/release
-	$(foreach file,$(wildcard $(BIN)/$(EXECUTABLE)-*),cp $(file) $(DIST)/release/$(EXECUTABLE)-$(VERSION)-$(word 3,$(subst -, ,$(notdir $(file))))-$(subst .exe,,$(word 4,$(subst -, ,$(notdir $(file)))));)
+	$(foreach file,$(wildcard $(BIN)/$(EXECUTABLE)-*),cp $(file) $(DIST)/release/$(notdir $(file));)
 
 release-check:
-	cd $(DIST)/release; $(foreach file,$(wildcard $(DIST)/release/*),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;)
+	cd $(DIST)/release; $(foreach file,$(wildcard $(DIST)/release/$(EXECUTABLE)-*),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;)
 
 latest: release-build latest-copy latest-check
 
 latest-copy:
 	mkdir -p $(DIST)/latest
-	$(foreach file,$(wildcard $(BIN)/$(EXECUTABLE)-*),cp $(file) $(DIST)/latest/$(EXECUTABLE)-latest-$(word 3,$(subst -, ,$(notdir $(file))))-$(subst .exe,,$(word 4,$(subst -, ,$(notdir $(file)))));)
+	$(foreach file,$(wildcard $(BIN)/$(EXECUTABLE)-*),cp $(file) $(DIST)/latest/$(subst $(EXECUTABLE)-$(VERSION),$(EXECUTABLE)-latest,$(notdir $(file)));)
 
 latest-check:
-	cd $(DIST)/latest; $(foreach file,$(wildcard $(DIST)/latest/*),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;)
+	cd $(DIST)/latest; $(foreach file,$(wildcard $(DIST)/latest/$(EXECUTABLE)-*),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;)
 
 publish: release latest
 
