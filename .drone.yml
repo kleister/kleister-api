@@ -6,6 +6,8 @@ pipeline:
   testing:
     image: webhippie/golang:edge
     pull: true
+    environment:
+      CGO_ENABLED: 1
     commands:
       - make clean
       - make vet
