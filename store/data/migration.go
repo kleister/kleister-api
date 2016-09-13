@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -151,11 +152,11 @@ var (
 			ID: "201609011307",
 			Migrate: func(tx *gorm.DB) error {
 				type Pack struct {
-					ID            int    `gorm:"primary_key"`
-					RecommendedID int    `sql:"index"`
-					LatestID      int    `sql:"index"`
-					Slug          string `sql:"unique_index"`
-					Name          string `sql:"unique_index"`
+					ID            int           `gorm:"primary_key"`
+					RecommendedID sql.NullInt64 `gorm:"type:integer" sql:"index"`
+					LatestID      sql.NullInt64 `gorm:"type:integer" sql:"index"`
+					Slug          string        `sql:"unique_index"`
+					Name          string        `sql:"unique_index"`
 					Website       string
 					Published     bool `sql:"default:false"`
 					Private       bool `sql:"default:false"`
@@ -428,10 +429,10 @@ var (
 			ID: "201609011320",
 			Migrate: func(tx *gorm.DB) error {
 				type Build struct {
-					ID          int `gorm:"primary_key"`
-					PackID      int `sql:"index"`
-					MinecraftID int `sql:"index"`
-					ForgeID     int `sql:"index"`
+					ID          int           `gorm:"primary_key"`
+					PackID      int           `sql:"index"`
+					MinecraftID sql.NullInt64 `gorm:"type:integer" sql:"index"`
+					ForgeID     sql.NullInt64 `gorm:"type:integer" sql:"index"`
 					Slug        string
 					Name        string
 					MinJava     string

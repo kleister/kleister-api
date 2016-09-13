@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -19,9 +20,9 @@ type Pack struct {
 	Logo          *PackLogo       `json:"logo,omitempty"`
 	Background    *PackBackground `json:"background,omitempty"`
 	Recommended   *Build          `json:"recommended,omitempty"`
-	RecommendedID int             `json:"recommended_id" sql:"index"`
+	RecommendedID sql.NullInt64   `json:"recommended_id" gorm:"type:integer" sql:"index"`
 	Latest        *Build          `json:"latest,omitempty"`
-	LatestID      int             `json:"latest_id" sql:"index"`
+	LatestID      sql.NullInt64   `json:"latest_id" gorm:"type:integer" sql:"index"`
 	Slug          string          `json:"slug" sql:"unique_index"`
 	Name          string          `json:"name" sql:"unique_index"`
 	Website       string          `json:"website"`
@@ -111,7 +112,7 @@ func (u *Pack) BeforeDelete(tx *gorm.DB) error {
 
 // Validate does some validation to be able to store the record.
 func (u *Pack) Validate(db *gorm.DB) {
-	if u.RecommendedID > 0 {
+	if u.RecommendedID.Int64 > 0 {
 		res := db.Where(
 			"pack_id = ?",
 			u.ID,
@@ -127,7 +128,7 @@ func (u *Pack) Validate(db *gorm.DB) {
 		}
 	}
 
-	if u.LatestID > 0 {
+	if u.LatestID.Int64 > 0 {
 		res := db.Where(
 			"pack_id = ?",
 			u.ID,
