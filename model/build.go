@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -14,22 +15,22 @@ type Builds []*Build
 
 // Build represents a build model definition.
 type Build struct {
-	ID          int        `json:"id" gorm:"primary_key"`
-	Pack        *Pack      `json:"pack,omitempty"`
-	PackID      int        `json:"pack_id" sql:"index"`
-	Minecraft   *Minecraft `json:"minecraft,omitempty"`
-	MinecraftID int        `json:"minecraft_id" sql:"index"`
-	Forge       *Forge     `json:"forge,omitempty"`
-	ForgeID     int        `json:"forge_id" sql:"index"`
-	Slug        string     `json:"slug"`
-	Name        string     `json:"name"`
-	MinJava     string     `json:"min_java"`
-	MinMemory   string     `json:"min_memory"`
-	Published   bool       `json:"published" sql:"default:false"`
-	Private     bool       `json:"private" sql:"default:false"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	Versions    Versions   `json:"versions,omitempty" gorm:"many2many:build_versions"`
+	ID          int           `json:"id" gorm:"primary_key"`
+	Pack        *Pack         `json:"pack,omitempty"`
+	PackID      int           `json:"pack_id" sql:"index"`
+	Minecraft   *Minecraft    `json:"minecraft,omitempty"`
+	MinecraftID sql.NullInt64 `json:"minecraft_id" gorm:"type:integer" sql:"index"`
+	Forge       *Forge        `json:"forge,omitempty"`
+	ForgeID     sql.NullInt64 `json:"forge_id" gorm:"type:integer" sql:"index"`
+	Slug        string        `json:"slug"`
+	Name        string        `json:"name"`
+	MinJava     string        `json:"min_java"`
+	MinMemory   string        `json:"min_memory"`
+	Published   bool          `json:"published" sql:"default:false"`
+	Private     bool          `json:"private" sql:"default:false"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
+	Versions    Versions      `json:"versions,omitempty" gorm:"many2many:build_versions"`
 }
 
 // BeforeSave invokes required actions before persisting.
@@ -92,7 +93,7 @@ func (u *Build) Validate(db *gorm.DB) {
 		}
 	}
 
-	if u.MinecraftID > 0 {
+	if u.MinecraftID.Int64 > 0 {
 		res := db.Where(
 			"id = ?",
 			u.MinecraftID,
@@ -105,7 +106,7 @@ func (u *Build) Validate(db *gorm.DB) {
 		}
 	}
 
-	if u.ForgeID > 0 {
+	if u.ForgeID.Int64 > 0 {
 		res := db.Where(
 			"id = ?",
 			u.ForgeID,

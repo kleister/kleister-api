@@ -98,7 +98,7 @@ func (db *data) GetForgeHasBuild(params *model.ForgeBuildParams) bool {
 	pack, _ := db.GetPack(params.Pack)
 	build, _ := db.GetBuild(pack.ID, params.Build)
 
-	return build.ForgeID == forge.ID
+	return build.ForgeID.Int64 == int64(forge.ID)
 }
 
 func (db *data) CreateForgeBuild(params *model.ForgeBuildParams, current *model.User) error {
