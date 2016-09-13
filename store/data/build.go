@@ -9,7 +9,7 @@ import (
 )
 
 // GetBuilds retrieves all available builds from the database.
-func (db *data) GetBuilds(pack int) (*model.Builds, error) {
+func (db *data) GetBuilds(pack int64) (*model.Builds, error) {
 	records := &model.Builds{}
 
 	err := db.Order(
@@ -34,7 +34,7 @@ func (db *data) GetBuilds(pack int) (*model.Builds, error) {
 }
 
 // CreateBuild creates a new build.
-func (db *data) CreateBuild(pack int, record *model.Build, current *model.User) error {
+func (db *data) CreateBuild(pack int64, record *model.Build, current *model.User) error {
 	record.PackID = pack
 
 	return db.Create(
@@ -43,7 +43,7 @@ func (db *data) CreateBuild(pack int, record *model.Build, current *model.User) 
 }
 
 // UpdateBuild updates a build.
-func (db *data) UpdateBuild(pack int, record *model.Build, current *model.User) error {
+func (db *data) UpdateBuild(pack int64, record *model.Build, current *model.User) error {
 	record.PackID = pack
 
 	return db.Save(
@@ -52,7 +52,7 @@ func (db *data) UpdateBuild(pack int, record *model.Build, current *model.User) 
 }
 
 // DeleteBuild deletes a build.
-func (db *data) DeleteBuild(pack int, record *model.Build, current *model.User) error {
+func (db *data) DeleteBuild(pack int64, record *model.Build, current *model.User) error {
 	record.PackID = pack
 
 	return db.Delete(
@@ -61,14 +61,14 @@ func (db *data) DeleteBuild(pack int, record *model.Build, current *model.User) 
 }
 
 // GetBuild retrieves a specific build from the database.
-func (db *data) GetBuild(pack int, id string) (*model.Build, *gorm.DB) {
+func (db *data) GetBuild(pack int64, id string) (*model.Build, *gorm.DB) {
 	var (
 		record = &model.Build{}
 		query  *gorm.DB
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.Atoi(id)
+		val, _ := strconv.ParseInt(id, 10, 64)
 
 		query = db.Where(
 			&model.Build{

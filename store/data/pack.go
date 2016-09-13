@@ -80,7 +80,7 @@ func (db *data) GetPack(id string) (*model.Pack, *gorm.DB) {
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.Atoi(id)
+		val, _ := strconv.ParseInt(id, 10, 64)
 
 		query = db.Where(
 			&model.Pack{

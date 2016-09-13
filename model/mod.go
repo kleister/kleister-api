@@ -14,7 +14,7 @@ type Mods []*Mod
 
 // Mod represents a mod model definition.
 type Mod struct {
-	ID          int       `json:"id" gorm:"primary_key"`
+	ID          int64     `json:"id" gorm:"primary_key"`
 	Slug        string    `json:"slug" sql:"unique_index"`
 	Name        string    `json:"name" sql:"unique_index"`
 	Description string    `json:"description" sql:"type:text"`

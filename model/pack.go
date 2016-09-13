@@ -15,7 +15,7 @@ type Packs []*Pack
 
 // Pack represents a pack model definition.
 type Pack struct {
-	ID            int             `json:"id" gorm:"primary_key"`
+	ID            int64           `json:"id" gorm:"primary_key"`
 	Icon          *PackIcon       `json:"icon,omitempty"`
 	Logo          *PackLogo       `json:"logo,omitempty"`
 	Background    *PackBackground `json:"background,omitempty"`

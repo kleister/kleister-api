@@ -14,7 +14,7 @@ var (
 			ID: "201609011300",
 			Migrate: func(tx *gorm.DB) error {
 				type User struct {
-					ID        int    `gorm:"primary_key"`
+					ID        int64  `gorm:"primary_key"`
 					Slug      string `sql:"unique_index"`
 					Username  string `sql:"unique_index"`
 					Email     string `sql:"unique_index"`
@@ -36,7 +36,7 @@ var (
 			ID: "201609011301",
 			Migrate: func(tx *gorm.DB) error {
 				type Team struct {
-					ID        int    `gorm:"primary_key"`
+					ID        int64  `gorm:"primary_key"`
 					Slug      string `sql:"unique_index"`
 					Name      string `sql:"unique_index"`
 					CreatedAt time.Time
@@ -53,8 +53,8 @@ var (
 			ID: "201609011302",
 			Migrate: func(tx *gorm.DB) error {
 				type TeamUser struct {
-					TeamID int `sql:"index"`
-					UserID int `sql:"index"`
+					TeamID int64 `sql:"index"`
+					UserID int64 `sql:"index"`
 					Perm   string
 				}
 
@@ -116,7 +116,7 @@ var (
 			ID: "201609011305",
 			Migrate: func(tx *gorm.DB) error {
 				type Forge struct {
-					ID        int    `gorm:"primary_key"`
+					ID        int64  `gorm:"primary_key"`
 					Slug      string `sql:"unique_index"`
 					Name      string `sql:"unique_index"`
 					Minecraft string
@@ -134,7 +134,7 @@ var (
 			ID: "201609011306",
 			Migrate: func(tx *gorm.DB) error {
 				type Minecraft struct {
-					ID        int    `gorm:"primary_key"`
+					ID        int64  `gorm:"primary_key"`
 					Slug      string `sql:"unique_index"`
 					Name      string `sql:"unique_index"`
 					Type      string
@@ -152,7 +152,7 @@ var (
 			ID: "201609011307",
 			Migrate: func(tx *gorm.DB) error {
 				type Pack struct {
-					ID            int      `gorm:"primary_key"`
+					ID            int64    `gorm:"primary_key"`
 					RecommendedID null.Int `sql:"index"`
 					LatestID      null.Int `sql:"index"`
 					Slug          string   `sql:"unique_index"`
@@ -174,8 +174,8 @@ var (
 			ID: "201609011308",
 			Migrate: func(tx *gorm.DB) error {
 				type TeamPack struct {
-					TeamID int `sql:"index"`
-					PackID int `sql:"index"`
+					TeamID int64 `sql:"index"`
+					PackID int64 `sql:"index"`
 					Perm   string
 				}
 
@@ -237,8 +237,8 @@ var (
 			ID: "201609011311",
 			Migrate: func(tx *gorm.DB) error {
 				type UserPack struct {
-					UserID int `sql:"index"`
-					PackID int `sql:"index"`
+					UserID int64 `sql:"index"`
+					PackID int64 `sql:"index"`
 					Perm   string
 				}
 
@@ -300,8 +300,8 @@ var (
 			ID: "201609011314",
 			Migrate: func(tx *gorm.DB) error {
 				type PackBackground struct {
-					ID          int    `gorm:"primary_key"`
-					PackID      int    `sql:"index"`
+					ID          int64  `gorm:"primary_key"`
+					PackID      int64  `sql:"index"`
 					Slug        string `sql:"unique_index"`
 					ContentType string
 					MD5         string
@@ -343,8 +343,8 @@ var (
 			ID: "201609011316",
 			Migrate: func(tx *gorm.DB) error {
 				type PackIcon struct {
-					ID          int    `gorm:"primary_key"`
-					PackID      int    `sql:"index"`
+					ID          int64  `gorm:"primary_key"`
+					PackID      int64  `sql:"index"`
 					Slug        string `sql:"unique_index"`
 					ContentType string
 					MD5         string
@@ -386,8 +386,8 @@ var (
 			ID: "201609011318",
 			Migrate: func(tx *gorm.DB) error {
 				type PackLogo struct {
-					ID          int    `gorm:"primary_key"`
-					PackID      int    `sql:"index"`
+					ID          int64  `gorm:"primary_key"`
+					PackID      int64  `sql:"index"`
 					Slug        string `sql:"unique_index"`
 					ContentType string
 					MD5         string
@@ -429,8 +429,8 @@ var (
 			ID: "201609011320",
 			Migrate: func(tx *gorm.DB) error {
 				type Build struct {
-					ID          int      `gorm:"primary_key"`
-					PackID      int      `sql:"index"`
+					ID          int64    `gorm:"primary_key"`
+					PackID      int64    `sql:"index"`
 					MinecraftID null.Int `sql:"index"`
 					ForgeID     null.Int `sql:"index"`
 					Slug        string
@@ -611,7 +611,7 @@ var (
 			ID: "201609011328",
 			Migrate: func(tx *gorm.DB) error {
 				type Mod struct {
-					ID          int    `gorm:"primary_key"`
+					ID          int64  `gorm:"primary_key"`
 					Slug        string `sql:"unique_index"`
 					Name        string `sql:"unique_index"`
 					Description string `sql:"type:text"`
@@ -632,8 +632,8 @@ var (
 			ID: "201609011329",
 			Migrate: func(tx *gorm.DB) error {
 				type TeamMod struct {
-					TeamID int `sql:"index"`
-					ModID  int `sql:"index"`
+					TeamID int64 `sql:"index"`
+					ModID  int64 `sql:"index"`
 					Perm   string
 				}
 
@@ -695,8 +695,8 @@ var (
 			ID: "201609011332",
 			Migrate: func(tx *gorm.DB) error {
 				type UserMod struct {
-					UserID int `sql:"index"`
-					ModID  int `sql:"index"`
+					UserID int64 `sql:"index"`
+					ModID  int64 `sql:"index"`
 					Perm   string
 				}
 
@@ -758,8 +758,8 @@ var (
 			ID: "201609011335",
 			Migrate: func(tx *gorm.DB) error {
 				type Version struct {
-					ID        int `gorm:"primary_key"`
-					ModID     int `sql:"index"`
+					ID        int64 `gorm:"primary_key"`
+					ModID     int64 `sql:"index"`
 					Slug      string
 					Name      string
 					CreatedAt time.Time
@@ -838,8 +838,8 @@ var (
 			ID: "201609011339",
 			Migrate: func(tx *gorm.DB) error {
 				type VersionFile struct {
-					ID          int    `gorm:"primary_key"`
-					VersionID   int    `sql:"index"`
+					ID          int64  `gorm:"primary_key"`
+					VersionID   int64  `sql:"index"`
 					Slug        string `sql:"unique_index"`
 					ContentType string
 					MD5         string
@@ -881,8 +881,8 @@ var (
 			ID: "201609011341",
 			Migrate: func(tx *gorm.DB) error {
 				type BuildVersion struct {
-					BuildID   int `sql:"index"`
-					VersionID int `sql:"index"`
+					BuildID   int64 `sql:"index"`
+					VersionID int64 `sql:"index"`
 				}
 
 				return tx.CreateTable(&BuildVersion{}).Error
@@ -943,7 +943,7 @@ var (
 			ID: "201609011344",
 			Migrate: func(tx *gorm.DB) error {
 				type Client struct {
-					ID        int    `gorm:"primary_key"`
+					ID        int64  `gorm:"primary_key"`
 					Slug      string `sql:"unique_index"`
 					Name      string `sql:"unique_index"`
 					Value     string `sql:"unique_index"`
@@ -961,8 +961,8 @@ var (
 			ID: "201609011345",
 			Migrate: func(tx *gorm.DB) error {
 				type ClientPack struct {
-					ClientID int `sql:"index"`
-					PackID   int `sql:"index"`
+					ClientID int64 `sql:"index"`
+					PackID   int64 `sql:"index"`
 				}
 
 				return tx.CreateTable(&ClientPack{}).Error
@@ -1023,7 +1023,7 @@ var (
 			ID: "201609091338",
 			Migrate: func(tx *gorm.DB) error {
 				type Key struct {
-					ID        int    `gorm:"primary_key"`
+					ID        int64  `gorm:"primary_key"`
 					Slug      string `sql:"unique_index"`
 					Name      string `sql:"unique_index"`
 					Value     string `sql:"unique_index"`

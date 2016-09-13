@@ -18,7 +18,7 @@ type Users []*User
 
 // User represents a user model definition.
 type User struct {
-	ID        int       `json:"id" gorm:"primary_key"`
+	ID        int64     `json:"id" gorm:"primary_key"`
 	Slug      string    `json:"slug" sql:"unique_index"`
 	Username  string    `json:"username" sql:"unique_index"`
 	Email     string    `json:"email" sql:"unique_index"`

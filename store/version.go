@@ -7,27 +7,27 @@ import (
 )
 
 // GetVersions retrieves all available versions from the database.
-func GetVersions(c context.Context, mod int) (*model.Versions, error) {
+func GetVersions(c context.Context, mod int64) (*model.Versions, error) {
 	return FromContext(c).GetVersions(mod)
 }
 
 // CreateVersion creates a new version.
-func CreateVersion(c context.Context, mod int, record *model.Version) error {
+func CreateVersion(c context.Context, mod int64, record *model.Version) error {
 	return FromContext(c).CreateVersion(mod, record, Current(c))
 }
 
 // UpdateVersion updates a version.
-func UpdateVersion(c context.Context, mod int, record *model.Version) error {
+func UpdateVersion(c context.Context, mod int64, record *model.Version) error {
 	return FromContext(c).UpdateVersion(mod, record, Current(c))
 }
 
 // DeleteVersion deletes a version.
-func DeleteVersion(c context.Context, mod int, record *model.Version) error {
+func DeleteVersion(c context.Context, mod int64, record *model.Version) error {
 	return FromContext(c).DeleteVersion(mod, record, Current(c))
 }
 
 // GetVersion retrieves a specific version from the database.
-func GetVersion(c context.Context, mod int, id string) (*model.Version, *gorm.DB) {
+func GetVersion(c context.Context, mod int64, id string) (*model.Version, *gorm.DB) {
 	return FromContext(c).GetVersion(mod, id)
 }
 

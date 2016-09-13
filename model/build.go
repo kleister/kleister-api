@@ -15,9 +15,9 @@ type Builds []*Build
 
 // Build represents a build model definition.
 type Build struct {
-	ID          int        `json:"id" gorm:"primary_key"`
+	ID          int64      `json:"id" gorm:"primary_key"`
 	Pack        *Pack      `json:"pack,omitempty"`
-	PackID      int        `json:"pack_id" sql:"index"`
+	PackID      int64      `json:"pack_id" sql:"index"`
 	Minecraft   *Minecraft `json:"minecraft,omitempty"`
 	MinecraftID null.Int   `json:"minecraft_id" sql:"index"`
 	Forge       *Forge     `json:"forge,omitempty"`

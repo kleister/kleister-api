@@ -16,8 +16,8 @@ type VersionFiles []*VersionFile
 
 // VersionFile represents a version file model definition.
 type VersionFile struct {
-	ID          int              `json:"-" gorm:"primary_key"`
-	VersionID   int              `json:"-"`
+	ID          int64            `json:"-" gorm:"primary_key"`
+	VersionID   int64            `json:"-"`
 	Version     *Pack            `json:"-"`
 	Slug        string           `json:"slug" sql:"unique_index"`
 	ContentType string           `json:"content_type"`

@@ -14,7 +14,7 @@ type Teams []*Team
 
 // Team represents a registry model definition.
 type Team struct {
-	ID        int       `json:"id" gorm:"primary_key"`
+	ID        int64     `json:"id" gorm:"primary_key"`
 	Slug      string    `json:"slug" sql:"unique_index"`
 	Name      string    `json:"name" sql:"unique_index"`
 	CreatedAt time.Time `json:"created_at"`
