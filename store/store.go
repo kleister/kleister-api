@@ -28,19 +28,19 @@ type Store interface {
 	GetKeyByValue(string) (*model.Key, *gorm.DB)
 
 	// GetBuilds retrieves all available builds from the database.
-	GetBuilds(int) (*model.Builds, error)
+	GetBuilds(int64) (*model.Builds, error)
 
 	// CreateBuild creates a new build.
-	CreateBuild(int, *model.Build, *model.User) error
+	CreateBuild(int64, *model.Build, *model.User) error
 
 	// UpdateBuild updates a build.
-	UpdateBuild(int, *model.Build, *model.User) error
+	UpdateBuild(int64, *model.Build, *model.User) error
 
 	// DeleteBuild deletes a build.
-	DeleteBuild(int, *model.Build, *model.User) error
+	DeleteBuild(int64, *model.Build, *model.User) error
 
 	// GetBuild retrieves a specific build from the database.
-	GetBuild(int, string) (*model.Build, *gorm.DB)
+	GetBuild(int64, string) (*model.Build, *gorm.DB)
 
 	// GetBuildVersions retrieves versions for a build.
 	GetBuildVersions(*model.BuildVersionParams) (*model.BuildVersions, error)
@@ -247,19 +247,19 @@ type Store interface {
 	DeleteUserTeam(*model.UserTeamParams, *model.User) error
 
 	// GetVersions retrieves all available versions from the database.
-	GetVersions(int) (*model.Versions, error)
+	GetVersions(int64) (*model.Versions, error)
 
 	// CreateVersion creates a new version.
-	CreateVersion(int, *model.Version, *model.User) error
+	CreateVersion(int64, *model.Version, *model.User) error
 
 	// UpdateVersion updates a version.
-	UpdateVersion(int, *model.Version, *model.User) error
+	UpdateVersion(int64, *model.Version, *model.User) error
 
 	// DeleteVersion deletes a version.
-	DeleteVersion(int, *model.Version, *model.User) error
+	DeleteVersion(int64, *model.Version, *model.User) error
 
 	// GetVersion retrieves a specific version from the database.
-	GetVersion(int, string) (*model.Version, *gorm.DB)
+	GetVersion(int64, string) (*model.Version, *gorm.DB)
 
 	// GetVersionBuilds retrieves builds for a version.
 	GetVersionBuilds(*model.VersionBuildParams) (*model.BuildVersions, error)

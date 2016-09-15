@@ -5,9 +5,9 @@ type UserMods []*UserMod
 
 // UserMod represents a user mod model definition.
 type UserMod struct {
-	UserID int    `json:"user_id" sql:"index"`
+	UserID int64  `json:"user_id" sql:"index"`
 	User   *User  `json:"user,omitempty"`
-	ModID  int    `json:"mod_id" sql:"index"`
+	ModID  int64  `json:"mod_id" sql:"index"`
 	Mod    *Mod   `json:"mod,omitempty"`
 	Perm   string `json:"perm,omitempty"`
 }

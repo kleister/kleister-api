@@ -28,7 +28,7 @@ func (u *Forges) Filter(term string) *Forges {
 
 // Forge represents a forge model definition.
 type Forge struct {
-	ID        int       `json:"id" gorm:"primary_key"`
+	ID        int64     `json:"id" gorm:"primary_key"`
 	Slug      string    `json:"slug" sql:"unique_index"`
 	Name      string    `json:"version" sql:"unique_index"`
 	Minecraft string    `json:"minecraft"`

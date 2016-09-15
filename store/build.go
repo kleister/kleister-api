@@ -7,27 +7,27 @@ import (
 )
 
 // GetBuilds retrieves all available builds from the database.
-func GetBuilds(c context.Context, pack int) (*model.Builds, error) {
+func GetBuilds(c context.Context, pack int64) (*model.Builds, error) {
 	return FromContext(c).GetBuilds(pack)
 }
 
 // CreateBuild creates a new build.
-func CreateBuild(c context.Context, pack int, record *model.Build) error {
+func CreateBuild(c context.Context, pack int64, record *model.Build) error {
 	return FromContext(c).CreateBuild(pack, record, Current(c))
 }
 
 // UpdateBuild updates a build.
-func UpdateBuild(c context.Context, pack int, record *model.Build) error {
+func UpdateBuild(c context.Context, pack int64, record *model.Build) error {
 	return FromContext(c).UpdateBuild(pack, record, Current(c))
 }
 
 // DeleteBuild deletes a build.
-func DeleteBuild(c context.Context, pack int, record *model.Build) error {
+func DeleteBuild(c context.Context, pack int64, record *model.Build) error {
 	return FromContext(c).DeleteBuild(pack, record, Current(c))
 }
 
 // GetBuild retrieves a specific build from the database.
-func GetBuild(c context.Context, pack int, id string) (*model.Build, *gorm.DB) {
+func GetBuild(c context.Context, pack int64, id string) (*model.Build, *gorm.DB) {
 	return FromContext(c).GetBuild(pack, id)
 }
 

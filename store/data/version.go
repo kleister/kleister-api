@@ -9,7 +9,7 @@ import (
 )
 
 // GetVersions retrieves all available versions from the database.
-func (db *data) GetVersions(mod int) (*model.Versions, error) {
+func (db *data) GetVersions(mod int64) (*model.Versions, error) {
 	records := &model.Versions{}
 
 	err := db.Order(
@@ -32,7 +32,7 @@ func (db *data) GetVersions(mod int) (*model.Versions, error) {
 }
 
 // CreateVersion creates a new version.
-func (db *data) CreateVersion(mod int, record *model.Version, current *model.User) error {
+func (db *data) CreateVersion(mod int64, record *model.Version, current *model.User) error {
 	record.ModID = mod
 
 	return db.Create(
@@ -41,7 +41,7 @@ func (db *data) CreateVersion(mod int, record *model.Version, current *model.Use
 }
 
 // UpdateVersion updates a version.
-func (db *data) UpdateVersion(mod int, record *model.Version, current *model.User) error {
+func (db *data) UpdateVersion(mod int64, record *model.Version, current *model.User) error {
 	record.ModID = mod
 
 	return db.Save(
@@ -50,7 +50,7 @@ func (db *data) UpdateVersion(mod int, record *model.Version, current *model.Use
 }
 
 // DeleteVersion deletes a version.
-func (db *data) DeleteVersion(mod int, record *model.Version, current *model.User) error {
+func (db *data) DeleteVersion(mod int64, record *model.Version, current *model.User) error {
 	record.ModID = mod
 
 	return db.Delete(
@@ -59,14 +59,14 @@ func (db *data) DeleteVersion(mod int, record *model.Version, current *model.Use
 }
 
 // GetVersion retrieves a specific version from the database.
-func (db *data) GetVersion(mod int, id string) (*model.Version, *gorm.DB) {
+func (db *data) GetVersion(mod int64, id string) (*model.Version, *gorm.DB) {
 	var (
 		record = &model.Version{}
 		query  *gorm.DB
 	)
 
 	if match, _ := regexp.MatchString("^([0-9]+)$", id); match {
-		val, _ := strconv.Atoi(id)
+		val, _ := strconv.ParseInt(id, 10, 64)
 
 		query = db.Where(
 			&model.Version{

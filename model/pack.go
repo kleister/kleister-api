@@ -1,13 +1,13 @@
 package model
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/Machiel/slugify"
 	"github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
+	"gopkg.in/guregu/null.v3"
 )
 
 // Packs is simply a collection of pack structs.
@@ -15,14 +15,14 @@ type Packs []*Pack
 
 // Pack represents a pack model definition.
 type Pack struct {
-	ID            int             `json:"id" gorm:"primary_key"`
+	ID            int64           `json:"id" gorm:"primary_key"`
 	Icon          *PackIcon       `json:"icon,omitempty"`
 	Logo          *PackLogo       `json:"logo,omitempty"`
 	Background    *PackBackground `json:"background,omitempty"`
 	Recommended   *Build          `json:"recommended,omitempty"`
-	RecommendedID sql.NullInt64   `json:"recommended_id" gorm:"type:integer" sql:"index"`
+	RecommendedID null.Int        `json:"recommended_id" sql:"index"`
 	Latest        *Build          `json:"latest,omitempty"`
-	LatestID      sql.NullInt64   `json:"latest_id" gorm:"type:integer" sql:"index"`
+	LatestID      null.Int        `json:"latest_id" sql:"index"`
 	Slug          string          `json:"slug" sql:"unique_index"`
 	Name          string          `json:"name" sql:"unique_index"`
 	Website       string          `json:"website"`

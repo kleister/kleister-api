@@ -28,7 +28,7 @@ func (u *Minecrafts) Filter(term string) *Minecrafts {
 
 // Minecraft represents a minecraft model definition.
 type Minecraft struct {
-	ID        int       `json:"id" gorm:"primary_key"`
+	ID        int64     `json:"id" gorm:"primary_key"`
 	Slug      string    `json:"slug" sql:"unique_index"`
 	Name      string    `json:"version" sql:"unique_index"`
 	Type      string    `json:"type"`

@@ -5,9 +5,9 @@ type TeamMods []*TeamMod
 
 // TeamMod represents a team mod model definition.
 type TeamMod struct {
-	TeamID int    `json:"team_id" sql:"index"`
+	TeamID int64  `json:"team_id" sql:"index"`
 	Team   *Team  `json:"team,omitempty"`
-	ModID  int    `json:"mod_id" sql:"index"`
+	ModID  int64  `json:"mod_id" sql:"index"`
 	Mod    *Mod   `json:"mod,omitempty"`
 	Perm   string `json:"perm,omitempty"`
 }
