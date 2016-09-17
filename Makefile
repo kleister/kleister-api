@@ -4,7 +4,7 @@ EXECUTABLE := kleister-api
 IMPORT := github.com/kleister/kleister-api
 SHA := $(shell git rev-parse --short HEAD)
 
-LDFLAGS += -X "github.com/kleister/kleister-api/config.VersionDev=$(SHA)"
+LDFLAGS += -s -w -X "github.com/kleister/kleister-api/config.VersionDev=$(SHA)"
 
 TARGETS ?= linux/*,darwin/*,windows/*
 PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
@@ -22,6 +22,12 @@ else
 endif
 
 all: clean test build
+
+update:
+	@which govend > /dev/null; if [ $$? -ne 0 ]; then \
+		go get -u github.com/govend/govend; \
+	fi
+	govend -vtlu --prune
 
 clean:
 	go clean -i ./...
@@ -51,7 +57,7 @@ install: $(BIN)/$(EXECUTABLE)
 build: $(BIN)/$(EXECUTABLE)
 
 $(BIN)/$(EXECUTABLE): $(wildcard *.go)
-	go build -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS)' -o $@
+	go build -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@
 
 release: release-build release-copy release-check
 
@@ -59,7 +65,7 @@ release-build:
 	@which xgo > /dev/null; if [ $$? -ne 0 ]; then \
 		go get -u github.com/karalabe/xgo; \
 	fi
-	xgo -dest $(BIN) -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS)' -targets '$(TARGETS)' -out $(EXECUTABLE)-$(VERSION) $(IMPORT)
+	xgo -dest $(BIN) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -targets '$(TARGETS)' -out $(EXECUTABLE)-$(VERSION) $(IMPORT)
 
 release-copy:
 	mkdir -p $(DIST)/release
@@ -79,4 +85,4 @@ latest-check:
 
 publish: release latest
 
-.PHONY: all clean generate fmt vet lint test build release latest publish
+.PHONY: all update clean generate fmt vet lint test build release latest publish
