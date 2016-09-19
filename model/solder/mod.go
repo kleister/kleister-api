@@ -16,7 +16,7 @@ type Mod struct {
 }
 
 // NewModFromModel generates a solder model from our used models.
-func NewModFromModel(source *model.Mod) *Mod {
+func NewModFromModel(source *model.Mod, client *model.Client, key *model.Key, include string) *Mod {
 	result := &Mod{}
 
 	result.Slug = source.Slug

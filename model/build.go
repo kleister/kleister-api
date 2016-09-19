@@ -27,10 +27,18 @@ type Build struct {
 	MinJava     string     `json:"min_java"`
 	MinMemory   string     `json:"min_memory"`
 	Published   bool       `json:"published" sql:"default:false"`
+	Hidden      bool       `json:"hidden" sql:"-"`
 	Private     bool       `json:"private" sql:"default:false"`
+	Public      bool       `json:"public" sql:"-"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 	Versions    Versions   `json:"versions,omitempty" gorm:"many2many:build_versions"`
+}
+
+// AfterFind invokes required after loading a record from the database.
+func (u *Build) AfterFind(db *gorm.DB) {
+	u.Hidden = !u.Published
+	u.Public = !u.Private
 }
 
 // BeforeSave invokes required actions before persisting.

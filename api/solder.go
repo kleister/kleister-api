@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/kleister/kleister-api/model/solder"
+	"github.com/kleister/kleister-api/router/middleware/session"
 	"github.com/kleister/kleister-api/store"
 )
 
@@ -14,19 +15,14 @@ func SolderPacks(c *gin.Context) {
 		c,
 	)
 
-	result := make(
-		map[string]string,
-	)
-
-	for _, record := range *records {
-		result[record.Slug] = record.Name
-	}
-
 	c.JSON(
 		http.StatusOK,
-		gin.H{
-			"modpacks": result,
-		},
+		solder.NewPacksFromList(
+			records,
+			session.Client(c),
+			session.Key(c),
+			c.Query("include"),
+		),
 	)
 }
 
@@ -52,6 +48,9 @@ func SolderPack(c *gin.Context) {
 		http.StatusOK,
 		solder.NewPackFromModel(
 			record,
+			session.Client(c),
+			session.Key(c),
+			c.Query("include"),
 		),
 	)
 }
@@ -79,6 +78,9 @@ func SolderBuild(c *gin.Context) {
 		http.StatusOK,
 		solder.NewBuildFromModel(
 			record,
+			session.Client(c),
+			session.Key(c),
+			c.Query("include"),
 		),
 	)
 }
@@ -115,6 +117,9 @@ func SolderMod(c *gin.Context) {
 		http.StatusOK,
 		solder.NewModFromModel(
 			record,
+			session.Client(c),
+			session.Key(c),
+			c.Query("include"),
 		),
 	)
 }
@@ -158,6 +163,9 @@ func SolderVersion(c *gin.Context) {
 		http.StatusOK,
 		solder.NewVersionFromModel(
 			record,
+			session.Client(c),
+			session.Key(c),
+			c.Query("include"),
 		),
 	)
 }

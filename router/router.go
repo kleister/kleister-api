@@ -408,6 +408,8 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 			//
 			solder := base.Group("/")
 			{
+				solder.Use(session.SetSolder())
+
 				solder.GET("/modpack", api.SolderPacks)
 				solder.GET("/modpack/:pack", api.SolderPack)
 				solder.GET("/modpack/:pack/:build", api.SolderBuild)

@@ -21,7 +21,7 @@ type Pack struct {
 }
 
 // NewPackFromModel generates a solder model from our used models.
-func NewPackFromModel(source *model.Pack) *Pack {
+func NewPackFromModel(source *model.Pack, client *model.Client, key *model.Key, include string) *Pack {
 	result := &Pack{}
 
 	result.Slug = source.Slug
@@ -52,10 +52,29 @@ func NewPackFromModel(source *model.Pack) *Pack {
 	}
 
 	for _, build := range source.Builds {
-		result.Builds = append(
-			result.Builds,
-			build.Slug,
-		)
+		if build.Hidden {
+			continue
+		}
+
+		if build.Public || key != nil {
+			result.Builds = append(
+				result.Builds,
+				build.Slug,
+			)
+		} else {
+			if client != nil {
+				for _, pack := range client.Packs {
+					if build.PackID == pack.ID {
+						result.Builds = append(
+							result.Builds,
+							build.Slug,
+						)
+
+						break
+					}
+				}
+			}
+		}
 	}
 
 	return result
