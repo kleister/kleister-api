@@ -1037,5 +1037,137 @@ var (
 				return tx.DropTable("keys").Error
 			},
 		},
+		{
+			ID: "20160919214501",
+			Migrate: func(tx *gorm.DB) error {
+				type PackBackground struct {
+					MD5 string `gorm:"column:md5"`
+				}
+
+				if err := tx.AutoMigrate(&PackBackground{}).Error; err != nil {
+					return err
+				}
+
+				if err := tx.Set("validations:skip_validations", true).Table("pack_backgrounds").Update("md5", gorm.Expr("m_d5")).Error; err != nil {
+					return err
+				}
+
+				return tx.Table("pack_backgrounds").DropColumn("m_d5").Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				type PackBackground struct {
+					MD5 string `gorm:"column:m_d5"`
+				}
+
+				if err := tx.AutoMigrate(&PackBackground{}).Error; err != nil {
+					return err
+				}
+
+				if err := tx.Set("validations:skip_validations", true).Table("pack_backgrounds").Update("m_d5", gorm.Expr("md5")).Error; err != nil {
+					return err
+				}
+
+				return tx.Table("pack_backgrounds").DropColumn("md5").Error
+			},
+		},
+		{
+			ID: "20160919214502",
+			Migrate: func(tx *gorm.DB) error {
+				type PackIcon struct {
+					MD5 string `gorm:"column:md5"`
+				}
+
+				if err := tx.AutoMigrate(&PackIcon{}).Error; err != nil {
+					return err
+				}
+
+				if err := tx.Set("validations:skip_validations", true).Table("pack_icons").Update("md5", gorm.Expr("m_d5")).Error; err != nil {
+					return err
+				}
+
+				return tx.Table("pack_icons").DropColumn("m_d5").Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				type PackIcon struct {
+					MD5 string `gorm:"column:m_d5"`
+				}
+
+				if err := tx.AutoMigrate(&PackIcon{}).Error; err != nil {
+					return err
+				}
+
+				if err := tx.Set("validations:skip_validations", true).Table("pack_icons").Update("m_d5", gorm.Expr("md5")).Error; err != nil {
+					return err
+				}
+
+				return tx.Table("pack_icons").DropColumn("md5").Error
+			},
+		},
+		{
+			ID: "20160919214503",
+			Migrate: func(tx *gorm.DB) error {
+				type PackLogo struct {
+					MD5 string `gorm:"column:md5"`
+				}
+
+				if err := tx.AutoMigrate(&PackLogo{}).Error; err != nil {
+					return err
+				}
+
+				if err := tx.Set("validations:skip_validations", true).Table("pack_logos").Update("md5", gorm.Expr("m_d5")).Error; err != nil {
+					return err
+				}
+
+				return tx.Table("pack_logos").DropColumn("m_d5").Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				type PackLogo struct {
+					MD5 string `gorm:"column:m_d5"`
+				}
+
+				if err := tx.AutoMigrate(&PackLogo{}).Error; err != nil {
+					return err
+				}
+
+				if err := tx.Set("validations:skip_validations", true).Table("pack_logos").Update("m_d5", gorm.Expr("md5")).Error; err != nil {
+					return err
+				}
+
+				return tx.Table("pack_logos").DropColumn("md5").Error
+			},
+		},
+		{
+			ID: "20160919214504",
+			Migrate: func(tx *gorm.DB) error {
+				type VersionFile struct {
+					MD5 string `gorm:"column:md5"`
+				}
+
+				if err := tx.AutoMigrate(&VersionFile{}).Error; err != nil {
+					return err
+				}
+
+				if err := tx.Set("validations:skip_validations", true).Table("version_files").Update("md5", gorm.Expr("m_d5")).Error; err != nil {
+					return err
+				}
+
+				return tx.Table("version_files").DropColumn("m_d5").Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				type VersionFile struct {
+					MD5 string `gorm:"column:m_d5"`
+				}
+
+				if err := tx.AutoMigrate(&VersionFile{}).Error; err != nil {
+					return err
+				}
+
+				if err := tx.Set("validations:skip_validations", true).Table("version_files").Update("m_d5", gorm.Expr("md5")).Error; err != nil {
+					return err
+				}
+
+				return tx.Table("version_files").DropColumn("md5").Error
+			},
+		},
 	}
 )
