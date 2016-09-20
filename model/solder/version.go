@@ -11,7 +11,7 @@ type Version struct {
 }
 
 // NewVersionFromModel generates a solder model from our used models.
-func NewVersionFromModel(source *model.Version) *Version {
+func NewVersionFromModel(source *model.Version, client *model.Client, key *model.Key, include string) *Version {
 	result := &Version{}
 
 	result.URL = source.File.URL

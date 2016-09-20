@@ -27,7 +27,9 @@ type Pack struct {
 	Name          string          `json:"name" sql:"unique_index"`
 	Website       string          `json:"website"`
 	Published     bool            `json:"published" sql:"default:false"`
+	Hidden        bool            `json:"hidden" sql:"-"`
 	Private       bool            `json:"private" sql:"default:false"`
+	Public        bool            `json:"public" sql:"-"`
 	CreatedAt     time.Time       `json:"created_at"`
 	UpdatedAt     time.Time       `json:"updated_at"`
 	Builds        Builds          `json:"builds,omitempty"`
@@ -36,6 +38,12 @@ type Pack struct {
 	UserPacks     UserPacks       `json:"user_packs,omitempty"`
 	Teams         Teams           `json:"teams,omitempty" gorm:"many2many:team_packs;"`
 	TeamPacks     TeamPacks       `json:"team_packs,omitempty"`
+}
+
+// AfterFind invokes required after loading a record from the database.
+func (u *Pack) AfterFind(db *gorm.DB) {
+	u.Hidden = !u.Published
+	u.Public = !u.Private
 }
 
 // BeforeSave invokes required actions before persisting.
