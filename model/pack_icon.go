@@ -23,7 +23,7 @@ type PackIcon struct {
 	ContentType string           `json:"content_type"`
 	Path        string           `json:"-" sql:"-"`
 	URL         string           `json:"url" sql:"-"`
-	MD5         string           `json:"md5"`
+	MD5         string           `json:"md5" gorm:"column:md5"`
 	Upload      *dataurl.DataURL `json:"upload,omitempty" sql:"-"`
 	CreatedAt   time.Time        `json:"-"`
 	UpdatedAt   time.Time        `json:"-"`
