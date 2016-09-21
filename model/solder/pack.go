@@ -36,17 +36,23 @@ func NewPackFromModel(source *model.Pack, client *model.Client, key *model.Key, 
 		result.Recommended = source.Recommended.Slug
 	}
 
-	if source.Icon != nil {
+	if source.Icon == nil {
+		result.Icon, result.IconMD5 = model.AttachmentDefault("icon")
+	} else {
 		result.Icon = source.Icon.URL
 		result.IconMD5 = source.Icon.MD5
 	}
 
-	if source.Background != nil {
+	if source.Background == nil {
+		result.Background, result.BackgroundMD5 = model.AttachmentDefault("background")
+	} else {
 		result.Background = source.Background.URL
 		result.BackgroundMD5 = source.Background.MD5
 	}
 
-	if source.Logo != nil {
+	if source.Logo == nil {
+		result.Logo, result.LogoMD5 = model.AttachmentDefault("logo")
+	} else {
 		result.Logo = source.Logo.URL
 		result.LogoMD5 = source.Logo.MD5
 	}
