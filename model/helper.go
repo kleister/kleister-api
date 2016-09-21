@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kleister/kleister-api/assets"
 	"github.com/kleister/kleister-api/config"
 	"github.com/kleister/kleister-api/shared/s3client"
 	"github.com/vincent-petithory/dataurl"
@@ -23,6 +24,36 @@ func RandomHash() string {
 		),
 	)
 	return hex.EncodeToString(hash[:])
+}
+
+// AttachmentDefault returns checksum and URL for default images.
+func AttachmentDefault(kind string) (string, string) {
+	content, err := assets.Asset(
+		fmt.Sprintf(
+			"images/default-%s.png",
+			kind,
+		),
+	)
+
+	if err != nil {
+		return "", ""
+	}
+
+	check := md5.Sum(
+		content,
+	)
+
+	hash := hex.EncodeToString(
+		check[:],
+	)
+
+	url := fmt.Sprintf(
+		"%s/assets/images/default-%s.png",
+		config.Server.Host,
+		kind,
+	)
+
+	return url, hash
 }
 
 // AttachmentURL generates an absolute URL to attachments.
