@@ -6,13 +6,13 @@ import (
 
 // Mod represents a solder mod model definition.
 type Mod struct {
-	Slug        string   `json:"name"`
-	Name        string   `json:"pretty_name"`
-	Description string   `json:"description"`
-	Author      string   `json:"author"`
-	Website     string   `json:"link"`
-	Donate      string   `json:"donate"`
-	Versions    []string `json:"versions"`
+	Slug        string   `json:"name,omitempty"`
+	Name        string   `json:"pretty_name,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Author      string   `json:"author,omitempty"`
+	Website     string   `json:"link,omitempty"`
+	Donate      string   `json:"donate,omitempty"`
+	Versions    []string `json:"versions,omitempty"`
 }
 
 // NewModFromModel generates a solder model from our used models.

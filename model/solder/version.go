@@ -6,8 +6,8 @@ import (
 
 // Version represents a solder version model definition.
 type Version struct {
-	URL string `json:"url"`
-	MD5 string `json:"md5"`
+	URL string `json:"url,omitempty"`
+	MD5 string `json:"md5,omitempty"`
 }
 
 // NewVersionFromModel generates a solder model from our used models.
