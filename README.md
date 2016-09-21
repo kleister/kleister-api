@@ -3,7 +3,7 @@
 [![Build Status](http://github.dronehippie.de/api/badges/kleister/kleister-api/status.svg)](http://github.dronehippie.de/kleister/kleister-api)
 [![Coverage Status](http://coverage.dronehippie.de/badges/kleister/kleister-api/coverage.svg)](http://coverage.dronehippie.de/kleister/kleister-api)
 [![Go Doc](https://godoc.org/github.com/kleister/kleister-api?status.svg)](http://godoc.org/github.com/kleister/kleister-api)
-[![Go Report](https://goreportcard.com/badge/github.com/harborapp/harbor-api)](https://goreportcard.com/report/github.com/harborapp/harbor-api)
+[![Go Report](https://goreportcard.com/badge/github.com/kleister/kleister-api)](https://goreportcard.com/report/github.com/kleister/kleister-api)
 [![](https://images.microbadger.com/badges/image/kleister/kleister-api.svg)](http://microbadger.com/images/kleister/kleister-api "Get your own image badge on microbadger.com")
 [![Join the chat at https://gitter.im/kleister/kleister](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kleister/kleister)
 [![Stories in Ready](https://badge.waffle.io/kleister/kleister-api.svg?label=ready&title=Ready)](http://waffle.io/kleister/kleister-api)
