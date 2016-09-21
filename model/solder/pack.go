@@ -6,18 +6,18 @@ import (
 
 // Pack represents a solder pack model definition.
 type Pack struct {
-	Slug          string   `json:"name"`
-	Name          string   `json:"display_name"`
-	Website       string   `json:"url"`
-	Recommended   string   `json:"recommended"`
-	Latest        string   `json:"latest"`
-	Icon          string   `json:"icon"`
-	IconMD5       string   `json:"icon_md5"`
-	Background    string   `json:"background"`
-	BackgroundMD5 string   `json:"background_md5"`
-	Logo          string   `json:"logo"`
-	LogoMD5       string   `json:"logo_md5"`
-	Builds        []string `json:"builds"`
+	Slug          string   `json:"name,omitempty"`
+	Name          string   `json:"display_name,omitempty"`
+	Website       string   `json:"url,omitempty"`
+	Recommended   string   `json:"recommended,omitempty"`
+	Latest        string   `json:"latest,omitempty"`
+	Icon          string   `json:"icon,omitempty"`
+	IconMD5       string   `json:"icon_md5,omitempty"`
+	Background    string   `json:"background,omitempty"`
+	BackgroundMD5 string   `json:"background_md5,omitempty"`
+	Logo          string   `json:"logo,omitempty"`
+	LogoMD5       string   `json:"logo_md5,omitempty"`
+	Builds        []string `json:"builds,omitempty"`
 }
 
 // NewPackFromModel generates a solder model from our used models.

@@ -9,6 +9,18 @@ func (db *data) GetSolderPacks() (*model.Packs, error) {
 
 	err := db.Order(
 		"name ASC",
+	).Preload(
+		"Builds",
+	).Preload(
+		"Icon",
+	).Preload(
+		"Background",
+	).Preload(
+		"Logo",
+	).Preload(
+		"Recommended",
+	).Preload(
+		"Latest",
 	).Find(
 		records,
 	).Error

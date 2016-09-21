@@ -21,25 +21,25 @@ func NewPacksFromList(records *model.Packs, client *model.Client, key *model.Key
 			case client != nil:
 				for _, pack := range client.Packs {
 					if pack.ID == record.ID {
-						result.Modpacks[record.Slug] = getPackValue(include, record)
+						result.Modpacks[record.Slug] = getPackValue(record, client, key, include)
 						break
 					}
 				}
 			case key != nil:
-				result.Modpacks[record.Slug] = getPackValue(include, record)
+				result.Modpacks[record.Slug] = getPackValue(record, client, key, include)
 			}
 		} else {
-			result.Modpacks[record.Slug] = getPackValue(include, record)
+			result.Modpacks[record.Slug] = getPackValue(record, client, key, include)
 		}
 	}
 
 	return result
 }
 
-func getPackValue(include string, record *model.Pack) interface{} {
+func getPackValue(record *model.Pack, client *model.Client, key *model.Key, include string) interface{} {
 	switch include {
 	case "full":
-		return record
+		return NewPackFromModel(record, client, key, include)
 	default:
 		return record.Name
 	}
