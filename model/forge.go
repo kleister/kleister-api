@@ -1,8 +1,6 @@
 package model
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"strings"
 	"time"
@@ -41,8 +39,11 @@ type Forge struct {
 func (u *Forge) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
 		for i := 0; true; i++ {
-			hash := md5.Sum([]byte(fmt.Sprintf("%s-%d", u.Name, i)))
-			u.Slug = hex.EncodeToString(hash[:])
+			if i == 0 {
+				u.Slug = u.Name
+			} else {
+				u.Slug = fmt.Sprintf("%s-%d", u.Name, i)
+			}
 
 			notFound := db.Where(
 				"slug = ?",
