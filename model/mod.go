@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Machiel/slugify"
@@ -17,6 +18,7 @@ type Mod struct {
 	ID          int64     `json:"id" gorm:"primary_key"`
 	Slug        string    `json:"slug" sql:"unique_index"`
 	Name        string    `json:"name" sql:"unique_index"`
+	Side        string    `json:"side"`
 	Description string    `json:"description" sql:"type:text"`
 	Author      string    `json:"author"`
 	Website     string    `json:"website"`
@@ -105,6 +107,21 @@ func (u *Mod) Validate(db *gorm.DB) {
 
 		if !notFound {
 			db.AddError(fmt.Errorf("Name is already present"))
+		}
+	}
+
+	if u.Side != "" {
+		u.Side = strings.ToLower(u.Side)
+		invalidSide := true
+
+		for _, side := range []string{"client", "server", "both"} {
+			if u.Side == side {
+				invalidSide = false
+			}
+		}
+
+		if invalidSide {
+			db.AddError(fmt.Errorf("Selected side is invalid"))
 		}
 	}
 }
