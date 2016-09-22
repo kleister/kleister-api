@@ -17,19 +17,19 @@ func Load() (*Remote, error) {
 	res, err := http.Get(MinecraftVersions)
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to fetch minecraft versions. %s", err)
+		return nil, fmt.Errorf("Failed to fetch Minecraft versions. %s", err)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to read minecraft versions. %s", err)
+		return nil, fmt.Errorf("Failed to read Minecraft versions. %s", err)
 	}
 
 	remote := &Remote{}
 
 	if err := json.Unmarshal(body, &remote); err != nil {
-		return nil, fmt.Errorf("Failed to parse minecraft versions. %s", err)
+		return nil, fmt.Errorf("Failed to parse Minecraft versions. %s", err)
 	}
 
 	return remote, nil

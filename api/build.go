@@ -20,6 +20,8 @@ func BuildIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch builds. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -60,11 +62,13 @@ func BuildDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete build. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
-				"message": err.Error(),
+				"message": "Failed to delete build",
 			},
 		)
 
@@ -87,8 +91,7 @@ func BuildUpdate(c *gin.Context) {
 	record := session.Build(c)
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind build data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind build data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -109,6 +112,8 @@ func BuildUpdate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to update build. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -133,8 +138,7 @@ func BuildCreate(c *gin.Context) {
 	record := &model.Build{}
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind build data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind build data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -155,6 +159,8 @@ func BuildCreate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to create build. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -184,6 +190,8 @@ func BuildVersionIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch build versions. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -207,14 +215,13 @@ func BuildVersionAppend(c *gin.Context) {
 	form := &model.BuildVersionParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind build version data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind build version data",
 			},
 		)
 
@@ -249,6 +256,8 @@ func BuildVersionAppend(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to append build version. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -275,14 +284,13 @@ func BuildVersionDelete(c *gin.Context) {
 	form := &model.BuildVersionParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind build version data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind build version data",
 			},
 		)
 
@@ -317,6 +325,8 @@ func BuildVersionDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete build version. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"runtime"
 
@@ -58,7 +57,7 @@ func main() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		fmt.Println(err)
+		logrus.Error(err)
 		os.Exit(1)
 	}
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/kleister/kleister-api/model/solder"
 	"github.com/kleister/kleister-api/router/middleware/session"
@@ -34,6 +35,8 @@ func SolderPack(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch solder pack. %s", err)
+
 		c.JSON(
 			http.StatusOK,
 			gin.H{
@@ -64,6 +67,8 @@ func SolderBuild(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch solder build. %s", err)
+
 		c.JSON(
 			http.StatusOK,
 			gin.H{

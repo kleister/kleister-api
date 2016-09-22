@@ -30,7 +30,7 @@ func AuthRefresh(c *gin.Context) {
 	result, err := token.SignExpiring(record.Hash, config.Session.Expire)
 
 	if err != nil {
-		logrus.Warnf("Failed to refresh token: %s", err)
+		logrus.Warnf("Failed to refresh token. %s", err)
 
 		c.JSON(
 			http.StatusUnauthorized,
@@ -55,7 +55,7 @@ func AuthLogin(c *gin.Context) {
 	auth := &model.Auth{}
 
 	if err := c.BindJSON(&auth); err != nil {
-		logrus.Warn("Failed to bind login data: %s", err)
+		logrus.Warn("Failed to bind login data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -75,7 +75,7 @@ func AuthLogin(c *gin.Context) {
 	)
 
 	if res.Error != nil || res.RecordNotFound() {
-		logrus.Warnf("Failed to fetch requested user: %s", res.Error)
+		logrus.Warnf("Failed to fetch requested user. %s", res.Error)
 
 		c.JSON(
 			http.StatusUnauthorized,
@@ -90,7 +90,7 @@ func AuthLogin(c *gin.Context) {
 	}
 
 	if err := user.MatchPassword(auth.Password); err != nil {
-		logrus.Warnf("Failed to match passwords: %s", err)
+		logrus.Warnf("Failed to match passwords. %s", err)
 
 		c.JSON(
 			http.StatusUnauthorized,
@@ -108,7 +108,7 @@ func AuthLogin(c *gin.Context) {
 	result, err := token.SignExpiring(user.Hash, config.Session.Expire)
 
 	if err != nil {
-		logrus.Warnf("Failed to generate token: %s", err)
+		logrus.Warnf("Failed to generate token. %s", err)
 
 		c.JSON(
 			http.StatusUnauthorized,

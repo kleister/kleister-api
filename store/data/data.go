@@ -50,8 +50,7 @@ func Test() store.Store {
 	db, err := gorm.Open(driver, config)
 
 	if err != nil {
-		logrus.Errorln(err)
-		logrus.Fatalln("database connection failed")
+		logrus.Fatalf("Database connection failed. %s", err)
 	}
 
 	return &data{
@@ -64,8 +63,7 @@ func New(driver string, config string) store.Store {
 	db, err := gorm.Open(driver, config)
 
 	if err != nil {
-		logrus.Errorln(err)
-		logrus.Fatalln("Database connection failed")
+		logrus.Fatalf("Database connection failed. %s", err)
 	}
 
 	return &data{
@@ -78,8 +76,7 @@ func From(driver string, handle *sql.DB) store.Store {
 	db, err := gorm.Open(driver, handle)
 
 	if err != nil {
-		logrus.Errorln(err)
-		logrus.Fatalln("Database connection failed")
+		logrus.Fatalf("Database connection failed. %s", err)
 	}
 
 	return &data{
@@ -93,7 +90,7 @@ func Load() store.Store {
 	connect := ""
 
 	if invalidDriver(driver) {
-		logrus.Fatal("Unknown database driver selected")
+		logrus.Fatalf("Unknown database driver %s selected", driver)
 	}
 
 	switch driver {

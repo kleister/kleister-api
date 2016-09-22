@@ -25,8 +25,7 @@ func ProfileUpdate(c *gin.Context) {
 	record := session.Current(c)
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind profile data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind profile data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -46,6 +45,8 @@ func ProfileUpdate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to update profile. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -72,7 +73,7 @@ func ProfileToken(c *gin.Context) {
 	result, err := token.SignUnlimited(record.Hash)
 
 	if err != nil {
-		logrus.Warnf("Failed to generate token: %s", err)
+		logrus.Warnf("Failed to generate token. %s", err)
 
 		c.JSON(
 			http.StatusInternalServerError,
