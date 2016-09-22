@@ -1169,5 +1169,22 @@ var (
 				return tx.Table("version_files").DropColumn("md5").Error
 			},
 		},
+		{
+			ID: "20160921222800",
+			Migrate: func(tx *gorm.DB) error {
+				type Mod struct {
+					Side string
+				}
+
+				if err := tx.AutoMigrate(&Mod{}).Error; err != nil {
+					return err
+				}
+
+				return tx.Set("validations:skip_validations", true).Table("mods").Update("side", "both").Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Table("mods").DropColumn("side").Error
+			},
+		},
 	}
 )
