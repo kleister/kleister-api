@@ -17,6 +17,8 @@ func ClientIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch clients. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -55,11 +57,13 @@ func ClientDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete client. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
-				"message": err.Error(),
+				"message": "Failed to delete client",
 			},
 		)
 
@@ -81,8 +85,7 @@ func ClientUpdate(c *gin.Context) {
 	record := session.Client(c)
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind client data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind client data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -102,6 +105,8 @@ func ClientUpdate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to update client. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -125,8 +130,7 @@ func ClientCreate(c *gin.Context) {
 	record := &model.Client{}
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind client data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind client data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -146,6 +150,8 @@ func ClientCreate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to create client. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -174,6 +180,8 @@ func ClientPackIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch client packs. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -197,14 +205,13 @@ func ClientPackAppend(c *gin.Context) {
 	form := &model.ClientPackParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind client pack data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind client pack data",
 			},
 		)
 
@@ -238,7 +245,7 @@ func ClientPackAppend(c *gin.Context) {
 	)
 
 	if err != nil {
-		logrus.Warn(err)
+		logrus.Warnf("Failed to append client pack. %s", err)
 
 		c.JSON(
 			http.StatusInternalServerError,
@@ -266,14 +273,13 @@ func ClientPackDelete(c *gin.Context) {
 	form := &model.ClientPackParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind client pack data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind client pack data",
 			},
 		)
 
@@ -307,6 +313,8 @@ func ClientPackDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete client pack. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{

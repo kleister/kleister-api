@@ -17,6 +17,8 @@ func ModIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch mods. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -55,11 +57,13 @@ func ModDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete mod. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
-				"message": err.Error(),
+				"message": "Failed to delete mod",
 			},
 		)
 
@@ -81,8 +85,7 @@ func ModUpdate(c *gin.Context) {
 	record := session.Mod(c)
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind mod data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind mod data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -102,6 +105,8 @@ func ModUpdate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to update mod. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -125,8 +130,7 @@ func ModCreate(c *gin.Context) {
 	record := &model.Mod{}
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind mod data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind mod data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -146,6 +150,8 @@ func ModCreate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to create mod. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -174,6 +180,8 @@ func ModUserIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch mod users. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -197,14 +205,13 @@ func ModUserAppend(c *gin.Context) {
 	form := &model.ModUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind mod user data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind mod user data",
 			},
 		)
 
@@ -238,6 +245,8 @@ func ModUserAppend(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to append mod user. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -264,14 +273,13 @@ func ModUserPerm(c *gin.Context) {
 	form := &model.ModUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind mod user data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind mod user data",
 			},
 		)
 
@@ -303,6 +311,8 @@ func ModUserPerm(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to update permissions. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -329,14 +339,13 @@ func ModUserDelete(c *gin.Context) {
 	form := &model.ModUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind mod user data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind mod user data",
 			},
 		)
 
@@ -370,6 +379,8 @@ func ModUserDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete mod user. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -401,6 +412,8 @@ func ModTeamIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch mod teams. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -424,14 +437,13 @@ func ModTeamAppend(c *gin.Context) {
 	form := &model.ModTeamParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind mod team data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind mod team data",
 			},
 		)
 
@@ -463,6 +475,8 @@ func ModTeamAppend(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to append mod team. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -489,14 +503,13 @@ func ModTeamPerm(c *gin.Context) {
 	form := &model.ModTeamParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind mod team data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind mod team data",
 			},
 		)
 
@@ -528,6 +541,8 @@ func ModTeamPerm(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to update permissions. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -554,14 +569,13 @@ func ModTeamDelete(c *gin.Context) {
 	form := &model.ModTeamParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind mod team data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind mod team data",
 			},
 		)
 
@@ -593,6 +607,8 @@ func ModTeamDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete mod team. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{

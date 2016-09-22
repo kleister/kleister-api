@@ -17,6 +17,8 @@ func MinecraftIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch minecraft versions. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -46,6 +48,8 @@ func MinecraftUpdate(c *gin.Context) {
 	result, err := minecraft.Load()
 
 	if err != nil {
+		logrus.Warnf("Failed to sync minecraft versions. %s", err)
+
 		c.JSON(
 			http.StatusServiceUnavailable,
 			gin.H{
@@ -69,6 +73,8 @@ func MinecraftUpdate(c *gin.Context) {
 		)
 
 		if err != nil {
+			logrus.Warnf("Failed to store minecraft version. %s", err)
+
 			c.JSON(
 				http.StatusInternalServerError,
 				gin.H{
@@ -101,6 +107,8 @@ func MinecraftBuildIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch minecraft builds. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -124,14 +132,13 @@ func MinecraftBuildAppend(c *gin.Context) {
 	form := &model.MinecraftBuildParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind minecraft build data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind minecraft build data",
 			},
 		)
 
@@ -165,6 +172,8 @@ func MinecraftBuildAppend(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to append minecraft build. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -191,14 +200,13 @@ func MinecraftBuildDelete(c *gin.Context) {
 	form := &model.MinecraftBuildParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind minecraft build data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind minecraft build data",
 			},
 		)
 
@@ -232,6 +240,8 @@ func MinecraftBuildDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete minecraft build. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{

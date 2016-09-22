@@ -17,6 +17,8 @@ func PackIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch packs. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -55,6 +57,8 @@ func PackDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete pack. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -81,8 +85,7 @@ func PackUpdate(c *gin.Context) {
 	record := session.Pack(c)
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind pack data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind pack data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -102,6 +105,8 @@ func PackUpdate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to update pack. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -125,8 +130,7 @@ func PackCreate(c *gin.Context) {
 	record := &model.Pack{}
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind pack data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind pack data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -146,6 +150,8 @@ func PackCreate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to create pack. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -174,6 +180,8 @@ func PackClientIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch pack clients. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -197,14 +205,13 @@ func PackClientAppend(c *gin.Context) {
 	form := &model.PackClientParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind pack client data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind pack client data",
 			},
 		)
 
@@ -238,6 +245,8 @@ func PackClientAppend(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to append pack client. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -264,14 +273,13 @@ func PackClientDelete(c *gin.Context) {
 	form := &model.PackClientParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind pack client data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind pack client data",
 			},
 		)
 
@@ -305,6 +313,8 @@ func PackClientDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete pack client. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -336,6 +346,8 @@ func PackUserIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch pack users. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -359,14 +371,13 @@ func PackUserAppend(c *gin.Context) {
 	form := &model.PackUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind pack user data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind pack user data",
 			},
 		)
 
@@ -400,6 +411,8 @@ func PackUserAppend(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to append pack user. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -426,14 +439,13 @@ func PackUserPerm(c *gin.Context) {
 	form := &model.PackUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind pack user data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind pack user data",
 			},
 		)
 
@@ -465,6 +477,8 @@ func PackUserPerm(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to update permissions. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -491,14 +505,13 @@ func PackUserDelete(c *gin.Context) {
 	form := &model.PackUserParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind pack user data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind pack user data",
 			},
 		)
 
@@ -532,6 +545,8 @@ func PackUserDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete pack user. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -563,6 +578,8 @@ func PackTeamIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch pack teams. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -586,14 +603,13 @@ func PackTeamAppend(c *gin.Context) {
 	form := &model.PackTeamParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind pack team data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind pack team data",
 			},
 		)
 
@@ -625,6 +641,8 @@ func PackTeamAppend(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to append pack team. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -651,14 +669,13 @@ func PackTeamPerm(c *gin.Context) {
 	form := &model.PackTeamParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind pack team data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind pack team data",
 			},
 		)
 
@@ -690,6 +707,8 @@ func PackTeamPerm(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to update permissions. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -716,14 +735,13 @@ func PackTeamDelete(c *gin.Context) {
 	form := &model.PackTeamParams{}
 
 	if err := c.BindJSON(&form); err != nil {
-		logrus.Warn("Failed to bind post data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind pack team data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
 				"status":  http.StatusPreconditionFailed,
-				"message": "Failed to bind form data",
+				"message": "Failed to bind pack team data",
 			},
 		)
 
@@ -755,6 +773,8 @@ func PackTeamDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete pack team. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{

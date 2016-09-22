@@ -17,6 +17,8 @@ func KeyIndex(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to fetch keys. %s", err)
+
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -55,11 +57,13 @@ func KeyDelete(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to delete key. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
 				"status":  http.StatusBadRequest,
-				"message": err.Error(),
+				"message": "Failed to delete key",
 			},
 		)
 
@@ -81,8 +85,7 @@ func KeyUpdate(c *gin.Context) {
 	record := session.Key(c)
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind key data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind key data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -102,6 +105,8 @@ func KeyUpdate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to update key. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -125,8 +130,7 @@ func KeyCreate(c *gin.Context) {
 	record := &model.Key{}
 
 	if err := c.BindJSON(&record); err != nil {
-		logrus.Warn("Failed to bind key data")
-		logrus.Warn(err)
+		logrus.Warnf("Failed to bind key data. %s", err)
 
 		c.JSON(
 			http.StatusPreconditionFailed,
@@ -146,6 +150,8 @@ func KeyCreate(c *gin.Context) {
 	)
 
 	if err != nil {
+		logrus.Warnf("Failed to create key. %s", err)
+
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
