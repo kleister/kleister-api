@@ -1,18 +1,23 @@
 package solder
 
 import (
+	"fmt"
+
+	"github.com/kleister/kleister-api/config"
 	"github.com/kleister/kleister-api/model"
 )
 
 // Packs is simply a collection of pack structs.
 type Packs struct {
-	Modpacks map[string]interface{} `json:"modpacks"`
+	MirrorURL string                 `json:"mirror_url"`
+	Modpacks  map[string]interface{} `json:"modpacks"`
 }
 
 // NewPacksFromList generates a solder model from our used models.
 func NewPacksFromList(records *model.Packs, client *model.Client, key *model.Key, include string) *Packs {
 	result := &Packs{
-		Modpacks: make(map[string]interface{}, 0),
+		MirrorURL: getMirrorURL(),
+		Modpacks:  make(map[string]interface{}, 0),
 	}
 
 	for _, record := range *records {
@@ -43,4 +48,27 @@ func getPackValue(record *model.Pack, client *model.Client, key *model.Key, incl
 	default:
 		return record.Name
 	}
+}
+
+func getMirrorURL() string {
+	if config.S3.Enabled {
+		if config.S3.Endpoint == "" {
+			return fmt.Sprintf(
+				"https://s3-%s.amazonaws.com/%s/",
+				config.S3.Region,
+				config.S3.Bucket,
+			)
+		}
+
+		return fmt.Sprintf(
+			"%s/%s/",
+			config.S3.Endpoint,
+			config.S3.Bucket,
+		)
+	}
+
+	return fmt.Sprintf(
+		"%s/storage/",
+		config.Server.Host,
+	)
 }
