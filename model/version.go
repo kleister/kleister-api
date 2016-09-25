@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Machiel/slugify"
 	"github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
 )
@@ -30,11 +29,9 @@ func (u *Version) BeforeSave(db *gorm.DB) (err error) {
 	if u.Slug == "" {
 		for i := 0; true; i++ {
 			if i == 0 {
-				u.Slug = slugify.Slugify(u.Name)
+				u.Slug = u.Name
 			} else {
-				u.Slug = slugify.Slugify(
-					fmt.Sprintf("%s-%d", u.Name, i),
-				)
+				u.Slug = fmt.Sprintf("%s-%d", u.Name, i)
 			}
 
 			notFound := db.Where(
