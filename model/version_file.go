@@ -150,6 +150,12 @@ func (u *VersionFile) SetURL() {
 }
 
 func isInvalidVersionFileType(mediaType string) bool {
-	logrus.Debugf("Got %s version file media type", mediaType)
-	return false
+	switch mediaType {
+	case "application/zip":
+		logrus.Debugf("Detected valid %s media type", mediaType)
+		return false
+	}
+
+	logrus.Debugf("Failed to validate %s media type", mediaType)
+	return true
 }
