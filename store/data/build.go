@@ -95,6 +95,8 @@ func (db *data) GetBuild(pack int64, id string) (*model.Build, *gorm.DB) {
 		"Forge",
 	).Preload(
 		"Versions",
+	).Preload(
+		"Versions.Mod",
 	).First(
 		record,
 	)
