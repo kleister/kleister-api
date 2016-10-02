@@ -91,6 +91,8 @@ func (db *data) GetVersion(mod int64, id string) (*model.Version, *gorm.DB) {
 		"File",
 	).Preload(
 		"Builds",
+	).Preload(
+		"Builds.Pack",
 	).First(
 		record,
 	)
