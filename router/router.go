@@ -413,10 +413,6 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 				solder.GET("/modpack", api.SolderPacks)
 				solder.GET("/modpack/:pack", api.SolderPack)
 				solder.GET("/modpack/:pack/:build", api.SolderBuild)
-
-				solder.GET("/mod", api.SolderMods)
-				solder.GET("/mod/:mod", api.SolderMod)
-				solder.GET("/mod/:mod/:version", api.SolderVersion)
 			}
 
 			//

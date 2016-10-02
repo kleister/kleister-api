@@ -8,13 +8,13 @@ import (
 
 // Build represents a solder build model definition.
 type Build struct {
-	Minecraft string   `json:"minecraft"`
-	Forge     string   `json:"forge"`
-	Mods      []*Child `json:"mods"`
+	Minecraft string `json:"minecraft"`
+	Forge     string `json:"forge"`
+	Mods      []*Mod `json:"mods"`
 }
 
-// Child represents a build mod model definition.
-type Child struct {
+// Mod represents a build mod model definition.
+type Mod struct {
 	Slug        string `json:"name,omitempty"`
 	Version     string `json:"version,omitempty"`
 	MD5         string `json:"md5,omitempty"`
@@ -26,28 +26,28 @@ type Child struct {
 	Donate      string `json:"donate,omitempty"`
 }
 
-// ChildBySlug sorts a list of children be the slug.
-type ChildBySlug []*Child
+// ModBySlug sorts a list of children be the slug.
+type ModBySlug []*Mod
 
 // Len is part of the child sorting algorithm.
-func (u ChildBySlug) Len() int {
+func (u ModBySlug) Len() int {
 	return len(u)
 }
 
 // Swap is part of the child sorting algorithm.
-func (u ChildBySlug) Swap(i, j int) {
+func (u ModBySlug) Swap(i, j int) {
 	u[i], u[j] = u[j], u[i]
 }
 
 // Less is part of the child sorting algorithm.
-func (u ChildBySlug) Less(i, j int) bool {
+func (u ModBySlug) Less(i, j int) bool {
 	return u[i].Slug < u[j].Slug
 }
 
 // NewBuildFromModel generates a solder model from our used models.
 func NewBuildFromModel(source *model.Build, client *model.Client, key *model.Key, include string) *Build {
 	result := &Build{
-		Mods: make([]*Child, 0),
+		Mods: make([]*Mod, 0),
 	}
 
 	if source.Minecraft != nil {
@@ -63,7 +63,7 @@ func NewBuildFromModel(source *model.Build, client *model.Client, key *model.Key
 		case "mods":
 			result.Mods = append(
 				result.Mods,
-				&Child{
+				&Mod{
 					Slug:        version.Mod.Slug,
 					Version:     version.Name,
 					MD5:         version.File.MD5,
@@ -78,7 +78,7 @@ func NewBuildFromModel(source *model.Build, client *model.Client, key *model.Key
 		default:
 			result.Mods = append(
 				result.Mods,
-				&Child{
+				&Mod{
 					Slug:    version.Mod.Slug,
 					Version: version.Name,
 					MD5:     version.File.MD5,
@@ -89,7 +89,7 @@ func NewBuildFromModel(source *model.Build, client *model.Client, key *model.Key
 	}
 
 	sort.Sort(
-		ChildBySlug(
+		ModBySlug(
 			result.Mods,
 		),
 	)
