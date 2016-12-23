@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"time"
@@ -165,12 +166,38 @@ func Server() cli.Command {
 			logrus.Infof("Starting the API on %s", config.Server.Addr)
 
 			if config.Server.Cert != "" && config.Server.Key != "" {
+				curves := []tls.CurveID{
+					tls.CurveP521,
+					tls.CurveP384,
+					tls.CurveP256,
+				}
+
+				ciphers := []uint16{
+					tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+					tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+					tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+					tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				}
+
+				cfg := &tls.Config{
+					PreferServerCipherSuites: true,
+					MinVersion:               tls.VersionTLS12,
+					CurvePreferences:         curves,
+					CipherSuites:             ciphers,
+				}
+
+				server := &http.Server{
+					Addr:         config.Server.Addr,
+					Handler:      router.Load(),
+					ReadTimeout:  5 * time.Second,
+					WriteTimeout: 10 * time.Second,
+					TLSConfig:    cfg,
+				}
+
 				logrus.Fatal(
-					http.ListenAndServeTLS(
-						config.Server.Addr,
+					server.ListenAndServeTLS(
 						config.Server.Cert,
 						config.Server.Key,
-						router.Load(),
 					),
 				)
 			} else {
