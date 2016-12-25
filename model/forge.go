@@ -75,7 +75,7 @@ func (u *Forge) BeforeDelete(tx *gorm.DB) error {
 	)
 
 	if len(builds) > 0 {
-		return fmt.Errorf("Can't delete, still assigned to builds.")
+		return fmt.Errorf("Can't delete, still assigned to builds")
 	}
 
 	return nil

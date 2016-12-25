@@ -8,41 +8,87 @@ pipeline:
     pull: true
     environment:
       CGO_ENABLED: 1
+      TAGS:
+      GOPATH: /srv/app
     commands:
       - make clean
       - make vet
       - make lint
       - make test
       - make build
+    when:
+      event: [ push, tag, pull_request ]
+
+  test-mysql:
+    image: webhippie/golang:edge
+    pull: true
+    environment:
+      CGO_ENABLED: 1
+      TAGS:
+      GOPATH: /srv/app
+    commands:
+      - make test-mysql
+    when:
+      event: [ push ]
+
+  test-pgsql:
+    image: webhippie/golang:edge
+    pull: true
+    environment:
+      CGO_ENABLED: 1
+      TAGS:
+      GOPATH: /srv/app
+    commands:
+      - make test-pgsql
+    when:
+      event: [ push ]
 
   updater:
     image: karalabe/xgo-latest:latest
     pull: true
+    environment:
+      CGO_ENABLED: 1
+      TAGS:
+      GOPATH: /srv/app
     commands:
-      - make publish
+      - make release
     when:
       event: [ push, tag ]
-      branch: [ master, refs/tags/* ]
+      branch: [ master, release/*, refs/tags/* ]
 
-  coverage:
-    image: plugins/coverage
-    server: http://coverage.dronehippie.de
+  # coverage:
+  #   image: plugins/coverage
+  #   server: https://coverage.gitea.io
+  #   when:
+  #     event: [ push, tag, pull_request ]
 
-  docker1:
+  docker:
     image: plugins/docker
     repo: kleister/kleister-api
-    tags: [ '${TAG}' ]
+    tags: [ '${DRONE_TAG##v}' ]
     when:
-      event: tag
-      branch: refs/tags/*
+      event: [ tag ]
+      branch: [ refs/tags/* ]
 
-  docker2:
+  docker:
     image: plugins/docker
     repo: kleister/kleister-api
     tags: [ 'latest' ]
     when:
-      event: push
-      branch: master
+      event: [ push ]
+      branch: [ master ]
+
+  # rsync:
+  #   image: plugins/rsync
+  #   user: deploy
+  #   host: dl.webhippie.de
+  #   source: dist/release/
+  #   target: /usr/share/webapps/dl/public_html/kleister-api/${DRONE_TAG##v}
+  #   recursive: true
+  #   delete: true
+  #   when:
+  #     event: [ tag ]
+  #     branch: [ refs/tags/* ]
 
   # rsync:
   #   image: plugins/rsync
@@ -53,40 +99,32 @@ pipeline:
   #   recursive: true
   #   delete: true
   #   when:
-  #     event: push
-  #     branch: master
+  #     event: [ push ]
+  #     branch: [ master ]
 
-  # rsync:
-  #   image: plugins/rsync
-  #   user: deploy
-  #   host: dl.webhippie.de
-  #   source: dist/release/
-  #   target: /usr/share/webapps/dl/public_html/kleister-api/$$TAG
-  #   recursive: true
-  #   delete: true
-  #   when:
-  #     event: tag
-  #     branch: refs/tags/*
-
-  # rsync:
-  #   image: plugins/rsync
-  #   user: deploy
-  #   host: dl.webhippie.de
-  #   source: dist/latest/
-  #   target: /usr/share/webapps/dl/public_html/kleister-api/latest
-  #   recursive: true
-  #   delete: true
-  #   when:
-  #     event: tag
-  #     branch: refs/tags/*
-
-  # github_release:
-  #   image: plugins/github-release
-  #   files:
-  #     - dist/release/*
-  #   when:
-  #     event: tag
-  #     branch: refs/tags/*
+  github:
+    image: plugins/github-release
+    files:
+      - dist/release/*
+    when:
+      event: [ tag ]
+      branch: [ refs/tags/* ]
 
   gitter:
     image: plugins/gitter
+
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_DATABASE=test
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    when:
+      event: [ push ]
+
+  pgsql:
+    image: postgres:9.5
+    environment:
+      - POSTGRES_DB=test
+    when:
+      event: [ push ]

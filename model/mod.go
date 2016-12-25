@@ -74,7 +74,7 @@ func (u *Mod) BeforeDelete(tx *gorm.DB) error {
 	)
 
 	if len(versions) > 0 {
-		return fmt.Errorf("Can't delete, still assigned to versions.")
+		return fmt.Errorf("Can't delete, still assigned to versions")
 	}
 
 	if err := tx.Model(u).Association("Users").Clear().Error; err != nil {
