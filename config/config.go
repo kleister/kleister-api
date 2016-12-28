@@ -13,12 +13,13 @@ type database struct {
 }
 
 type server struct {
-	Host    string
-	Addr    string
-	Cert    string
-	Key     string
-	Root    string
-	Storage string
+	Host        string
+	Addr        string
+	Cert        string
+	Key         string
+	Root        string
+	Storage     string
+	LetsEncrypt bool
 }
 
 type s3 struct {
