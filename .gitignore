@@ -28,4 +28,4 @@ coverage.out
 .env
 /storage
 /dist
-/bin
+/kleister-api

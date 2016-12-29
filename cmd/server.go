@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"path"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -11,6 +12,7 @@ import (
 	"github.com/kleister/kleister-api/router"
 	"github.com/kleister/kleister-api/shared/s3client"
 	"github.com/urfave/cli"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 // Server provides the sub-command to start the API server.
@@ -69,20 +71,6 @@ func Server() cli.Command {
 				Destination: &config.Server.Addr,
 			},
 			cli.StringFlag{
-				Name:        "cert",
-				Value:       "",
-				Usage:       "Path to SSL cert",
-				EnvVar:      "KLEISTER_SERVER_CERT",
-				Destination: &config.Server.Cert,
-			},
-			cli.StringFlag{
-				Name:        "key",
-				Value:       "",
-				Usage:       "Path to SSL key",
-				EnvVar:      "KLEISTER_SERVER_KEY",
-				Destination: &config.Server.Key,
-			},
-			cli.StringFlag{
 				Name:        "root",
 				Value:       "/",
 				Usage:       "Root folder of the app",
@@ -102,6 +90,26 @@ func Server() cli.Command {
 				Usage:       "Session expire duration",
 				EnvVar:      "KLEISTER_SESSION_EXPIRE",
 				Destination: &config.Session.Expire,
+			},
+			cli.StringFlag{
+				Name:        "ssl-cert",
+				Value:       "",
+				Usage:       "Path to SSL cert",
+				EnvVar:      "KLEISTER_SSL_CERT",
+				Destination: &config.Server.Cert,
+			},
+			cli.StringFlag{
+				Name:        "ssl-key",
+				Value:       "",
+				Usage:       "Path to SSL key",
+				EnvVar:      "KLEISTER_SSL_KEY",
+				Destination: &config.Server.Key,
+			},
+			cli.BoolFlag{
+				Name:        "ssl-letsencrypt",
+				Usage:       "Enable Let's Encrypt SSL",
+				EnvVar:      "KLEISTER_SSL_LETSENCRYPT",
+				Destination: &config.Server.LetsEncrypt,
 			},
 			cli.BoolFlag{
 				Name:        "s3-enabled",
@@ -165,7 +173,7 @@ func Server() cli.Command {
 		Action: func(c *cli.Context) {
 			logrus.Infof("Starting the API on %s", config.Server.Addr)
 
-			if config.Server.Cert != "" && config.Server.Key != "" {
+			if config.Server.LetsEncrypt || (config.Server.Cert != "" && config.Server.Key != "") {
 				curves := []tls.CurveID{
 					tls.CurveP521,
 					tls.CurveP384,
@@ -184,6 +192,18 @@ func Server() cli.Command {
 					MinVersion:               tls.VersionTLS12,
 					CurvePreferences:         curves,
 					CipherSuites:             ciphers,
+				}
+
+				if config.Server.LetsEncrypt {
+					certManager := autocert.Manager{
+						Prompt: autocert.AcceptTOS,
+						Cache:  autocert.DirCache(path.Join(config.Server.Storage, "certs")),
+					}
+
+					cfg.GetCertificate = certManager.GetCertificate
+
+					config.Server.Cert = ""
+					config.Server.Key = ""
 				}
 
 				server := &http.Server{
