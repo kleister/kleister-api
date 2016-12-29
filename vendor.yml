@@ -13,6 +13,14 @@ vendors:
   rev: 9ed569b5d1ac936e6494082958d63a6aa4fff99a
 - path: github.com/elazarl/go-bindata-assetfs
   rev: 9a6736ed45b44bf3835afeebb3034b57ed329f3e
+- path: github.com/facebookgo/clock
+  rev: 600d898af40aa09a7a93ecb9265d87b0504b6f03
+- path: github.com/facebookgo/grace
+  rev: 5729e484473f52048578af1b80d0008c7024089b
+- path: github.com/facebookgo/httpdown
+  rev: a3b1354551a26449fbe05f5d855937f6e7acbd71
+- path: github.com/facebookgo/stats
+  rev: 1b76add642e42c6ffba7211ad7b3939ce654526e
 - path: github.com/gin-gonic/gin
   rev: e2212d40c62a98b388a5eb48ecbdcf88534688ba
 - path: github.com/go-ini/ini
