@@ -16,8 +16,6 @@ pipeline:
       - make lint
       - make test
       - make build
-    when:
-      event: [ push, tag, pull_request ]
 
   test-mysql:
     image: webhippie/golang:edge
@@ -73,6 +71,14 @@ pipeline:
   docker:
     image: plugins/docker
     repo: kleister/kleister-api
+    tags: [ '${DRONE_BRANCH##release/v}' ]
+    when:
+      event: [ push ]
+      branch: [ release/* ]
+
+  docker:
+    image: plugins/docker
+    repo: kleister/kleister-api
     tags: [ 'latest' ]
     when:
       event: [ push ]
@@ -89,6 +95,18 @@ pipeline:
   #   when:
   #     event: [ tag ]
   #     branch: [ refs/tags/* ]
+
+  # rsync:
+  #   image: plugins/rsync
+  #   user: deploy
+  #   host: dl.webhippie.de
+  #   source: dist/release/
+  #   target: /usr/share/webapps/dl/public_html/kleister-api/${DRONE_TAG##release/v}
+  #   recursive: true
+  #   delete: true
+  #   when:
+  #     event: [ push ]
+  #     branch: [ release/* ]
 
   # rsync:
   #   image: plugins/rsync
