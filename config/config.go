@@ -22,6 +22,11 @@ type server struct {
 	LetsEncrypt bool
 }
 
+type admin struct {
+	Users  []string
+	Create bool
+}
+
 type s3 struct {
 	Enabled   bool
 	Endpoint  string
@@ -45,6 +50,9 @@ var (
 
 	// Server represents the informations about the server bindings.
 	Server = &server{}
+
+	// Admin represents the informations about the admin config.
+	Admin = &admin{}
 
 	// S3 represents the informations about s3 storage connections.
 	S3 = &s3{}

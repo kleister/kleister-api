@@ -92,6 +92,18 @@ func Server() cli.Command {
 				EnvVar:      "KLEISTER_SESSION_EXPIRE",
 				Destination: &config.Session.Expire,
 			},
+			cli.StringSliceFlag{
+				Name:   "admin-user",
+				Value:  &cli.StringSlice{},
+				Usage:  "Enforce user as an admin",
+				EnvVar: "KLEISTER_ADMIN_USERS",
+			},
+			cli.BoolTFlag{
+				Name:        "admin-create",
+				Usage:       "Create an initial admin user",
+				EnvVar:      "KLEISTER_ADMIN_CREATE",
+				Destination: &config.Admin.Create,
+			},
 			cli.StringFlag{
 				Name:        "ssl-cert",
 				Value:       "",
@@ -161,6 +173,11 @@ func Server() cli.Command {
 			},
 		},
 		Before: func(c *cli.Context) error {
+			if len(c.StringSlice("admin-user")) > 0 {
+				// StringSliceFlag doesn't support Destination
+				config.Admin.Users = c.StringSlice("admin-user")
+			}
+
 			if config.S3.Enabled {
 				_, err := s3client.New().List()
 
