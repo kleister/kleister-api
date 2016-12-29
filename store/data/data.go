@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -219,7 +220,7 @@ func migrateDatabase(driver string, db *gorm.DB) error {
 		)
 	}
 
-	if db.First(&model.User{}).RecordNotFound() {
+	if config.Admin.Create && db.First(&model.User{}).RecordNotFound() {
 		record := &model.User{
 			Username: "admin",
 			Password: "admin",
@@ -235,6 +236,32 @@ func migrateDatabase(driver string, db *gorm.DB) error {
 		if err != nil {
 			return fmt.Errorf(
 				"Failed to create initial user. %s",
+				err.Error(),
+			)
+		}
+	}
+
+	logrus.Debugf("%v", config.Admin.Users)
+
+	if len(config.Admin.Users) > 0 {
+		logrus.Infof(
+			"Enforcing admin users: %s",
+			strings.Join(config.Admin.Users, ", "),
+		)
+
+		err := db.Model(
+			&model.User{},
+		).Where(
+			"username IN (?)",
+			config.Admin.Users,
+		).UpdateColumn(
+			"admin",
+			true,
+		).Error
+
+		if err != nil {
+			return fmt.Errorf(
+				"Failed to enforce admin users. %s",
 				err.Error(),
 			)
 		}
