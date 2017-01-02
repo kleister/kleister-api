@@ -13,18 +13,22 @@ var (
 
 	// VersionPatch is the current patch version
 	VersionPatch = 0
-)
 
-var (
 	// VersionDev indicates the current commit
 	VersionDev = "dev"
 
+	// VersionDate indicates the build date
+	VersionDate = "20170101"
+)
+
+var (
 	// Version is the version of the current implementation.
 	Version = fmt.Sprintf(
-		"%d.%d.%d+%s",
+		"%d.%d.%d+git%s.%s",
 		VersionMajor,
 		VersionMinor,
 		VersionPatch,
+		VersionDate,
 		VersionDev,
 	)
 )
