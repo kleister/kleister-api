@@ -1,9 +1,15 @@
 DIST := dist
-EXECUTABLE := kleister-api
 IMPORT := github.com/kleister/kleister-api
 
+ifeq ($(OS), Windows_NT)
+	EXECUTABLE := kleister-api.exe
+else
+	EXECUTABLE := kleister-api
+endif
+
 SHA := $(shell git rev-parse --short HEAD)
-LDFLAGS += -s -w -X "github.com/kleister/kleister-api/config.VersionDev=$(SHA)"
+DATE := $(shell date -u '+%Y%m%d')
+LDFLAGS += -s -w -X "$(IMPORT)/config.VersionDev=$(SHA)" -X "$(IMPORT)/config.VersionDate=$(DATE)"
 
 TARGETS ?= linux/*,darwin/*,windows/*
 PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
