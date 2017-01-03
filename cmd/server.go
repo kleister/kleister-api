@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/facebookgo/grace/gracehttp"
 	"github.com/kleister/kleister-api/config"
 	"github.com/kleister/kleister-api/router"
 	"github.com/kleister/kleister-api/shared/s3client"
@@ -255,7 +254,7 @@ func Server() cli.Command {
 				}
 			}
 
-			if err := gracehttp.Serve(server); err != nil {
+			if err := startServer(server); err != nil {
 				logrus.Fatal(err)
 			}
 		},
