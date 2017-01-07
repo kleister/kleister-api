@@ -64,6 +64,20 @@ errcheck:
 	fi
 	errcheck $(PACKAGES)
 
+.PHONY: varcheck
+varcheck:
+	@which varcheck > /dev/null; if [ $$? -ne 0 ]; then \
+		go get -u github.com/opennota/check/cmd/varcheck; \
+	fi
+	varcheck $(PACKAGES)
+
+.PHONY: structcheck
+structcheck:
+	@which structcheck > /dev/null; if [ $$? -ne 0 ]; then \
+		go get -u github.com/opennota/check/cmd/structcheck; \
+	fi
+	structcheck $(PACKAGES)
+
 .PHONY: lint
 lint:
 	@which golint > /dev/null; if [ $$? -ne 0 ]; then \
