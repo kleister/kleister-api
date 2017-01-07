@@ -1,16 +1,16 @@
 vendors:
 - path: github.com/Machiel/slugify
-  rev: 9c8f186ad6ea352ad2709ad0ec08f2ecc8a1b424
+  rev: 41c84c0beaaff50afb3405924315f6cafa95f781
 - path: github.com/Sirupsen/logrus
-  rev: 881bee4e20a5d11a6a88a5667c6f292072ac1963
+  rev: 9b48ece7fc373043054858f8c0d362665e866004
 - path: github.com/asaskevich/govalidator
-  rev: 3b2665001c4c24e3b076d1ca8c428049ecbb925b
+  rev: fdf19785fd3558d619ef81212f5edf1d6c2a5911
 - path: github.com/aws/aws-sdk-go
-  rev: 34836244f5c4e694b99d1a81898af5559a3c9c6d
+  rev: 8649d278323ebf6bd20c9cd56ecb152b1c617375
 - path: github.com/denisenkom/go-mssqldb
-  rev: aa91b9def474faafb2406c8b562ae1e0e1f89ea4
+  rev: 1f78c56b282570b046db06a0618059a2e10dcaae
 - path: github.com/dgrijalva/jwt-go
-  rev: 9ed569b5d1ac936e6494082958d63a6aa4fff99a
+  rev: a601269ab70c205d26370c16f7c81e9017c14e04
 - path: github.com/elazarl/go-bindata-assetfs
   rev: 9a6736ed45b44bf3835afeebb3034b57ed329f3e
 - path: github.com/facebookgo/clock
@@ -32,21 +32,21 @@ vendors:
 - path: github.com/gorilla/securecookie
   rev: fa5329f913702981df43dcb2a380bac429c810b5
 - path: github.com/jinzhu/gorm
-  rev: 0fbff1e8f0821fc67ef793a9f403beda5ca372b8
+  rev: 373207d546d4bf4a971d688b63ed787528548d6e
 - path: github.com/jinzhu/inflection
-  rev: 74387dc39a75e970e7a3ae6a3386b5bd2e5c5cff
+  rev: 1c35d901db3da928c72a72d8458480cc9ade058f
 - path: github.com/jmespath/go-jmespath
   rev: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - path: github.com/joho/godotenv
   rev: 726cc8b906e3d31c70a9671c90a13716a8d3f50d
 - path: github.com/lib/pq
-  rev: 5bf161122cd640c2a5a2c1d7fa49ea9befff31dd
+  rev: 8df6253d1317616f36b0c3740eb30c239a7372cb
 - path: github.com/manucorporat/sse
   rev: ee05b128a739a0fb76c7ebd3ae4810c1de808d6d
 - path: github.com/mattn/go-isatty
   rev: 30a891c33c7cde7b02a981314b4228ec99380cca
 - path: github.com/mattn/go-sqlite3
-  rev: 2d44decb4941c9cdf72c22297b7890faf7da9bcb
+  rev: 6f2749a3ca9b233ffb8749ef9684f7f4d88cee7a
 - path: github.com/mcuadros/go-version
   rev: 257f7b9a7d87427c8d7f89469a5958d57f8abd7c
 - path: github.com/o1egl/gormrus
@@ -60,9 +60,9 @@ vendors:
 - path: github.com/vincent-petithory/dataurl
   rev: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - path: golang.org/x/crypto
-  rev: f6b343c37ca80bfa8ea539da67a0b621f84fab1d
+  rev: cb497ae8f18e3c55f81bc9f3876c8f4c3d8a2813
 - path: golang.org/x/net
-  rev: 45e771701b814666a7eb299e6c7a57d0b1799e91
+  rev: ae05321a78c1401cec22ba7bc203b597ea372496
 - path: golang.org/x/sys
   rev: d75a52659825e75fff6158388dddc6a5b04f9ba5
 - path: gopkg.in/go-playground/validator.v8
