@@ -1,0 +1,12 @@
+pkg: "template"
+dest: "."
+fmt: true
+
+compression:
+  compress: true
+
+custom:
+  - files:
+    - "dist/"
+    base: "dist/"
+    prefix: ""
