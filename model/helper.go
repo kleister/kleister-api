@@ -28,7 +28,7 @@ func RandomHash() string {
 
 // AttachmentDefault returns checksum and URL for default images.
 func AttachmentDefault(kind string) (string, string) {
-	content, err := assets.Asset(
+	content, err := assets.ReadFile(
 		fmt.Sprintf(
 			"images/default-%s.png",
 			kind,

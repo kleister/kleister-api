@@ -9,11 +9,11 @@ import (
 
 // Favicon represents the favicon.
 func Favicon(c *gin.Context) {
+	file, _ := assets.ReadFile("images/favicon.ico")
+
 	c.Data(
 		http.StatusOK,
 		"image/x-icon",
-		assets.MustAsset(
-			"images/favicon.ico",
-		),
+		file,
 	)
 }

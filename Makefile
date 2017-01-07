@@ -52,8 +52,8 @@ vet:
 
 .PHONY: generate
 generate:
-	@which go-bindata > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/jteeuwen/go-bindata/...; \
+	@which fileb0x > /dev/null; if [ $$? -ne 0 ]; then \
+		go get -u github.com/UnnoTed/fileb0x; \
 	fi
 	go generate $(PACKAGES)
 
