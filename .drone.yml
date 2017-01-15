@@ -13,6 +13,12 @@ pipeline:
     commands:
       - make clean
       - make vet
+      - make varcheck
+      - make structcheck
+      - make unused
+      - make gosimple
+      - make unconvert
+      - make ineffassign
       - make lint
       - make test
       - make build
