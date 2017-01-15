@@ -5,15 +5,18 @@ import (
 	"runtime"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/joho/godotenv"
 	"github.com/kleister/kleister-api/cmd"
 	"github.com/kleister/kleister-api/config"
 	"github.com/urfave/cli"
-
-	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	if env := os.Getenv("KLEISTER_ENV_FILE"); env != "" {
+		godotenv.Load(env)
+	}
 
 	app := cli.NewApp()
 	app.Name = "kleister"
