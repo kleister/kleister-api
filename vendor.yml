@@ -2,17 +2,15 @@ vendors:
 - path: github.com/Machiel/slugify
   rev: 41c84c0beaaff50afb3405924315f6cafa95f781
 - path: github.com/Sirupsen/logrus
-  rev: 9b48ece7fc373043054858f8c0d362665e866004
+  rev: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
 - path: github.com/asaskevich/govalidator
   rev: fdf19785fd3558d619ef81212f5edf1d6c2a5911
 - path: github.com/aws/aws-sdk-go
-  rev: 8649d278323ebf6bd20c9cd56ecb152b1c617375
+  rev: 5e1afe1c0a077fb2da9b5f74232b790d99397ce8
 - path: github.com/denisenkom/go-mssqldb
-  rev: 1f78c56b282570b046db06a0618059a2e10dcaae
+  rev: 370263e74ba8f78a6a3fa15202e934f1be4eccd4
 - path: github.com/dgrijalva/jwt-go
   rev: a601269ab70c205d26370c16f7c81e9017c14e04
-- path: github.com/elazarl/go-bindata-assetfs
-  rev: 9a6736ed45b44bf3835afeebb3034b57ed329f3e
 - path: github.com/facebookgo/clock
   rev: 600d898af40aa09a7a93ecb9265d87b0504b6f03
 - path: github.com/facebookgo/grace
@@ -32,7 +30,7 @@ vendors:
 - path: github.com/gorilla/securecookie
   rev: fa5329f913702981df43dcb2a380bac429c810b5
 - path: github.com/jinzhu/gorm
-  rev: 373207d546d4bf4a971d688b63ed787528548d6e
+  rev: a3b8b332edf4ac4360a4f4cb95979000bd0aef8c
 - path: github.com/jinzhu/inflection
   rev: 1c35d901db3da928c72a72d8458480cc9ade058f
 - path: github.com/jmespath/go-jmespath
@@ -46,23 +44,25 @@ vendors:
 - path: github.com/mattn/go-isatty
   rev: 30a891c33c7cde7b02a981314b4228ec99380cca
 - path: github.com/mattn/go-sqlite3
-  rev: 6f2749a3ca9b233ffb8749ef9684f7f4d88cee7a
+  rev: eff6379ba09b2fca7aa8216f2132d4c170ed9d46
 - path: github.com/mcuadros/go-version
   rev: 257f7b9a7d87427c8d7f89469a5958d57f8abd7c
 - path: github.com/o1egl/gormrus
   rev: 57710b0229272260f1fa2b31838a0dc4baa22a0a
+- path: github.com/pkg/errors
+  rev: 248dadf4e9068a0b3e79f02ed0a610d935de5302
 - path: github.com/qor/validations
   rev: 33b58b9d1651affa63034555341ea989b78cb8f9
 - path: github.com/ungerik/go-gravatar
   rev: 6ab22628222adee0d853df36a2f0783f56ea55ec
 - path: github.com/urfave/cli
-  rev: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
+  rev: 8ef3805c9de2519805c3f060524b695bba2cd715
 - path: github.com/vincent-petithory/dataurl
   rev: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - path: golang.org/x/crypto
-  rev: cb497ae8f18e3c55f81bc9f3876c8f4c3d8a2813
+  rev: 2f8be38b9a7533b8763d48273737ff6e90428a96
 - path: golang.org/x/net
-  rev: ae05321a78c1401cec22ba7bc203b597ea372496
+  rev: f2499483f923065a842d38eb4c7f1927e6fc6e6d
 - path: golang.org/x/sys
   rev: d75a52659825e75fff6158388dddc6a5b04f9ba5
 - path: gopkg.in/go-playground/validator.v8
