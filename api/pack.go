@@ -226,7 +226,7 @@ func PackClientAppend(c *gin.Context) {
 		form,
 	)
 
-	if assigned == true {
+	if assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -294,7 +294,7 @@ func PackClientDelete(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -392,7 +392,7 @@ func PackUserAppend(c *gin.Context) {
 		form,
 	)
 
-	if assigned == true {
+	if assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -458,7 +458,7 @@ func PackUserPerm(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -526,7 +526,7 @@ func PackUserDelete(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -622,7 +622,7 @@ func PackTeamAppend(c *gin.Context) {
 		form,
 	)
 
-	if assigned == true {
+	if assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -688,7 +688,7 @@ func PackTeamPerm(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -754,7 +754,7 @@ func PackTeamDelete(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{

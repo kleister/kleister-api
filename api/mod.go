@@ -226,7 +226,7 @@ func ModUserAppend(c *gin.Context) {
 		form,
 	)
 
-	if assigned == true {
+	if assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -292,7 +292,7 @@ func ModUserPerm(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -360,7 +360,7 @@ func ModUserDelete(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -456,7 +456,7 @@ func ModTeamAppend(c *gin.Context) {
 		form,
 	)
 
-	if assigned == true {
+	if assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -522,7 +522,7 @@ func ModTeamPerm(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -588,7 +588,7 @@ func ModTeamDelete(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{

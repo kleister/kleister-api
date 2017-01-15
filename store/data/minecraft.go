@@ -98,7 +98,7 @@ func (db *data) GetMinecraftHasBuild(params *model.MinecraftBuildParams) bool {
 	pack, _ := db.GetPack(params.Pack)
 	build, _ := db.GetBuild(pack.ID, params.Build)
 
-	return build.MinecraftID.Int64 == int64(minecraft.ID)
+	return build.MinecraftID.Int64 == minecraft.ID
 }
 
 func (db *data) CreateMinecraftBuild(params *model.MinecraftBuildParams, current *model.User) error {

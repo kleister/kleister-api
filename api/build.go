@@ -237,7 +237,7 @@ func BuildVersionAppend(c *gin.Context) {
 		form,
 	)
 
-	if assigned == true {
+	if assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -306,7 +306,7 @@ func BuildVersionDelete(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
