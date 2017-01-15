@@ -224,7 +224,7 @@ func UserModAppend(c *gin.Context) {
 		form,
 	)
 
-	if assigned == true {
+	if assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -290,7 +290,7 @@ func UserModPerm(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -356,7 +356,7 @@ func UserModDelete(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -455,7 +455,7 @@ func UserPackAppend(c *gin.Context) {
 		form,
 	)
 
-	if assigned == true {
+	if assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -521,7 +521,7 @@ func UserPackPerm(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -589,7 +589,7 @@ func UserPackDelete(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -685,7 +685,7 @@ func UserTeamAppend(c *gin.Context) {
 		form,
 	)
 
-	if assigned == true {
+	if assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -751,7 +751,7 @@ func UserTeamPerm(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{
@@ -817,7 +817,7 @@ func UserTeamDelete(c *gin.Context) {
 		form,
 	)
 
-	if assigned == false {
+	if !assigned {
 		c.JSON(
 			http.StatusPreconditionFailed,
 			gin.H{

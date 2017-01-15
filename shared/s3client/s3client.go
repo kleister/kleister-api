@@ -82,9 +82,11 @@ func New() *S3Client {
 		)
 	}
 
+	sess, _ := session.NewSession()
+
 	return &S3Client{
 		client: s3.New(
-			session.New(),
+			sess,
 			cfg,
 		),
 	}

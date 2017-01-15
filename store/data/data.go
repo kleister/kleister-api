@@ -43,7 +43,7 @@ func Test() store.Store {
 		config = ":memory:"
 	)
 
-	if os.Getenv("DATABASE_DRIVER") != "" && os.Getenv("DATABASE_DRIVER") != "" {
+	if os.Getenv("DATABASE_DRIVER") != "" && os.Getenv("DATABASE_CONFIG") != "" {
 		driver = os.Getenv("DATABASE_DRIVER")
 		config = os.Getenv("DATABASE_CONFIG")
 	}
