@@ -13,6 +13,9 @@ import (
 	"github.com/kleister/kleister-api/shared/s3client"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/acme/autocert"
+
+	// Import pprof for optional debugging
+	_ "net/http/pprof"
 )
 
 // Server provides the sub-command to start the API server.
@@ -83,6 +86,12 @@ func Server() cli.Command {
 				Usage:       "Folder for storing uploads",
 				EnvVar:      "KLEISTER_SERVER_STORAGE",
 				Destination: &config.Server.Storage,
+			},
+			cli.BoolFlag{
+				Name:        "pprof",
+				Usage:       "Enable pprof debugging server",
+				EnvVar:      "KLEISTER_SERVER_PPROF",
+				Destination: &config.Server.Pprof,
 			},
 			cli.DurationFlag{
 				Name:        "expire",
@@ -193,6 +202,14 @@ func Server() cli.Command {
 			var (
 				server *http.Server
 			)
+
+			if config.Server.Pprof {
+				go func() {
+					if err := http.ListenAndServe("localhost:6060", nil); err != nil {
+						logrus.Info(err)
+					}
+				}()
+			}
 
 			if config.Server.LetsEncrypt || (config.Server.Cert != "" && config.Server.Key != "") {
 
