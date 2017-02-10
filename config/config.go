@@ -20,6 +20,7 @@ type server struct {
 	Root        string
 	Storage     string
 	LetsEncrypt bool
+	Pprof       bool
 }
 
 type admin struct {
