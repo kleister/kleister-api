@@ -2,7 +2,9 @@ package router
 
 import (
 	"net/http"
+	"path"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/kleister/kleister-api/api"
 	"github.com/kleister/kleister-api/assets"
@@ -39,6 +41,15 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 	e.Use(header.SetSecure())
 	e.Use(header.SetVersion())
 	e.Use(session.SetCurrent())
+
+	if config.Server.Pprof {
+		pprof.Register(
+			e,
+			&pprof.Options{
+				RoutePrefix: path.Join(config.Server.Root, "debug", "pprof"),
+			},
+		)
+	}
 
 	root := e.Group(config.Server.Root)
 	{
