@@ -7,16 +7,14 @@ pipeline:
     image: webhippie/golang:edge
     pull: true
     environment:
-      CGO_ENABLED: 1
-      TAGS:
-      GOPATH: /srv/app
+      - CGO_ENABLED=1
+      - TAGS=
+      - GOPATH=/srv/app
     commands:
       - make clean
       - make vet
       - make varcheck
       - make structcheck
-      - make unused
-      - make gosimple
       - make unconvert
       - make ineffassign
       - make lint
@@ -27,9 +25,9 @@ pipeline:
     image: webhippie/golang:edge
     pull: true
     environment:
-      CGO_ENABLED: 1
-      TAGS:
-      GOPATH: /srv/app
+      - CGO_ENABLED=1
+      - TAGS=
+      - GOPATH=/srv/app
     commands:
       - make test-mysql
     when:
@@ -39,9 +37,9 @@ pipeline:
     image: webhippie/golang:edge
     pull: true
     environment:
-      CGO_ENABLED: 1
-      TAGS:
-      GOPATH: /srv/app
+      - CGO_ENABLED=1
+      - TAGS=
+      - GOPATH=/srv/app
     commands:
       - make test-pgsql
     when:
@@ -51,23 +49,18 @@ pipeline:
     image: karalabe/xgo-latest:latest
     pull: true
     environment:
-      CGO_ENABLED: 1
-      TAGS:
-      GOPATH: /srv/app
+      - CGO_ENABLED=1
+      - TAGS=
+      - GOPATH=/srv/app
     commands:
       - make release
     when:
       event: [ push, tag ]
       branch: [ master, release/*, refs/tags/* ]
 
-  # coverage:
-  #   image: plugins/coverage
-  #   server: https://coverage.gitea.io
-  #   when:
-  #     event: [ push, tag, pull_request ]
-
   docker:
     image: plugins/docker
+    secrets: [ docker_username, docker_password ]
     repo: kleister/kleister-api
     tags: [ '${DRONE_TAG##v}' ]
     when:
@@ -76,6 +69,7 @@ pipeline:
 
   docker:
     image: plugins/docker
+    secrets: [ docker_username, docker_password ]
     repo: kleister/kleister-api
     tags: [ '${DRONE_BRANCH##release/v}' ]
     when:
@@ -84,50 +78,49 @@ pipeline:
 
   docker:
     image: plugins/docker
+    secrets: [ docker_username, docker_password ]
     repo: kleister/kleister-api
     tags: [ 'latest' ]
     when:
       event: [ push ]
       branch: [ master ]
 
-  # rsync:
-  #   image: plugins/rsync
-  #   user: deploy
-  #   host: dl.webhippie.de
-  #   source: dist/release/
-  #   target: /usr/share/webapps/dl/public_html/kleister-api/${DRONE_TAG##v}
-  #   recursive: true
-  #   delete: true
-  #   when:
-  #     event: [ tag ]
-  #     branch: [ refs/tags/* ]
+  archive:
+    image: plugins/s3
+    secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
+    source: dist/release/*
+    target: /kleister/api/${DRONE_TAG##v}
+    strip_prefix: dist/release/
+    path_style: true
+    when:
+      event: [ tag ]
+      branch: [ refs/tags/* ]
 
-  # rsync:
-  #   image: plugins/rsync
-  #   user: deploy
-  #   host: dl.webhippie.de
-  #   source: dist/release/
-  #   target: /usr/share/webapps/dl/public_html/kleister-api/${DRONE_TAG##release/v}
-  #   recursive: true
-  #   delete: true
-  #   when:
-  #     event: [ push ]
-  #     branch: [ release/* ]
+  archive:
+    image: plugins/s3
+    secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
+    source: dist/release/*
+    target: /kleister/api/${DRONE_TAG##release/v}
+    strip_prefix: dist/release/
+    path_style: true
+    when:
+      event: [ push ]
+      branch: [ release/* ]
 
-  # rsync:
-  #   image: plugins/rsync
-  #   user: deploy
-  #   host: dl.webhippie.de
-  #   source: dist/release/
-  #   target: /usr/share/webapps/dl/public_html/kleister-api/master
-  #   recursive: true
-  #   delete: true
-  #   when:
-  #     event: [ push ]
-  #     branch: [ master ]
+  archive:
+    image: plugins/s3
+    secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
+    source: dist/release/*
+    target: /kleister/api/master
+    strip_prefix: dist/release/
+    path_style: true
+    when:
+      event: [ push ]
+      branch: [ master ]
 
   github:
     image: plugins/github-release
+    secrets: [ github_token ]
     files:
       - dist/release/*
     when:
@@ -136,6 +129,7 @@ pipeline:
 
   gitter:
     image: plugins/gitter
+    secrets: [ gitter_webhook ]
 
 services:
   mysql:
