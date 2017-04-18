@@ -1,7 +1,6 @@
 package gorm
 
 import (
-	"database/sql"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -15,7 +14,7 @@ type DefaultForeignKeyNamer struct {
 }
 
 type commonDialect struct {
-	db *sql.DB
+	db SQLCommon
 	DefaultForeignKeyNamer
 }
 
@@ -27,12 +26,12 @@ func (commonDialect) GetName() string {
 	return "common"
 }
 
-func (s *commonDialect) SetDB(db *sql.DB) {
+func (s *commonDialect) SetDB(db SQLCommon) {
 	s.db = db
 }
 
 func (commonDialect) BindVar(i int) string {
-	return "$$" // ?
+	return "$$$" // ?
 }
 
 func (commonDialect) Quote(key string) string {
@@ -125,12 +124,12 @@ func (s commonDialect) CurrentDatabase() (name string) {
 
 func (commonDialect) LimitAndOffsetSQL(limit, offset interface{}) (sql string) {
 	if limit != nil {
-		if parsedLimit, err := strconv.ParseInt(fmt.Sprint(limit), 0, 0); err == nil && parsedLimit > 0 {
+		if parsedLimit, err := strconv.ParseInt(fmt.Sprint(limit), 0, 0); err == nil && parsedLimit >= 0 {
 			sql += fmt.Sprintf(" LIMIT %d", parsedLimit)
 		}
 	}
 	if offset != nil {
-		if parsedOffset, err := strconv.ParseInt(fmt.Sprint(offset), 0, 0); err == nil && parsedOffset > 0 {
+		if parsedOffset, err := strconv.ParseInt(fmt.Sprint(offset), 0, 0); err == nil && parsedOffset >= 0 {
 			sql += fmt.Sprintf(" OFFSET %d", parsedOffset)
 		}
 	}

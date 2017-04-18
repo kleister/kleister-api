@@ -24,6 +24,13 @@ type ConfigProvider interface {
 	ClientConfig(serviceName string, cfgs ...*aws.Config) Config
 }
 
+// ConfigNoResolveEndpointProvider same as ConfigProvider except it will not
+// resolve the endpoint automatically. The service client's endpoint must be
+// provided via the aws.Config.Endpoint field.
+type ConfigNoResolveEndpointProvider interface {
+	ClientConfigNoResolveEndpoint(cfgs ...*aws.Config) Config
+}
+
 // A Client implements the base client request and response handling
 // used by all service clients.
 type Client struct {
@@ -39,7 +46,7 @@ func New(cfg aws.Config, info metadata.ClientInfo, handlers request.Handlers, op
 	svc := &Client{
 		Config:     cfg,
 		ClientInfo: info,
-		Handlers:   handlers,
+		Handlers:   handlers.Copy(),
 	}
 
 	switch retryer, ok := cfg.Retryer.(request.Retryer); {
@@ -79,8 +86,8 @@ func (c *Client) AddDebugHandlers() {
 		return
 	}
 
-	c.Handlers.Send.PushFront(logRequest)
-	c.Handlers.Send.PushBack(logResponse)
+	c.Handlers.Send.PushFrontNamed(request.NamedHandler{Name: "awssdk.client.LogRequest", Fn: logRequest})
+	c.Handlers.Send.PushBackNamed(request.NamedHandler{Name: "awssdk.client.LogResponse", Fn: logResponse})
 }
 
 const logReqMsg = `DEBUG: Request %s/%s Details:

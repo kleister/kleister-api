@@ -13,9 +13,6 @@ import (
 	"github.com/kleister/kleister-api/shared/s3client"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/acme/autocert"
-
-	// Import pprof for optional debugging
-	_ "net/http/pprof"
 )
 
 // Server provides the sub-command to start the API server.
@@ -93,6 +90,26 @@ func Server() cli.Command {
 				EnvVar:      "KLEISTER_SERVER_PPROF",
 				Destination: &config.Server.Pprof,
 			},
+			cli.StringFlag{
+				Name:        "cert",
+				Value:       "",
+				Usage:       "Path to SSL cert",
+				EnvVar:      "KLEISTER_SERVER_CERT",
+				Destination: &config.Server.Cert,
+			},
+			cli.StringFlag{
+				Name:        "key",
+				Value:       "",
+				Usage:       "Path to SSL key",
+				EnvVar:      "KLEISTER_SERVER_KEY",
+				Destination: &config.Server.Key,
+			},
+			cli.BoolFlag{
+				Name:        "letsencrypt",
+				Usage:       "Enable Let's Encrypt SSL",
+				EnvVar:      "KLEISTER_SERVER_LETSENCRYPT",
+				Destination: &config.Server.LetsEncrypt,
+			},
 			cli.DurationFlag{
 				Name:        "expire",
 				Value:       time.Hour * 24,
@@ -111,26 +128,6 @@ func Server() cli.Command {
 				Usage:       "Create an initial admin user",
 				EnvVar:      "KLEISTER_ADMIN_CREATE",
 				Destination: &config.Admin.Create,
-			},
-			cli.StringFlag{
-				Name:        "ssl-cert",
-				Value:       "",
-				Usage:       "Path to SSL cert",
-				EnvVar:      "KLEISTER_SSL_CERT",
-				Destination: &config.Server.Cert,
-			},
-			cli.StringFlag{
-				Name:        "ssl-key",
-				Value:       "",
-				Usage:       "Path to SSL key",
-				EnvVar:      "KLEISTER_SSL_KEY",
-				Destination: &config.Server.Key,
-			},
-			cli.BoolFlag{
-				Name:        "ssl-letsencrypt",
-				Usage:       "Enable Let's Encrypt SSL",
-				EnvVar:      "KLEISTER_SSL_LETSENCRYPT",
-				Destination: &config.Server.LetsEncrypt,
 			},
 			cli.BoolFlag{
 				Name:        "s3-enabled",
@@ -197,19 +194,11 @@ func Server() cli.Command {
 			return nil
 		},
 		Action: func(c *cli.Context) {
-			logrus.Infof("Starting the API on %s", config.Server.Addr)
+			logrus.Infof("Starting API on %s", config.Server.Addr)
 
 			var (
 				server *http.Server
 			)
-
-			if config.Server.Pprof {
-				go func() {
-					if err := http.ListenAndServe("localhost:6060", nil); err != nil {
-						logrus.Info(err)
-					}
-				}()
-			}
 
 			if config.Server.LetsEncrypt || (config.Server.Cert != "" && config.Server.Key != "") {
 

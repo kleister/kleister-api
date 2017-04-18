@@ -1,7 +1,6 @@
 # Kleister: API server
 
 [![Build Status](http://github.dronehippie.de/api/badges/kleister/kleister-api/status.svg)](http://github.dronehippie.de/kleister/kleister-api)
-[![Coverage Status](http://coverage.dronehippie.de/badges/kleister/kleister-api/coverage.svg)](http://coverage.dronehippie.de/kleister/kleister-api)
 [![Go Doc](https://godoc.org/github.com/kleister/kleister-api?status.svg)](http://godoc.org/github.com/kleister/kleister-api)
 [![Go Report](https://goreportcard.com/badge/github.com/kleister/kleister-api)](https://goreportcard.com/report/github.com/kleister/kleister-api)
 [![](https://images.microbadger.com/badges/image/kleister/kleister-api.svg)](http://microbadger.com/images/kleister/kleister-api "Get your own image badge on microbadger.com")
@@ -53,7 +52,7 @@ go get -d github.com/kleister/kleister-api
 cd $GOPATH/src/github.com/kleister/kleister-api
 make clean build
 
-bin/kleister-api -h
+./kleister-api -h
 ```
 
 

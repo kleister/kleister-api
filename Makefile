@@ -92,20 +92,6 @@ structcheck:
 	fi
 	structcheck $(PACKAGES)
 
-.PHONY: unused
-unused:
-	@which unused > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u honnef.co/go/unused/cmd/unused; \
-	fi
-	unused $(PACKAGES)
-
-.PHONY: gosimple
-gosimple:
-	@which gosimple > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u honnef.co/go/simple/cmd/gosimple; \
-	fi
-	gosimple $(PACKAGES)
-
 .PHONY: unconvert
 unconvert:
 	@which unconvert > /dev/null; if [ $$? -ne 0 ]; then \
