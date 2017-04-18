@@ -2,74 +2,74 @@ vendors:
 - path: github.com/Machiel/slugify
   rev: 41c84c0beaaff50afb3405924315f6cafa95f781
 - path: github.com/Sirupsen/logrus
-  rev: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
+  rev: 10f801ebc38b33738c9d17d50860f484a0988ff5
 - path: github.com/asaskevich/govalidator
-  rev: fdf19785fd3558d619ef81212f5edf1d6c2a5911
+  rev: 2c14e1cca90af49b3b21fe2d7aaa8cc7f9da2ff8
 - path: github.com/aws/aws-sdk-go
-  rev: 5e1afe1c0a077fb2da9b5f74232b790d99397ce8
+  rev: aa8e957bb6bc3164f0e5cd722d68fe96894a359a
 - path: github.com/denisenkom/go-mssqldb
-  rev: 370263e74ba8f78a6a3fa15202e934f1be4eccd4
+  rev: 8e6115d5172422909579b49fd1fe0f7591416e4b
 - path: github.com/dgrijalva/jwt-go
-  rev: a601269ab70c205d26370c16f7c81e9017c14e04
+  rev: 2268707a8f0843315e2004ee4f1d021dc08baedf
 - path: github.com/facebookgo/clock
   rev: 600d898af40aa09a7a93ecb9265d87b0504b6f03
 - path: github.com/facebookgo/grace
-  rev: 5729e484473f52048578af1b80d0008c7024089b
+  rev: 4afe952a37a495ae4ac0c1d4ce5f66e91058d149
 - path: github.com/facebookgo/httpdown
   rev: a3b1354551a26449fbe05f5d855937f6e7acbd71
 - path: github.com/facebookgo/stats
   rev: 1b76add642e42c6ffba7211ad7b3939ce654526e
+- path: github.com/gin-contrib/pprof
+  rev: cea200e02ddddca4b843d75d32aa13c413549de9
 - path: github.com/gin-gonic/gin
   rev: e2212d40c62a98b388a5eb48ecbdcf88534688ba
 - path: github.com/go-ini/ini
-  rev: 6f66b0e091edb3c7b380f7c4f0f884274d550b67
+  rev: e7fea39b01aea8d5671f6858f0532f56e8bff3a5
 - path: github.com/go-sql-driver/mysql
-  rev: 2e00b5cd70399450106cec6431c2e2ce3cae5034
+  rev: 9dee4ca50b83acdf57a35fb9e6fb4be640afa2f3
 - path: github.com/golang/protobuf
-  rev: 8ee79997227bf9b34611aee7946ae64735e6fd93
+  rev: 2bba0603135d7d7f5cb73b2125beeda19c09f4ef
 - path: github.com/gorilla/securecookie
-  rev: fa5329f913702981df43dcb2a380bac429c810b5
+  rev: e59506cc896acb7f7bf732d4fdf5e25f7ccd8983
 - path: github.com/jinzhu/gorm
-  rev: a3b8b332edf4ac4360a4f4cb95979000bd0aef8c
+  rev: a870874bb50a229465a45cfc0a1dc3e87d549705
 - path: github.com/jinzhu/inflection
   rev: 1c35d901db3da928c72a72d8458480cc9ade058f
 - path: github.com/jmespath/go-jmespath
   rev: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - path: github.com/joho/godotenv
-  rev: 726cc8b906e3d31c70a9671c90a13716a8d3f50d
+  rev: 325433c502d409f3c3dc820098fb0cfe38d98dc7
 - path: github.com/lib/pq
-  rev: 8df6253d1317616f36b0c3740eb30c239a7372cb
+  rev: 2704adc878c21e1329f46f6e56a1c387d788ff94
 - path: github.com/manucorporat/sse
   rev: ee05b128a739a0fb76c7ebd3ae4810c1de808d6d
 - path: github.com/mattn/go-isatty
-  rev: 30a891c33c7cde7b02a981314b4228ec99380cca
+  rev: fc9e8d8ef48496124e79ae0df75490096eccf6fe
 - path: github.com/mattn/go-sqlite3
-  rev: eff6379ba09b2fca7aa8216f2132d4c170ed9d46
+  rev: cf7286f069c3ef596efcc87781a4653a2e7607bd
 - path: github.com/mcuadros/go-version
   rev: 257f7b9a7d87427c8d7f89469a5958d57f8abd7c
 - path: github.com/o1egl/gormrus
   rev: 57710b0229272260f1fa2b31838a0dc4baa22a0a
-- path: github.com/pkg/errors
-  rev: 248dadf4e9068a0b3e79f02ed0a610d935de5302
 - path: github.com/qor/validations
   rev: 33b58b9d1651affa63034555341ea989b78cb8f9
 - path: github.com/ungerik/go-gravatar
   rev: 6ab22628222adee0d853df36a2f0783f56ea55ec
 - path: github.com/urfave/cli
-  rev: 8ef3805c9de2519805c3f060524b695bba2cd715
+  rev: 8ba6f23b6e36d03666a14bd9421f5e3efcb59aca
 - path: github.com/vincent-petithory/dataurl
   rev: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - path: golang.org/x/crypto
-  rev: 2f8be38b9a7533b8763d48273737ff6e90428a96
+  rev: efac7f277b17c19894091e358c6130cb6bd51117
 - path: golang.org/x/net
-  rev: f2499483f923065a842d38eb4c7f1927e6fc6e6d
+  rev: 5602c733f70afc6dcec6766be0d5034d4c4f14de
 - path: golang.org/x/sys
-  rev: d75a52659825e75fff6158388dddc6a5b04f9ba5
+  rev: f3918c30c5c2cb527c0b071a27c35120a6c0719a
 - path: gopkg.in/go-playground/validator.v8
   rev: 5f57d2222ad794d0dffb07e664ea05e2ee07d60c
 - path: gopkg.in/gormigrate.v1
-  rev: 3935a5b05d4d54b9792449b3f563e2ad8c4fa5b6
+  rev: 8d65e80265237e0c9ccc7fca4771de6d2939576c
 - path: gopkg.in/guregu/null.v3
   rev: 41961cea0328defc5f95c1c473f89ebf0d1813f6
 - path: gopkg.in/yaml.v2
-  rev: a5b47d31c556af34a302ce5d659e6fea44d90de0
+  rev: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
