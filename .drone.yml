@@ -21,7 +21,7 @@ pipeline:
       - make test
       - make build
 
-  test-mysql:
+  testing-mysql:
     image: webhippie/golang:edge
     pull: true
     environment:
@@ -33,7 +33,7 @@ pipeline:
     when:
       event: [ push ]
 
-  test-pgsql:
+  testing-pgsql:
     image: webhippie/golang:edge
     pull: true
     environment:
@@ -45,7 +45,7 @@ pipeline:
     when:
       event: [ push ]
 
-  updater:
+  release:
     image: karalabe/xgo-latest:latest
     pull: true
     environment:
@@ -84,6 +84,16 @@ pipeline:
     when:
       event: [ push ]
       branch: [ master ]
+
+  microbadger:
+    image: zyclonite/drone-webhook
+    secrets:
+      - source: microbadger_token
+        target: plugin_webhook
+    when:
+      event: [ push, tag ]
+      branch: [ master, release/*, refs/tags/* ]
+      status: [ success ]
 
   archive:
     image: plugins/s3
