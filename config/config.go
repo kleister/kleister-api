@@ -13,15 +13,17 @@ type database struct {
 }
 
 type server struct {
-	Host        string
-	Addr        string
-	Cert        string
-	Key         string
-	Root        string
-	Storage     string
-	Assets      string
-	LetsEncrypt bool
-	Pprof       bool
+	Host          string
+	Addr          string
+	Cert          string
+	Key           string
+	Root          string
+	Storage       string
+	Assets        string
+	LetsEncrypt   bool
+	StrictCurves  bool
+	StrictCiphers bool
+	Pprof         bool
 }
 
 type admin struct {
