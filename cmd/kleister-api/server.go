@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"crypto/tls"
@@ -90,6 +90,13 @@ func Server() cli.Command {
 				Usage:       "Folder for storing uploads",
 				EnvVar:      "KLEISTER_SERVER_STORAGE",
 				Destination: &config.Server.Storage,
+			},
+			cli.StringFlag{
+				Name:        "assets",
+				Value:       "",
+				Usage:       "Path to custom assets and templates",
+				EnvVar:      "KLEISTER_SERVER_ASSETS",
+				Destination: &config.Server.Assets,
 			},
 			cli.BoolFlag{
 				Name:        "pprof",

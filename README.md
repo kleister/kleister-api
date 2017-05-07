@@ -44,8 +44,8 @@ take a look at the [install instructions](http://golang.org/doc/install.html).
 As this project relies on vendoring of the dependencies and we are not
 exporting `GO15VENDOREXPERIMENT=1` within our makefile you have to use a Go
 version `>= 1.6`. It is also possible to just simply execute the
-`go get github.com/kleister/kleister-api` command, but we prefer to use our
-`Makefile`:
+`go get github.com/kleister/kleister-api/cmd/kleister-api` command, but we
+prefer to use our `Makefile`:
 
 ```bash
 go get -d github.com/kleister/kleister-api
