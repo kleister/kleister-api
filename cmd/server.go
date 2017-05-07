@@ -4,7 +4,9 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"net/url"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -13,6 +15,11 @@ import (
 	"github.com/kleister/kleister-api/shared/s3client"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/sync/errgroup"
+)
+
+var (
+	defaultAddr = ":8080"
 )
 
 // Server provides the sub-command to start the API server.
@@ -65,7 +72,7 @@ func Server() cli.Command {
 			},
 			cli.StringFlag{
 				Name:        "addr",
-				Value:       ":8080",
+				Value:       defaultAddr,
 				Usage:       "Address to bind the server",
 				EnvVar:      "KLEISTER_SERVER_ADDR",
 				Destination: &config.Server.Addr,
@@ -109,6 +116,16 @@ func Server() cli.Command {
 				Usage:       "Enable Let's Encrypt SSL",
 				EnvVar:      "KLEISTER_SERVER_LETSENCRYPT",
 				Destination: &config.Server.LetsEncrypt,
+			},
+			cli.BoolFlag{
+				Name:   "strict-curves",
+				Usage:  "Use strict SSL curves",
+				EnvVar: "KLEISTER_STRICT_CURVES",
+			},
+			cli.BoolFlag{
+				Name:   "strict-ciphers",
+				Usage:  "Use strict SSL ciphers",
+				EnvVar: "KLEISTER_STRICT_CIPHERS",
 			},
 			cli.DurationFlag{
 				Name:        "expire",
@@ -196,40 +213,78 @@ func Server() cli.Command {
 		Action: func(c *cli.Context) {
 			logrus.Infof("Starting API on %s", config.Server.Addr)
 
-			var (
-				server *http.Server
-			)
-
 			if config.Server.LetsEncrypt || (config.Server.Cert != "" && config.Server.Key != "") {
-
-				curves := []tls.CurveID{
-					tls.CurveP521,
-					tls.CurveP384,
-					tls.CurveP256,
-				}
-
-				ciphers := []uint16{
-					tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-					tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-					tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-					tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-				}
-
 				cfg := &tls.Config{
 					PreferServerCipherSuites: true,
 					MinVersion:               tls.VersionTLS12,
-					CurvePreferences:         curves,
-					CipherSuites:             ciphers,
+				}
+
+				if c.Bool("strict-curves") {
+					cfg.CurvePreferences = []tls.CurveID{
+						tls.CurveP521,
+						tls.CurveP384,
+						tls.CurveP256,
+					}
+				}
+
+				if c.Bool("strict-ciphers") {
+					cfg.CipherSuites = []uint16{
+						tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+						tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+						tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+						tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+					}
 				}
 
 				if config.Server.LetsEncrypt {
+					if config.Server.Addr != defaultAddr {
+						logrus.Infof("With Let's Encrypt bind port have been overwritten!")
+					}
+
+					parsed, err := url.Parse(config.Server.Host)
+
+					if err != nil {
+						logrus.Fatal("Failed to parse host name. %s", err)
+					}
+
 					certManager := autocert.Manager{
-						Prompt: autocert.AcceptTOS,
-						Cache:  autocert.DirCache(path.Join(config.Server.Storage, "certs")),
+						Prompt:     autocert.AcceptTOS,
+						HostPolicy: autocert.HostWhitelist(parsed.Host),
+						Cache:      autocert.DirCache(path.Join(config.Server.Storage, "certs")),
 					}
 
 					cfg.GetCertificate = certManager.GetCertificate
+
+					var (
+						g errgroup.Group
+					)
+
+					splitAddr := strings.SplitN(config.Server.Addr, ":", 2)
+					logrus.Infof("Starting on %s:80 and %s:443", splitAddr[0], splitAddr[0])
+
+					g.Go(func() error {
+						return http.ListenAndServe(
+							fmt.Sprintf("%s:80", splitAddr[0]),
+							http.HandlerFunc(redirect),
+						)
+					})
+
+					g.Go(func() error {
+						return startServer(&http.Server{
+							Addr:         fmt.Sprintf("%s:443", splitAddr[0]),
+							Handler:      router.Load(),
+							ReadTimeout:  5 * time.Second,
+							WriteTimeout: 10 * time.Second,
+							TLSConfig:    cfg,
+						})
+					})
+
+					if err := g.Wait(); err != nil {
+						logrus.Fatal(err)
+					}
 				} else {
+					logrus.Infof("Starting on %s", config.Server.Addr)
+
 					cert, err := tls.LoadX509KeyPair(
 						config.Server.Cert,
 						config.Server.Key,
@@ -242,27 +297,44 @@ func Server() cli.Command {
 					cfg.Certificates = []tls.Certificate{
 						cert,
 					}
-				}
 
-				server = &http.Server{
-					Addr:         config.Server.Addr,
-					Handler:      router.Load(),
-					ReadTimeout:  5 * time.Second,
-					WriteTimeout: 10 * time.Second,
-					TLSConfig:    cfg,
+					server := &http.Server{
+						Addr:         config.Server.Addr,
+						Handler:      router.Load(),
+						ReadTimeout:  5 * time.Second,
+						WriteTimeout: 10 * time.Second,
+						TLSConfig:    cfg,
+					}
+
+					if err := startServer(server); err != nil {
+						logrus.Fatal(err)
+					}
 				}
 			} else {
-				server = &http.Server{
+				logrus.Infof("Starting on %s", config.Server.Addr)
+
+				server := &http.Server{
 					Addr:         config.Server.Addr,
 					Handler:      router.Load(),
 					ReadTimeout:  5 * time.Second,
 					WriteTimeout: 10 * time.Second,
 				}
-			}
 
-			if err := startServer(server); err != nil {
-				logrus.Fatal(err)
+				if err := startServer(server); err != nil {
+					logrus.Fatal(err)
+				}
 			}
 		},
 	}
+}
+
+func redirect(w http.ResponseWriter, req *http.Request) {
+	target := "https://" + req.Host + req.URL.Path
+
+	if len(req.URL.RawQuery) > 0 {
+		target += "?" + req.URL.RawQuery
+	}
+
+	logrus.Debugf("Redirecting to %s", target)
+	http.Redirect(w, req, target, http.StatusTemporaryRedirect)
 }
