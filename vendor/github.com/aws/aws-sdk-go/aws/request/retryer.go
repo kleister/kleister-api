@@ -26,10 +26,8 @@ func WithRetryer(cfg *aws.Config, retryer Retryer) *aws.Config {
 // retryableCodes is a collection of service response codes which are retry-able
 // without any further action.
 var retryableCodes = map[string]struct{}{
-	"RequestError":            {},
-	"RequestTimeout":          {},
-	ErrCodeResponseTimeout:    {},
-	"RequestTimeoutException": {}, // Glacier's flavor of RequestTimeout
+	"RequestError":   {},
+	"RequestTimeout": {},
 }
 
 var throttleCodes = map[string]struct{}{
@@ -40,7 +38,6 @@ var throttleCodes = map[string]struct{}{
 	"RequestThrottled":                       {},
 	"LimitExceededException":                 {}, // Deleting 10+ DynamoDb tables at once
 	"TooManyRequestsException":               {}, // Lambda functions
-	"PriorRequestNotComplete":                {}, // Route53
 }
 
 // credsExpiredCodes is a collection of error codes which signify the credentials
@@ -70,73 +67,35 @@ func isCodeExpiredCreds(code string) bool {
 	return ok
 }
 
-func isSerializationErrorRetryable(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	if aerr, ok := err.(awserr.Error); ok {
-		return isCodeRetryable(aerr.Code())
-	}
-
-	return isErrConnectionReset(err)
-}
-
-// IsErrorRetryable returns whether the error is retryable, based on its Code.
-// Returns false if error is nil.
-func IsErrorRetryable(err error) bool {
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok && aerr.Code() != ErrCodeSerialization {
-			return isCodeRetryable(aerr.Code())
-		} else if ok {
-			return isSerializationErrorRetryable(aerr.OrigErr())
-		}
-	}
-	return false
-}
-
-// IsErrorThrottle returns whether the error is to be throttled based on its code.
-// Returns false if error is nil.
-func IsErrorThrottle(err error) bool {
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			return isCodeThrottle(aerr.Code())
-		}
-	}
-	return false
-}
-
-// IsErrorExpiredCreds returns whether the error code is a credential expiry error.
-// Returns false if error is nil.
-func IsErrorExpiredCreds(err error) bool {
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			return isCodeExpiredCreds(aerr.Code())
-		}
-	}
-	return false
-}
-
 // IsErrorRetryable returns whether the error is retryable, based on its Code.
 // Returns false if the request has no Error set.
-//
-// Alias for the utility function IsErrorRetryable
 func (r *Request) IsErrorRetryable() bool {
-	return IsErrorRetryable(r.Error)
+	if r.Error != nil {
+		if err, ok := r.Error.(awserr.Error); ok {
+			return isCodeRetryable(err.Code())
+		}
+	}
+	return false
 }
 
 // IsErrorThrottle returns whether the error is to be throttled based on its code.
 // Returns false if the request has no Error set
-//
-// Alias for the utility function IsErrorThrottle
 func (r *Request) IsErrorThrottle() bool {
-	return IsErrorThrottle(r.Error)
+	if r.Error != nil {
+		if err, ok := r.Error.(awserr.Error); ok {
+			return isCodeThrottle(err.Code())
+		}
+	}
+	return false
 }
 
 // IsErrorExpired returns whether the error code is a credential expiry error.
 // Returns false if the request has no Error set.
-//
-// Alias for the utility function IsErrorExpiredCreds
 func (r *Request) IsErrorExpired() bool {
-	return IsErrorExpiredCreds(r.Error)
+	if r.Error != nil {
+		if err, ok := r.Error.(awserr.Error); ok {
+			return isCodeExpiredCreds(err.Code())
+		}
+	}
+	return false
 }

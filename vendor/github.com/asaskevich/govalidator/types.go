@@ -29,19 +29,15 @@ type stringValues []reflect.Value
 // ParamTagMap is a map of functions accept variants parameters
 var ParamTagMap = map[string]ParamValidator{
 	"length":       ByteLength,
-	"runelength":   RuneLength,
 	"stringlength": StringLength,
 	"matches":      StringMatches,
-	"in":           isInRaw,
 }
 
 // ParamTagRegexMap maps param tags to their respective regexes.
 var ParamTagRegexMap = map[string]*regexp.Regexp{
 	"length":       regexp.MustCompile("^length\\((\\d+)\\|(\\d+)\\)$"),
-	"runelength":   regexp.MustCompile("^runelength\\((\\d+)\\|(\\d+)\\)$"),
 	"stringlength": regexp.MustCompile("^stringlength\\((\\d+)\\|(\\d+)\\)$"),
-	"in":           regexp.MustCompile(`^in\((.*)\)`),
-	"matches":      regexp.MustCompile(`^matches\((.+)\)$`),
+	"matches":      regexp.MustCompile(`matches\(([^)]+)\)`),
 }
 
 type customTypeTagMap struct {
@@ -117,9 +113,6 @@ var TagMap = map[string]Validator{
 	"longitude":      IsLongitude,
 	"ssn":            IsSSN,
 	"semver":         IsSemver,
-	"rfc3339":        IsRFC3339,
-	"ISO3166Alpha2":  IsISO3166Alpha2,
-	"ISO3166Alpha3":  IsISO3166Alpha3,
 }
 
 // ISO3166Entry stores country codes

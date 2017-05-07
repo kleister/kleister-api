@@ -1,6 +1,7 @@
 package mssql
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -13,31 +14,17 @@ import (
 
 func setIdentityInsert(scope *gorm.Scope) {
 	if scope.Dialect().GetName() == "mssql" {
-		for _, field := range scope.PrimaryFields() {
-			if _, ok := field.TagSettings["AUTO_INCREMENT"]; ok && !field.IsBlank {
-				scope.NewDB().Exec(fmt.Sprintf("SET IDENTITY_INSERT %v ON", scope.TableName()))
-				scope.InstanceSet("mssql:identity_insert_on", true)
-			}
-		}
-	}
-}
-
-func turnOffIdentityInsert(scope *gorm.Scope) {
-	if scope.Dialect().GetName() == "mssql" {
-		if _, ok := scope.InstanceGet("mssql:identity_insert_on"); ok {
-			scope.NewDB().Exec(fmt.Sprintf("SET IDENTITY_INSERT %v OFF", scope.TableName()))
-		}
+		scope.NewDB().Exec(fmt.Sprintf("SET IDENTITY_INSERT %v ON", scope.TableName()))
 	}
 }
 
 func init() {
 	gorm.DefaultCallback.Create().After("gorm:begin_transaction").Register("mssql:set_identity_insert", setIdentityInsert)
-	gorm.DefaultCallback.Create().Before("gorm:commit_or_rollback_transaction").Register("mssql:turn_off_identity_insert", turnOffIdentityInsert)
 	gorm.RegisterDialect("mssql", &mssql{})
 }
 
 type mssql struct {
-	db gorm.SQLCommon
+	db *sql.DB
 	gorm.DefaultForeignKeyNamer
 }
 
@@ -45,12 +32,12 @@ func (mssql) GetName() string {
 	return "mssql"
 }
 
-func (s *mssql) SetDB(db gorm.SQLCommon) {
+func (s *mssql) SetDB(db *sql.DB) {
 	s.db = db
 }
 
 func (mssql) BindVar(i int) string {
-	return "$$$" // ?
+	return "$$" // ?
 }
 
 func (mssql) Quote(key string) string {
@@ -66,14 +53,12 @@ func (s *mssql) DataTypeOf(field *gorm.StructField) string {
 			sqlType = "bit"
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uintptr:
 			if _, ok := field.TagSettings["AUTO_INCREMENT"]; ok || field.IsPrimaryKey {
-				field.TagSettings["AUTO_INCREMENT"] = "AUTO_INCREMENT"
 				sqlType = "int IDENTITY(1,1)"
 			} else {
 				sqlType = "int"
 			}
 		case reflect.Int64, reflect.Uint64:
 			if _, ok := field.TagSettings["AUTO_INCREMENT"]; ok || field.IsPrimaryKey {
-				field.TagSettings["AUTO_INCREMENT"] = "AUTO_INCREMENT"
 				sqlType = "bigint IDENTITY(1,1)"
 			} else {
 				sqlType = "bigint"
@@ -144,18 +129,14 @@ func (s mssql) CurrentDatabase() (name string) {
 }
 
 func (mssql) LimitAndOffsetSQL(limit, offset interface{}) (sql string) {
-	if offset != nil {
-		if parsedOffset, err := strconv.ParseInt(fmt.Sprint(offset), 0, 0); err == nil && parsedOffset >= 0 {
-			sql += fmt.Sprintf(" OFFSET %d ROWS", parsedOffset)
+	if limit != nil {
+		if parsedLimit, err := strconv.ParseInt(fmt.Sprint(limit), 0, 0); err == nil && parsedLimit > 0 {
+			sql += fmt.Sprintf(" FETCH NEXT %d ROWS ONLY", parsedLimit)
 		}
 	}
-	if limit != nil {
-		if parsedLimit, err := strconv.ParseInt(fmt.Sprint(limit), 0, 0); err == nil && parsedLimit >= 0 {
-			if sql == "" {
-				// add default zero offset
-				sql += " OFFSET 0 ROWS"
-			}
-			sql += fmt.Sprintf(" FETCH NEXT %d ROWS ONLY", parsedLimit)
+	if offset != nil {
+		if parsedOffset, err := strconv.ParseInt(fmt.Sprint(offset), 0, 0); err == nil && parsedOffset > 0 {
+			sql += fmt.Sprintf(" OFFSET %d ROWS", parsedOffset)
 		}
 	}
 	return

@@ -12,6 +12,7 @@ type sqlite3 struct {
 }
 
 func init() {
+	RegisterDialect("sqlite", &sqlite3{})
 	RegisterDialect("sqlite3", &sqlite3{})
 }
 

@@ -58,7 +58,7 @@ func (scope *Scope) NewDB() *DB {
 }
 
 // SQLDB return *sql.DB
-func (scope *Scope) SQLDB() SQLCommon {
+func (scope *Scope) SQLDB() sqlCommon {
 	return scope.db.db
 }
 
@@ -340,7 +340,7 @@ func (scope *Scope) CombinedConditionSql() string {
 
 // Raw set raw sql
 func (scope *Scope) Raw(sql string) *Scope {
-	scope.SQL = strings.Replace(sql, "$$$", "?", -1)
+	scope.SQL = strings.Replace(sql, "$$", "?", -1)
 	return scope
 }
 
@@ -391,7 +391,7 @@ func (scope *Scope) InstanceGet(name string) (interface{}, bool) {
 func (scope *Scope) Begin() *Scope {
 	if db, ok := scope.SQLDB().(sqlDb); ok {
 		if tx, err := db.Begin(); err == nil {
-			scope.db.db = interface{}(tx).(SQLCommon)
+			scope.db.db = interface{}(tx).(sqlCommon)
 			scope.InstanceSet("gorm:started_transaction", true)
 		}
 	}
@@ -673,12 +673,11 @@ func (scope *Scope) buildSelectQuery(clause map[string]interface{}) (str string)
 func (scope *Scope) whereSQL() (sql string) {
 	var (
 		quotedTableName                                = scope.QuotedTableName()
-		deletedAtField, hasDeletedAtField              = scope.FieldByName("DeletedAt")
 		primaryConditions, andConditions, orConditions []string
 	)
 
-	if !scope.Search.Unscoped && hasDeletedAtField {
-		sql := fmt.Sprintf("%v.%v IS NULL", quotedTableName, scope.Quote(deletedAtField.DBName))
+	if !scope.Search.Unscoped && scope.HasColumn("deleted_at") {
+		sql := fmt.Sprintf("%v.deleted_at IS NULL", quotedTableName)
 		primaryConditions = append(primaryConditions, sql)
 	}
 
@@ -929,10 +928,6 @@ func (scope *Scope) pluck(column string, value interface{}) *Scope {
 			elem := reflect.New(dest.Type().Elem()).Interface()
 			scope.Err(rows.Scan(elem))
 			dest.Set(reflect.Append(dest, reflect.ValueOf(elem).Elem()))
-		}
-
-		if err := rows.Err(); err != nil {
-			scope.Err(err)
 		}
 	}
 	return scope

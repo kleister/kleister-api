@@ -42,28 +42,14 @@ func (s *mysql) DataTypeOf(field *StructField) string {
 		switch dataValue.Kind() {
 		case reflect.Bool:
 			sqlType = "boolean"
-		case reflect.Int8:
-			if _, ok := field.TagSettings["AUTO_INCREMENT"]; ok || field.IsPrimaryKey {
-				field.TagSettings["AUTO_INCREMENT"] = "AUTO_INCREMENT"
-				sqlType = "tinyint AUTO_INCREMENT"
-			} else {
-				sqlType = "tinyint"
-			}
-		case reflect.Int, reflect.Int16, reflect.Int32:
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
 			if _, ok := field.TagSettings["AUTO_INCREMENT"]; ok || field.IsPrimaryKey {
 				field.TagSettings["AUTO_INCREMENT"] = "AUTO_INCREMENT"
 				sqlType = "int AUTO_INCREMENT"
 			} else {
 				sqlType = "int"
 			}
-		case reflect.Uint8:
-			if _, ok := field.TagSettings["AUTO_INCREMENT"]; ok || field.IsPrimaryKey {
-				field.TagSettings["AUTO_INCREMENT"] = "AUTO_INCREMENT"
-				sqlType = "tinyint unsigned AUTO_INCREMENT"
-			} else {
-				sqlType = "tinyint unsigned"
-			}
-		case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uintptr:
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uintptr:
 			if _, ok := field.TagSettings["AUTO_INCREMENT"]; ok || field.IsPrimaryKey {
 				field.TagSettings["AUTO_INCREMENT"] = "AUTO_INCREMENT"
 				sqlType = "int unsigned AUTO_INCREMENT"

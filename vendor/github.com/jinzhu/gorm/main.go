@@ -11,23 +11,21 @@ import (
 
 // DB contains information for current db connection
 type DB struct {
-	Value        interface{}
-	Error        error
-	RowsAffected int64
-
-	// single db
-	db                SQLCommon
-	blockGlobalUpdate bool
+	Value             interface{}
+	Error             error
+	RowsAffected      int64
+	callbacks         *Callback
+	db                sqlCommon
+	parent            *DB
+	search            *search
 	logMode           int
 	logger            logger
-	search            *search
+	dialect           Dialect
+	singularTable     bool
+	source            string
 	values            map[string]interface{}
-
-	// global db
-	parent        *DB
-	callbacks     *Callback
-	dialect       Dialect
-	singularTable bool
+	joinTableHandlers map[string]JoinTableHandler
+	blockGlobalUpdate bool
 }
 
 // Open initialize a new db connection, need to import driver first, e.g:
@@ -41,13 +39,16 @@ type DB struct {
 //    // import _ "github.com/jinzhu/gorm/dialects/postgres"
 //    // import _ "github.com/jinzhu/gorm/dialects/sqlite"
 //    // import _ "github.com/jinzhu/gorm/dialects/mssql"
-func Open(dialect string, args ...interface{}) (db *DB, err error) {
+func Open(dialect string, args ...interface{}) (*DB, error) {
+	var db DB
+	var err error
+
 	if len(args) == 0 {
 		err = errors.New("invalid database source")
 		return nil, err
 	}
 	var source string
-	var dbSQL SQLCommon
+	var dbSQL sqlCommon
 
 	switch value := args[0].(type) {
 	case string:
@@ -59,28 +60,44 @@ func Open(dialect string, args ...interface{}) (db *DB, err error) {
 			source = args[1].(string)
 		}
 		dbSQL, err = sql.Open(driver, source)
-	case SQLCommon:
+	case sqlCommon:
+		source = reflect.Indirect(reflect.ValueOf(value)).FieldByName("dsn").String()
 		dbSQL = value
 	}
 
-	db = &DB{
-		db:        dbSQL,
+	db = DB{
+		dialect:   newDialect(dialect, dbSQL.(*sql.DB)),
 		logger:    defaultLogger,
-		values:    map[string]interface{}{},
 		callbacks: DefaultCallback,
-		dialect:   newDialect(dialect, dbSQL),
+		source:    source,
+		values:    map[string]interface{}{},
+		db:        dbSQL,
 	}
-	db.parent = db
-	if err != nil {
-		return
-	}
-	// Send a ping to make sure the database connection is alive.
-	if d, ok := dbSQL.(*sql.DB); ok {
-		if err = d.Ping(); err != nil {
-			d.Close()
+	db.parent = &db
+
+	if err == nil {
+		err = db.DB().Ping() // Send a ping to make sure the database connection is alive.
+		if err != nil {
+			db.DB().Close()
 		}
 	}
-	return
+
+	return &db, err
+}
+
+// Close close current db connection
+func (s *DB) Close() error {
+	return s.parent.db.(*sql.DB).Close()
+}
+
+// DB get `*sql.DB` from current connection
+func (s *DB) DB() *sql.DB {
+	return s.db.(*sql.DB)
+}
+
+// Dialect get dialect
+func (s *DB) Dialect() Dialect {
+	return s.parent.dialect
 }
 
 // New clone a new db connection without search conditions
@@ -91,33 +108,16 @@ func (s *DB) New() *DB {
 	return clone
 }
 
-type closer interface {
-	Close() error
-}
-
-// Close close current db connection.  If database connection is not an io.Closer, returns an error.
-func (s *DB) Close() error {
-	if db, ok := s.parent.db.(closer); ok {
-		return db.Close()
-	}
-	return errors.New("can't close current db")
-}
-
-// DB get `*sql.DB` from current connection
-// If the underlying database connection is not a *sql.DB, returns nil
-func (s *DB) DB() *sql.DB {
-	db, _ := s.db.(*sql.DB)
-	return db
+// NewScope create a scope for current operation
+func (s *DB) NewScope(value interface{}) *Scope {
+	dbClone := s.clone()
+	dbClone.Value = value
+	return &Scope{db: dbClone, Search: dbClone.search.clone(), Value: value}
 }
 
 // CommonDB return the underlying `*sql.DB` or `*sql.Tx` instance, mainly intended to allow coexistence with legacy non-GORM code.
-func (s *DB) CommonDB() SQLCommon {
+func (s *DB) CommonDB() sqlCommon {
 	return s.db
-}
-
-// Dialect get dialect
-func (s *DB) Dialect() Dialect {
-	return s.parent.dialect
 }
 
 // Callback return `Callbacks` container, you could add/change/delete callbacks with it
@@ -159,13 +159,6 @@ func (s *DB) HasBlockGlobalUpdate() bool {
 func (s *DB) SingularTable(enable bool) {
 	modelStructsMap = newModelStructsMap()
 	s.parent.singularTable = enable
-}
-
-// NewScope create a scope for current operation
-func (s *DB) NewScope(value interface{}) *Scope {
-	dbClone := s.clone()
-	dbClone.Value = value
-	return &Scope{db: dbClone, Search: dbClone.search.clone(), Value: value}
 }
 
 // Where return a new relation, filter records with given conditions, accepts `map`, `struct` or `string` as conditions, refer http://jinzhu.github.io/gorm/crud.html#query
@@ -454,9 +447,9 @@ func (s *DB) Debug() *DB {
 // Begin begin a transaction
 func (s *DB) Begin() *DB {
 	c := s.clone()
-	if db, ok := c.db.(sqlDb); ok && db != nil {
+	if db, ok := c.db.(sqlDb); ok {
 		tx, err := db.Begin()
-		c.db = interface{}(tx).(SQLCommon)
+		c.db = interface{}(tx).(sqlCommon)
 		c.AddError(err)
 	} else {
 		c.AddError(ErrCantStartTransaction)
@@ -466,7 +459,7 @@ func (s *DB) Begin() *DB {
 
 // Commit commit a transaction
 func (s *DB) Commit() *DB {
-	if db, ok := s.db.(sqlTx); ok && db != nil {
+	if db, ok := s.db.(sqlTx); ok {
 		s.AddError(db.Commit())
 	} else {
 		s.AddError(ErrInvalidTransaction)
@@ -476,7 +469,7 @@ func (s *DB) Commit() *DB {
 
 // Rollback rollback a transaction
 func (s *DB) Rollback() *DB {
-	if db, ok := s.db.(sqlTx); ok && db != nil {
+	if db, ok := s.db.(sqlTx); ok {
 		s.AddError(db.Rollback())
 	} else {
 		s.AddError(ErrInvalidTransaction)
@@ -698,7 +691,7 @@ func (s *DB) GetErrors() []error {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Private Methods For DB
+// Private Methods For *gorm.DB
 ////////////////////////////////////////////////////////////////////////////////
 
 func (s *DB) clone() *DB {
@@ -728,7 +721,7 @@ func (s *DB) clone() *DB {
 }
 
 func (s *DB) print(v ...interface{}) {
-	s.logger.Print(v...)
+	s.logger.(logger).Print(v...)
 }
 
 func (s *DB) log(v ...interface{}) {
