@@ -91,6 +91,13 @@ func Server() cli.Command {
 				EnvVar:      "KLEISTER_SERVER_STORAGE",
 				Destination: &config.Server.Storage,
 			},
+			cli.StringFlag{
+				Name:        "assets",
+				Value:       "",
+				Usage:       "Path to custom assets and templates",
+				EnvVar:      "KLEISTER_SERVER_ASSETS",
+				Destination: &config.Server.Assets,
+			},
 			cli.BoolFlag{
 				Name:        "pprof",
 				Usage:       "Enable pprof debugging server",

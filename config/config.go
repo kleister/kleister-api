@@ -19,6 +19,7 @@ type server struct {
 	Key         string
 	Root        string
 	Storage     string
+	Assets      string
 	LetsEncrypt bool
 	Pprof       bool
 }
