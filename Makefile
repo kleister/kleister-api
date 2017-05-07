@@ -31,10 +31,11 @@ all: build
 
 .PHONY: update
 update:
-	@which govend > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/govend/govend; \
+	@which govendor > /dev/null; if [ $$? -ne 0 ]; then \
+		go get -u github.com/kardianos/govendor; \
 	fi
-	govend -vtlu --prune
+	govendor add +external
+	govendor fetch +external
 
 .PHONY: clean
 clean:
