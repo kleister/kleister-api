@@ -15,6 +15,12 @@
 			"revisionTime": "2017-03-17T14:32:14Z"
 		},
 		{
+			"checksumSHA1": "7HXb3cry6luicWeJM9Uxwzfo9Rs=",
+			"path": "github.com/Unknwon/com",
+			"revision": "0db4a625e949e956314d7d1adea9bf82384cc10c",
+			"revisionTime": "2017-02-13T07:20:14Z"
+		},
+		{
 			"checksumSHA1": "CDOphCxF7dup+hBBVRpFeQhM9Jw=",
 			"path": "github.com/asaskevich/govalidator",
 			"revision": "593d64559f7600f29581a3ee42177f5dbded27a9",
