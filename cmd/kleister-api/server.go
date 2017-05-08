@@ -204,6 +204,7 @@ func Server() *cli.Command {
 			},
 			&cli.BoolFlag{
 				Name:        "s3-path-style",
+				Value:       false,
 				Usage:       "S3 path style",
 				EnvVars:     []string{"KLEISTER_S3_PATH_STYLE"},
 				Destination: &config.S3.PathStyle,
