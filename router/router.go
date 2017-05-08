@@ -11,6 +11,7 @@ import (
 	"github.com/kleister/kleister-api/config"
 	"github.com/kleister/kleister-api/router/middleware/header"
 	"github.com/kleister/kleister-api/router/middleware/logger"
+	"github.com/kleister/kleister-api/router/middleware/prometheus"
 	"github.com/kleister/kleister-api/router/middleware/recovery"
 	"github.com/kleister/kleister-api/router/middleware/session"
 	"github.com/kleister/kleister-api/router/middleware/store"
@@ -68,6 +69,7 @@ func Load(middleware ...gin.HandlerFunc) http.Handler {
 
 		root.GET("/favicon.ico", web.Favicon)
 		root.GET("", web.Index)
+		root.GET("/metrics", prometheus.Handler())
 
 		base := root.Group("/api")
 		{
