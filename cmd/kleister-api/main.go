@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -12,8 +11,6 @@ import (
 )
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-
 	if env := os.Getenv("KLEISTER_ENV_FILE"); env != "" {
 		godotenv.Load(env)
 	}
