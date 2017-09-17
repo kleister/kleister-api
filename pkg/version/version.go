@@ -8,19 +8,19 @@ import (
 
 var (
 	// VersionMajor is the current major version
-	VersionMajor int64 = 0
+	VersionMajor int64
 
 	// VersionMinor is the current minor version
 	VersionMinor int64 = 1
 
 	// VersionPatch is the current patch version
-	VersionPatch int64 = 0
+	VersionPatch int64
 
 	// VersionPre indicates a pre release tag
-	VersionPre string = "alpha1"
+	VersionPre = "alpha1"
 
 	// VersionDev indicates the current commit
-	VersionDev string = "0000000"
+	VersionDev = "0000000"
 
 	// VersionDate indicates the build date
 	VersionDate = "20170101"
