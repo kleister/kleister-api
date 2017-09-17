@@ -173,7 +173,7 @@ publish: release
 
 HAS_RETOOL := $(shell command -v retool)
 
-.PHONY:
+.PHONY: retool
 retool:
 ifndef HAS_RETOOL
 	go get -u github.com/twitchtv/retool
