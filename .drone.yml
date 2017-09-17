@@ -168,7 +168,7 @@ pipeline:
       event: [ tag ]
 
   gitter:
-    image: plugins/gitter_1
+    image: plugins/gitter:1
     pull: true
     secrets: [ gitter_webhook ]
 
