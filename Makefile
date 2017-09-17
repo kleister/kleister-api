@@ -91,11 +91,11 @@ misspell:
 
 .PHONY: ineffassign
 ineffassign:
-	retool do ineffassign .
+	retool do ineffassign -n $(SOURCES)
 
 .PHONY: dupl
 dupl:
-	retool add dupl .
+	retool do dupl -t 100 $(SOURCES)
 
 .PHONY: lint
 lint:
