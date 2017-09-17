@@ -3,6 +3,13 @@ workspace:
   path: src/github.com/kleister/kleister-api
 
 pipeline:
+  restore:
+    image: plugins/s3-cache:1
+    pull: true
+    secrets: [ cache_s3_server, cache_s3_access_key, cache_s3_secret_key ]
+    pull: true
+    restore: true
+
   testing:
     image: webhippie/golang:edge
     pull: true
@@ -12,6 +19,7 @@ pipeline:
       - GOPATH=/srv/app
     commands:
       - make clean
+      - make retool
       - make vet
       - make varcheck
       - make structcheck
@@ -30,8 +38,6 @@ pipeline:
       - GOPATH=/srv/app
     commands:
       - make test-mysql
-    when:
-      event: [ push ]
 
   testing-pgsql:
     image: webhippie/golang:edge
@@ -42,8 +48,6 @@ pipeline:
       - GOPATH=/srv/app
     commands:
       - make test-pgsql
-    when:
-      event: [ push ]
 
   release:
     image: karalabe/xgo-latest:latest
@@ -56,19 +60,20 @@ pipeline:
       - make release
     when:
       event: [ push, tag ]
-      branch: [ master, release/*, refs/tags/* ]
+      branch: [ master, release/* ]
 
   docker:
-    image: plugins/docker
+    image: plugins/docker:17.05
+    pull: true
     secrets: [ docker_username, docker_password ]
     repo: kleister/kleister-api
     tags: [ '${DRONE_TAG##v}' ]
     when:
       event: [ tag ]
-      branch: [ refs/tags/* ]
 
   docker:
-    image: plugins/docker
+    image: plugins/docker:17.05
+    pull: true
     secrets: [ docker_username, docker_password ]
     repo: kleister/kleister-api
     tags: [ '${DRONE_BRANCH##release/v}' ]
@@ -77,7 +82,8 @@ pipeline:
       branch: [ release/* ]
 
   docker:
-    image: plugins/docker
+    image: plugins/docker:17.05
+    pull: true
     secrets: [ docker_username, docker_password ]
     repo: kleister/kleister-api
     tags: [ 'latest' ]
@@ -86,17 +92,40 @@ pipeline:
       branch: [ master ]
 
   microbadger:
-    image: zyclonite/drone-webhook
+    image: plugins/webhook:1
+    pull: true
     secrets:
       - source: microbadger_token
-        target: plugin_webhook
+        target: plugin_urls
     when:
       event: [ push, tag ]
-      branch: [ master, release/*, refs/tags/* ]
-      status: [ success ]
+      branch: [ master, release/* ]
+
+  rebuild:
+    image: plugins/s3-cache:1
+    pull: true
+    secrets: [ cache_s3_server, cache_s3_access_key, cache_s3_secret_key ]
+    rebuild: true
+    mount:
+      - _tools/bin
+      - _tools/pkg
+    when:
+      event: [ push ]
+      branch: [ master, release/* ]
+
+  flush:
+    image: plugins/s3-cache:1
+    pull: true
+    secrets: [ cache_s3_server, cache_s3_access_key, cache_s3_secret_key ]
+    flush: true
+    flush_age: 14
+    when:
+      event: [ push ]
+      branch: [ master, release/* ]
 
   archive:
-    image: plugins/s3
+    image: plugins/s3:1
+    pull: true
     secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
     source: dist/release/*
     target: /kleister/api/${DRONE_TAG##v}
@@ -104,10 +133,10 @@ pipeline:
     path_style: true
     when:
       event: [ tag ]
-      branch: [ refs/tags/* ]
 
   archive:
-    image: plugins/s3
+    image: plugins/s3:1
+    pull: true
     secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
     source: dist/release/*
     target: /kleister/api/${DRONE_TAG##release/v}
@@ -118,7 +147,8 @@ pipeline:
       branch: [ release/* ]
 
   archive:
-    image: plugins/s3
+    image: plugins/s3:1
+    pull: true
     secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
     source: dist/release/*
     target: /kleister/api/master
@@ -129,16 +159,17 @@ pipeline:
       branch: [ master ]
 
   github:
-    image: plugins/github-release
+    image: plugins/github-release:1
+    pull: true
     secrets: [ github_token ]
     files:
       - dist/release/*
     when:
       event: [ tag ]
-      branch: [ refs/tags/* ]
 
   gitter:
-    image: plugins/gitter
+    image: plugins/gitter_1
+    pull: true
     secrets: [ gitter_webhook ]
 
 services:
