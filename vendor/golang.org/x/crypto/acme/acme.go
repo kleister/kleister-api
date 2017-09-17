@@ -51,38 +51,6 @@ const (
 	maxNonces = 100
 )
 
-// CertOption is an optional argument type for Client methods which manipulate
-// certificate data.
-type CertOption interface {
-	privateCertOpt()
-}
-
-// WithKey creates an option holding a private/public key pair.
-// The private part signs a certificate, and the public part represents the signee.
-func WithKey(key crypto.Signer) CertOption {
-	return &certOptKey{key}
-}
-
-type certOptKey struct {
-	key crypto.Signer
-}
-
-func (*certOptKey) privateCertOpt() {}
-
-// WithTemplate creates an option for specifying a certificate template.
-// See x509.CreateCertificate for template usage details.
-//
-// In TLSSNIxChallengeCert methods, the template is also used as parent,
-// resulting in a self-signed certificate.
-// The DNSNames field of t is always overwritten for tls-sni challenge certs.
-func WithTemplate(t *x509.Certificate) CertOption {
-	return (*certOptTemplate)(t)
-}
-
-type certOptTemplate x509.Certificate
-
-func (*certOptTemplate) privateCertOpt() {}
-
 // Client is an ACME client.
 // The only required field is Key. An example of creating a client with a new key
 // is as follows:
@@ -152,7 +120,7 @@ func (c *Client) Discover(ctx context.Context) (Directory, error) {
 			CAA     []string `json:"caa-identities"`
 		}
 	}
-	if json.NewDecoder(res.Body).Decode(&v); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&v); err != nil {
 		return Directory{}, err
 	}
 	c.dir = &Directory{
@@ -207,7 +175,7 @@ func (c *Client) CreateCert(ctx context.Context, csr []byte, exp time.Duration, 
 		return nil, "", responseError(res)
 	}
 
-	curl := res.Header.Get("location") // cert permanent URL
+	curl := res.Header.Get("Location") // cert permanent URL
 	if res.ContentLength == 0 {
 		// no cert in the body; poll until we get it
 		cert, err := c.FetchCert(ctx, curl, bundle)
@@ -240,7 +208,7 @@ func (c *Client) FetchCert(ctx context.Context, url string, bundle bool) ([][]by
 		if res.StatusCode > 299 {
 			return nil, responseError(res)
 		}
-		d := retryAfter(res.Header.Get("retry-after"), 3*time.Second)
+		d := retryAfter(res.Header.Get("Retry-After"), 3*time.Second)
 		select {
 		case <-time.After(d):
 			// retry
@@ -289,7 +257,7 @@ func (c *Client) RevokeCert(ctx context.Context, key crypto.Signer, cert []byte,
 func AcceptTOS(tosURL string) bool { return true }
 
 // Register creates a new account registration by following the "new-reg" flow.
-// It returns registered account. The a argument is not modified.
+// It returns registered account. The account is not modified.
 //
 // The registration may require the caller to agree to the CA's Terms of Service (TOS).
 // If so, and the account has not indicated the acceptance of the terms (see Account for details),
@@ -436,7 +404,7 @@ func (c *Client) RevokeAuthorization(ctx context.Context, url string) error {
 //
 // It returns a non-nil Authorization only if its Status is StatusValid.
 // In all other cases WaitAuthorization returns an error.
-// If the Status is StatusInvalid, the returned error is ErrAuthorizationFailed.
+// If the Status is StatusInvalid, the returned error is of type *AuthorizationError.
 func (c *Client) WaitAuthorization(ctx context.Context, url string) (*Authorization, error) {
 	sleep := sleeper(ctx)
 	for {
@@ -444,7 +412,7 @@ func (c *Client) WaitAuthorization(ctx context.Context, url string) (*Authorizat
 		if err != nil {
 			return nil, err
 		}
-		retry := res.Header.Get("retry-after")
+		retry := res.Header.Get("Retry-After")
 		if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusAccepted {
 			res.Body.Close()
 			if err := sleep(retry, 1); err != nil {
@@ -465,7 +433,7 @@ func (c *Client) WaitAuthorization(ctx context.Context, url string) (*Authorizat
 			return raw.authorization(url), nil
 		}
 		if raw.Status == StatusInvalid {
-			return nil, ErrAuthorizationFailed
+			return nil, raw.error(url)
 		}
 		if err := sleep(retry, 0); err != nil {
 			return nil, err
@@ -703,7 +671,7 @@ func (c *Client) retryPostJWS(ctx context.Context, key crypto.Signer, url string
 				// clear any nonces that we might've stored that might now be
 				// considered bad
 				c.clearNonces()
-				retry := res.Header.Get("retry-after")
+				retry := res.Header.Get("Retry-After")
 				if err := sleep(retry, 1); err != nil {
 					return nil, err
 				}
@@ -882,14 +850,8 @@ func responseError(resp *http.Response) error {
 	// don't care if ReadAll returns an error:
 	// json.Unmarshal will fail in that case anyway
 	b, _ := ioutil.ReadAll(resp.Body)
-	e := struct {
-		Status int
-		Type   string
-		Detail string
-	}{
-		Status: resp.StatusCode,
-	}
-	if err := json.Unmarshal(b, &e); err != nil {
+	e := &wireError{Status: resp.StatusCode}
+	if err := json.Unmarshal(b, e); err != nil {
 		// this is not a regular error response:
 		// populate detail with anything we received,
 		// e.Status will already contain HTTP response code value
@@ -898,12 +860,7 @@ func responseError(resp *http.Response) error {
 			e.Detail = resp.Status
 		}
 	}
-	return &Error{
-		StatusCode:  e.Status,
-		ProblemType: e.Type,
-		Detail:      e.Detail,
-		Header:      resp.Header,
-	}
+	return e.error(resp.Header)
 }
 
 // chainCert fetches CA certificate chain recursively by following "up" links.
