@@ -1,0 +1,118 @@
+
+# Gopkg.toml example
+#
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#  name = "github.com/x/y"
+#  version = "2.4.0"
+
+
+[[constraint]]
+  name = "github.com/Machiel/slugify"
+  version = "1.0.1"
+
+[[constraint]]
+  name = "github.com/Sirupsen/logrus"
+  version = "1.0.3"
+
+[[constraint]]
+  name = "github.com/Unknwon/com"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/asaskevich/govalidator"
+  version = "7.0.0"
+
+[[constraint]]
+  name = "github.com/aws/aws-sdk-go"
+  version = "1.10.46"
+
+[[constraint]]
+  name = "github.com/dgrijalva/jwt-go"
+  version = "3.0.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/facebookgo/grace"
+
+[[constraint]]
+  name = "github.com/gin-contrib/pprof"
+  version = "1.1.0"
+
+[[constraint]]
+  name = "github.com/gin-gonic/gin"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/gorilla/securecookie"
+  version = "1.1.0"
+
+[[constraint]]
+  name = "github.com/jinzhu/gorm"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/joho/godotenv"
+  version = "1.1.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/mcuadros/go-version"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/o1egl/gormrus"
+
+[[constraint]]
+  name = "github.com/prometheus/client_golang"
+  version = "0.8.0"
+
+[[constraint]]
+  name = "github.com/qor/validations"
+  version = "1.0.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ungerik/go-gravatar"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/vincent-petithory/dataurl"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/net"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/sync"
+
+[[constraint]]
+  name = "gopkg.in/gormigrate.v1"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "gopkg.in/guregu/null.v3"
+  version = "3.2.0"
+
+[[constraint]]
+  branch = "v2"
+  name = "gopkg.in/urfave/cli.v2"

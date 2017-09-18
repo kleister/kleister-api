@@ -1,18 +1,15 @@
+NAME := kleister-api
 DIST := dist
-IMPORT := github.com/kleister/kleister-api
+IMPORT := github.com/kleister/$(NAME)
 
 ifeq ($(OS), Windows_NT)
-	EXECUTABLE := kleister-api.exe
+	EXECUTABLE := $(NAME).exe
 else
-	EXECUTABLE := kleister-api
+	EXECUTABLE := $(NAME)
 endif
 
-SHA := $(shell git rev-parse --short HEAD)
-DATE := $(shell date -u '+%Y%m%d')
-LDFLAGS += -s -w -X "$(IMPORT)/config.VersionDev=$(SHA)" -X "$(IMPORT)/config.VersionDate=$(DATE)"
-
-PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
-SOURCES ?= $(shell find . -name "*.go" -type f -not -path "./vendor/*")
+PACKAGES ?= $(shell go list ./... | grep -v /vendor/ | grep -v /_tools/)
+SOURCES ?= $(shell find . -name "*.go" -type f -not -path "./vendor/*" -not -path "./_tools/*")
 
 TAGS ?=
 
@@ -26,16 +23,30 @@ else
 	endif
 endif
 
+ifndef SHA
+	SHA := $(shell git rev-parse --short HEAD)
+endif
+
+ifndef DATE
+	DATE := $(shell date -u '+%Y%m%d')
+endif
+
+LDFLAGS += -s -w -X "$(IMPORT)/pkg/version.VersionDev=$(SHA)" -X "$(IMPORT)/pkg/version.VersionDate=$(DATE)"
+
 .PHONY: all
 all: build
 
 .PHONY: update
 update:
-	@which govendor > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/kardianos/govendor; \
-	fi
-	govendor add +external
-	govendor fetch +external
+	retool do dep ensure -update
+
+.PHONY: sync
+sync:
+	retool do dep ensure
+
+.PHONY: graph
+graph:
+	retool do dep status -dot | dot -T png -o docs/deps.png
 
 .PHONY: clean
 clean:
@@ -50,82 +61,45 @@ fmt:
 vet:
 	go vet $(PACKAGES)
 
-.PHONY: misspell
-misspell:
-	@which misspell > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/client9/misspell/cmd/misspell; \
-	fi
-	misspell $(SOURCES)
-
 .PHONY: generate
 generate:
-	@which fileb0x > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/UnnoTed/fileb0x; \
-	fi
 	go generate $(PACKAGES)
-
-.PHONY: staticcheck
-staticcheck:
-	@which staticcheck > /dev/null; if [ $$? -ne 0 ]; then \
-		go get honnef.co/go/staticcheck/cmd/staticcheck; \
-	fi
-	staticcheck $(PACKAGES)
 
 .PHONY: errcheck
 errcheck:
-	@which errcheck > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/kisielk/errcheck; \
-	fi
-	errcheck $(PACKAGES)
+	retool do errcheck $(PACKAGES)
 
 .PHONY: varcheck
 varcheck:
-	@which varcheck > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/opennota/check/cmd/varcheck; \
-	fi
-	varcheck $(PACKAGES)
+	retool do varcheck $(PACKAGES)
 
 .PHONY: structcheck
 structcheck:
-	@which structcheck > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/opennota/check/cmd/structcheck; \
-	fi
-	structcheck $(PACKAGES)
+	retool do structcheck $(PACKAGES)
 
 .PHONY: unconvert
 unconvert:
-	@which unconvert > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/mdempsky/unconvert; \
-	fi
-	unconvert $(PACKAGES)
+	retool do unconvert $(PACKAGES)
 
 .PHONY: interfacer
 interfacer:
-	@which interfacer > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/mvdan/interfacer/cmd/interfacer; \
-	fi
-	interfacer $(PACKAGES)
+	retool do interfacer $(PACKAGES)
+
+.PHONY: misspell
+misspell:
+	retool misspell $(SOURCES)
 
 .PHONY: ineffassign
 ineffassign:
-	@which ineffassign > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/gordonklaus/ineffassign; \
-	fi
-	ineffassign .
+	retool do ineffassign -n $(SOURCES)
 
 .PHONY: dupl
 dupl:
-	@which dupl > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/mibk/dupl; \
-	fi
-	dupl .
+	retool do dupl -t 100 $(SOURCES)
 
 .PHONY: lint
 lint:
-	@which golint > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/golang/lint/golint; \
-	fi
-	for PKG in $(PACKAGES); do golint -set_exit_status $$PKG || exit 1; done;
+	for PKG in $(PACKAGES); do retool do golint -set_exit_status $$PKG || exit 1; done;
 
 .PHONY: test
 test:
@@ -141,13 +115,13 @@ test-pgsql:
 
 .PHONY: install
 install: $(SOURCES)
-	go install -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./cmd/kleister-api
+	go install -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./cmd/$(NAME)
 
 .PHONY: build
 build: $(EXECUTABLE)
 
 $(EXECUTABLE): $(SOURCES)
-	go build -i -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/kleister-api
+	go build -i -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
 
 .PHONY: release
 release: release-dirs release-windows release-linux release-darwin release-copy release-check
@@ -161,7 +135,7 @@ release-windows:
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go get -u github.com/karalabe/xgo; \
 	fi
-	xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'windows/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/kleister-api
+	xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'windows/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/$(NAME)
 ifeq ($(CI),drone)
 	mv /build/* $(DIST)/binaries
 endif
@@ -171,7 +145,7 @@ release-linux:
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go get -u github.com/karalabe/xgo; \
 	fi
-	xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'linux/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/kleister-api
+	xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'linux/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/$(NAME)
 ifeq ($(CI),drone)
 	mv /build/* $(DIST)/binaries
 endif
@@ -181,7 +155,7 @@ release-darwin:
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go get -u github.com/karalabe/xgo; \
 	fi
-	xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '$(LDFLAGS)' -targets 'darwin/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/kleister-api
+	xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '$(LDFLAGS)' -targets 'darwin/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/$(NAME)
 ifeq ($(CI),drone)
 	mv /build/* $(DIST)/binaries
 endif
@@ -196,3 +170,13 @@ release-check:
 
 .PHONY: publish
 publish: release
+
+HAS_RETOOL := $(shell command -v retool)
+
+.PHONY: retool
+retool:
+ifndef HAS_RETOOL
+	go get -u github.com/twitchtv/retool
+endif
+	retool sync
+	retool build

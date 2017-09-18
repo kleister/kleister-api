@@ -40,12 +40,7 @@ build:
         - script:
                 name: test sqlite
                 code: |
-                    GORM_DIALECT=sqlite3 go test ./...
-
-        - script:
-                name: test tidb
-                code: |
-                    GORM_DIALECT=tidb go test ./...
+                    go test ./...
 
         - script:
                 name: test mysql
