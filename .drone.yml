@@ -3,68 +3,154 @@ workspace:
   path: src/github.com/kleister/kleister-api
 
 pipeline:
-  restore:
+  cache-restore:
     image: plugins/s3-cache:1
     pull: true
     secrets: [ cache_s3_endpoint, cache_s3_access_key, cache_s3_secret_key ]
-    pull: true
     restore: true
     when:
       local: false
 
-  testing:
+  backend-prepare:
     image: webhippie/golang:edge
     pull: true
     environment:
       - CGO_ENABLED=1
-      - TAGS=
       - GOPATH=/srv/app
     commands:
       - make clean
       - make retool
-      - make vet
-      - make varcheck
-      - make structcheck
-      - make unconvert
-      - make ineffassign
-      - make lint
-      - make test
-      - make build
+      - make generate
 
-  testing-mysql:
+  backend-vet:
     image: webhippie/golang:edge
     pull: true
+    group: backend
     environment:
       - CGO_ENABLED=1
-      - TAGS=
       - GOPATH=/srv/app
+    commands:
+      - make vet
+
+  backend-check:
+    image: webhippie/golang:edge
+    pull: true
+    group: backend
+    environment:
+      - CGO_ENABLED=1
+      - GOPATH=/srv/app
+    commands:
+      - make megacheck
+
+  backend-lint:
+    image: webhippie/golang:edge
+    pull: true
+    group: backend
+    environment:
+      - CGO_ENABLED=1
+      - GOPATH=/srv/app
+    commands:
+      - make lint
+
+  backend-test:
+    image: webhippie/golang:edge
+    pull: true
+    group: backend
+    environment:
+      - CGO_ENABLED=1
+      - GOPATH=/srv/app
+    commands:
+      - make test
+
+  backend-mysql:
+    image: webhippie/golang:edge
+    pull: true
+    group: backend
+    environment:
+      - CGO_ENABLED=1
+      - GOPATH=/srv/app
+      - DB=mysql-service:3306
     commands:
       - make test-mysql
 
-  testing-pgsql:
+  backend-pgsql:
     image: webhippie/golang:edge
     pull: true
+    group: backend
     environment:
       - CGO_ENABLED=1
-      - TAGS=
       - GOPATH=/srv/app
+      - DB=pgsql-service:5432
     commands:
       - make test-pgsql
 
-  release:
-    image: karalabe/xgo-latest:latest
+  backend-build:
+    image: webhippie/golang:edge
     pull: true
+    group: backend
     environment:
       - CGO_ENABLED=1
-      - TAGS=
       - GOPATH=/srv/app
+      - TAGS=
     commands:
-      - make release
+      - make build
+
+  backend-windows:
+    image: karalabe/xgo-latest:latest
+    pull: true
+    group: release
+    environment:
+      - CGO_ENABLED=1
+      - GOPATH=/srv/app
+      - TAGS=
+    commands:
+      - make release-dirs release-windows
     when:
       event: [ push, tag ]
       branch: [ master, release/* ]
 
-  docker:
+  backend-linux:
+    image: karalabe/xgo-latest:latest
+    pull: true
+    group: release
+    environment:
+      - CGO_ENABLED=1
+      - GOPATH=/srv/app
+      - TAGS=
+    commands:
+      - make release-dirs release-linux
+    when:
+      event: [ push, tag ]
+      branch: [ master, release/* ]
+
+  backend-darwin:
+    image: karalabe/xgo-latest:latest
+    pull: true
+    group: release
+    environment:
+      - CGO_ENABLED=1
+      - GOPATH=/srv/app
+      - TAGS=
+    commands:
+      - make release-dirs release-darwin
+    when:
+      event: [ push, tag ]
+      branch: [ master, release/* ]
+
+  backend-finish:
+    image: webhippie/golang:edge
+    pull: true
+    environment:
+      - CGO_ENABLED=1
+      - GOPATH=/srv/app
+      - TAGS=
+    commands:
+      - make release-copy release-check
+    when:
+      event: [ push, tag ]
+      branch: [ master, release/* ]
+
+  docker-publish:
     image: plugins/docker:17.05
     pull: true
     secrets: [ docker_username, docker_password ]
@@ -73,7 +159,7 @@ pipeline:
     when:
       event: [ tag ]
 
-  docker:
+  docker-publish:
     image: plugins/docker:17.05
     pull: true
     secrets: [ docker_username, docker_password ]
@@ -83,7 +169,7 @@ pipeline:
       event: [ push ]
       branch: [ release/* ]
 
-  docker:
+  docker-publish:
     image: plugins/docker:17.05
     pull: true
     secrets: [ docker_username, docker_password ]
@@ -93,7 +179,7 @@ pipeline:
       event: [ push ]
       branch: [ master ]
 
-  microbadger:
+  docker-microbadger:
     image: plugins/webhook:1
     pull: true
     secrets:
@@ -103,7 +189,7 @@ pipeline:
       event: [ push, tag ]
       branch: [ master, release/* ]
 
-  rebuild:
+  cache-rebuild:
     image: plugins/s3-cache:1
     pull: true
     secrets: [ cache_s3_endpoint, cache_s3_access_key, cache_s3_secret_key ]
@@ -116,7 +202,7 @@ pipeline:
       event: [ push ]
       branch: [ master, release/* ]
 
-  flush:
+  cache-flush:
     image: plugins/s3-cache:1
     pull: true
     secrets: [ cache_s3_endpoint, cache_s3_access_key, cache_s3_secret_key ]
@@ -127,7 +213,7 @@ pipeline:
       event: [ push ]
       branch: [ master, release/* ]
 
-  archive:
+  archive-release:
     image: plugins/s3:1
     pull: true
     secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
@@ -138,7 +224,7 @@ pipeline:
     when:
       event: [ tag ]
 
-  archive:
+  archive-release:
     image: plugins/s3:1
     pull: true
     secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
@@ -150,7 +236,7 @@ pipeline:
       event: [ push ]
       branch: [ release/* ]
 
-  archive:
+  archive-release:
     image: plugins/s3:1
     pull: true
     secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
@@ -162,7 +248,7 @@ pipeline:
       event: [ push ]
       branch: [ master ]
 
-  github:
+  github-release:
     image: plugins/github-release:1
     pull: true
     secrets: [ github_token ]
@@ -171,7 +257,7 @@ pipeline:
     when:
       event: [ tag ]
 
-  gitter:
+  notify-gitter:
     image: plugins/gitter:1
     pull: true
     secrets: [ gitter_webhook ]
@@ -180,17 +266,13 @@ pipeline:
       status: [ success, failure ]
 
 services:
-  mysql:
+  mysql-service:
     image: mysql:5.7
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-    when:
-      event: [ push ]
 
-  pgsql:
+  pgsql-service:
     image: postgres:9.5
     environment:
       - POSTGRES_DB=test
-    when:
-      event: [ push ]

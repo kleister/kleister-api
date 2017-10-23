@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM webhippie/alpine:latest
 MAINTAINER Thomas Boerger <thomas@webhippie.de>
 
 EXPOSE 8080 80 443
