@@ -460,15 +460,16 @@ func Server() *cli.Command {
 			}
 
 			{
+				stop := make(chan os.Signal, 1)
+
 				gr.Add(func() error {
-					stop := make(chan os.Signal, 1)
 					signal.Notify(stop, os.Interrupt)
 
 					<-stop
 
 					return nil
 				}, func(err error) {
-
+					close(stop)
 				})
 			}
 
