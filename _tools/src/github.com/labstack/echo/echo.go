@@ -213,7 +213,7 @@ const (
 )
 
 const (
-	version = "3.2.1"
+	version = "3.2.3"
 	website = "https://echo.labstack.com"
 	// http://patorjk.com/software/taag/#p=display&f=Small%20Slant&t=Echo
 	banner = `
@@ -320,11 +320,11 @@ func (e *Echo) DefaultHTTPErrorHandler(err error, c Context) {
 	if he, ok := err.(*HTTPError); ok {
 		code = he.Code
 		msg = he.Message
-	} else if e.Debug {
-		msg = err.Error()
 		if he.Inner != nil {
 			msg = fmt.Sprintf("%v, %v", err, he.Inner)
 		}
+	} else if e.Debug {
+		msg = err.Error()
 	} else {
 		msg = http.StatusText(code)
 	}

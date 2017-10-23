@@ -48,23 +48,22 @@ Following is the simplest use case:
 	bar := p.AddBar(int64(total),
 		// Prepending decorators
 		mpb.PrependDecorators(
-			// StaticName decorator with minWidth and no width sync options
+			// StaticName decorator with minWidth and no extra config
 			// If you need to change name while rendering, use DynamicName
 			decor.StaticName(name, len(name), 0),
-			// ETA decorator with minWidth and width sync options
-			// DSyncSpace is shortcut for DwidthSync|DextraSpace
-			decor.ETA(4, decor.DSyncSpace),
+			// ETA decorator with minWidth and no extra config
+			decor.ETA(4, 0),
 		),
 		// Appending decorators
 		mpb.AppendDecorators(
-			// Percentage decorator with minWidth and no width sync options
+			// Percentage decorator with minWidth and no extra config
 			decor.Percentage(5, 0),
 		),
 	)
 
 	for i := 0; i < total; i++ {
-		time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
-		bar.Incr(1) // increment progress bar
+		time.Sleep(time.Duration(rand.Intn(10)+1) * time.Second / 100)
+		bar.Increment()
 	}
 
 	p.Stop()
@@ -78,10 +77,10 @@ However **mpb** was designed with concurrency in mind. Each new bar renders in i
 own goroutine, therefore adding multiple bars is easy and safe:
 
 ```go
-	p := mpb.New()
+	var wg sync.WaitGroup
+	p := mpb.New(mpb.WithWaitGroup(&wg))
 	total := 100
 	numBars := 3
-	var wg sync.WaitGroup
 	wg.Add(numBars)
 
 	for i := 0; i < numBars; i++ {
@@ -89,6 +88,9 @@ own goroutine, therefore adding multiple bars is easy and safe:
 		bar := p.AddBar(int64(total),
 			mpb.PrependDecorators(
 				decor.StaticName(name, 0, 0),
+				// DSyncSpace is shortcut for DwidthSync|DextraSpace
+				// means sync the width of respective decorator's column
+				// and prepend one extra space.
 				decor.Percentage(3, decor.DSyncSpace),
 			),
 			mpb.AppendDecorators(
@@ -98,13 +100,14 @@ own goroutine, therefore adding multiple bars is easy and safe:
 		go func() {
 			defer wg.Done()
 			for i := 0; i < total; i++ {
-				time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
-				bar.Incr(1)
+				time.Sleep(time.Duration(rand.Intn(10)+1) * time.Second / 100)
+				bar.Increment()
 			}
 		}()
 	}
-	wg.Wait() // Wait for goroutines to finish
-	p.Stop()  // Stop mpb's rendering goroutine
+	// Wait for incr loop goroutines to finish,
+	// and shutdown mpb's rendering goroutine
+	p.Stop()
 ```
 
 ![simple.gif](examples/gifs/simple.gif)
