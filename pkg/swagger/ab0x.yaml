@@ -1,0 +1,12 @@
+pkg: "swagger"
+dest: "."
+fmt: true
+
+compression:
+  compress: true
+
+custom:
+  - files:
+    - "swagger.json"
+    base: ""
+    prefix: ""
