@@ -1,4 +1,7 @@
-FROM webhippie/alpine:latest
+FROM webhippie/alpine:latest AS build
+RUN apk add --no-cache ca-certificates mailcap
+
+FROM scratch
 
 LABEL maintainer="Thomas Boerger <thomas@webhippie.de>" \
   org.label-schema.name="Kleister API" \
@@ -13,6 +16,7 @@ CMD ["server"]
 
 ENV KLEISTER_API_UPLOAD_DSN file://var/lib/kleister/
 
-RUN apk add --no-cache ca-certificates mailcap bash
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /etc/mime.types /etc/
 
-COPY dist/binaries/kleister-api-*-linux-amd64 /usr/bin/
+COPY dist/binaries/kleister-api-*-linux-arm-5 /usr/bin/

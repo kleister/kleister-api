@@ -1,0 +1,17 @@
+# escape=`
+FROM microsoft/nanoserver:10.0.14393.1593
+
+LABEL maintainer="Thomas Boerger <thomas@webhippie.de>" `
+  org.label-schema.name="Gomematic API" `
+  org.label-schema.vendor="Thomas Boerger" `
+  org.label-schema.schema-version="1.0"
+
+EXPOSE 8080 8090
+VOLUME c:\kleister
+
+ENTRYPOINT ["c:\\kleister-api.exe"]
+CMD ["server"]
+
+ENV KLEISTER_API_UPLOAD_DSN file://kleister/
+
+COPY bin/kleister-api.exe c:\kleister-api.exe
