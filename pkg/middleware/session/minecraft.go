@@ -78,7 +78,15 @@ func MustMinecraftBuilds(action string) gin.HandlerFunc {
 			}
 		}
 
-		AbortUnauthorized(c)
+		c.JSON(
+			http.StatusForbidden,
+			gin.H{
+				"status":  http.StatusForbidden,
+				"message": "You are not authorized to request this resource",
+			},
+		)
+
+		c.Abort()
 	}
 }
 

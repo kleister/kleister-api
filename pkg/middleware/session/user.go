@@ -83,7 +83,15 @@ func MustUsers(action string) gin.HandlerFunc {
 			}
 		}
 
-		AbortUnauthorized(c)
+		c.JSON(
+			http.StatusForbidden,
+			gin.H{
+				"status":  http.StatusForbidden,
+				"message": "You are not authorized to request this resource",
+			},
+		)
+
+		c.Abort()
 	}
 }
 
@@ -128,7 +136,15 @@ func MustUserTeams(action string) gin.HandlerFunc {
 			}
 		}
 
-		AbortUnauthorized(c)
+		c.JSON(
+			http.StatusForbidden,
+			gin.H{
+				"status":  http.StatusForbidden,
+				"message": "You are not authorized to request this resource",
+			},
+		)
+
+		c.Abort()
 	}
 }
 
@@ -167,7 +183,15 @@ func MustUserMods(action string) gin.HandlerFunc {
 			}
 		}
 
-		AbortUnauthorized(c)
+		c.JSON(
+			http.StatusForbidden,
+			gin.H{
+				"status":  http.StatusForbidden,
+				"message": "You are not authorized to request this resource",
+			},
+		)
+
+		c.Abort()
 	}
 }
 
@@ -206,7 +230,15 @@ func MustUserPacks(action string) gin.HandlerFunc {
 			}
 		}
 
-		AbortUnauthorized(c)
+		c.JSON(
+			http.StatusForbidden,
+			gin.H{
+				"status":  http.StatusForbidden,
+				"message": "You are not authorized to request this resource",
+			},
+		)
+
+		c.Abort()
 	}
 }
 
