@@ -1,68 +1,62 @@
 package config
 
-import (
-	"time"
-)
+// Database defines the database configuration.
+type Database struct {
+	DSN string
+}
 
-type database struct {
-	Driver   string
+// Upload defines the asset upload configuration.
+type Upload struct {
+	DSN string
+}
+
+// Server defines the webserver configuration.
+type Server struct {
+	Host  string
+	Root string
+	Addr  string
+	Pprof bool
+}
+
+// Metrics defines the metrics server configuration.
+type Metrics struct {
+	Addr  string
+	Token string
+}
+
+// Admin defines the initial admin user configuration.
+type Admin struct {
+	Create   bool
 	Username string
 	Password string
-	Name     string
-	Host     string
-	Timeout  int
+	Email    string
 }
 
-type server struct {
-	Host          string
-	Addr          string
-	Cert          string
-	Key           string
-	Root          string
-	Storage       string
-	Assets        string
-	LetsEncrypt   bool
-	StrictCurves  bool
-	StrictCiphers bool
-	Prometheus    bool
-	Pprof         bool
+// Logs defines the level and color for log configuration.
+type Logs struct {
+	Level  string
+	Pretty bool
+	Color  bool
 }
 
-type admin struct {
-	Users  []string
-	Create bool
+// Tracing defines the tracing client configuration.
+type Tracing struct {
+	Enabled  bool
+	Endpoint string
 }
 
-type s3 struct {
-	Enabled   bool
-	Endpoint  string
-	Bucket    string
-	PathStyle bool
-	Region    string
-	Access    string
-	Secret    string
+// Config is a combination of all available configurations.
+type Config struct {
+	Database Database
+	Upload   Upload
+	Server   Server
+	Metrics  Metrics
+	Admin    Admin
+	Logs     Logs
+	Tracing  Tracing
 }
 
-type session struct {
-	Expire time.Duration
+// Load initializes a default configuration struct.
+func Load() *Config {
+	return &Config{}
 }
-
-var (
-	// LogLevel defines the log level used by our logging package.
-	LogLevel string
-
-	// Database represents the current database connection details.
-	Database = &database{}
-
-	// Server represents the informations about the server bindings.
-	Server = &server{}
-
-	// Admin represents the informations about the admin config.
-	Admin = &admin{}
-
-	// S3 represents the informations about s3 storage connections.
-	S3 = &s3{}
-
-	// Session represents the informations about the session handling.
-	Session = &session{}
-)

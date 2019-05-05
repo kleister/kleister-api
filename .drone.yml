@@ -2,6 +2,9 @@ workspace:
   base: /srv/app
   path: src/github.com/kleister/kleister-api
 
+branches:
+  - master
+
 pipeline:
   cache-restore:
     image: plugins/s3-cache:1
@@ -17,9 +20,11 @@ pipeline:
     environment:
       - CGO_ENABLED=1
       - GOPATH=/srv/app
+      - TAGS=
     commands:
       - make clean
       - make retool
+      - make sync
       - make generate
 
   backend-vet:
@@ -29,6 +34,7 @@ pipeline:
     environment:
       - CGO_ENABLED=1
       - GOPATH=/srv/app
+      - TAGS=
     commands:
       - make vet
 
@@ -39,6 +45,7 @@ pipeline:
     environment:
       - CGO_ENABLED=1
       - GOPATH=/srv/app
+      - TAGS=
     commands:
       - make megacheck
 
@@ -49,6 +56,7 @@ pipeline:
     environment:
       - CGO_ENABLED=1
       - GOPATH=/srv/app
+      - TAGS=
     commands:
       - make lint
 
@@ -59,6 +67,7 @@ pipeline:
     environment:
       - CGO_ENABLED=1
       - GOPATH=/srv/app
+      - TAGS=
     commands:
       - make test
 
@@ -69,6 +78,7 @@ pipeline:
     environment:
       - CGO_ENABLED=1
       - GOPATH=/srv/app
+      - TAGS=
       - DB=mysql-service:3306
     commands:
       - make test-mysql
@@ -80,6 +90,7 @@ pipeline:
     environment:
       - CGO_ENABLED=1
       - GOPATH=/srv/app
+      - TAGS=
       - DB=pgsql-service:5432
     commands:
       - make test-pgsql
@@ -107,7 +118,6 @@ pipeline:
       - make release-dirs release-windows
     when:
       event: [ push, tag ]
-      branch: [ master, release/* ]
 
   backend-linux:
     image: karalabe/xgo-latest:latest
@@ -121,7 +131,6 @@ pipeline:
       - make release-dirs release-linux
     when:
       event: [ push, tag ]
-      branch: [ master, release/* ]
 
   backend-darwin:
     image: karalabe/xgo-latest:latest
@@ -135,7 +144,6 @@ pipeline:
       - make release-dirs release-darwin
     when:
       event: [ push, tag ]
-      branch: [ master, release/* ]
 
   backend-finish:
     image: webhippie/golang:edge
@@ -148,36 +156,75 @@ pipeline:
       - make release-copy release-check
     when:
       event: [ push, tag ]
-      branch: [ master, release/* ]
 
-  docker-publish:
+  backend-gpgsign:
+    image: plugins/gpgsign:1
+    pull: true
+    secrets: [ gpgsign_key, gpgsign_passphrase ]
+    detach_sign: true
+    files:
+      - dist/release/*
+    excludes:
+      - dist/release/*.sha256
+    when:
+      event: [ push, tag ]
+
+  docker-amd64:
     image: plugins/docker:17.05
     pull: true
+    group: docker
     secrets: [ docker_username, docker_password ]
-    repo: kleister/kleister-api
-    tags: [ '${DRONE_TAG##v}' ]
+    repo: umschlag/umschlag-api
+    auto_tag: true
+    auto_tag_suffix: amd64
     when:
-      event: [ tag ]
+      event: [ push, tag ]
 
-  docker-publish:
+  docker-i386:
     image: plugins/docker:17.05
     pull: true
+    group: docker
     secrets: [ docker_username, docker_password ]
-    repo: kleister/kleister-api
-    tags: [ '${DRONE_BRANCH##release/v}' ]
+    repo: umschlag/umschlag-api
+    dockerfile: Dockerfile.i386
+    auto_tag: true
+    auto_tag_suffix: i386
     when:
-      event: [ push ]
-      branch: [ release/* ]
+      event: [ push, tag ]
 
-  docker-publish:
+  docker-arm64:
     image: plugins/docker:17.05
     pull: true
+    group: docker
     secrets: [ docker_username, docker_password ]
-    repo: kleister/kleister-api
-    tags: [ 'latest' ]
+    repo: umschlag/umschlag-api
+    dockerfile: Dockerfile.arm64
+    auto_tag: true
+    auto_tag_suffix: arm64
     when:
-      event: [ push ]
-      branch: [ master ]
+      event: [ push, tag ]
+
+  docker-arm:
+    image: plugins/docker:17.05
+    pull: true
+    group: docker
+    secrets: [ docker_username, docker_password ]
+    repo: umschlag/umschlag-api
+    dockerfile: Dockerfile.arm
+    auto_tag: true
+    auto_tag_suffix: arm
+    when:
+      event: [ push, tag ]
+
+  docker-manifests:
+    image: plugins/manifest:1
+    pull: true
+    secrets: [ docker_username, docker_password ]
+    spec: manifest.yml
+    auto_tag: true
+    ignore_missing: true
+    when:
+      event: [ push, tag ]
 
   docker-microbadger:
     image: plugins/webhook:1
@@ -187,7 +234,6 @@ pipeline:
         target: plugin_urls
     when:
       event: [ push, tag ]
-      branch: [ master, release/* ]
 
   cache-rebuild:
     image: plugins/s3-cache:1
@@ -195,12 +241,11 @@ pipeline:
     secrets: [ cache_s3_endpoint, cache_s3_access_key, cache_s3_secret_key ]
     rebuild: true
     mount:
-      - _tools/bin
-      - _tools/pkg
+      - _tools
+      - vendor
     when:
       local: false
       event: [ push ]
-      branch: [ master, release/* ]
 
   cache-flush:
     image: plugins/s3-cache:1
@@ -211,42 +256,28 @@ pipeline:
     when:
       local: false
       event: [ push ]
-      branch: [ master, release/* ]
 
   archive-release:
     image: plugins/s3:1
     pull: true
     secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
     source: dist/release/*
-    target: /kleister/api/${DRONE_TAG##v}
+    target: /api/master
+    strip_prefix: dist/release/
+    path_style: true
+    when:
+      event: [ push ]
+
+  archive-release:
+    image: plugins/s3:1
+    pull: true
+    secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
+    source: dist/release/*
+    target: /api/${DRONE_TAG##v}
     strip_prefix: dist/release/
     path_style: true
     when:
       event: [ tag ]
-
-  archive-release:
-    image: plugins/s3:1
-    pull: true
-    secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
-    source: dist/release/*
-    target: /kleister/api/${DRONE_TAG##release/v}
-    strip_prefix: dist/release/
-    path_style: true
-    when:
-      event: [ push ]
-      branch: [ release/* ]
-
-  archive-release:
-    image: plugins/s3:1
-    pull: true
-    secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
-    source: dist/release/*
-    target: /kleister/api/master
-    strip_prefix: dist/release/
-    path_style: true
-    when:
-      event: [ push ]
-      branch: [ master ]
 
   github-release:
     image: plugins/github-release:1
@@ -257,13 +288,14 @@ pipeline:
     when:
       event: [ tag ]
 
-  notify-gitter:
-    image: plugins/gitter:1
+  notify-matrix:
+    image: plugins/matrix:1
     pull: true
-    secrets: [ gitter_webhook ]
+    secrets: [ matrix_roomid, matrix_username, matrix_password ]
     when:
       local: false
-      status: [ success, failure ]
+      event: [ push, tag ]
+      status: [ changed, failure ]
 
 services:
   mysql-service:

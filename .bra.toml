@@ -2,36 +2,33 @@
 watch_all = true
 watch_dirs = ["cmd", "pkg"]
 watch_exts = [".go"]
-ignore = [".git", "docs", "assets", "templates", "storage"]
+ignore = [".git", "bin", "dist", "storage"]
 ignore_files = []
 build_delay = 1500
 interrupt_timout = 15
 graceful_kill = false
 
 init_cmds = [
+  ["mkdir", "-p", "storage"],
   ["make", "build"],
   [
-    "./kleister-api",
+    "./bin/kleister-api",
     "--log-level",
     "debug",
-    "--db-driver",
-    "sqlite3",
-    "--db-name",
-    "storage/kleister.sqlite3",
-    "server"
+    "server",
+    "--db-dsn",
+    "boltdb://storage/kleister.db"
   ]
 ]
 
 cmds = [
   ["make", "build"],
   [
-    "./kleister-api",
+    "./bin/kleister-api",
     "--log-level",
     "debug",
-    "--db-driver",
-    "sqlite3",
-    "--db-name",
-    "storage/kleister.sqlite3",
-    "server"
+    "server",
+    "--db-dsn",
+    "boltdb://storage/kleister.db"
   ]
 ]

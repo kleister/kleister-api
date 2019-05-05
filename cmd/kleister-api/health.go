@@ -3,79 +3,69 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"strings"
 
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
 	"github.com/kleister/kleister-api/pkg/config"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/urfave/cli.v2"
 )
 
 // Health provides the sub-command to perform a health check.
-func Health() *cli.Command {
+func Health(cfg *config.Config) *cli.Command {
 	return &cli.Command{
-		Name:  "health",
-		Usage: "perform health checks for server",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "server-addr",
-				Value:       "0.0.0.0:8080",
-				Usage:       "address to access the server",
-				EnvVars:     []string{"KLEISTER_SERVER_ADDR"},
-				Destination: &config.Server.Addr,
-			},
+		Name:   "health",
+		Usage:  "perform health checks",
+		Flags:  healthFlags(cfg),
+		Before: healthBefore(cfg),
+		Action: healthAction(cfg),
+	}
+}
+
+func healthFlags(cfg *config.Config) []cli.Flag {
+	return []cli.Flag{
+		&cli.StringFlag{
+			Name:        "metrics-addr",
+			Value:       "0.0.0.0:8090",
+			Usage:       "address to bind the metrics",
+			EnvVars:     []string{"KLEISTER_API_METRICS_ADDR"},
+			Destination: &cfg.Metrics.Addr,
 		},
-		Before: func(c *cli.Context) error {
-			return nil
-		},
-		Action: func(c *cli.Context) error {
-			logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stdout))
+	}
+}
 
-			switch strings.ToLower(config.LogLevel) {
-			case "debug":
-				logger = level.NewFilter(logger, level.AllowDebug())
-			case "warn":
-				logger = level.NewFilter(logger, level.AllowWarn())
-			case "error":
-				logger = level.NewFilter(logger, level.AllowError())
-			default:
-				logger = level.NewFilter(logger, level.AllowInfo())
-			}
+func healthBefore(cfg *config.Config) cli.BeforeFunc {
+	return func(c *cli.Context) error {
+		setupLogger(cfg)
+		return nil
+	}
+}
 
-			logger = log.WithPrefix(logger,
-				"app", c.App.Name,
-				"ts", log.DefaultTimestampUTC,
-			)
+func healthAction(cfg *config.Config) cli.ActionFunc {
+	return func(c *cli.Context) error {
+		resp, err := http.Get(
+			fmt.Sprintf(
+				"http://%s/healthz",
+				cfg.Metrics.Addr,
+			),
+		)
 
-			resp, err := http.Get(
-				fmt.Sprintf(
-					"http://%s/healthz",
-					config.Server.Addr,
-				),
-			)
+		if err != nil {
+			log.Error().
+				Err(err).
+				Msg("failed to request health check")
 
-			if err != nil {
-				level.Error(logger).Log(
-					"msg", "failed to request health check",
-					"err", err,
-				)
+			return err
+		}
 
-				return err
-			}
+		defer resp.Body.Close()
 
-			defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			log.Error().
+				Int("code", resp.StatusCode).
+				Msg("health seems to be in bad state")
 
-			if resp.StatusCode != 200 {
-				level.Error(logger).Log(
-					"msg", "health seems to be in a bad state",
-					"code", resp.StatusCode,
-				)
+			return err
+		}
 
-				return err
-			}
-
-			return nil
-		},
+		return nil
 	}
 }

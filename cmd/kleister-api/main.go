@@ -2,8 +2,6 @@ package main
 
 import (
 	"os"
-	"runtime"
-	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/kleister/kleister-api/pkg/config"
@@ -12,9 +10,9 @@ import (
 )
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	cfg := config.Load()
 
-	if env := os.Getenv("KLEISTER_ENV_FILE"); env != "" {
+	if env := os.Getenv("KLEISTER_API_ENV_FILE"); env != "" {
 		godotenv.Load(env)
 	}
 
@@ -22,75 +20,9 @@ func main() {
 		Name:     "kleister-api",
 		Version:  version.Version.String(),
 		Usage:    "manage mod packs for minecraft",
-		Compiled: time.Now(),
-
-		Authors: []*cli.Author{
-			{
-				Name:  "Thomas Boerger",
-				Email: "thomas@webhippie.de",
-			},
-		},
-
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "log-level",
-				Value:       "info",
-				Usage:       "set logging level",
-				EnvVars:     []string{"KLEISTER_LOG_LEVEL"},
-				Destination: &config.LogLevel,
-			},
-			&cli.StringFlag{
-				Name:        "db-driver",
-				Value:       "mysql",
-				Usage:       "database driver selection",
-				EnvVars:     []string{"KLEISTER_DB_DRIVER"},
-				Destination: &config.Database.Driver,
-			},
-			&cli.StringFlag{
-				Name:        "db-name",
-				Value:       "umschlag",
-				Usage:       "name for database to use",
-				EnvVars:     []string{"KLEISTER_DB_NAME"},
-				Destination: &config.Database.Name,
-			},
-			&cli.StringFlag{
-				Name:        "db-username",
-				Value:       "root",
-				Usage:       "username for database",
-				EnvVars:     []string{"KLEISTER_DB_USERNAME"},
-				Destination: &config.Database.Username,
-			},
-			&cli.StringFlag{
-				Name:        "db-password",
-				Value:       "root",
-				Usage:       "password for database",
-				EnvVars:     []string{"KLEISTER_DB_PASSWORD"},
-				Destination: &config.Database.Password,
-			},
-			&cli.StringFlag{
-				Name:        "db-host",
-				Value:       "localhost:3306",
-				Usage:       "host for database",
-				EnvVars:     []string{"KLEISTER_DB_HOST"},
-				Destination: &config.Database.Host,
-			},
-			&cli.IntFlag{
-				Name:        "db-timeout",
-				Value:       60,
-				Usage:       "timeout for waiting on db",
-				EnvVars:     []string{"KLEISTER_DB_TIMEOUT"},
-				Destination: &config.Database.Timeout,
-			},
-		},
-
-		Before: func(c *cli.Context) error {
-			return nil
-		},
-
-		Commands: []*cli.Command{
-			Server(),
-			Health(),
-		},
+		Authors:  authorList(),
+		Flags:    globalFlags(cfg),
+		Commands: globalCommands(cfg),
 	}
 
 	cli.HelpFlag = &cli.BoolFlag{
@@ -107,5 +39,47 @@ func main() {
 
 	if err := app.Run(os.Args); err != nil {
 		os.Exit(1)
+	}
+}
+
+func authorList() []*cli.Author {
+	return []*cli.Author{
+		{
+			Name:  "Thomas Boerger",
+			Email: "thomas@webhippie.de",
+		},
+	}
+}
+
+func globalFlags(cfg *config.Config) []cli.Flag {
+	return []cli.Flag{
+		&cli.StringFlag{
+			Name:        "log-level",
+			Value:       "info",
+			Usage:       "set logging level",
+			EnvVars:     []string{"KLEISTER_API_LOG_LEVEL"},
+			Destination: &cfg.Logs.Level,
+		},
+		&cli.BoolFlag{
+			Name:        "log-pretty",
+			Value:       true,
+			Usage:       "enable pretty logging",
+			EnvVars:     []string{"KLEISTER_API_LOG_PRETTY"},
+			Destination: &cfg.Logs.Pretty,
+		},
+		&cli.BoolFlag{
+			Name:        "log-color",
+			Value:       true,
+			Usage:       "enable colored logging",
+			EnvVars:     []string{"KLEISTER_API_LOG_COLOR"},
+			Destination: &cfg.Logs.Color,
+		},
+	}
+}
+
+func globalCommands(cfg *config.Config) []*cli.Command {
+	return []*cli.Command{
+		Server(cfg),
+		Health(cfg),
 	}
 }

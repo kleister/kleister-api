@@ -25,8 +25,8 @@ _testmain.go
 
 coverage.out
 
-.env
-
-/storage
+/_tools
+/vendor
+/bin
 /dist
-/kleister-api
+/storage

@@ -7,7 +7,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
-	"github.com/kleister/kleister-api/pkg/config"
+	// "github.com/kleister/kleister-api/pkg/config"
 	"github.com/vincent-petithory/dataurl"
 )
 
@@ -71,15 +71,15 @@ func (u *VersionFile) AfterSave(db *gorm.DB) error {
 			dest string
 		)
 
-		if config.S3.Enabled {
-			dest = u.RelativePath()
-		} else {
-			dest, err = u.AbsolutePath()
+		// if config.S3.Enabled {
+		// 	dest = u.RelativePath()
+		// } else {
+		dest, err = u.AbsolutePath()
 
-			if err != nil {
-				return err
-			}
+		if err != nil {
+			return err
 		}
+		// }
 
 		if err := AttachmentUpload(dest, u.ContentType, u.Upload.Data); err != nil {
 			return fmt.Errorf("Failed to store version. %s", err)
@@ -96,15 +96,15 @@ func (u *VersionFile) AfterDelete(tx *gorm.DB) error {
 		dest string
 	)
 
-	if config.S3.Enabled {
-		dest = u.RelativePath()
-	} else {
-		dest, err = u.AbsolutePath()
+	// if config.S3.Enabled {
+	// 	dest = u.RelativePath()
+	// } else {
+	dest, err = u.AbsolutePath()
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
+	// }
 
 	if err := AttachmentDelete(dest); err != nil {
 		return fmt.Errorf("Failed to remove version. %s", err)
@@ -124,12 +124,12 @@ func (u *VersionFile) Validate(db *gorm.DB) {
 
 // AbsolutePath generates the absolute path to the file.
 func (u *VersionFile) AbsolutePath() (string, error) {
-	if config.Server.Storage == "" {
-		return "", fmt.Errorf("Missing storage path for version")
-	}
+	// if config.Server.Storage == "" {
+	// 	return "", fmt.Errorf("Missing storage path for version")
+	// }
 
 	return path.Join(
-		config.Server.Storage,
+		"", // config.Server.Storage,
 		u.RelativePath(),
 	), nil
 }

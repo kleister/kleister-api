@@ -11,35 +11,33 @@ type s3 struct {
 	dsn *url.URL
 }
 
+// Info prepares some informational message about the handler.
+func (u *s3) Info() string {
+	return ""
+}
+
+// Prepare simply prepares the upload handler.
+func (u *s3) Prepare() (upload.Upload, error) {
+	return u, nil
+}
+
 // Close simply closes the upload handler.
 func (u *s3) Close() error {
 	return nil
 }
 
 // Handler implements an HTTP handler for asset uploads.
-func (u *s3) Handler() http.Handler {
-	// root.Handle("/storage/*", files(logger))
-
-	// func files(logger log.Logger) http.Handler {
-	// 	return http.StripPrefix(
-	// 		fmt.Sprintf(
-	// 			"%sstorage",
-	// 			config.Server.Root,
-	// 		),
-	// 		http.FileServer(
-	// 			http.Dir(config.Server.Storage),
-	// 		),
-	// 	)
-	// }
-
+func (u *s3) Handler(root string) http.Handler {
 	return nil
 }
 
 // New initializes a new S3 handler.
 func New(dsn *url.URL) (upload.Upload, error) {
-	return &s3{
+	f := &s3{
 		dsn: dsn,
-	}, nil
+	}
+
+	return f.Prepare()
 }
 
 // Must simply calls New and panics on an error.

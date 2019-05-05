@@ -7,7 +7,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
-	"github.com/kleister/kleister-api/pkg/config"
+	// "github.com/kleister/kleister-api/pkg/config"
 	"github.com/vincent-petithory/dataurl"
 )
 
@@ -71,15 +71,15 @@ func (u *PackBackground) AfterSave(db *gorm.DB) error {
 			dest string
 		)
 
-		if config.S3.Enabled {
-			dest = u.RelativePath()
-		} else {
-			dest, err = u.AbsolutePath()
+		// if config.S3.Enabled {
+		// 	dest = u.RelativePath()
+		// } else {
+		dest, err = u.AbsolutePath()
 
-			if err != nil {
-				return err
-			}
+		if err != nil {
+			return err
 		}
+		// }
 
 		if err := AttachmentUpload(dest, u.ContentType, u.Upload.Data); err != nil {
 			return fmt.Errorf("Failed to store background. %s", err)
@@ -96,15 +96,15 @@ func (u *PackBackground) AfterDelete(tx *gorm.DB) error {
 		dest string
 	)
 
-	if config.S3.Enabled {
-		dest = u.RelativePath()
-	} else {
-		dest, err = u.AbsolutePath()
+	// if config.S3.Enabled {
+	// 	dest = u.RelativePath()
+	// } else {
+	dest, err = u.AbsolutePath()
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
+	// }
 
 	if err := AttachmentDelete(dest); err != nil {
 		return fmt.Errorf("Failed to remove background. %s", err)
@@ -124,12 +124,12 @@ func (u *PackBackground) Validate(db *gorm.DB) {
 
 // AbsolutePath generates the absolute path to the background.
 func (u *PackBackground) AbsolutePath() (string, error) {
-	if config.Server.Storage == "" {
-		return "", fmt.Errorf("Missing storage path for background")
-	}
+	// if config.Server.Storage == "" {
+	// 	return "", fmt.Errorf("Missing storage path for background")
+	// }
 
 	return path.Join(
-		config.Server.Storage,
+		"", // config.Server.Storage,
 		u.RelativePath(),
 	), nil
 }
