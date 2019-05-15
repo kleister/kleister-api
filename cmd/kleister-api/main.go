@@ -2,74 +2,84 @@ package main
 
 import (
 	"os"
-	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/joho/godotenv"
-	"github.com/kleister/kleister-api/config"
+	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/version"
 	"gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-	if env := os.Getenv("KLEISTER_ENV_FILE"); env != "" {
+	cfg := config.Load()
+
+	if env := os.Getenv("KLEISTER_API_ENV_FILE"); env != "" {
 		godotenv.Load(env)
 	}
 
 	app := &cli.App{
 		Name:     "kleister-api",
-		Version:  version.Version.String(),
-		Usage:    "Manage mod packs for Minecraft",
-		Compiled: time.Now(),
-
-		Authors: []*cli.Author{
-			{
-				Name:  "Thomas Boerger",
-				Email: "thomas@webhippie.de",
-			},
-		},
-
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:        "debug",
-				Value:       false,
-				Usage:       "Activate debug information",
-				EnvVars:     []string{"KLEISTER_DEBUG"},
-				Destination: &config.Debug,
-				Hidden:      true,
-			},
-		},
-
-		Before: func(c *cli.Context) error {
-			logrus.SetOutput(os.Stdout)
-
-			if config.Debug {
-				logrus.SetLevel(logrus.DebugLevel)
-			} else {
-				logrus.SetLevel(logrus.InfoLevel)
-			}
-
-			return nil
-		},
-
-		Commands: []*cli.Command{
-			Server(),
-		},
+		Version:  version.String,
+		Usage:    "manage mod packs for minecraft",
+		Authors:  authorList(),
+		Flags:    globalFlags(cfg),
+		Commands: globalCommands(cfg),
 	}
 
 	cli.HelpFlag = &cli.BoolFlag{
 		Name:    "help",
 		Aliases: []string{"h"},
-		Usage:   "Show the help, so what you see now",
+		Usage:   "show the help, so what you see now",
 	}
 
 	cli.VersionFlag = &cli.BoolFlag{
 		Name:    "version",
 		Aliases: []string{"v"},
-		Usage:   "Print the current version of that tool",
+		Usage:   "print the current version of that tool",
 	}
 
 	if err := app.Run(os.Args); err != nil {
 		os.Exit(1)
+	}
+}
+
+func authorList() []*cli.Author {
+	return []*cli.Author{
+		{
+			Name:  "Thomas Boerger",
+			Email: "thomas@webhippie.de",
+		},
+	}
+}
+
+func globalFlags(cfg *config.Config) []cli.Flag {
+	return []cli.Flag{
+		&cli.StringFlag{
+			Name:        "log-level",
+			Value:       "info",
+			Usage:       "set logging level",
+			EnvVars:     []string{"KLEISTER_API_LOG_LEVEL"},
+			Destination: &cfg.Logs.Level,
+		},
+		&cli.BoolFlag{
+			Name:        "log-pretty",
+			Value:       true,
+			Usage:       "enable pretty logging",
+			EnvVars:     []string{"KLEISTER_API_LOG_PRETTY"},
+			Destination: &cfg.Logs.Pretty,
+		},
+		&cli.BoolFlag{
+			Name:        "log-color",
+			Value:       true,
+			Usage:       "enable colored logging",
+			EnvVars:     []string{"KLEISTER_API_LOG_COLOR"},
+			Destination: &cfg.Logs.Color,
+		},
+	}
+}
+
+func globalCommands(cfg *config.Config) []*cli.Command {
+	return []*cli.Command{
+		Server(cfg),
+		Health(cfg),
 	}
 }
