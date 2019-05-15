@@ -3,30 +3,19 @@ package router
 import (
 	"io"
 	"net/http"
+	"path"
 	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/rs/zerolog/hlog"
-	"github.com/rs/zerolog/log"
-	// "github.com/kleister/kleister-api/pkg/service/auth"
-	// "github.com/kleister/kleister-api/pkg/service/client"
-	// "github.com/kleister/kleister-api/pkg/service/forge"
-	// "github.com/kleister/kleister-api/pkg/service/general"
-	// "github.com/kleister/kleister-api/pkg/service/key"
-	// "github.com/kleister/kleister-api/pkg/service/minecraft"
-	// "github.com/kleister/kleister-api/pkg/service/mod"
-	// "github.com/kleister/kleister-api/pkg/service/pack"
-	// "github.com/kleister/kleister-api/pkg/service/profile"
-	// "github.com/kleister/kleister-api/pkg/service/team"
+	"github.com/kleister/kleister-api/pkg/assets"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/middleware/header"
 	"github.com/kleister/kleister-api/pkg/middleware/prometheus"
-	// "github.com/kleister/kleister-api/pkg/middleware/session"
-	// "github.com/kleister/kleister-api/pkg/service/user"
 	"github.com/kleister/kleister-api/pkg/store"
-	"github.com/kleister/kleister-api/pkg/swagger"
 	"github.com/kleister/kleister-api/pkg/upload"
+	"github.com/rs/zerolog/hlog"
+	"github.com/rs/zerolog/log"
 	"github.com/webhippie/fail"
 )
 
@@ -58,37 +47,21 @@ func Server(cfg *config.Config, storage store.Store, uploads upload.Upload) http
 	mux.Use(header.Secure)
 	mux.Use(header.Options)
 
-	// userService := user.NewService(user.ServiceOptions{
-	// 	Store: store,
-	// })
-
-	// userService = user.NewLogging(user.LoggingOptions{
-	// 	Service: userService,
-	// 	Logger: log.WithPrefix(logger, "service", "user"),
-	// })
-
-	// userService = user.NewMetrics(user.MetricsOptions{
-	// 	Service: userService,
-	// 	Metrics: "user",
-	// })
-
-	// mux.Use(session.SetCurrent(store))
-
 	mux.Route(cfg.Server.Root, func(root chi.Router) {
 		root.Route("/api", func(base chi.Router) {
-			base.Get("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
-				content, err := swagger.ReadFile("swagger.json")
+			base.Get("/v1.yml", func(w http.ResponseWriter, r *http.Request) {
+				content, err := assets.ReadFile("apiv1.yml")
 
 				if err != nil {
 					log.Error().
 						Err(err).
-						Msg("failed to read swagger.json")
+						Msg("failed to read openapi definition")
 
 					fail.ErrorJSON(w, fail.Unexpected())
 					return
 				}
 
-				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set("Content-Type", "text/vnd.yaml")
 				w.WriteHeader(http.StatusOK)
 
 				io.WriteString(w, string(content))
@@ -105,21 +78,6 @@ func Server(cfg *config.Config, storage store.Store, uploads upload.Upload) http
 					"storage",
 				),
 			))
-
-			// base.Get("/", general.Index(store, logger))
-
-			// base.Mount("/auth", auth.NewHandler(store, logger))
-			// base.Mount("/profile", profile.NewHandler(store, logger))
-			// base.Mount("/keys", keys.NewHandler(store, logger))
-			// base.Mount("/minecraft", minecraft.NewHandler(store, logger))
-			// base.Mount("/forge", forge.NewHandler(store, logger))
-			// base.Mount("/packs", packs.NewHandler(store, logger))
-			// base.Mount("/mods", mods.NewHandler(store, logger))
-			// base.Mount("/clients", clients.NewHandler(store, logger))
-			// base.Mount("/teams", teams.NewHandler(store, logger))
-
-			// base.Mount("/users", user.NewHandler(userService))
-
 		})
 	})
 

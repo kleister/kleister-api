@@ -18,7 +18,7 @@ func main() {
 
 	app := &cli.App{
 		Name:     "kleister-api",
-		Version:  version.Version.String(),
+		Version:  version.String,
 		Usage:    "manage mod packs for minecraft",
 		Authors:  authorList(),
 		Flags:    globalFlags(cfg),

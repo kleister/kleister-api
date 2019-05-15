@@ -1,0 +1,12 @@
+pkg: "assets"
+dest: "."
+fmt: true
+
+compression:
+  compress: false
+
+custom:
+  - files:
+    - "../../assets/"
+    base: "../../assets/"
+    prefix: ""

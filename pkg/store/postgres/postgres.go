@@ -23,7 +23,7 @@ func New(dsn *url.URL) (store.Store, error) {
 }
 
 // Must simply calls New and panics on an error.
-func Must(dsn *url.URL) store.Stores {
+func Must(dsn *url.URL) store.Store {
 	db, err := New(dsn)
 
 	if err != nil {

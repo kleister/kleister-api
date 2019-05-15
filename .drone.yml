@@ -1,310 +1,632 @@
-workspace:
-  base: /srv/app
-  path: src/github.com/kleister/kleister-api
+---
+kind: pipeline
+name: general
 
-branches:
-  - master
+platform:
+  os: linux
+  arch: amd64
 
-pipeline:
-  cache-restore:
-    image: plugins/s3-cache:1
-    pull: true
-    secrets: [ cache_s3_endpoint, cache_s3_access_key, cache_s3_secret_key ]
-    restore: true
-    when:
-      local: false
+steps:
+- name: generate
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make generate
+  volumes:
+  - name: gopath
+    path: /srv/app
 
-  backend-prepare:
-    image: webhippie/golang:edge
-    pull: true
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-    commands:
-      - make clean
-      - make retool
-      - make sync
-      - make generate
+- name: vet
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make vet
+  volumes:
+  - name: gopath
+    path: /srv/app
 
-  backend-vet:
-    image: webhippie/golang:edge
-    pull: true
-    group: backend
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-    commands:
-      - make vet
+- name: staticcheck
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make staticcheck
+  volumes:
+  - name: gopath
+    path: /srv/app
 
-  backend-check:
-    image: webhippie/golang:edge
-    pull: true
-    group: backend
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-    commands:
-      - make megacheck
+- name: lint
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make lint
+  volumes:
+  - name: gopath
+    path: /srv/app
 
-  backend-lint:
-    image: webhippie/golang:edge
-    pull: true
-    group: backend
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-    commands:
-      - make lint
+- name: test
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make test
+  volumes:
+  - name: gopath
+    path: /srv/app
 
-  backend-test:
-    image: webhippie/golang:edge
-    pull: true
-    group: backend
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-    commands:
-      - make test
+- name: build
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make build
+  volumes:
+  - name: gopath
+    path: /srv/app
 
-  backend-mysql:
-    image: webhippie/golang:edge
-    pull: true
-    group: backend
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-      - DB=mysql-service:3306
-    commands:
-      - make test-mysql
+volumes:
+- name: gopath
+  temp: {}
 
-  backend-pgsql:
-    image: webhippie/golang:edge
-    pull: true
-    group: backend
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-      - DB=pgsql-service:5432
-    commands:
-      - make test-pgsql
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
 
-  backend-build:
-    image: webhippie/golang:edge
-    pull: true
-    group: backend
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-    commands:
-      - make build
+---
+kind: pipeline
+name: linux
 
-  backend-windows:
-    image: karalabe/xgo-latest:latest
-    pull: true
-    group: release
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-    commands:
-      - make release-dirs release-windows
-    when:
-      event: [ push, tag ]
+platform:
+  os: linux
+  arch: amd64
 
-  backend-linux:
-    image: karalabe/xgo-latest:latest
-    pull: true
-    group: release
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-    commands:
-      - make release-dirs release-linux
-    when:
-      event: [ push, tag ]
+steps:
+- name: generate
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make generate
+  volumes:
+  - name: gopath
+    path: /srv/app
 
-  backend-darwin:
-    image: karalabe/xgo-latest:latest
-    pull: true
-    group: release
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-    commands:
-      - make release-dirs release-darwin
-    when:
-      event: [ push, tag ]
+- name: build
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make release-dirs release-linux
+  volumes:
+  - name: gopath
+    path: /srv/app
+  depends_on:
+  - generate
 
-  backend-finish:
-    image: webhippie/golang:edge
-    pull: true
-    environment:
-      - CGO_ENABLED=1
-      - GOPATH=/srv/app
-      - TAGS=
-    commands:
-      - make release-copy release-check
-    when:
-      event: [ push, tag ]
+- name: finish
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make release-finish
+  volumes:
+  - name: gopath
+    path: /srv/app
+  depends_on:
+  - build
 
-  backend-gpgsign:
-    image: plugins/gpgsign:1
-    pull: true
-    secrets: [ gpgsign_key, gpgsign_passphrase ]
-    detach_sign: true
+- name: gpgsign
+  image: plugins/gpgsign:1
+  pull: always
+  settings:
+    key:
+      from_secret: gpgsign_key
+    passphrase:
+      from_secret: gpgsign_passphrase
     files:
       - dist/release/*
     excludes:
       - dist/release/*.sha256
-    when:
-      event: [ push, tag ]
+    detach_sign: true
+  when:
+    event:
+      exclude:
+      - pull_request
+  depends_on:
+  - finish
 
-  docker-amd64:
-    image: plugins/docker:17.05
-    pull: true
-    group: docker
-    secrets: [ docker_username, docker_password ]
-    repo: umschlag/umschlag-api
-    auto_tag: true
-    auto_tag_suffix: amd64
-    when:
-      event: [ push, tag ]
-
-  docker-i386:
-    image: plugins/docker:17.05
-    pull: true
-    group: docker
-    secrets: [ docker_username, docker_password ]
-    repo: umschlag/umschlag-api
-    dockerfile: Dockerfile.i386
-    auto_tag: true
-    auto_tag_suffix: i386
-    when:
-      event: [ push, tag ]
-
-  docker-arm64:
-    image: plugins/docker:17.05
-    pull: true
-    group: docker
-    secrets: [ docker_username, docker_password ]
-    repo: umschlag/umschlag-api
-    dockerfile: Dockerfile.arm64
-    auto_tag: true
-    auto_tag_suffix: arm64
-    when:
-      event: [ push, tag ]
-
-  docker-arm:
-    image: plugins/docker:17.05
-    pull: true
-    group: docker
-    secrets: [ docker_username, docker_password ]
-    repo: umschlag/umschlag-api
-    dockerfile: Dockerfile.arm
-    auto_tag: true
-    auto_tag_suffix: arm
-    when:
-      event: [ push, tag ]
-
-  docker-manifests:
-    image: plugins/manifest:1
-    pull: true
-    secrets: [ docker_username, docker_password ]
-    spec: manifest.yml
-    auto_tag: true
-    ignore_missing: true
-    when:
-      event: [ push, tag ]
-
-  docker-microbadger:
-    image: plugins/webhook:1
-    pull: true
-    secrets:
-      - source: microbadger_token
-        target: plugin_urls
-    when:
-      event: [ push, tag ]
-
-  cache-rebuild:
-    image: plugins/s3-cache:1
-    pull: true
-    secrets: [ cache_s3_endpoint, cache_s3_access_key, cache_s3_secret_key ]
-    rebuild: true
-    mount:
-      - _tools
-      - vendor
-    when:
-      local: false
-      event: [ push ]
-
-  cache-flush:
-    image: plugins/s3-cache:1
-    pull: true
-    secrets: [ cache_s3_endpoint, cache_s3_access_key, cache_s3_secret_key ]
-    flush: true
-    flush_age: 14
-    when:
-      local: false
-      event: [ push ]
-
-  archive-release:
-    image: plugins/s3:1
-    pull: true
-    secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
+- name: upload-push
+  image: plugins/s3:1
+  pull: always
+  settings:
+    endpoint:
+      from_secret: s3_endpoint
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    bucket:
+      from_secret: s3_bucket
     source: dist/release/*
-    target: /api/master
+    target: /api/testing
     strip_prefix: dist/release/
     path_style: true
-    when:
-      event: [ push ]
+  when:
+    event:
+    - push
+  depends_on:
+  - gpgsign
 
-  archive-release:
-    image: plugins/s3:1
-    pull: true
-    secrets: [ s3_endpoint, aws_access_key_id, aws_secret_access_key, s3_bucket ]
+- name: upload-tag
+  image: plugins/s3:1
+  pull: always
+  settings:
+    endpoint:
+      from_secret: s3_endpoint
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    bucket:
+      from_secret: s3_bucket
     source: dist/release/*
     target: /api/${DRONE_TAG##v}
     strip_prefix: dist/release/
     path_style: true
-    when:
-      event: [ tag ]
+  when:
+    event:
+    - tag
+  depends_on:
+  - gpgsign
 
-  github-release:
-    image: plugins/github-release:1
-    pull: true
-    secrets: [ github_token ]
+- name: release
+  image: plugins/github-release:1
+  pull: always
+  settings:
+    api_key:
+      from_secret: github_token
+    files:
+    - dist/release/*
+  when:
+    event:
+    - tag
+  depends_on:
+  - gpgsign
+
+- name: amd64
+  pull: always
+  image: plugins/docker:18.09
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    auto_tag: true
+    auto_tag_suffix: linux-amd64
+    dockerfile: docker/Dockerfile.linux.amd64
+    repo: kleister/kleister-api
+  when:
+    event:
+      exclude:
+      - pull_request
+  depends_on:
+  - finish
+
+- name: i386
+  pull: always
+  image: plugins/docker:18.09
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    auto_tag: true
+    auto_tag_suffix: linux-i386
+    dockerfile: docker/Dockerfile.linux.i386
+    repo: kleister/kleister-api
+  when:
+    event:
+      exclude:
+      - pull_request
+  depends_on:
+  - finish
+
+- name: arm64v8
+  pull: always
+  image: plugins/docker:18.09
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    auto_tag: true
+    auto_tag_suffix: linux-arm64v8
+    dockerfile: docker/Dockerfile.linux.arm64v8
+    repo: kleister/kleister-api
+  when:
+    event:
+      exclude:
+      - pull_request
+  depends_on:
+  - finish
+
+- name: arm32v6
+  pull: always
+  image: plugins/docker:18.09
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    auto_tag: true
+    auto_tag_suffix: linux-arm32v6
+    dockerfile: docker/Dockerfile.linux.arm32v6
+    repo: kleister/kleister-api
+  when:
+    event:
+      exclude:
+      - pull_request
+  depends_on:
+  - finish
+
+- name: manifest
+  pull: always
+  image: plugins/manifest:1
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    spec: docker/manifest.tmpl
+    auto_tag: true
+    ignore_missing: true
+  when:
+    event:
+      exclude:
+      - pull_request
+  depends_on:
+  - amd64
+  - i386
+  - arm64v8
+  - arm32v6
+
+- name: microbadger
+  image: plugins/webhook:1
+  pull: always
+  settings:
+    urls:
+      from_secret: microbadger_token
+  when:
+    event:
+      exclude:
+      - pull_request
+  depends_on:
+  - manifest
+
+volumes:
+- name: gopath
+  temp: {}
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+---
+kind: pipeline
+name: windows
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: generate
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make generate
+  volumes:
+  - name: gopath
+    path: /srv/app
+
+- name: build
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make release-dirs release-windows
+  volumes:
+  - name: gopath
+    path: /srv/app
+  depends_on:
+  - generate
+
+- name: finish
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make release-finish
+  volumes:
+  - name: gopath
+    path: /srv/app
+  depends_on:
+  - build
+
+- name: gpgsign
+  image: plugins/gpgsign:1
+  pull: always
+  settings:
+    key:
+      from_secret: gpgsign_key
+    passphrase:
+      from_secret: gpgsign_passphrase
     files:
       - dist/release/*
-    when:
-      event: [ tag ]
+    excludes:
+      - dist/release/*.sha256
+    detach_sign: true
+  when:
+    event:
+      exclude:
+      - pull_request
+  depends_on:
+  - finish
 
-  notify-matrix:
-    image: plugins/matrix:1
-    pull: true
-    secrets: [ matrix_roomid, matrix_username, matrix_password ]
-    when:
-      local: false
-      event: [ push, tag ]
-      status: [ changed, failure ]
+- name: upload-push
+  image: plugins/s3:1
+  pull: always
+  settings:
+    endpoint:
+      from_secret: s3_endpoint
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    bucket:
+      from_secret: s3_bucket
+    source: dist/release/*
+    target: /api/testing
+    strip_prefix: dist/release/
+    path_style: true
+  when:
+    event:
+    - push
+  depends_on:
+  - gpgsign
 
-services:
-  mysql-service:
-    image: mysql:5.7
-    environment:
-      - MYSQL_DATABASE=test
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+- name: upload-tag
+  image: plugins/s3:1
+  pull: always
+  settings:
+    endpoint:
+      from_secret: s3_endpoint
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    bucket:
+      from_secret: s3_bucket
+    source: dist/release/*
+    target: /api/${DRONE_TAG##v}
+    strip_prefix: dist/release/
+    path_style: true
+  when:
+    event:
+    - tag
+  depends_on:
+  - gpgsign
 
-  pgsql-service:
-    image: postgres:9.5
-    environment:
-      - POSTGRES_DB=test
+- name: release
+  image: plugins/github-release:1
+  pull: always
+  settings:
+    api_key:
+      from_secret: github_token
+    files:
+    - dist/release/*
+  when:
+    event:
+    - tag
+  depends_on:
+  - gpgsign
+
+volumes:
+- name: gopath
+  temp: {}
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+---
+kind: pipeline
+name: darwin
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: generate
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make generate
+  volumes:
+  - name: gopath
+    path: /srv/app
+
+- name: build
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make release-dirs release-darwin
+  volumes:
+  - name: gopath
+    path: /srv/app
+  depends_on:
+  - generate
+
+- name: finish
+  image: webhippie/golang:1.12
+  pull: always
+  environment:
+    CGO_ENABLED: 0
+  commands:
+  - make release-finish
+  volumes:
+  - name: gopath
+    path: /srv/app
+  depends_on:
+  - build
+
+- name: gpgsign
+  image: plugins/gpgsign:1
+  pull: always
+  settings:
+    key:
+      from_secret: gpgsign_key
+    passphrase:
+      from_secret: gpgsign_passphrase
+    files:
+      - dist/release/*
+    excludes:
+      - dist/release/*.sha256
+    detach_sign: true
+  when:
+    event:
+      exclude:
+      - pull_request
+  depends_on:
+  - finish
+
+- name: upload-push
+  image: plugins/s3:1
+  pull: always
+  settings:
+    endpoint:
+      from_secret: s3_endpoint
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    bucket:
+      from_secret: s3_bucket
+    source: dist/release/*
+    target: /api/testing
+    strip_prefix: dist/release/
+    path_style: true
+  when:
+    event:
+    - push
+  depends_on:
+  - gpgsign
+
+- name: upload-tag
+  image: plugins/s3:1
+  pull: always
+  settings:
+    endpoint:
+      from_secret: s3_endpoint
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    bucket:
+      from_secret: s3_bucket
+    source: dist/release/*
+    target: /api/${DRONE_TAG##v}
+    strip_prefix: dist/release/
+    path_style: true
+  when:
+    event:
+    - tag
+  depends_on:
+  - gpgsign
+
+- name: release
+  image: plugins/github-release:1
+  pull: always
+  settings:
+    api_key:
+      from_secret: github_token
+    files:
+    - dist/release/*
+  when:
+    event:
+    - tag
+  depends_on:
+  - gpgsign
+
+volumes:
+- name: gopath
+  temp: {}
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+---
+kind: pipeline
+name: notification
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: notify
+  image: plugins/matrix:1
+  pull: always
+  settings:
+    username:
+      from_secret: matrix_username
+    password:
+      from_secret: matrix_password
+    roomid:
+      from_secret: matrix_roomid
+
+depends_on:
+- general
+- linux
+- windows
+- darwin
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  status:
+  - changed
+  - failure
+
+...

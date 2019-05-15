@@ -1,56 +1,56 @@
+SHELL := bash
 NAME := kleister-api
 IMPORT := github.com/kleister/$(NAME)
+BIN := bin
 DIST := dist
 
 ifeq ($(OS), Windows_NT)
 	EXECUTABLE := $(NAME).exe
+	HAS_GORUNPKG := $(shell where gorunpkg)
 else
 	EXECUTABLE := $(NAME)
+	HAS_GORUNPKG := $(shell command -v gorunpkg)
 endif
 
-PACKAGES ?= $(shell go list ./... | grep -v /vendor/ | grep -v /_tools/)
-SOURCES ?= $(shell find . -name "*.go" -type f -not -path "./vendor/*" -not -path "./_tools/*")
-GENERATE ?= $(IMPORT)/pkg/swagger
+PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
+SOURCES ?= $(shell find . -name "*.go" -type f -not -path "./vendor/*")
+GENERATE ?= $(IMPORT)/pkg/assets
 
 TAGS ?=
+
+ifndef OUTPUT
+	ifneq ($(DRONE_TAG),)
+		OUTPUT ?= $(subst v,,$(DRONE_TAG))
+	else
+		OUTPUT ?= testing
+	endif
+endif
 
 ifndef VERSION
 	ifneq ($(DRONE_TAG),)
 		VERSION ?= $(subst v,,$(DRONE_TAG))
 	else
-		ifneq ($(DRONE_BRANCH),)
-			VERSION ?= 0.0.0-$(subst /,,$(DRONE_BRANCH))
-		else
-			VERSION ?= 0.0.0-master
-		endif
+		VERSION ?= $(shell git rev-parse --short HEAD)
 	endif
-endif
-
-ifndef SHA
-	SHA := $(shell git rev-parse --short HEAD)
 endif
 
 ifndef DATE
 	DATE := $(shell date -u '+%Y%m%d')
 endif
 
-LDFLAGS += -s -w -X "$(IMPORT)/pkg/version.VersionString=$(VERSION)" -X "$(IMPORT)/pkg/version.VersionDev=$(SHA)" -X "$(IMPORT)/pkg/version.VersionDate=$(DATE)"
+LDFLAGS += -s -w -X "$(IMPORT)/pkg/version.String=$(VERSION)" -X "$(IMPORT)/pkg/version.Date=$(DATE)"
 
 .PHONY: all
 all: build
 
-.PHONY: update
-update:
-	retool do dep ensure -update
-
 .PHONY: sync
 sync:
-	retool do dep ensure
+	go mod download
 
 .PHONY: clean
 clean:
 	go clean -i ./...
-	rm -rf bin/ $(DIST)/binaries $(DIST)/release
+	rm -rf $(BIN) $(DIST)
 
 .PHONY: fmt
 fmt:
@@ -60,73 +60,50 @@ fmt:
 vet:
 	go vet $(PACKAGES)
 
-.PHONY: megacheck
-megacheck:
-	retool do megacheck -tags '$(TAGS)' $(PACKAGES)
+.PHONY: staticcheck
+staticcheck: gorunpkg
+	gorunpkg honnef.co/go/tools/cmd/staticcheck -tags '$(TAGS)' $(PACKAGES)
 
 .PHONY: lint
-lint:
-	for PKG in $(PACKAGES); do retool do golint -set_exit_status $$PKG || exit 1; done;
+lint: gorunpkg
+	for PKG in $(PACKAGES); do gorunpkg golang.org/x/lint/golint -set_exit_status $$PKG || exit 1; done;
 
 .PHONY: generate
-generate:
-	retool do go generate $(GENERATE)
+generate: gorunpkg
+	go generate $(GENERATE)
 
 .PHONY: test
-test:
-	retool do goverage -v -coverprofile coverage.out $(PACKAGES)
-
-.PHONY: test-mysql
-test-mysql:
-	@echo "Not integrated yet!"
-
-.PHONY: test-pgsql
-test-pgsql:
-	@echo "Not integrated yet!"
+test: gorunpkg
+	gorunpkg github.com/haya14busa/goverage -v -coverprofile coverage.out $(PACKAGES)
 
 .PHONY: install
 install: $(SOURCES)
 	go install -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./cmd/$(NAME)
 
 .PHONY: build
-build: bin/$(EXECUTABLE)
+build: $(BIN)/$(EXECUTABLE)
 
-bin/$(EXECUTABLE): $(SOURCES)
+$(BIN)/$(EXECUTABLE): $(SOURCES)
 	go build -i -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
 
 .PHONY: release
-release: release-dirs release-windows release-linux release-darwin release-copy release-check
+release: release-dirs release-linux release-windows release-darwin release-copy release-check
 
 .PHONY: release-dirs
 release-dirs:
 	mkdir -p $(DIST)/binaries $(DIST)/release
 
-.PHONY: release-windows
-release-windows:
-ifeq ($(CI),drone)
-	xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'windows/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/$(NAME)
-	mv /build/* $(DIST)/binaries
-else
-	retool do xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'windows/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/$(NAME)
-endif
-
 .PHONY: release-linux
-release-linux:
-ifeq ($(CI),drone)
-	xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'linux/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/$(NAME)
-	mv /build/* $(DIST)/binaries
-else
-	retool do xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'linux/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/$(NAME)
-endif
+release-linux: gorunpkg
+	gorunpkg github.com/mitchellh/gox -tags 'netgo $(TAGS)' -ldflags '-extldflags "-static" $(LDFLAGS)' -os 'linux' -arch 'amd64 386 arm64 arm' -output '$(DIST)/binaries/$(EXECUTABLE)-$(OUTPUT)-{{.OS}}-{{.Arch}}' ./cmd/$(NAME)
+
+.PHONY: release-windows
+release-windows: gorunpkg
+	gorunpkg github.com/mitchellh/gox -tags 'netgo $(TAGS)' -ldflags '-extldflags "-static" $(LDFLAGS)' -os 'windows' -arch 'amd64' -output '$(DIST)/binaries/$(EXECUTABLE)-$(OUTPUT)-{{.OS}}-{{.Arch}}' ./cmd/$(NAME)
 
 .PHONY: release-darwin
-release-darwin:
-ifeq ($(CI),drone)
-	xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '$(LDFLAGS)' -targets 'darwin/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/$(NAME)
-	mv /build/* $(DIST)/binaries
-else
-	retool do xgo -dest $(DIST)/binaries -tags 'netgo $(TAGS)' -ldflags '$(LDFLAGS)' -targets 'darwin/*' -out $(EXECUTABLE)-$(VERSION)  ./cmd/$(NAME)
-endif
+release-darwin: gorunpkg
+	gorunpkg github.com/mitchellh/gox -tags 'netgo $(TAGS)' -ldflags '$(LDFLAGS)' -os 'darwin' -arch 'amd64' -output '$(DIST)/binaries/$(EXECUTABLE)-$(OUTPUT)-{{.OS}}-{{.Arch}}' ./cmd/$(NAME)
 
 .PHONY: release-copy
 release-copy:
@@ -136,13 +113,11 @@ release-copy:
 release-check:
 	cd $(DIST)/release; $(foreach file,$(wildcard $(DIST)/release/$(EXECUTABLE)-*),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;)
 
-.PHONY: publish
-publish: release
+.PHONY: release-finish
+release-finish: release-copy release-check
 
-.PHONY: retool
-retool:
-ifndef HAS_RETOOL
-	go get -u github.com/twitchtv/retool
+.PHONY: gorunpkg
+gorunpkg:
+ifndef HAS_GORUNPKG
+	go get -u github.com/vektah/gorunpkg
 endif
-	retool sync
-	retool build

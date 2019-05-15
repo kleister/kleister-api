@@ -1,7 +1,6 @@
 # Kleister: API server
 
-[![Build Status](http://github.dronehippie.de/api/badges/kleister/kleister-api/status.svg)](http://github.dronehippie.de/kleister/kleister-api)
-[![Build Status](https://ci.appveyor.com/api/projects/status/vugtghebqi0xnfiw?svg=true)](https://ci.appveyor.com/project/kleisterz/kleister-api)
+[![Build Status](https://cloud.drone.io/api/badges/kleister/kleister-api/status.svg)](https://cloud.drone.io/kleister/kleister-api)
 [![Stories in Ready](https://badge.waffle.io/kleister/kleister-api.svg?label=ready&title=Ready)](http://waffle.io/kleister/kleister-api)
 [![Join the Matrix chat at https://matrix.to/#/#kleister:matrix.org](https://img.shields.io/badge/matrix-%23kleister-7bc9a4.svg)](https://matrix.to/#/#kleister:matrix.org)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a7f12e6f17524e669df945546d4ee37c)](https://www.codacy.com/app/kleister/kleister-api?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kleister/kleister-api&amp;utm_campaign=Badge_Grade)
@@ -23,23 +22,13 @@ You can download prebuilt binaries from the GitHub releases or from our [downloa
 
 ## Development
 
-Make sure you have a working Go environment, for further reference or a guide take a look at the [install instructions](http://golang.org/doc/install.html). This project requires Go >= v1.8. It is possible to just execute `go get github.com/kleister/kleister-api/cmd/kleister-api`, but we prefer to use our `Makefile`:
+Make sure you have a working Go environment, for further reference or a guide take a look at the [install instructions](http://golang.org/doc/install.html). This project requires Go >= v1.11.
 
 ```bash
-go get -d github.com/kleister/kleister-api
-cd $GOPATH/src/github.com/kleister/kleister-api
+git clone https://github.com/kleister/kleister-api.git
+cd kleister-api
 
-# install retool
-make retool
-
-# sync dependencies
-make sync
-
-# generate code
-make generate
-
-# build binary
-make build
+make sync generate build
 
 ./bin/kleister-api -h
 ```

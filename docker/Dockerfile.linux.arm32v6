@@ -20,4 +20,4 @@ CMD ["server"]
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/mime.types /etc/
 
-COPY dist/binaries/kleister-api-*-linux-arm-6 /usr/bin/kleister-api
+COPY dist/binaries/kleister-api-*-linux-arm /usr/bin/kleister-api
