@@ -15,6 +15,7 @@ endif
 PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 SOURCES ?= $(shell find . -name "*.go" -type f -not -path "./vendor/*")
 GENERATE ?= $(IMPORT)/pkg/assets
+SWAGGER ?= $(IMPORT)/pkg/api/v1/restapi
 
 TAGS ?=
 
@@ -71,6 +72,10 @@ lint: gorunpkg
 .PHONY: generate
 generate: gorunpkg
 	go generate $(GENERATE)
+
+.PHONY: swagger
+swagger: gorunpkg
+	go generate $(SWAGGER)
 
 .PHONY: test
 test: gorunpkg

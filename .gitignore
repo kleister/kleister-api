@@ -1,5 +1,7 @@
 coverage.out
 
+/pkg/assets/ab0x.go
+
 /bin
 /dist
 

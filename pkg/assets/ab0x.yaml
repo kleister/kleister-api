@@ -3,7 +3,7 @@ dest: "."
 fmt: true
 
 compression:
-  compress: false
+  compress: true
 
 custom:
   - files:

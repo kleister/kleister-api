@@ -75,7 +75,7 @@ paths:
         - "auth"
       parameters:
         - in: "body"
-          name: "auth"
+          name: "params"
           description: "The credentials to authenticate"
           required: true
           schema:
@@ -153,7 +153,7 @@ paths:
         - "profile"
       parameters:
         - in: "body"
-          name: "profile"
+          name: "params"
           description: "The profile data to update"
           required: true
           schema:
@@ -225,7 +225,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /minecraft/{minecraft}:
+  /minecraft/{minecraftID}:
     get:
       summary: "Search for available Minecraft versions"
       operationId: "MinecraftSearch"
@@ -233,7 +233,7 @@ paths:
         - "minecraft"
       parameters:
         - in: "path"
-          name: "minecraft"
+          name: "minecraftID"
           description: "A search token to search Minecraft versions"
           type: "string"
           required: true
@@ -253,7 +253,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /minecraft/{minecraft}/builds:
+  /minecraft/{minecraftID}/builds:
     get:
       summary: "Fetch the builds assigned to a Minecraft version"
       operationId: "MinecraftBuildIndex"
@@ -261,7 +261,7 @@ paths:
         - "minecraft"
       parameters:
         - in: "path"
-          name: "minecraft"
+          name: "minecraftID"
           description: "A minecraft UUID or slug"
           type: "string"
           required: true
@@ -288,7 +288,7 @@ paths:
         - "minecraft"
       parameters:
         - in: "path"
-          name: "minecraft"
+          name: "minecraftID"
           description: "A minecraft UUID or slug"
           type: "string"
           required: true
@@ -329,7 +329,7 @@ paths:
         - "minecraft"
       parameters:
         - in: "path"
-          name: "minecraft"
+          name: "minecraftID"
           description: "A minecraft UUID or slug"
           type: "string"
           required: true
@@ -408,7 +408,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /forge/{forge}:
+  /forge/{forgeID}:
     get:
       summary: "Search for available Forge versions"
       operationId: "ForgeSearch"
@@ -416,7 +416,7 @@ paths:
         - "forge"
       parameters:
         - in: "path"
-          name: "forge"
+          name: "forgeID"
           description: "A search token to search Forge versions"
           type: "string"
           required: true
@@ -436,7 +436,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /forge/{forge}/builds:
+  /forge/{forgeID}/builds:
     get:
       summary: "Fetch the builds assigned to a Forge version"
       operationId: "ForgeBuildIndex"
@@ -444,7 +444,7 @@ paths:
         - "forge"
       parameters:
         - in: "path"
-          name: "forge"
+          name: "forgeID"
           description: "A forge UUID or slug"
           type: "string"
           required: true
@@ -471,7 +471,7 @@ paths:
         - "forge"
       parameters:
         - in: "path"
-          name: "forge"
+          name: "forgeID"
           description: "A forge UUID or slug"
           type: "string"
           required: true
@@ -512,7 +512,7 @@ paths:
         - "forge"
       parameters:
         - in: "path"
-          name: "forge"
+          name: "forgeID"
           description: "A forge UUID or slug"
           type: "string"
           required: true
@@ -575,7 +575,7 @@ paths:
         - "pack"
       parameters:
         - in: "body"
-          name: "pack"
+          name: "params"
           description: "The pack data to create"
           required: true
           schema:
@@ -602,7 +602,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /packs/{pack}:
+  /packs/{packID}:
     get:
       summary: "Fetch a specific pack"
       operationId: "PackShow"
@@ -610,7 +610,7 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
@@ -635,12 +635,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "pack"
+          name: "params"
           description: "The pack data to update"
           required: true
           schema:
@@ -674,7 +674,7 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
@@ -696,7 +696,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /packs/{pack}/users:
+  /packs/{packID}/users:
     get:
       summary: "Fetch all users assigned to pack"
       operationId: "PackUserIndex"
@@ -704,7 +704,7 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
@@ -731,12 +731,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "pack_user"
+          name: "params"
           description: "The pack user data to assign"
           required: true
           schema:
@@ -770,12 +770,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "pack_user"
+          name: "params"
           description: "The pack user data to update"
           required: true
           schema:
@@ -809,12 +809,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "pack_user"
+          name: "params"
           description: "The pack user data to delete"
           required: true
           schema:
@@ -841,7 +841,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /packs/{pack}/teams:
+  /packs/{packID}/teams:
     get:
       summary: "Fetch all teams assigned to pack"
       operationId: "PackTeamIndex"
@@ -849,7 +849,7 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
@@ -876,12 +876,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "pack_team"
+          name: "params"
           description: "The pack team data to assign"
           required: true
           schema:
@@ -915,12 +915,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "pack_team"
+          name: "params"
           description: "The pack team data to update"
           required: true
           schema:
@@ -954,12 +954,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "pack_team"
+          name: "params"
           description: "The pack team data to delete"
           required: true
           schema:
@@ -986,7 +986,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /packs/{pack}/builds:
+  /packs/{packID}/builds:
     get:
       summary: "Fetch all available builds for a pack"
       operationId: "BuildIndex"
@@ -994,7 +994,7 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
@@ -1021,12 +1021,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "build"
+          name: "params"
           description: "The build data to create"
           required: true
           schema:
@@ -1053,7 +1053,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /packs/{pack}/builds/{build}:
+  /packs/{packID}/builds/{buildID}:
     get:
       summary: "Fetch a specific build for a pack"
       operationId: "BuildShow"
@@ -1061,12 +1061,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "build"
+          name: "buildID"
           description: "A build UUID or slug"
           type: "string"
           required: true
@@ -1091,17 +1091,17 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "build"
+          name: "buildID"
           description: "A build UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "build"
+          name: "params"
           description: "The build data to update"
           required: true
           schema:
@@ -1135,12 +1135,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "build"
+          name: "buildID"
           description: "A build UUID or slug"
           type: "string"
           required: true
@@ -1162,7 +1162,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /packs/{pack}/builds/{build}/versions:
+  /packs/{packID}/builds/{buildID}/versions:
     get:
       summary: "Fetch all versions assigned to build"
       operationId: "BuildVersionIndex"
@@ -1170,12 +1170,12 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "build"
+          name: "buildID"
           description: "A build UUID or slug"
           type: "string"
           required: true
@@ -1202,17 +1202,17 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "build"
+          name: "buildID"
           description: "A build UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "build_version"
+          name: "params"
           description: "The version data to append to build"
           required: true
           schema:
@@ -1246,17 +1246,17 @@ paths:
         - "pack"
       parameters:
         - in: "path"
-          name: "pack"
+          name: "packID"
           description: "A pack UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "build"
+          name: "buildID"
           description: "A build UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "build_version"
+          name: "params"
           description: "The version data to unlink from build"
           required: true
           schema:
@@ -1308,7 +1308,7 @@ paths:
         - "mod"
       parameters:
         - in: "body"
-          name: "mod"
+          name: "params"
           description: "The mod data to create"
           required: true
           schema:
@@ -1335,7 +1335,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /mods/{mod}:
+  /mods/{modID}:
     get:
       summary: "Fetch a specific mod"
       operationId: "ModShow"
@@ -1343,7 +1343,7 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
@@ -1368,12 +1368,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "mod"
+          name: "params"
           description: "The mod data to update"
           required: true
           schema:
@@ -1407,7 +1407,7 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
@@ -1429,7 +1429,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /mods/{mod}/users:
+  /mods/{modID}/users:
     get:
       summary: "Fetch all users assigned to mod"
       operationId: "ModUserIndex"
@@ -1437,7 +1437,7 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
@@ -1464,12 +1464,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "mod_user"
+          name: "params"
           description: "The mod user data to assign"
           required: true
           schema:
@@ -1503,12 +1503,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "mod_user"
+          name: "params"
           description: "The mod user data to update"
           required: true
           schema:
@@ -1542,12 +1542,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "mod_user"
+          name: "params"
           description: "The mod user data to delete"
           required: true
           schema:
@@ -1574,7 +1574,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /mods/{mod}/teams:
+  /mods/{modID}/teams:
     get:
       summary: "Fetch all teams assigned to mod"
       operationId: "ModTeamIndex"
@@ -1582,7 +1582,7 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
@@ -1609,12 +1609,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "mod_team"
+          name: "params"
           description: "The mod team data to assign"
           required: true
           schema:
@@ -1648,12 +1648,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "mod_team"
+          name: "params"
           description: "The mod team data to update"
           required: true
           schema:
@@ -1687,12 +1687,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "mod_team"
+          name: "params"
           description: "The mod team data to delete"
           required: true
           schema:
@@ -1719,7 +1719,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /mods/{mod}/versions:
+  /mods/{modID}/versions:
     get:
       summary: "Fetch all available versions for a mod"
       operationId: "VersionIndex"
@@ -1727,7 +1727,7 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
@@ -1754,12 +1754,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "version"
+          name: "params"
           description: "The version data to create"
           required: true
           schema:
@@ -1786,7 +1786,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /mods/{mod}/versions/{version}:
+  /mods/{modID}/versions/{versionID}:
     get:
       summary: "Fetch a specific version for a mod"
       operationId: "VersionShow"
@@ -1794,12 +1794,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "version"
+          name: "versionID"
           description: "A version UUID or slug"
           type: "string"
           required: true
@@ -1824,17 +1824,17 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "version"
+          name: "versionID"
           description: "A version UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "version"
+          name: "params"
           description: "The version data to update"
           required: true
           schema:
@@ -1868,12 +1868,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "version"
+          name: "versionID"
           description: "A version UUID or slug"
           type: "string"
           required: true
@@ -1895,7 +1895,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /mods/{mod}/versions/{version}/builds:
+  /mods/{modID}/versions/{versionID}/builds:
     get:
       summary: "Fetch all builds assigned to version"
       operationId: "VersionBuildIndex"
@@ -1903,12 +1903,12 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "version"
+          name: "versionID"
           description: "A version UUID or slug"
           type: "string"
           required: true
@@ -1935,17 +1935,17 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "version"
+          name: "versionID"
           description: "A version UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "version_build"
+          name: "params"
           description: "The build data to append to version"
           required: true
           schema:
@@ -1979,17 +1979,17 @@ paths:
         - "mod"
       parameters:
         - in: "path"
-          name: "mod"
+          name: "modID"
           description: "A mod UUID or slug"
           type: "string"
           required: true
         - in: "path"
-          name: "version"
+          name: "versionID"
           description: "A version UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "version_build"
+          name: "params"
           description: "The build data to unlink from version"
           required: true
           schema:
@@ -2041,7 +2041,7 @@ paths:
         - "team"
       parameters:
         - in: "body"
-          name: "team"
+          name: "params"
           description: "The team data to create"
           required: true
           schema:
@@ -2068,7 +2068,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /teams/{team}:
+  /teams/{teamID}:
     get:
       summary: "Fetch a specific team"
       operationId: "TeamShow"
@@ -2076,7 +2076,7 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
@@ -2101,12 +2101,12 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "team"
+          name: "params"
           description: "The team data to update"
           required: true
           schema:
@@ -2140,7 +2140,7 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
@@ -2162,7 +2162,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /teams/{team}/users:
+  /teams/{teamID}/users:
     get:
       summary: "Fetch all users assigned to team"
       operationId: "TeamUserIndex"
@@ -2170,7 +2170,7 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
@@ -2197,12 +2197,12 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "team_user"
+          name: "params"
           description: "The team user data to assign"
           required: true
           schema:
@@ -2236,12 +2236,12 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "team_user"
+          name: "params"
           description: "The team user data to update"
           required: true
           schema:
@@ -2275,12 +2275,12 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "team_user"
+          name: "params"
           description: "The team user data to delete"
           required: true
           schema:
@@ -2307,7 +2307,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /teams/{team}/packs:
+  /teams/{teamID}/packs:
     get:
       summary: "Fetch all packs assigned to team"
       operationId: "TeamPackIndex"
@@ -2315,7 +2315,7 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
@@ -2342,12 +2342,12 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "team_pack"
+          name: "params"
           description: "The team pack data to assign"
           required: true
           schema:
@@ -2381,12 +2381,12 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "team_pack"
+          name: "params"
           description: "The team pack data to update"
           required: true
           schema:
@@ -2420,12 +2420,12 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "team_pack"
+          name: "params"
           description: "The team pack data to delete"
           required: true
           schema:
@@ -2452,7 +2452,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /teams/{team}/mods:
+  /teams/{teamID}/mods:
     get:
       summary: "Fetch all mods assigned to team"
       operationId: "TeamModIndex"
@@ -2460,7 +2460,7 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
@@ -2487,12 +2487,12 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "team_mod"
+          name: "params"
           description: "The team mod data to assign"
           required: true
           schema:
@@ -2526,12 +2526,12 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "team_mod"
+          name: "params"
           description: "The team mod data to update"
           required: true
           schema:
@@ -2565,12 +2565,12 @@ paths:
         - "team"
       parameters:
         - in: "path"
-          name: "team"
+          name: "teamID"
           description: "A team UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "team_mod"
+          name: "params"
           description: "The team mod data to delete"
           required: true
           schema:
@@ -2626,7 +2626,7 @@ paths:
         - "user"
       parameters:
         - in: "body"
-          name: "user"
+          name: "params"
           description: "The user data to create"
           required: true
           schema:
@@ -2653,7 +2653,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /users/{user}:
+  /users/{userID}:
     get:
       summary: "Fetch a specific user"
       operationId: "UserShow"
@@ -2661,7 +2661,7 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
@@ -2686,12 +2686,12 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "user"
+          name: "params"
           description: "The user data to update"
           required: true
           schema:
@@ -2725,7 +2725,7 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
@@ -2747,7 +2747,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /users/{user}/teams:
+  /users/{userID}/teams:
     get:
       summary: "Fetch all teams assigned to user"
       operationId: "UserTeamIndex"
@@ -2755,7 +2755,7 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
@@ -2782,12 +2782,12 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "user_team"
+          name: "params"
           description: "The user team data to assign"
           required: true
           schema:
@@ -2821,12 +2821,12 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "user_team"
+          name: "params"
           description: "The user team data to update"
           required: true
           schema:
@@ -2860,12 +2860,12 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "user_team"
+          name: "params"
           description: "The user team data to delete"
           required: true
           schema:
@@ -2892,7 +2892,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /users/{user}/mods:
+  /users/{userID}/mods:
     get:
       summary: "Fetch all mods assigned to user"
       operationId: "UserModIndex"
@@ -2900,7 +2900,7 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
@@ -2927,12 +2927,12 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "user_mod"
+          name: "params"
           description: "The user mod data to assign"
           required: true
           schema:
@@ -2966,12 +2966,12 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "user_mod"
+          name: "params"
           description: "The user mod data to update"
           required: true
           schema:
@@ -3005,12 +3005,12 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "user_mod"
+          name: "params"
           description: "The user mod data to delete"
           required: true
           schema:
@@ -3037,7 +3037,7 @@ paths:
           schema:
             $ref: "#/definitions/general_error"
 
-  /users/{user}/packs:
+  /users/{userID}/packs:
     get:
       summary: "Fetch all packs assigned to user"
       operationId: "UserPackIndex"
@@ -3045,7 +3045,7 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
@@ -3072,12 +3072,12 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "user_pack"
+          name: "params"
           description: "The user pack data to assign"
           required: true
           schema:
@@ -3111,12 +3111,12 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "user_pack"
+          name: "params"
           description: "The user pack data to update"
           required: true
           schema:
@@ -3150,12 +3150,12 @@ paths:
         - "user"
       parameters:
         - in: "path"
-          name: "user"
+          name: "userID"
           description: "A user UUID or slug"
           type: "string"
           required: true
         - in: "body"
-          name: "user_pack"
+          name: "params"
           description: "The user pack data to delete"
           required: true
           schema:
