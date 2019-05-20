@@ -46,7 +46,7 @@ func init() {
           "auth"
         ],
         "summary": "Authenticate an user by credentials",
-        "operationId": "AuthLogin",
+        "operationId": "LoginUser",
         "parameters": [
           {
             "description": "The credentials to authenticate",
@@ -98,7 +98,7 @@ func init() {
           "auth"
         ],
         "summary": "Refresh an auth token before it expires",
-        "operationId": "AuthRefresh",
+        "operationId": "RefreshAuth",
         "responses": {
           "200": {
             "description": "A refreshed token with expire",
@@ -127,7 +127,7 @@ func init() {
           "auth"
         ],
         "summary": "Verify validity for an authentication token",
-        "operationId": "AuthVerify",
+        "operationId": "VerifyAuth",
         "parameters": [
           {
             "type": "string",
@@ -165,7 +165,7 @@ func init() {
           "forge"
         ],
         "summary": "Fetch the available Forge versions",
-        "operationId": "ForgeIndex",
+        "operationId": "ListForges",
         "responses": {
           "200": {
             "description": "A collection of Forge versions",
@@ -195,7 +195,7 @@ func init() {
           "forge"
         ],
         "summary": "Update the available Forge versions",
-        "operationId": "ForgeUpdate",
+        "operationId": "UpdateForge",
         "responses": {
           "200": {
             "description": "Plain success message",
@@ -230,7 +230,7 @@ func init() {
           "forge"
         ],
         "summary": "Search for available Forge versions",
-        "operationId": "ForgeSearch",
+        "operationId": "SearchForges",
         "parameters": [
           {
             "type": "string",
@@ -271,7 +271,7 @@ func init() {
           "forge"
         ],
         "summary": "Fetch the builds assigned to a Forge version",
-        "operationId": "ForgeBuildIndex",
+        "operationId": "ListForgeBuilds",
         "parameters": [
           {
             "type": "string",
@@ -310,7 +310,7 @@ func init() {
           "forge"
         ],
         "summary": "Assign a build to a Forge version",
-        "operationId": "ForgeBuildAppend",
+        "operationId": "AppendForgeToBuild",
         "parameters": [
           {
             "type": "string",
@@ -370,7 +370,7 @@ func init() {
           "forge"
         ],
         "summary": "Unlink a build from a Forge version",
-        "operationId": "ForgeBuildDelete",
+        "operationId": "DeleteForgeFromBuild",
         "parameters": [
           {
             "type": "string",
@@ -432,7 +432,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Fetch the available Minecraft versions",
-        "operationId": "MinecraftIndex",
+        "operationId": "ListMinecrafts",
         "responses": {
           "200": {
             "description": "A collection of Minecraft versions",
@@ -462,7 +462,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Update the available Minecraft versions",
-        "operationId": "MinecraftUpdate",
+        "operationId": "UpdateMinecraft",
         "responses": {
           "200": {
             "description": "Plain success message",
@@ -497,7 +497,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Search for available Minecraft versions",
-        "operationId": "MinecraftSearch",
+        "operationId": "SearchMinecrafts",
         "parameters": [
           {
             "type": "string",
@@ -538,7 +538,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Fetch the builds assigned to a Minecraft version",
-        "operationId": "MinecraftBuildIndex",
+        "operationId": "ListMinecraftBuilds",
         "parameters": [
           {
             "type": "string",
@@ -577,7 +577,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Assign a build to a Minecraft version",
-        "operationId": "MinecraftBuildAppend",
+        "operationId": "AppendMinecraftToBuild",
         "parameters": [
           {
             "type": "string",
@@ -637,7 +637,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Unlink a build from a Minecraft version",
-        "operationId": "MinecraftBuildDelete",
+        "operationId": "DeleteMinecraftFromBuild",
         "parameters": [
           {
             "type": "string",
@@ -699,7 +699,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch all available mods",
-        "operationId": "ModIndex",
+        "operationId": "ListMods",
         "responses": {
           "200": {
             "description": "A collection of mods",
@@ -729,7 +729,7 @@ func init() {
           "mod"
         ],
         "summary": "Create a new mod",
-        "operationId": "ModCreate",
+        "operationId": "CreateMod",
         "parameters": [
           {
             "description": "The mod data to create",
@@ -781,7 +781,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch a specific mod",
-        "operationId": "ModShow",
+        "operationId": "ShowMod",
         "parameters": [
           {
             "type": "string",
@@ -817,7 +817,7 @@ func init() {
           "mod"
         ],
         "summary": "Update a specific mod",
-        "operationId": "ModUpdate",
+        "operationId": "UpdateMod",
         "parameters": [
           {
             "type": "string",
@@ -874,7 +874,7 @@ func init() {
           "mod"
         ],
         "summary": "Delete a specific mod",
-        "operationId": "ModDelete",
+        "operationId": "DeleteMod",
         "parameters": [
           {
             "type": "string",
@@ -918,7 +918,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch all teams assigned to mod",
-        "operationId": "ModTeamIndex",
+        "operationId": "ListModTeams",
         "parameters": [
           {
             "type": "string",
@@ -957,7 +957,7 @@ func init() {
           "mod"
         ],
         "summary": "Update team perms for mod",
-        "operationId": "ModTeamPerm",
+        "operationId": "PermitModTeam",
         "parameters": [
           {
             "type": "string",
@@ -1014,7 +1014,7 @@ func init() {
           "mod"
         ],
         "summary": "Assign a team to mod",
-        "operationId": "ModTeamAppend",
+        "operationId": "AppendModToTeam",
         "parameters": [
           {
             "type": "string",
@@ -1071,7 +1071,7 @@ func init() {
           "mod"
         ],
         "summary": "Remove a team from mod",
-        "operationId": "ModTeamDelete",
+        "operationId": "DeleteModFromTeam",
         "parameters": [
           {
             "type": "string",
@@ -1130,7 +1130,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch all users assigned to mod",
-        "operationId": "ModUserIndex",
+        "operationId": "ListModUsers",
         "parameters": [
           {
             "type": "string",
@@ -1169,7 +1169,7 @@ func init() {
           "mod"
         ],
         "summary": "Update user perms for mod",
-        "operationId": "ModUserPerm",
+        "operationId": "PermitModUser",
         "parameters": [
           {
             "type": "string",
@@ -1226,7 +1226,7 @@ func init() {
           "mod"
         ],
         "summary": "Assign a user to mod",
-        "operationId": "ModUserAppend",
+        "operationId": "AppendModToUser",
         "parameters": [
           {
             "type": "string",
@@ -1283,7 +1283,7 @@ func init() {
           "mod"
         ],
         "summary": "Remove a user from mod",
-        "operationId": "ModUserDelete",
+        "operationId": "DeleteModFromUser",
         "parameters": [
           {
             "type": "string",
@@ -1342,7 +1342,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch all available versions for a mod",
-        "operationId": "VersionIndex",
+        "operationId": "ListVersions",
         "parameters": [
           {
             "type": "string",
@@ -1381,7 +1381,7 @@ func init() {
           "mod"
         ],
         "summary": "Create a new version for a mod",
-        "operationId": "VersionCreate",
+        "operationId": "CreateVersion",
         "parameters": [
           {
             "type": "string",
@@ -1440,7 +1440,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch a specific version for a mod",
-        "operationId": "VersionShow",
+        "operationId": "ShowVersion",
         "parameters": [
           {
             "type": "string",
@@ -1483,7 +1483,7 @@ func init() {
           "mod"
         ],
         "summary": "Update a specific version for a mod",
-        "operationId": "VersionUpdate",
+        "operationId": "UpdateVersion",
         "parameters": [
           {
             "type": "string",
@@ -1547,7 +1547,7 @@ func init() {
           "mod"
         ],
         "summary": "Delete a specific version for a mod",
-        "operationId": "VersionDelete",
+        "operationId": "DeleteVersion",
         "parameters": [
           {
             "type": "string",
@@ -1598,7 +1598,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch all builds assigned to version",
-        "operationId": "VersionBuildIndex",
+        "operationId": "ListVersionBuilds",
         "parameters": [
           {
             "type": "string",
@@ -1644,7 +1644,7 @@ func init() {
           "mod"
         ],
         "summary": "Assign a build to a version",
-        "operationId": "VersionBuildAppend",
+        "operationId": "AppendVersionToBuild",
         "parameters": [
           {
             "type": "string",
@@ -1708,7 +1708,7 @@ func init() {
           "mod"
         ],
         "summary": "Unlink a build from a version",
-        "operationId": "VersionBuildDelete",
+        "operationId": "DeleteVersionFromBuild",
         "parameters": [
           {
             "type": "string",
@@ -1768,7 +1768,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch all available packs",
-        "operationId": "PackIndex",
+        "operationId": "ListPacks",
         "responses": {
           "200": {
             "description": "A collection of packs",
@@ -1798,7 +1798,7 @@ func init() {
           "pack"
         ],
         "summary": "Create a new pack",
-        "operationId": "PackCreate",
+        "operationId": "CreatePack",
         "parameters": [
           {
             "description": "The pack data to create",
@@ -1850,7 +1850,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch a specific pack",
-        "operationId": "PackShow",
+        "operationId": "ShowPack",
         "parameters": [
           {
             "type": "string",
@@ -1886,7 +1886,7 @@ func init() {
           "pack"
         ],
         "summary": "Update a specific pack",
-        "operationId": "PackUpdate",
+        "operationId": "UpdatePack",
         "parameters": [
           {
             "type": "string",
@@ -1943,7 +1943,7 @@ func init() {
           "pack"
         ],
         "summary": "Delete a specific pack",
-        "operationId": "PackDelete",
+        "operationId": "DeletePack",
         "parameters": [
           {
             "type": "string",
@@ -1987,7 +1987,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch all available builds for a pack",
-        "operationId": "BuildIndex",
+        "operationId": "ListBuilds",
         "parameters": [
           {
             "type": "string",
@@ -2026,7 +2026,7 @@ func init() {
           "pack"
         ],
         "summary": "Create a new build for a pack",
-        "operationId": "BuildCreate",
+        "operationId": "CreateBuild",
         "parameters": [
           {
             "type": "string",
@@ -2085,7 +2085,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch a specific build for a pack",
-        "operationId": "BuildShow",
+        "operationId": "ShowBuild",
         "parameters": [
           {
             "type": "string",
@@ -2128,7 +2128,7 @@ func init() {
           "pack"
         ],
         "summary": "Update a specific build for a pack",
-        "operationId": "BuildUpdate",
+        "operationId": "UpdateBuild",
         "parameters": [
           {
             "type": "string",
@@ -2192,7 +2192,7 @@ func init() {
           "pack"
         ],
         "summary": "Delete a specific build for a pack",
-        "operationId": "BuildDelete",
+        "operationId": "DeleteBuild",
         "parameters": [
           {
             "type": "string",
@@ -2243,7 +2243,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch all versions assigned to build",
-        "operationId": "BuildVersionIndex",
+        "operationId": "ListBuildVersions",
         "parameters": [
           {
             "type": "string",
@@ -2289,7 +2289,7 @@ func init() {
           "pack"
         ],
         "summary": "Assign a version to a build",
-        "operationId": "BuildVersionAppend",
+        "operationId": "AppendBuildToVersion",
         "parameters": [
           {
             "type": "string",
@@ -2353,7 +2353,7 @@ func init() {
           "pack"
         ],
         "summary": "Unlink a version from a build",
-        "operationId": "BuildVersionDelete",
+        "operationId": "DeleteBuildFromVersion",
         "parameters": [
           {
             "type": "string",
@@ -2413,7 +2413,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch all teams assigned to pack",
-        "operationId": "PackTeamIndex",
+        "operationId": "ListPackTeams",
         "parameters": [
           {
             "type": "string",
@@ -2452,7 +2452,7 @@ func init() {
           "pack"
         ],
         "summary": "Update team perms for pack",
-        "operationId": "PackTeamPerm",
+        "operationId": "PermitPackTeam",
         "parameters": [
           {
             "type": "string",
@@ -2509,7 +2509,7 @@ func init() {
           "pack"
         ],
         "summary": "Assign a team to pack",
-        "operationId": "PackTeamAppend",
+        "operationId": "AppendPackToTeam",
         "parameters": [
           {
             "type": "string",
@@ -2566,7 +2566,7 @@ func init() {
           "pack"
         ],
         "summary": "Remove a team from pack",
-        "operationId": "PackTeamDelete",
+        "operationId": "DeletePackFromTeam",
         "parameters": [
           {
             "type": "string",
@@ -2625,7 +2625,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch all users assigned to pack",
-        "operationId": "PackUserIndex",
+        "operationId": "ListPackUsers",
         "parameters": [
           {
             "type": "string",
@@ -2664,7 +2664,7 @@ func init() {
           "pack"
         ],
         "summary": "Update user perms for pack",
-        "operationId": "PackUserPerm",
+        "operationId": "PermitPackUser",
         "parameters": [
           {
             "type": "string",
@@ -2721,7 +2721,7 @@ func init() {
           "pack"
         ],
         "summary": "Assign a user to pack",
-        "operationId": "PackUserAppend",
+        "operationId": "AppendPackToUser",
         "parameters": [
           {
             "type": "string",
@@ -2778,7 +2778,7 @@ func init() {
           "pack"
         ],
         "summary": "Remove a user from pack",
-        "operationId": "PackUserDelete",
+        "operationId": "DeletePackFromUser",
         "parameters": [
           {
             "type": "string",
@@ -2837,7 +2837,7 @@ func init() {
           "profile"
         ],
         "summary": "Retrieve an unlimited auth token",
-        "operationId": "ProfileShow",
+        "operationId": "ShowProfile",
         "responses": {
           "200": {
             "description": "The current profile data",
@@ -2864,7 +2864,7 @@ func init() {
           "profile"
         ],
         "summary": "Retrieve an unlimited auth token",
-        "operationId": "ProfileUpdate",
+        "operationId": "UpdateProfile",
         "parameters": [
           {
             "description": "The profile data to update",
@@ -2916,7 +2916,7 @@ func init() {
           "profile"
         ],
         "summary": "Retrieve an unlimited auth token",
-        "operationId": "ProfileToken",
+        "operationId": "TokenProfile",
         "responses": {
           "200": {
             "description": "The unlimited auth token",
@@ -2951,7 +2951,7 @@ func init() {
           "team"
         ],
         "summary": "Fetch all available teams",
-        "operationId": "TeamIndex",
+        "operationId": "ListTeams",
         "responses": {
           "200": {
             "description": "A collection of teams",
@@ -2981,7 +2981,7 @@ func init() {
           "team"
         ],
         "summary": "Create a new team",
-        "operationId": "TeamCreate",
+        "operationId": "CreateTeam",
         "parameters": [
           {
             "description": "The team data to create",
@@ -3033,7 +3033,7 @@ func init() {
           "team"
         ],
         "summary": "Fetch a specific team",
-        "operationId": "TeamShow",
+        "operationId": "ShowTeam",
         "parameters": [
           {
             "type": "string",
@@ -3069,7 +3069,7 @@ func init() {
           "team"
         ],
         "summary": "Update a specific team",
-        "operationId": "TeamUpdate",
+        "operationId": "UpdateTeam",
         "parameters": [
           {
             "type": "string",
@@ -3126,7 +3126,7 @@ func init() {
           "team"
         ],
         "summary": "Delete a specific team",
-        "operationId": "TeamDelete",
+        "operationId": "DeleteTeam",
         "parameters": [
           {
             "type": "string",
@@ -3170,7 +3170,7 @@ func init() {
           "team"
         ],
         "summary": "Fetch all mods assigned to team",
-        "operationId": "TeamModIndex",
+        "operationId": "ListTeamMods",
         "parameters": [
           {
             "type": "string",
@@ -3209,7 +3209,7 @@ func init() {
           "team"
         ],
         "summary": "Update mod perms for team",
-        "operationId": "TeamModPerm",
+        "operationId": "PermitTeamMod",
         "parameters": [
           {
             "type": "string",
@@ -3266,7 +3266,7 @@ func init() {
           "team"
         ],
         "summary": "Assign a mod to team",
-        "operationId": "TeamModAppend",
+        "operationId": "AppendTeamToMod",
         "parameters": [
           {
             "type": "string",
@@ -3323,7 +3323,7 @@ func init() {
           "team"
         ],
         "summary": "Remove a mod from team",
-        "operationId": "TeamModDelete",
+        "operationId": "DeleteTeamFromMod",
         "parameters": [
           {
             "type": "string",
@@ -3382,7 +3382,7 @@ func init() {
           "team"
         ],
         "summary": "Fetch all packs assigned to team",
-        "operationId": "TeamPackIndex",
+        "operationId": "ListTeamPacks",
         "parameters": [
           {
             "type": "string",
@@ -3421,7 +3421,7 @@ func init() {
           "team"
         ],
         "summary": "Update pack perms for team",
-        "operationId": "TeamPackPerm",
+        "operationId": "PermitTeamPack",
         "parameters": [
           {
             "type": "string",
@@ -3478,7 +3478,7 @@ func init() {
           "team"
         ],
         "summary": "Assign a pack to team",
-        "operationId": "TeamPackAppend",
+        "operationId": "AppendTeamToPack",
         "parameters": [
           {
             "type": "string",
@@ -3535,7 +3535,7 @@ func init() {
           "team"
         ],
         "summary": "Remove a pack from team",
-        "operationId": "TeamPackDelete",
+        "operationId": "DeleteTeamFromPack",
         "parameters": [
           {
             "type": "string",
@@ -3594,7 +3594,7 @@ func init() {
           "team"
         ],
         "summary": "Fetch all users assigned to team",
-        "operationId": "TeamUserIndex",
+        "operationId": "ListTeamUsers",
         "parameters": [
           {
             "type": "string",
@@ -3633,7 +3633,7 @@ func init() {
           "team"
         ],
         "summary": "Update user perms for team",
-        "operationId": "TeamUserPerm",
+        "operationId": "PermitTeamUser",
         "parameters": [
           {
             "type": "string",
@@ -3690,7 +3690,7 @@ func init() {
           "team"
         ],
         "summary": "Assign a user to team",
-        "operationId": "TeamUserAppend",
+        "operationId": "AppendTeamToUser",
         "parameters": [
           {
             "type": "string",
@@ -3747,7 +3747,7 @@ func init() {
           "team"
         ],
         "summary": "Remove a user from team",
-        "operationId": "TeamUserDelete",
+        "operationId": "DeleteTeamFromUser",
         "parameters": [
           {
             "type": "string",
@@ -3806,7 +3806,7 @@ func init() {
           "user"
         ],
         "summary": "Fetch all available users",
-        "operationId": "UserIndex",
+        "operationId": "ListUsers",
         "responses": {
           "200": {
             "description": "A collection of users",
@@ -3836,7 +3836,7 @@ func init() {
           "user"
         ],
         "summary": "Create a new user",
-        "operationId": "UserCreate",
+        "operationId": "CreateUser",
         "parameters": [
           {
             "description": "The user data to create",
@@ -3888,7 +3888,7 @@ func init() {
           "user"
         ],
         "summary": "Fetch a specific user",
-        "operationId": "UserShow",
+        "operationId": "ShowUser",
         "parameters": [
           {
             "type": "string",
@@ -3924,7 +3924,7 @@ func init() {
           "user"
         ],
         "summary": "Update a specific user",
-        "operationId": "UserUpdate",
+        "operationId": "UpdateUser",
         "parameters": [
           {
             "type": "string",
@@ -3981,7 +3981,7 @@ func init() {
           "user"
         ],
         "summary": "Delete a specific user",
-        "operationId": "UserDelete",
+        "operationId": "DeleteUser",
         "parameters": [
           {
             "type": "string",
@@ -4025,7 +4025,7 @@ func init() {
           "user"
         ],
         "summary": "Fetch all mods assigned to user",
-        "operationId": "UserModIndex",
+        "operationId": "ListUserMods",
         "parameters": [
           {
             "type": "string",
@@ -4064,7 +4064,7 @@ func init() {
           "user"
         ],
         "summary": "Update mod perms for user",
-        "operationId": "UserModPerm",
+        "operationId": "PermitUserMod",
         "parameters": [
           {
             "type": "string",
@@ -4121,7 +4121,7 @@ func init() {
           "user"
         ],
         "summary": "Assign a mod to user",
-        "operationId": "UserModAppend",
+        "operationId": "AppendUserToMod",
         "parameters": [
           {
             "type": "string",
@@ -4178,7 +4178,7 @@ func init() {
           "user"
         ],
         "summary": "Remove a mod from user",
-        "operationId": "UserModDelete",
+        "operationId": "DeleteUserFromMod",
         "parameters": [
           {
             "type": "string",
@@ -4237,7 +4237,7 @@ func init() {
           "user"
         ],
         "summary": "Fetch all packs assigned to user",
-        "operationId": "UserPackIndex",
+        "operationId": "ListUserPacks",
         "parameters": [
           {
             "type": "string",
@@ -4276,7 +4276,7 @@ func init() {
           "user"
         ],
         "summary": "Update pack perms for user",
-        "operationId": "UserPackPerm",
+        "operationId": "PermitUserPack",
         "parameters": [
           {
             "type": "string",
@@ -4333,7 +4333,7 @@ func init() {
           "user"
         ],
         "summary": "Assign a pack to user",
-        "operationId": "UserPackAppend",
+        "operationId": "AppendUserToPack",
         "parameters": [
           {
             "type": "string",
@@ -4390,7 +4390,7 @@ func init() {
           "user"
         ],
         "summary": "Remove a pack from user",
-        "operationId": "UserPackDelete",
+        "operationId": "DeleteUserFromPack",
         "parameters": [
           {
             "type": "string",
@@ -4449,7 +4449,7 @@ func init() {
           "user"
         ],
         "summary": "Fetch all teams assigned to user",
-        "operationId": "UserTeamIndex",
+        "operationId": "ListUserTeams",
         "parameters": [
           {
             "type": "string",
@@ -4488,7 +4488,7 @@ func init() {
           "user"
         ],
         "summary": "Update team perms for user",
-        "operationId": "UserTeamPerm",
+        "operationId": "PermitUserTeam",
         "parameters": [
           {
             "type": "string",
@@ -4545,7 +4545,7 @@ func init() {
           "user"
         ],
         "summary": "Assign a team to user",
-        "operationId": "UserTeamAppend",
+        "operationId": "AppendUserToTeam",
         "parameters": [
           {
             "type": "string",
@@ -4602,7 +4602,7 @@ func init() {
           "user"
         ],
         "summary": "Remove a team from user",
-        "operationId": "UserTeamDelete",
+        "operationId": "DeleteUserFromTeam",
         "parameters": [
           {
             "type": "string",
@@ -5504,7 +5504,7 @@ func init() {
           "auth"
         ],
         "summary": "Authenticate an user by credentials",
-        "operationId": "AuthLogin",
+        "operationId": "LoginUser",
         "parameters": [
           {
             "description": "The credentials to authenticate",
@@ -5556,7 +5556,7 @@ func init() {
           "auth"
         ],
         "summary": "Refresh an auth token before it expires",
-        "operationId": "AuthRefresh",
+        "operationId": "RefreshAuth",
         "responses": {
           "200": {
             "description": "A refreshed token with expire",
@@ -5585,7 +5585,7 @@ func init() {
           "auth"
         ],
         "summary": "Verify validity for an authentication token",
-        "operationId": "AuthVerify",
+        "operationId": "VerifyAuth",
         "parameters": [
           {
             "type": "string",
@@ -5623,7 +5623,7 @@ func init() {
           "forge"
         ],
         "summary": "Fetch the available Forge versions",
-        "operationId": "ForgeIndex",
+        "operationId": "ListForges",
         "responses": {
           "200": {
             "description": "A collection of Forge versions",
@@ -5653,7 +5653,7 @@ func init() {
           "forge"
         ],
         "summary": "Update the available Forge versions",
-        "operationId": "ForgeUpdate",
+        "operationId": "UpdateForge",
         "responses": {
           "200": {
             "description": "Plain success message",
@@ -5688,7 +5688,7 @@ func init() {
           "forge"
         ],
         "summary": "Search for available Forge versions",
-        "operationId": "ForgeSearch",
+        "operationId": "SearchForges",
         "parameters": [
           {
             "type": "string",
@@ -5729,7 +5729,7 @@ func init() {
           "forge"
         ],
         "summary": "Fetch the builds assigned to a Forge version",
-        "operationId": "ForgeBuildIndex",
+        "operationId": "ListForgeBuilds",
         "parameters": [
           {
             "type": "string",
@@ -5768,7 +5768,7 @@ func init() {
           "forge"
         ],
         "summary": "Assign a build to a Forge version",
-        "operationId": "ForgeBuildAppend",
+        "operationId": "AppendForgeToBuild",
         "parameters": [
           {
             "type": "string",
@@ -5828,7 +5828,7 @@ func init() {
           "forge"
         ],
         "summary": "Unlink a build from a Forge version",
-        "operationId": "ForgeBuildDelete",
+        "operationId": "DeleteForgeFromBuild",
         "parameters": [
           {
             "type": "string",
@@ -5890,7 +5890,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Fetch the available Minecraft versions",
-        "operationId": "MinecraftIndex",
+        "operationId": "ListMinecrafts",
         "responses": {
           "200": {
             "description": "A collection of Minecraft versions",
@@ -5920,7 +5920,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Update the available Minecraft versions",
-        "operationId": "MinecraftUpdate",
+        "operationId": "UpdateMinecraft",
         "responses": {
           "200": {
             "description": "Plain success message",
@@ -5955,7 +5955,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Search for available Minecraft versions",
-        "operationId": "MinecraftSearch",
+        "operationId": "SearchMinecrafts",
         "parameters": [
           {
             "type": "string",
@@ -5996,7 +5996,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Fetch the builds assigned to a Minecraft version",
-        "operationId": "MinecraftBuildIndex",
+        "operationId": "ListMinecraftBuilds",
         "parameters": [
           {
             "type": "string",
@@ -6035,7 +6035,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Assign a build to a Minecraft version",
-        "operationId": "MinecraftBuildAppend",
+        "operationId": "AppendMinecraftToBuild",
         "parameters": [
           {
             "type": "string",
@@ -6095,7 +6095,7 @@ func init() {
           "minecraft"
         ],
         "summary": "Unlink a build from a Minecraft version",
-        "operationId": "MinecraftBuildDelete",
+        "operationId": "DeleteMinecraftFromBuild",
         "parameters": [
           {
             "type": "string",
@@ -6157,7 +6157,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch all available mods",
-        "operationId": "ModIndex",
+        "operationId": "ListMods",
         "responses": {
           "200": {
             "description": "A collection of mods",
@@ -6187,7 +6187,7 @@ func init() {
           "mod"
         ],
         "summary": "Create a new mod",
-        "operationId": "ModCreate",
+        "operationId": "CreateMod",
         "parameters": [
           {
             "description": "The mod data to create",
@@ -6239,7 +6239,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch a specific mod",
-        "operationId": "ModShow",
+        "operationId": "ShowMod",
         "parameters": [
           {
             "type": "string",
@@ -6275,7 +6275,7 @@ func init() {
           "mod"
         ],
         "summary": "Update a specific mod",
-        "operationId": "ModUpdate",
+        "operationId": "UpdateMod",
         "parameters": [
           {
             "type": "string",
@@ -6332,7 +6332,7 @@ func init() {
           "mod"
         ],
         "summary": "Delete a specific mod",
-        "operationId": "ModDelete",
+        "operationId": "DeleteMod",
         "parameters": [
           {
             "type": "string",
@@ -6376,7 +6376,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch all teams assigned to mod",
-        "operationId": "ModTeamIndex",
+        "operationId": "ListModTeams",
         "parameters": [
           {
             "type": "string",
@@ -6415,7 +6415,7 @@ func init() {
           "mod"
         ],
         "summary": "Update team perms for mod",
-        "operationId": "ModTeamPerm",
+        "operationId": "PermitModTeam",
         "parameters": [
           {
             "type": "string",
@@ -6472,7 +6472,7 @@ func init() {
           "mod"
         ],
         "summary": "Assign a team to mod",
-        "operationId": "ModTeamAppend",
+        "operationId": "AppendModToTeam",
         "parameters": [
           {
             "type": "string",
@@ -6529,7 +6529,7 @@ func init() {
           "mod"
         ],
         "summary": "Remove a team from mod",
-        "operationId": "ModTeamDelete",
+        "operationId": "DeleteModFromTeam",
         "parameters": [
           {
             "type": "string",
@@ -6588,7 +6588,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch all users assigned to mod",
-        "operationId": "ModUserIndex",
+        "operationId": "ListModUsers",
         "parameters": [
           {
             "type": "string",
@@ -6627,7 +6627,7 @@ func init() {
           "mod"
         ],
         "summary": "Update user perms for mod",
-        "operationId": "ModUserPerm",
+        "operationId": "PermitModUser",
         "parameters": [
           {
             "type": "string",
@@ -6684,7 +6684,7 @@ func init() {
           "mod"
         ],
         "summary": "Assign a user to mod",
-        "operationId": "ModUserAppend",
+        "operationId": "AppendModToUser",
         "parameters": [
           {
             "type": "string",
@@ -6741,7 +6741,7 @@ func init() {
           "mod"
         ],
         "summary": "Remove a user from mod",
-        "operationId": "ModUserDelete",
+        "operationId": "DeleteModFromUser",
         "parameters": [
           {
             "type": "string",
@@ -6800,7 +6800,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch all available versions for a mod",
-        "operationId": "VersionIndex",
+        "operationId": "ListVersions",
         "parameters": [
           {
             "type": "string",
@@ -6839,7 +6839,7 @@ func init() {
           "mod"
         ],
         "summary": "Create a new version for a mod",
-        "operationId": "VersionCreate",
+        "operationId": "CreateVersion",
         "parameters": [
           {
             "type": "string",
@@ -6898,7 +6898,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch a specific version for a mod",
-        "operationId": "VersionShow",
+        "operationId": "ShowVersion",
         "parameters": [
           {
             "type": "string",
@@ -6941,7 +6941,7 @@ func init() {
           "mod"
         ],
         "summary": "Update a specific version for a mod",
-        "operationId": "VersionUpdate",
+        "operationId": "UpdateVersion",
         "parameters": [
           {
             "type": "string",
@@ -7005,7 +7005,7 @@ func init() {
           "mod"
         ],
         "summary": "Delete a specific version for a mod",
-        "operationId": "VersionDelete",
+        "operationId": "DeleteVersion",
         "parameters": [
           {
             "type": "string",
@@ -7056,7 +7056,7 @@ func init() {
           "mod"
         ],
         "summary": "Fetch all builds assigned to version",
-        "operationId": "VersionBuildIndex",
+        "operationId": "ListVersionBuilds",
         "parameters": [
           {
             "type": "string",
@@ -7102,7 +7102,7 @@ func init() {
           "mod"
         ],
         "summary": "Assign a build to a version",
-        "operationId": "VersionBuildAppend",
+        "operationId": "AppendVersionToBuild",
         "parameters": [
           {
             "type": "string",
@@ -7166,7 +7166,7 @@ func init() {
           "mod"
         ],
         "summary": "Unlink a build from a version",
-        "operationId": "VersionBuildDelete",
+        "operationId": "DeleteVersionFromBuild",
         "parameters": [
           {
             "type": "string",
@@ -7226,7 +7226,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch all available packs",
-        "operationId": "PackIndex",
+        "operationId": "ListPacks",
         "responses": {
           "200": {
             "description": "A collection of packs",
@@ -7256,7 +7256,7 @@ func init() {
           "pack"
         ],
         "summary": "Create a new pack",
-        "operationId": "PackCreate",
+        "operationId": "CreatePack",
         "parameters": [
           {
             "description": "The pack data to create",
@@ -7308,7 +7308,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch a specific pack",
-        "operationId": "PackShow",
+        "operationId": "ShowPack",
         "parameters": [
           {
             "type": "string",
@@ -7344,7 +7344,7 @@ func init() {
           "pack"
         ],
         "summary": "Update a specific pack",
-        "operationId": "PackUpdate",
+        "operationId": "UpdatePack",
         "parameters": [
           {
             "type": "string",
@@ -7401,7 +7401,7 @@ func init() {
           "pack"
         ],
         "summary": "Delete a specific pack",
-        "operationId": "PackDelete",
+        "operationId": "DeletePack",
         "parameters": [
           {
             "type": "string",
@@ -7445,7 +7445,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch all available builds for a pack",
-        "operationId": "BuildIndex",
+        "operationId": "ListBuilds",
         "parameters": [
           {
             "type": "string",
@@ -7484,7 +7484,7 @@ func init() {
           "pack"
         ],
         "summary": "Create a new build for a pack",
-        "operationId": "BuildCreate",
+        "operationId": "CreateBuild",
         "parameters": [
           {
             "type": "string",
@@ -7543,7 +7543,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch a specific build for a pack",
-        "operationId": "BuildShow",
+        "operationId": "ShowBuild",
         "parameters": [
           {
             "type": "string",
@@ -7586,7 +7586,7 @@ func init() {
           "pack"
         ],
         "summary": "Update a specific build for a pack",
-        "operationId": "BuildUpdate",
+        "operationId": "UpdateBuild",
         "parameters": [
           {
             "type": "string",
@@ -7650,7 +7650,7 @@ func init() {
           "pack"
         ],
         "summary": "Delete a specific build for a pack",
-        "operationId": "BuildDelete",
+        "operationId": "DeleteBuild",
         "parameters": [
           {
             "type": "string",
@@ -7701,7 +7701,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch all versions assigned to build",
-        "operationId": "BuildVersionIndex",
+        "operationId": "ListBuildVersions",
         "parameters": [
           {
             "type": "string",
@@ -7747,7 +7747,7 @@ func init() {
           "pack"
         ],
         "summary": "Assign a version to a build",
-        "operationId": "BuildVersionAppend",
+        "operationId": "AppendBuildToVersion",
         "parameters": [
           {
             "type": "string",
@@ -7811,7 +7811,7 @@ func init() {
           "pack"
         ],
         "summary": "Unlink a version from a build",
-        "operationId": "BuildVersionDelete",
+        "operationId": "DeleteBuildFromVersion",
         "parameters": [
           {
             "type": "string",
@@ -7871,7 +7871,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch all teams assigned to pack",
-        "operationId": "PackTeamIndex",
+        "operationId": "ListPackTeams",
         "parameters": [
           {
             "type": "string",
@@ -7910,7 +7910,7 @@ func init() {
           "pack"
         ],
         "summary": "Update team perms for pack",
-        "operationId": "PackTeamPerm",
+        "operationId": "PermitPackTeam",
         "parameters": [
           {
             "type": "string",
@@ -7967,7 +7967,7 @@ func init() {
           "pack"
         ],
         "summary": "Assign a team to pack",
-        "operationId": "PackTeamAppend",
+        "operationId": "AppendPackToTeam",
         "parameters": [
           {
             "type": "string",
@@ -8024,7 +8024,7 @@ func init() {
           "pack"
         ],
         "summary": "Remove a team from pack",
-        "operationId": "PackTeamDelete",
+        "operationId": "DeletePackFromTeam",
         "parameters": [
           {
             "type": "string",
@@ -8083,7 +8083,7 @@ func init() {
           "pack"
         ],
         "summary": "Fetch all users assigned to pack",
-        "operationId": "PackUserIndex",
+        "operationId": "ListPackUsers",
         "parameters": [
           {
             "type": "string",
@@ -8122,7 +8122,7 @@ func init() {
           "pack"
         ],
         "summary": "Update user perms for pack",
-        "operationId": "PackUserPerm",
+        "operationId": "PermitPackUser",
         "parameters": [
           {
             "type": "string",
@@ -8179,7 +8179,7 @@ func init() {
           "pack"
         ],
         "summary": "Assign a user to pack",
-        "operationId": "PackUserAppend",
+        "operationId": "AppendPackToUser",
         "parameters": [
           {
             "type": "string",
@@ -8236,7 +8236,7 @@ func init() {
           "pack"
         ],
         "summary": "Remove a user from pack",
-        "operationId": "PackUserDelete",
+        "operationId": "DeletePackFromUser",
         "parameters": [
           {
             "type": "string",
@@ -8295,7 +8295,7 @@ func init() {
           "profile"
         ],
         "summary": "Retrieve an unlimited auth token",
-        "operationId": "ProfileShow",
+        "operationId": "ShowProfile",
         "responses": {
           "200": {
             "description": "The current profile data",
@@ -8322,7 +8322,7 @@ func init() {
           "profile"
         ],
         "summary": "Retrieve an unlimited auth token",
-        "operationId": "ProfileUpdate",
+        "operationId": "UpdateProfile",
         "parameters": [
           {
             "description": "The profile data to update",
@@ -8374,7 +8374,7 @@ func init() {
           "profile"
         ],
         "summary": "Retrieve an unlimited auth token",
-        "operationId": "ProfileToken",
+        "operationId": "TokenProfile",
         "responses": {
           "200": {
             "description": "The unlimited auth token",
@@ -8409,7 +8409,7 @@ func init() {
           "team"
         ],
         "summary": "Fetch all available teams",
-        "operationId": "TeamIndex",
+        "operationId": "ListTeams",
         "responses": {
           "200": {
             "description": "A collection of teams",
@@ -8439,7 +8439,7 @@ func init() {
           "team"
         ],
         "summary": "Create a new team",
-        "operationId": "TeamCreate",
+        "operationId": "CreateTeam",
         "parameters": [
           {
             "description": "The team data to create",
@@ -8491,7 +8491,7 @@ func init() {
           "team"
         ],
         "summary": "Fetch a specific team",
-        "operationId": "TeamShow",
+        "operationId": "ShowTeam",
         "parameters": [
           {
             "type": "string",
@@ -8527,7 +8527,7 @@ func init() {
           "team"
         ],
         "summary": "Update a specific team",
-        "operationId": "TeamUpdate",
+        "operationId": "UpdateTeam",
         "parameters": [
           {
             "type": "string",
@@ -8584,7 +8584,7 @@ func init() {
           "team"
         ],
         "summary": "Delete a specific team",
-        "operationId": "TeamDelete",
+        "operationId": "DeleteTeam",
         "parameters": [
           {
             "type": "string",
@@ -8628,7 +8628,7 @@ func init() {
           "team"
         ],
         "summary": "Fetch all mods assigned to team",
-        "operationId": "TeamModIndex",
+        "operationId": "ListTeamMods",
         "parameters": [
           {
             "type": "string",
@@ -8667,7 +8667,7 @@ func init() {
           "team"
         ],
         "summary": "Update mod perms for team",
-        "operationId": "TeamModPerm",
+        "operationId": "PermitTeamMod",
         "parameters": [
           {
             "type": "string",
@@ -8724,7 +8724,7 @@ func init() {
           "team"
         ],
         "summary": "Assign a mod to team",
-        "operationId": "TeamModAppend",
+        "operationId": "AppendTeamToMod",
         "parameters": [
           {
             "type": "string",
@@ -8781,7 +8781,7 @@ func init() {
           "team"
         ],
         "summary": "Remove a mod from team",
-        "operationId": "TeamModDelete",
+        "operationId": "DeleteTeamFromMod",
         "parameters": [
           {
             "type": "string",
@@ -8840,7 +8840,7 @@ func init() {
           "team"
         ],
         "summary": "Fetch all packs assigned to team",
-        "operationId": "TeamPackIndex",
+        "operationId": "ListTeamPacks",
         "parameters": [
           {
             "type": "string",
@@ -8879,7 +8879,7 @@ func init() {
           "team"
         ],
         "summary": "Update pack perms for team",
-        "operationId": "TeamPackPerm",
+        "operationId": "PermitTeamPack",
         "parameters": [
           {
             "type": "string",
@@ -8936,7 +8936,7 @@ func init() {
           "team"
         ],
         "summary": "Assign a pack to team",
-        "operationId": "TeamPackAppend",
+        "operationId": "AppendTeamToPack",
         "parameters": [
           {
             "type": "string",
@@ -8993,7 +8993,7 @@ func init() {
           "team"
         ],
         "summary": "Remove a pack from team",
-        "operationId": "TeamPackDelete",
+        "operationId": "DeleteTeamFromPack",
         "parameters": [
           {
             "type": "string",
@@ -9052,7 +9052,7 @@ func init() {
           "team"
         ],
         "summary": "Fetch all users assigned to team",
-        "operationId": "TeamUserIndex",
+        "operationId": "ListTeamUsers",
         "parameters": [
           {
             "type": "string",
@@ -9091,7 +9091,7 @@ func init() {
           "team"
         ],
         "summary": "Update user perms for team",
-        "operationId": "TeamUserPerm",
+        "operationId": "PermitTeamUser",
         "parameters": [
           {
             "type": "string",
@@ -9148,7 +9148,7 @@ func init() {
           "team"
         ],
         "summary": "Assign a user to team",
-        "operationId": "TeamUserAppend",
+        "operationId": "AppendTeamToUser",
         "parameters": [
           {
             "type": "string",
@@ -9205,7 +9205,7 @@ func init() {
           "team"
         ],
         "summary": "Remove a user from team",
-        "operationId": "TeamUserDelete",
+        "operationId": "DeleteTeamFromUser",
         "parameters": [
           {
             "type": "string",
@@ -9264,7 +9264,7 @@ func init() {
           "user"
         ],
         "summary": "Fetch all available users",
-        "operationId": "UserIndex",
+        "operationId": "ListUsers",
         "responses": {
           "200": {
             "description": "A collection of users",
@@ -9294,7 +9294,7 @@ func init() {
           "user"
         ],
         "summary": "Create a new user",
-        "operationId": "UserCreate",
+        "operationId": "CreateUser",
         "parameters": [
           {
             "description": "The user data to create",
@@ -9346,7 +9346,7 @@ func init() {
           "user"
         ],
         "summary": "Fetch a specific user",
-        "operationId": "UserShow",
+        "operationId": "ShowUser",
         "parameters": [
           {
             "type": "string",
@@ -9382,7 +9382,7 @@ func init() {
           "user"
         ],
         "summary": "Update a specific user",
-        "operationId": "UserUpdate",
+        "operationId": "UpdateUser",
         "parameters": [
           {
             "type": "string",
@@ -9439,7 +9439,7 @@ func init() {
           "user"
         ],
         "summary": "Delete a specific user",
-        "operationId": "UserDelete",
+        "operationId": "DeleteUser",
         "parameters": [
           {
             "type": "string",
@@ -9483,7 +9483,7 @@ func init() {
           "user"
         ],
         "summary": "Fetch all mods assigned to user",
-        "operationId": "UserModIndex",
+        "operationId": "ListUserMods",
         "parameters": [
           {
             "type": "string",
@@ -9522,7 +9522,7 @@ func init() {
           "user"
         ],
         "summary": "Update mod perms for user",
-        "operationId": "UserModPerm",
+        "operationId": "PermitUserMod",
         "parameters": [
           {
             "type": "string",
@@ -9579,7 +9579,7 @@ func init() {
           "user"
         ],
         "summary": "Assign a mod to user",
-        "operationId": "UserModAppend",
+        "operationId": "AppendUserToMod",
         "parameters": [
           {
             "type": "string",
@@ -9636,7 +9636,7 @@ func init() {
           "user"
         ],
         "summary": "Remove a mod from user",
-        "operationId": "UserModDelete",
+        "operationId": "DeleteUserFromMod",
         "parameters": [
           {
             "type": "string",
@@ -9695,7 +9695,7 @@ func init() {
           "user"
         ],
         "summary": "Fetch all packs assigned to user",
-        "operationId": "UserPackIndex",
+        "operationId": "ListUserPacks",
         "parameters": [
           {
             "type": "string",
@@ -9734,7 +9734,7 @@ func init() {
           "user"
         ],
         "summary": "Update pack perms for user",
-        "operationId": "UserPackPerm",
+        "operationId": "PermitUserPack",
         "parameters": [
           {
             "type": "string",
@@ -9791,7 +9791,7 @@ func init() {
           "user"
         ],
         "summary": "Assign a pack to user",
-        "operationId": "UserPackAppend",
+        "operationId": "AppendUserToPack",
         "parameters": [
           {
             "type": "string",
@@ -9848,7 +9848,7 @@ func init() {
           "user"
         ],
         "summary": "Remove a pack from user",
-        "operationId": "UserPackDelete",
+        "operationId": "DeleteUserFromPack",
         "parameters": [
           {
             "type": "string",
@@ -9907,7 +9907,7 @@ func init() {
           "user"
         ],
         "summary": "Fetch all teams assigned to user",
-        "operationId": "UserTeamIndex",
+        "operationId": "ListUserTeams",
         "parameters": [
           {
             "type": "string",
@@ -9946,7 +9946,7 @@ func init() {
           "user"
         ],
         "summary": "Update team perms for user",
-        "operationId": "UserTeamPerm",
+        "operationId": "PermitUserTeam",
         "parameters": [
           {
             "type": "string",
@@ -10003,7 +10003,7 @@ func init() {
           "user"
         ],
         "summary": "Assign a team to user",
-        "operationId": "UserTeamAppend",
+        "operationId": "AppendUserToTeam",
         "parameters": [
           {
             "type": "string",
@@ -10060,7 +10060,7 @@ func init() {
           "user"
         ],
         "summary": "Remove a team from user",
-        "operationId": "UserTeamDelete",
+        "operationId": "DeleteUserFromTeam",
         "parameters": [
           {
             "type": "string",

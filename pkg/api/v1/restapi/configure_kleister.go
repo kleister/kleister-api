@@ -41,474 +41,474 @@ func configureAPI(api *operations.KleisterAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
-	if api.AuthAuthLoginHandler == nil {
-		api.AuthAuthLoginHandler = auth.AuthLoginHandlerFunc(func(params auth.AuthLoginParams) middleware.Responder {
-			return middleware.NotImplemented("operation auth.AuthLogin has not yet been implemented")
+	if api.PackAppendBuildToVersionHandler == nil {
+		api.PackAppendBuildToVersionHandler = pack.AppendBuildToVersionHandlerFunc(func(params pack.AppendBuildToVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.AppendBuildToVersion has not yet been implemented")
 		})
 	}
-	if api.AuthAuthRefreshHandler == nil {
-		api.AuthAuthRefreshHandler = auth.AuthRefreshHandlerFunc(func(params auth.AuthRefreshParams) middleware.Responder {
-			return middleware.NotImplemented("operation auth.AuthRefresh has not yet been implemented")
+	if api.ForgeAppendForgeToBuildHandler == nil {
+		api.ForgeAppendForgeToBuildHandler = forge.AppendForgeToBuildHandlerFunc(func(params forge.AppendForgeToBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation forge.AppendForgeToBuild has not yet been implemented")
 		})
 	}
-	if api.AuthAuthVerifyHandler == nil {
-		api.AuthAuthVerifyHandler = auth.AuthVerifyHandlerFunc(func(params auth.AuthVerifyParams) middleware.Responder {
-			return middleware.NotImplemented("operation auth.AuthVerify has not yet been implemented")
+	if api.MinecraftAppendMinecraftToBuildHandler == nil {
+		api.MinecraftAppendMinecraftToBuildHandler = minecraft.AppendMinecraftToBuildHandlerFunc(func(params minecraft.AppendMinecraftToBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation minecraft.AppendMinecraftToBuild has not yet been implemented")
 		})
 	}
-	if api.PackBuildCreateHandler == nil {
-		api.PackBuildCreateHandler = pack.BuildCreateHandlerFunc(func(params pack.BuildCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.BuildCreate has not yet been implemented")
+	if api.ModAppendModToTeamHandler == nil {
+		api.ModAppendModToTeamHandler = mod.AppendModToTeamHandlerFunc(func(params mod.AppendModToTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.AppendModToTeam has not yet been implemented")
 		})
 	}
-	if api.PackBuildDeleteHandler == nil {
-		api.PackBuildDeleteHandler = pack.BuildDeleteHandlerFunc(func(params pack.BuildDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.BuildDelete has not yet been implemented")
+	if api.ModAppendModToUserHandler == nil {
+		api.ModAppendModToUserHandler = mod.AppendModToUserHandlerFunc(func(params mod.AppendModToUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.AppendModToUser has not yet been implemented")
 		})
 	}
-	if api.PackBuildIndexHandler == nil {
-		api.PackBuildIndexHandler = pack.BuildIndexHandlerFunc(func(params pack.BuildIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.BuildIndex has not yet been implemented")
+	if api.PackAppendPackToTeamHandler == nil {
+		api.PackAppendPackToTeamHandler = pack.AppendPackToTeamHandlerFunc(func(params pack.AppendPackToTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.AppendPackToTeam has not yet been implemented")
 		})
 	}
-	if api.PackBuildShowHandler == nil {
-		api.PackBuildShowHandler = pack.BuildShowHandlerFunc(func(params pack.BuildShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.BuildShow has not yet been implemented")
+	if api.PackAppendPackToUserHandler == nil {
+		api.PackAppendPackToUserHandler = pack.AppendPackToUserHandlerFunc(func(params pack.AppendPackToUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.AppendPackToUser has not yet been implemented")
 		})
 	}
-	if api.PackBuildUpdateHandler == nil {
-		api.PackBuildUpdateHandler = pack.BuildUpdateHandlerFunc(func(params pack.BuildUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.BuildUpdate has not yet been implemented")
+	if api.TeamAppendTeamToModHandler == nil {
+		api.TeamAppendTeamToModHandler = team.AppendTeamToModHandlerFunc(func(params team.AppendTeamToModParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.AppendTeamToMod has not yet been implemented")
 		})
 	}
-	if api.PackBuildVersionAppendHandler == nil {
-		api.PackBuildVersionAppendHandler = pack.BuildVersionAppendHandlerFunc(func(params pack.BuildVersionAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.BuildVersionAppend has not yet been implemented")
+	if api.TeamAppendTeamToPackHandler == nil {
+		api.TeamAppendTeamToPackHandler = team.AppendTeamToPackHandlerFunc(func(params team.AppendTeamToPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.AppendTeamToPack has not yet been implemented")
 		})
 	}
-	if api.PackBuildVersionDeleteHandler == nil {
-		api.PackBuildVersionDeleteHandler = pack.BuildVersionDeleteHandlerFunc(func(params pack.BuildVersionDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.BuildVersionDelete has not yet been implemented")
+	if api.TeamAppendTeamToUserHandler == nil {
+		api.TeamAppendTeamToUserHandler = team.AppendTeamToUserHandlerFunc(func(params team.AppendTeamToUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.AppendTeamToUser has not yet been implemented")
 		})
 	}
-	if api.PackBuildVersionIndexHandler == nil {
-		api.PackBuildVersionIndexHandler = pack.BuildVersionIndexHandlerFunc(func(params pack.BuildVersionIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.BuildVersionIndex has not yet been implemented")
+	if api.UserAppendUserToModHandler == nil {
+		api.UserAppendUserToModHandler = user.AppendUserToModHandlerFunc(func(params user.AppendUserToModParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.AppendUserToMod has not yet been implemented")
 		})
 	}
-	if api.ForgeForgeBuildAppendHandler == nil {
-		api.ForgeForgeBuildAppendHandler = forge.ForgeBuildAppendHandlerFunc(func(params forge.ForgeBuildAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation forge.ForgeBuildAppend has not yet been implemented")
+	if api.UserAppendUserToPackHandler == nil {
+		api.UserAppendUserToPackHandler = user.AppendUserToPackHandlerFunc(func(params user.AppendUserToPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.AppendUserToPack has not yet been implemented")
 		})
 	}
-	if api.ForgeForgeBuildDeleteHandler == nil {
-		api.ForgeForgeBuildDeleteHandler = forge.ForgeBuildDeleteHandlerFunc(func(params forge.ForgeBuildDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation forge.ForgeBuildDelete has not yet been implemented")
+	if api.UserAppendUserToTeamHandler == nil {
+		api.UserAppendUserToTeamHandler = user.AppendUserToTeamHandlerFunc(func(params user.AppendUserToTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.AppendUserToTeam has not yet been implemented")
 		})
 	}
-	if api.ForgeForgeBuildIndexHandler == nil {
-		api.ForgeForgeBuildIndexHandler = forge.ForgeBuildIndexHandlerFunc(func(params forge.ForgeBuildIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation forge.ForgeBuildIndex has not yet been implemented")
+	if api.ModAppendVersionToBuildHandler == nil {
+		api.ModAppendVersionToBuildHandler = mod.AppendVersionToBuildHandlerFunc(func(params mod.AppendVersionToBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.AppendVersionToBuild has not yet been implemented")
 		})
 	}
-	if api.ForgeForgeIndexHandler == nil {
-		api.ForgeForgeIndexHandler = forge.ForgeIndexHandlerFunc(func(params forge.ForgeIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation forge.ForgeIndex has not yet been implemented")
+	if api.PackCreateBuildHandler == nil {
+		api.PackCreateBuildHandler = pack.CreateBuildHandlerFunc(func(params pack.CreateBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.CreateBuild has not yet been implemented")
 		})
 	}
-	if api.ForgeForgeSearchHandler == nil {
-		api.ForgeForgeSearchHandler = forge.ForgeSearchHandlerFunc(func(params forge.ForgeSearchParams) middleware.Responder {
-			return middleware.NotImplemented("operation forge.ForgeSearch has not yet been implemented")
+	if api.ModCreateModHandler == nil {
+		api.ModCreateModHandler = mod.CreateModHandlerFunc(func(params mod.CreateModParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.CreateMod has not yet been implemented")
 		})
 	}
-	if api.ForgeForgeUpdateHandler == nil {
-		api.ForgeForgeUpdateHandler = forge.ForgeUpdateHandlerFunc(func(params forge.ForgeUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation forge.ForgeUpdate has not yet been implemented")
+	if api.PackCreatePackHandler == nil {
+		api.PackCreatePackHandler = pack.CreatePackHandlerFunc(func(params pack.CreatePackParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.CreatePack has not yet been implemented")
 		})
 	}
-	if api.MinecraftMinecraftBuildAppendHandler == nil {
-		api.MinecraftMinecraftBuildAppendHandler = minecraft.MinecraftBuildAppendHandlerFunc(func(params minecraft.MinecraftBuildAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation minecraft.MinecraftBuildAppend has not yet been implemented")
+	if api.TeamCreateTeamHandler == nil {
+		api.TeamCreateTeamHandler = team.CreateTeamHandlerFunc(func(params team.CreateTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.CreateTeam has not yet been implemented")
 		})
 	}
-	if api.MinecraftMinecraftBuildDeleteHandler == nil {
-		api.MinecraftMinecraftBuildDeleteHandler = minecraft.MinecraftBuildDeleteHandlerFunc(func(params minecraft.MinecraftBuildDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation minecraft.MinecraftBuildDelete has not yet been implemented")
+	if api.UserCreateUserHandler == nil {
+		api.UserCreateUserHandler = user.CreateUserHandlerFunc(func(params user.CreateUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.CreateUser has not yet been implemented")
 		})
 	}
-	if api.MinecraftMinecraftBuildIndexHandler == nil {
-		api.MinecraftMinecraftBuildIndexHandler = minecraft.MinecraftBuildIndexHandlerFunc(func(params minecraft.MinecraftBuildIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation minecraft.MinecraftBuildIndex has not yet been implemented")
+	if api.ModCreateVersionHandler == nil {
+		api.ModCreateVersionHandler = mod.CreateVersionHandlerFunc(func(params mod.CreateVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.CreateVersion has not yet been implemented")
 		})
 	}
-	if api.MinecraftMinecraftIndexHandler == nil {
-		api.MinecraftMinecraftIndexHandler = minecraft.MinecraftIndexHandlerFunc(func(params minecraft.MinecraftIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation minecraft.MinecraftIndex has not yet been implemented")
+	if api.PackDeleteBuildHandler == nil {
+		api.PackDeleteBuildHandler = pack.DeleteBuildHandlerFunc(func(params pack.DeleteBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.DeleteBuild has not yet been implemented")
 		})
 	}
-	if api.MinecraftMinecraftSearchHandler == nil {
-		api.MinecraftMinecraftSearchHandler = minecraft.MinecraftSearchHandlerFunc(func(params minecraft.MinecraftSearchParams) middleware.Responder {
-			return middleware.NotImplemented("operation minecraft.MinecraftSearch has not yet been implemented")
+	if api.PackDeleteBuildFromVersionHandler == nil {
+		api.PackDeleteBuildFromVersionHandler = pack.DeleteBuildFromVersionHandlerFunc(func(params pack.DeleteBuildFromVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.DeleteBuildFromVersion has not yet been implemented")
 		})
 	}
-	if api.MinecraftMinecraftUpdateHandler == nil {
-		api.MinecraftMinecraftUpdateHandler = minecraft.MinecraftUpdateHandlerFunc(func(params minecraft.MinecraftUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation minecraft.MinecraftUpdate has not yet been implemented")
+	if api.ForgeDeleteForgeFromBuildHandler == nil {
+		api.ForgeDeleteForgeFromBuildHandler = forge.DeleteForgeFromBuildHandlerFunc(func(params forge.DeleteForgeFromBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation forge.DeleteForgeFromBuild has not yet been implemented")
 		})
 	}
-	if api.ModModCreateHandler == nil {
-		api.ModModCreateHandler = mod.ModCreateHandlerFunc(func(params mod.ModCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModCreate has not yet been implemented")
+	if api.MinecraftDeleteMinecraftFromBuildHandler == nil {
+		api.MinecraftDeleteMinecraftFromBuildHandler = minecraft.DeleteMinecraftFromBuildHandlerFunc(func(params minecraft.DeleteMinecraftFromBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation minecraft.DeleteMinecraftFromBuild has not yet been implemented")
 		})
 	}
-	if api.ModModDeleteHandler == nil {
-		api.ModModDeleteHandler = mod.ModDeleteHandlerFunc(func(params mod.ModDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModDelete has not yet been implemented")
+	if api.ModDeleteModHandler == nil {
+		api.ModDeleteModHandler = mod.DeleteModHandlerFunc(func(params mod.DeleteModParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.DeleteMod has not yet been implemented")
 		})
 	}
-	if api.ModModIndexHandler == nil {
-		api.ModModIndexHandler = mod.ModIndexHandlerFunc(func(params mod.ModIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModIndex has not yet been implemented")
+	if api.ModDeleteModFromTeamHandler == nil {
+		api.ModDeleteModFromTeamHandler = mod.DeleteModFromTeamHandlerFunc(func(params mod.DeleteModFromTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.DeleteModFromTeam has not yet been implemented")
 		})
 	}
-	if api.ModModShowHandler == nil {
-		api.ModModShowHandler = mod.ModShowHandlerFunc(func(params mod.ModShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModShow has not yet been implemented")
+	if api.ModDeleteModFromUserHandler == nil {
+		api.ModDeleteModFromUserHandler = mod.DeleteModFromUserHandlerFunc(func(params mod.DeleteModFromUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.DeleteModFromUser has not yet been implemented")
 		})
 	}
-	if api.ModModTeamAppendHandler == nil {
-		api.ModModTeamAppendHandler = mod.ModTeamAppendHandlerFunc(func(params mod.ModTeamAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModTeamAppend has not yet been implemented")
+	if api.PackDeletePackHandler == nil {
+		api.PackDeletePackHandler = pack.DeletePackHandlerFunc(func(params pack.DeletePackParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.DeletePack has not yet been implemented")
 		})
 	}
-	if api.ModModTeamDeleteHandler == nil {
-		api.ModModTeamDeleteHandler = mod.ModTeamDeleteHandlerFunc(func(params mod.ModTeamDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModTeamDelete has not yet been implemented")
+	if api.PackDeletePackFromTeamHandler == nil {
+		api.PackDeletePackFromTeamHandler = pack.DeletePackFromTeamHandlerFunc(func(params pack.DeletePackFromTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.DeletePackFromTeam has not yet been implemented")
 		})
 	}
-	if api.ModModTeamIndexHandler == nil {
-		api.ModModTeamIndexHandler = mod.ModTeamIndexHandlerFunc(func(params mod.ModTeamIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModTeamIndex has not yet been implemented")
+	if api.PackDeletePackFromUserHandler == nil {
+		api.PackDeletePackFromUserHandler = pack.DeletePackFromUserHandlerFunc(func(params pack.DeletePackFromUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.DeletePackFromUser has not yet been implemented")
 		})
 	}
-	if api.ModModTeamPermHandler == nil {
-		api.ModModTeamPermHandler = mod.ModTeamPermHandlerFunc(func(params mod.ModTeamPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModTeamPerm has not yet been implemented")
+	if api.TeamDeleteTeamHandler == nil {
+		api.TeamDeleteTeamHandler = team.DeleteTeamHandlerFunc(func(params team.DeleteTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.DeleteTeam has not yet been implemented")
 		})
 	}
-	if api.ModModUpdateHandler == nil {
-		api.ModModUpdateHandler = mod.ModUpdateHandlerFunc(func(params mod.ModUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModUpdate has not yet been implemented")
+	if api.TeamDeleteTeamFromModHandler == nil {
+		api.TeamDeleteTeamFromModHandler = team.DeleteTeamFromModHandlerFunc(func(params team.DeleteTeamFromModParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.DeleteTeamFromMod has not yet been implemented")
 		})
 	}
-	if api.ModModUserAppendHandler == nil {
-		api.ModModUserAppendHandler = mod.ModUserAppendHandlerFunc(func(params mod.ModUserAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModUserAppend has not yet been implemented")
+	if api.TeamDeleteTeamFromPackHandler == nil {
+		api.TeamDeleteTeamFromPackHandler = team.DeleteTeamFromPackHandlerFunc(func(params team.DeleteTeamFromPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.DeleteTeamFromPack has not yet been implemented")
 		})
 	}
-	if api.ModModUserDeleteHandler == nil {
-		api.ModModUserDeleteHandler = mod.ModUserDeleteHandlerFunc(func(params mod.ModUserDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModUserDelete has not yet been implemented")
+	if api.TeamDeleteTeamFromUserHandler == nil {
+		api.TeamDeleteTeamFromUserHandler = team.DeleteTeamFromUserHandlerFunc(func(params team.DeleteTeamFromUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.DeleteTeamFromUser has not yet been implemented")
 		})
 	}
-	if api.ModModUserIndexHandler == nil {
-		api.ModModUserIndexHandler = mod.ModUserIndexHandlerFunc(func(params mod.ModUserIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModUserIndex has not yet been implemented")
+	if api.UserDeleteUserHandler == nil {
+		api.UserDeleteUserHandler = user.DeleteUserHandlerFunc(func(params user.DeleteUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.DeleteUser has not yet been implemented")
 		})
 	}
-	if api.ModModUserPermHandler == nil {
-		api.ModModUserPermHandler = mod.ModUserPermHandlerFunc(func(params mod.ModUserPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.ModUserPerm has not yet been implemented")
+	if api.UserDeleteUserFromModHandler == nil {
+		api.UserDeleteUserFromModHandler = user.DeleteUserFromModHandlerFunc(func(params user.DeleteUserFromModParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.DeleteUserFromMod has not yet been implemented")
 		})
 	}
-	if api.PackPackCreateHandler == nil {
-		api.PackPackCreateHandler = pack.PackCreateHandlerFunc(func(params pack.PackCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackCreate has not yet been implemented")
+	if api.UserDeleteUserFromPackHandler == nil {
+		api.UserDeleteUserFromPackHandler = user.DeleteUserFromPackHandlerFunc(func(params user.DeleteUserFromPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.DeleteUserFromPack has not yet been implemented")
 		})
 	}
-	if api.PackPackDeleteHandler == nil {
-		api.PackPackDeleteHandler = pack.PackDeleteHandlerFunc(func(params pack.PackDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackDelete has not yet been implemented")
+	if api.UserDeleteUserFromTeamHandler == nil {
+		api.UserDeleteUserFromTeamHandler = user.DeleteUserFromTeamHandlerFunc(func(params user.DeleteUserFromTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.DeleteUserFromTeam has not yet been implemented")
 		})
 	}
-	if api.PackPackIndexHandler == nil {
-		api.PackPackIndexHandler = pack.PackIndexHandlerFunc(func(params pack.PackIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackIndex has not yet been implemented")
+	if api.ModDeleteVersionHandler == nil {
+		api.ModDeleteVersionHandler = mod.DeleteVersionHandlerFunc(func(params mod.DeleteVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.DeleteVersion has not yet been implemented")
 		})
 	}
-	if api.PackPackShowHandler == nil {
-		api.PackPackShowHandler = pack.PackShowHandlerFunc(func(params pack.PackShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackShow has not yet been implemented")
+	if api.ModDeleteVersionFromBuildHandler == nil {
+		api.ModDeleteVersionFromBuildHandler = mod.DeleteVersionFromBuildHandlerFunc(func(params mod.DeleteVersionFromBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.DeleteVersionFromBuild has not yet been implemented")
 		})
 	}
-	if api.PackPackTeamAppendHandler == nil {
-		api.PackPackTeamAppendHandler = pack.PackTeamAppendHandlerFunc(func(params pack.PackTeamAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackTeamAppend has not yet been implemented")
+	if api.PackListBuildVersionsHandler == nil {
+		api.PackListBuildVersionsHandler = pack.ListBuildVersionsHandlerFunc(func(params pack.ListBuildVersionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.ListBuildVersions has not yet been implemented")
 		})
 	}
-	if api.PackPackTeamDeleteHandler == nil {
-		api.PackPackTeamDeleteHandler = pack.PackTeamDeleteHandlerFunc(func(params pack.PackTeamDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackTeamDelete has not yet been implemented")
+	if api.PackListBuildsHandler == nil {
+		api.PackListBuildsHandler = pack.ListBuildsHandlerFunc(func(params pack.ListBuildsParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.ListBuilds has not yet been implemented")
 		})
 	}
-	if api.PackPackTeamIndexHandler == nil {
-		api.PackPackTeamIndexHandler = pack.PackTeamIndexHandlerFunc(func(params pack.PackTeamIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackTeamIndex has not yet been implemented")
+	if api.ForgeListForgeBuildsHandler == nil {
+		api.ForgeListForgeBuildsHandler = forge.ListForgeBuildsHandlerFunc(func(params forge.ListForgeBuildsParams) middleware.Responder {
+			return middleware.NotImplemented("operation forge.ListForgeBuilds has not yet been implemented")
 		})
 	}
-	if api.PackPackTeamPermHandler == nil {
-		api.PackPackTeamPermHandler = pack.PackTeamPermHandlerFunc(func(params pack.PackTeamPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackTeamPerm has not yet been implemented")
+	if api.ForgeListForgesHandler == nil {
+		api.ForgeListForgesHandler = forge.ListForgesHandlerFunc(func(params forge.ListForgesParams) middleware.Responder {
+			return middleware.NotImplemented("operation forge.ListForges has not yet been implemented")
 		})
 	}
-	if api.PackPackUpdateHandler == nil {
-		api.PackPackUpdateHandler = pack.PackUpdateHandlerFunc(func(params pack.PackUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackUpdate has not yet been implemented")
+	if api.MinecraftListMinecraftBuildsHandler == nil {
+		api.MinecraftListMinecraftBuildsHandler = minecraft.ListMinecraftBuildsHandlerFunc(func(params minecraft.ListMinecraftBuildsParams) middleware.Responder {
+			return middleware.NotImplemented("operation minecraft.ListMinecraftBuilds has not yet been implemented")
 		})
 	}
-	if api.PackPackUserAppendHandler == nil {
-		api.PackPackUserAppendHandler = pack.PackUserAppendHandlerFunc(func(params pack.PackUserAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackUserAppend has not yet been implemented")
+	if api.MinecraftListMinecraftsHandler == nil {
+		api.MinecraftListMinecraftsHandler = minecraft.ListMinecraftsHandlerFunc(func(params minecraft.ListMinecraftsParams) middleware.Responder {
+			return middleware.NotImplemented("operation minecraft.ListMinecrafts has not yet been implemented")
 		})
 	}
-	if api.PackPackUserDeleteHandler == nil {
-		api.PackPackUserDeleteHandler = pack.PackUserDeleteHandlerFunc(func(params pack.PackUserDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackUserDelete has not yet been implemented")
+	if api.ModListModTeamsHandler == nil {
+		api.ModListModTeamsHandler = mod.ListModTeamsHandlerFunc(func(params mod.ListModTeamsParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.ListModTeams has not yet been implemented")
 		})
 	}
-	if api.PackPackUserIndexHandler == nil {
-		api.PackPackUserIndexHandler = pack.PackUserIndexHandlerFunc(func(params pack.PackUserIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackUserIndex has not yet been implemented")
+	if api.ModListModUsersHandler == nil {
+		api.ModListModUsersHandler = mod.ListModUsersHandlerFunc(func(params mod.ListModUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.ListModUsers has not yet been implemented")
 		})
 	}
-	if api.PackPackUserPermHandler == nil {
-		api.PackPackUserPermHandler = pack.PackUserPermHandlerFunc(func(params pack.PackUserPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation pack.PackUserPerm has not yet been implemented")
+	if api.ModListModsHandler == nil {
+		api.ModListModsHandler = mod.ListModsHandlerFunc(func(params mod.ListModsParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.ListMods has not yet been implemented")
 		})
 	}
-	if api.ProfileProfileShowHandler == nil {
-		api.ProfileProfileShowHandler = profile.ProfileShowHandlerFunc(func(params profile.ProfileShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation profile.ProfileShow has not yet been implemented")
+	if api.PackListPackTeamsHandler == nil {
+		api.PackListPackTeamsHandler = pack.ListPackTeamsHandlerFunc(func(params pack.ListPackTeamsParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.ListPackTeams has not yet been implemented")
 		})
 	}
-	if api.ProfileProfileTokenHandler == nil {
-		api.ProfileProfileTokenHandler = profile.ProfileTokenHandlerFunc(func(params profile.ProfileTokenParams) middleware.Responder {
-			return middleware.NotImplemented("operation profile.ProfileToken has not yet been implemented")
+	if api.PackListPackUsersHandler == nil {
+		api.PackListPackUsersHandler = pack.ListPackUsersHandlerFunc(func(params pack.ListPackUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.ListPackUsers has not yet been implemented")
 		})
 	}
-	if api.ProfileProfileUpdateHandler == nil {
-		api.ProfileProfileUpdateHandler = profile.ProfileUpdateHandlerFunc(func(params profile.ProfileUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation profile.ProfileUpdate has not yet been implemented")
+	if api.PackListPacksHandler == nil {
+		api.PackListPacksHandler = pack.ListPacksHandlerFunc(func(params pack.ListPacksParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.ListPacks has not yet been implemented")
 		})
 	}
-	if api.TeamTeamCreateHandler == nil {
-		api.TeamTeamCreateHandler = team.TeamCreateHandlerFunc(func(params team.TeamCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamCreate has not yet been implemented")
+	if api.TeamListTeamModsHandler == nil {
+		api.TeamListTeamModsHandler = team.ListTeamModsHandlerFunc(func(params team.ListTeamModsParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.ListTeamMods has not yet been implemented")
 		})
 	}
-	if api.TeamTeamDeleteHandler == nil {
-		api.TeamTeamDeleteHandler = team.TeamDeleteHandlerFunc(func(params team.TeamDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamDelete has not yet been implemented")
+	if api.TeamListTeamPacksHandler == nil {
+		api.TeamListTeamPacksHandler = team.ListTeamPacksHandlerFunc(func(params team.ListTeamPacksParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.ListTeamPacks has not yet been implemented")
 		})
 	}
-	if api.TeamTeamIndexHandler == nil {
-		api.TeamTeamIndexHandler = team.TeamIndexHandlerFunc(func(params team.TeamIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamIndex has not yet been implemented")
+	if api.TeamListTeamUsersHandler == nil {
+		api.TeamListTeamUsersHandler = team.ListTeamUsersHandlerFunc(func(params team.ListTeamUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.ListTeamUsers has not yet been implemented")
 		})
 	}
-	if api.TeamTeamModAppendHandler == nil {
-		api.TeamTeamModAppendHandler = team.TeamModAppendHandlerFunc(func(params team.TeamModAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamModAppend has not yet been implemented")
+	if api.TeamListTeamsHandler == nil {
+		api.TeamListTeamsHandler = team.ListTeamsHandlerFunc(func(params team.ListTeamsParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.ListTeams has not yet been implemented")
 		})
 	}
-	if api.TeamTeamModDeleteHandler == nil {
-		api.TeamTeamModDeleteHandler = team.TeamModDeleteHandlerFunc(func(params team.TeamModDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamModDelete has not yet been implemented")
+	if api.UserListUserModsHandler == nil {
+		api.UserListUserModsHandler = user.ListUserModsHandlerFunc(func(params user.ListUserModsParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.ListUserMods has not yet been implemented")
 		})
 	}
-	if api.TeamTeamModIndexHandler == nil {
-		api.TeamTeamModIndexHandler = team.TeamModIndexHandlerFunc(func(params team.TeamModIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamModIndex has not yet been implemented")
+	if api.UserListUserPacksHandler == nil {
+		api.UserListUserPacksHandler = user.ListUserPacksHandlerFunc(func(params user.ListUserPacksParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.ListUserPacks has not yet been implemented")
 		})
 	}
-	if api.TeamTeamModPermHandler == nil {
-		api.TeamTeamModPermHandler = team.TeamModPermHandlerFunc(func(params team.TeamModPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamModPerm has not yet been implemented")
+	if api.UserListUserTeamsHandler == nil {
+		api.UserListUserTeamsHandler = user.ListUserTeamsHandlerFunc(func(params user.ListUserTeamsParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.ListUserTeams has not yet been implemented")
 		})
 	}
-	if api.TeamTeamPackAppendHandler == nil {
-		api.TeamTeamPackAppendHandler = team.TeamPackAppendHandlerFunc(func(params team.TeamPackAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamPackAppend has not yet been implemented")
+	if api.UserListUsersHandler == nil {
+		api.UserListUsersHandler = user.ListUsersHandlerFunc(func(params user.ListUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.ListUsers has not yet been implemented")
 		})
 	}
-	if api.TeamTeamPackDeleteHandler == nil {
-		api.TeamTeamPackDeleteHandler = team.TeamPackDeleteHandlerFunc(func(params team.TeamPackDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamPackDelete has not yet been implemented")
+	if api.ModListVersionBuildsHandler == nil {
+		api.ModListVersionBuildsHandler = mod.ListVersionBuildsHandlerFunc(func(params mod.ListVersionBuildsParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.ListVersionBuilds has not yet been implemented")
 		})
 	}
-	if api.TeamTeamPackIndexHandler == nil {
-		api.TeamTeamPackIndexHandler = team.TeamPackIndexHandlerFunc(func(params team.TeamPackIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamPackIndex has not yet been implemented")
+	if api.ModListVersionsHandler == nil {
+		api.ModListVersionsHandler = mod.ListVersionsHandlerFunc(func(params mod.ListVersionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.ListVersions has not yet been implemented")
 		})
 	}
-	if api.TeamTeamPackPermHandler == nil {
-		api.TeamTeamPackPermHandler = team.TeamPackPermHandlerFunc(func(params team.TeamPackPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamPackPerm has not yet been implemented")
+	if api.AuthLoginUserHandler == nil {
+		api.AuthLoginUserHandler = auth.LoginUserHandlerFunc(func(params auth.LoginUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation auth.LoginUser has not yet been implemented")
 		})
 	}
-	if api.TeamTeamShowHandler == nil {
-		api.TeamTeamShowHandler = team.TeamShowHandlerFunc(func(params team.TeamShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamShow has not yet been implemented")
+	if api.ModPermitModTeamHandler == nil {
+		api.ModPermitModTeamHandler = mod.PermitModTeamHandlerFunc(func(params mod.PermitModTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.PermitModTeam has not yet been implemented")
 		})
 	}
-	if api.TeamTeamUpdateHandler == nil {
-		api.TeamTeamUpdateHandler = team.TeamUpdateHandlerFunc(func(params team.TeamUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamUpdate has not yet been implemented")
+	if api.ModPermitModUserHandler == nil {
+		api.ModPermitModUserHandler = mod.PermitModUserHandlerFunc(func(params mod.PermitModUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.PermitModUser has not yet been implemented")
 		})
 	}
-	if api.TeamTeamUserAppendHandler == nil {
-		api.TeamTeamUserAppendHandler = team.TeamUserAppendHandlerFunc(func(params team.TeamUserAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamUserAppend has not yet been implemented")
+	if api.PackPermitPackTeamHandler == nil {
+		api.PackPermitPackTeamHandler = pack.PermitPackTeamHandlerFunc(func(params pack.PermitPackTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.PermitPackTeam has not yet been implemented")
 		})
 	}
-	if api.TeamTeamUserDeleteHandler == nil {
-		api.TeamTeamUserDeleteHandler = team.TeamUserDeleteHandlerFunc(func(params team.TeamUserDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamUserDelete has not yet been implemented")
+	if api.PackPermitPackUserHandler == nil {
+		api.PackPermitPackUserHandler = pack.PermitPackUserHandlerFunc(func(params pack.PermitPackUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.PermitPackUser has not yet been implemented")
 		})
 	}
-	if api.TeamTeamUserIndexHandler == nil {
-		api.TeamTeamUserIndexHandler = team.TeamUserIndexHandlerFunc(func(params team.TeamUserIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamUserIndex has not yet been implemented")
+	if api.TeamPermitTeamModHandler == nil {
+		api.TeamPermitTeamModHandler = team.PermitTeamModHandlerFunc(func(params team.PermitTeamModParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.PermitTeamMod has not yet been implemented")
 		})
 	}
-	if api.TeamTeamUserPermHandler == nil {
-		api.TeamTeamUserPermHandler = team.TeamUserPermHandlerFunc(func(params team.TeamUserPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation team.TeamUserPerm has not yet been implemented")
+	if api.TeamPermitTeamPackHandler == nil {
+		api.TeamPermitTeamPackHandler = team.PermitTeamPackHandlerFunc(func(params team.PermitTeamPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.PermitTeamPack has not yet been implemented")
 		})
 	}
-	if api.UserUserCreateHandler == nil {
-		api.UserUserCreateHandler = user.UserCreateHandlerFunc(func(params user.UserCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserCreate has not yet been implemented")
+	if api.TeamPermitTeamUserHandler == nil {
+		api.TeamPermitTeamUserHandler = team.PermitTeamUserHandlerFunc(func(params team.PermitTeamUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.PermitTeamUser has not yet been implemented")
 		})
 	}
-	if api.UserUserDeleteHandler == nil {
-		api.UserUserDeleteHandler = user.UserDeleteHandlerFunc(func(params user.UserDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserDelete has not yet been implemented")
+	if api.UserPermitUserModHandler == nil {
+		api.UserPermitUserModHandler = user.PermitUserModHandlerFunc(func(params user.PermitUserModParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.PermitUserMod has not yet been implemented")
 		})
 	}
-	if api.UserUserIndexHandler == nil {
-		api.UserUserIndexHandler = user.UserIndexHandlerFunc(func(params user.UserIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserIndex has not yet been implemented")
+	if api.UserPermitUserPackHandler == nil {
+		api.UserPermitUserPackHandler = user.PermitUserPackHandlerFunc(func(params user.PermitUserPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.PermitUserPack has not yet been implemented")
 		})
 	}
-	if api.UserUserModAppendHandler == nil {
-		api.UserUserModAppendHandler = user.UserModAppendHandlerFunc(func(params user.UserModAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserModAppend has not yet been implemented")
+	if api.UserPermitUserTeamHandler == nil {
+		api.UserPermitUserTeamHandler = user.PermitUserTeamHandlerFunc(func(params user.PermitUserTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.PermitUserTeam has not yet been implemented")
 		})
 	}
-	if api.UserUserModDeleteHandler == nil {
-		api.UserUserModDeleteHandler = user.UserModDeleteHandlerFunc(func(params user.UserModDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserModDelete has not yet been implemented")
+	if api.AuthRefreshAuthHandler == nil {
+		api.AuthRefreshAuthHandler = auth.RefreshAuthHandlerFunc(func(params auth.RefreshAuthParams) middleware.Responder {
+			return middleware.NotImplemented("operation auth.RefreshAuth has not yet been implemented")
 		})
 	}
-	if api.UserUserModIndexHandler == nil {
-		api.UserUserModIndexHandler = user.UserModIndexHandlerFunc(func(params user.UserModIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserModIndex has not yet been implemented")
+	if api.ForgeSearchForgesHandler == nil {
+		api.ForgeSearchForgesHandler = forge.SearchForgesHandlerFunc(func(params forge.SearchForgesParams) middleware.Responder {
+			return middleware.NotImplemented("operation forge.SearchForges has not yet been implemented")
 		})
 	}
-	if api.UserUserModPermHandler == nil {
-		api.UserUserModPermHandler = user.UserModPermHandlerFunc(func(params user.UserModPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserModPerm has not yet been implemented")
+	if api.MinecraftSearchMinecraftsHandler == nil {
+		api.MinecraftSearchMinecraftsHandler = minecraft.SearchMinecraftsHandlerFunc(func(params minecraft.SearchMinecraftsParams) middleware.Responder {
+			return middleware.NotImplemented("operation minecraft.SearchMinecrafts has not yet been implemented")
 		})
 	}
-	if api.UserUserPackAppendHandler == nil {
-		api.UserUserPackAppendHandler = user.UserPackAppendHandlerFunc(func(params user.UserPackAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserPackAppend has not yet been implemented")
+	if api.PackShowBuildHandler == nil {
+		api.PackShowBuildHandler = pack.ShowBuildHandlerFunc(func(params pack.ShowBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.ShowBuild has not yet been implemented")
 		})
 	}
-	if api.UserUserPackDeleteHandler == nil {
-		api.UserUserPackDeleteHandler = user.UserPackDeleteHandlerFunc(func(params user.UserPackDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserPackDelete has not yet been implemented")
+	if api.ModShowModHandler == nil {
+		api.ModShowModHandler = mod.ShowModHandlerFunc(func(params mod.ShowModParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.ShowMod has not yet been implemented")
 		})
 	}
-	if api.UserUserPackIndexHandler == nil {
-		api.UserUserPackIndexHandler = user.UserPackIndexHandlerFunc(func(params user.UserPackIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserPackIndex has not yet been implemented")
+	if api.PackShowPackHandler == nil {
+		api.PackShowPackHandler = pack.ShowPackHandlerFunc(func(params pack.ShowPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.ShowPack has not yet been implemented")
 		})
 	}
-	if api.UserUserPackPermHandler == nil {
-		api.UserUserPackPermHandler = user.UserPackPermHandlerFunc(func(params user.UserPackPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserPackPerm has not yet been implemented")
+	if api.ProfileShowProfileHandler == nil {
+		api.ProfileShowProfileHandler = profile.ShowProfileHandlerFunc(func(params profile.ShowProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation profile.ShowProfile has not yet been implemented")
 		})
 	}
-	if api.UserUserShowHandler == nil {
-		api.UserUserShowHandler = user.UserShowHandlerFunc(func(params user.UserShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserShow has not yet been implemented")
+	if api.TeamShowTeamHandler == nil {
+		api.TeamShowTeamHandler = team.ShowTeamHandlerFunc(func(params team.ShowTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.ShowTeam has not yet been implemented")
 		})
 	}
-	if api.UserUserTeamAppendHandler == nil {
-		api.UserUserTeamAppendHandler = user.UserTeamAppendHandlerFunc(func(params user.UserTeamAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserTeamAppend has not yet been implemented")
+	if api.UserShowUserHandler == nil {
+		api.UserShowUserHandler = user.ShowUserHandlerFunc(func(params user.ShowUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.ShowUser has not yet been implemented")
 		})
 	}
-	if api.UserUserTeamDeleteHandler == nil {
-		api.UserUserTeamDeleteHandler = user.UserTeamDeleteHandlerFunc(func(params user.UserTeamDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserTeamDelete has not yet been implemented")
+	if api.ModShowVersionHandler == nil {
+		api.ModShowVersionHandler = mod.ShowVersionHandlerFunc(func(params mod.ShowVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.ShowVersion has not yet been implemented")
 		})
 	}
-	if api.UserUserTeamIndexHandler == nil {
-		api.UserUserTeamIndexHandler = user.UserTeamIndexHandlerFunc(func(params user.UserTeamIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserTeamIndex has not yet been implemented")
+	if api.ProfileTokenProfileHandler == nil {
+		api.ProfileTokenProfileHandler = profile.TokenProfileHandlerFunc(func(params profile.TokenProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation profile.TokenProfile has not yet been implemented")
 		})
 	}
-	if api.UserUserTeamPermHandler == nil {
-		api.UserUserTeamPermHandler = user.UserTeamPermHandlerFunc(func(params user.UserTeamPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserTeamPerm has not yet been implemented")
+	if api.PackUpdateBuildHandler == nil {
+		api.PackUpdateBuildHandler = pack.UpdateBuildHandlerFunc(func(params pack.UpdateBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.UpdateBuild has not yet been implemented")
 		})
 	}
-	if api.UserUserUpdateHandler == nil {
-		api.UserUserUpdateHandler = user.UserUpdateHandlerFunc(func(params user.UserUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UserUpdate has not yet been implemented")
+	if api.ForgeUpdateForgeHandler == nil {
+		api.ForgeUpdateForgeHandler = forge.UpdateForgeHandlerFunc(func(params forge.UpdateForgeParams) middleware.Responder {
+			return middleware.NotImplemented("operation forge.UpdateForge has not yet been implemented")
 		})
 	}
-	if api.ModVersionBuildAppendHandler == nil {
-		api.ModVersionBuildAppendHandler = mod.VersionBuildAppendHandlerFunc(func(params mod.VersionBuildAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.VersionBuildAppend has not yet been implemented")
+	if api.MinecraftUpdateMinecraftHandler == nil {
+		api.MinecraftUpdateMinecraftHandler = minecraft.UpdateMinecraftHandlerFunc(func(params minecraft.UpdateMinecraftParams) middleware.Responder {
+			return middleware.NotImplemented("operation minecraft.UpdateMinecraft has not yet been implemented")
 		})
 	}
-	if api.ModVersionBuildDeleteHandler == nil {
-		api.ModVersionBuildDeleteHandler = mod.VersionBuildDeleteHandlerFunc(func(params mod.VersionBuildDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.VersionBuildDelete has not yet been implemented")
+	if api.ModUpdateModHandler == nil {
+		api.ModUpdateModHandler = mod.UpdateModHandlerFunc(func(params mod.UpdateModParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.UpdateMod has not yet been implemented")
 		})
 	}
-	if api.ModVersionBuildIndexHandler == nil {
-		api.ModVersionBuildIndexHandler = mod.VersionBuildIndexHandlerFunc(func(params mod.VersionBuildIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.VersionBuildIndex has not yet been implemented")
+	if api.PackUpdatePackHandler == nil {
+		api.PackUpdatePackHandler = pack.UpdatePackHandlerFunc(func(params pack.UpdatePackParams) middleware.Responder {
+			return middleware.NotImplemented("operation pack.UpdatePack has not yet been implemented")
 		})
 	}
-	if api.ModVersionCreateHandler == nil {
-		api.ModVersionCreateHandler = mod.VersionCreateHandlerFunc(func(params mod.VersionCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.VersionCreate has not yet been implemented")
+	if api.ProfileUpdateProfileHandler == nil {
+		api.ProfileUpdateProfileHandler = profile.UpdateProfileHandlerFunc(func(params profile.UpdateProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation profile.UpdateProfile has not yet been implemented")
 		})
 	}
-	if api.ModVersionDeleteHandler == nil {
-		api.ModVersionDeleteHandler = mod.VersionDeleteHandlerFunc(func(params mod.VersionDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.VersionDelete has not yet been implemented")
+	if api.TeamUpdateTeamHandler == nil {
+		api.TeamUpdateTeamHandler = team.UpdateTeamHandlerFunc(func(params team.UpdateTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation team.UpdateTeam has not yet been implemented")
 		})
 	}
-	if api.ModVersionIndexHandler == nil {
-		api.ModVersionIndexHandler = mod.VersionIndexHandlerFunc(func(params mod.VersionIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.VersionIndex has not yet been implemented")
+	if api.UserUpdateUserHandler == nil {
+		api.UserUpdateUserHandler = user.UpdateUserHandlerFunc(func(params user.UpdateUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.UpdateUser has not yet been implemented")
 		})
 	}
-	if api.ModVersionShowHandler == nil {
-		api.ModVersionShowHandler = mod.VersionShowHandlerFunc(func(params mod.VersionShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.VersionShow has not yet been implemented")
+	if api.ModUpdateVersionHandler == nil {
+		api.ModUpdateVersionHandler = mod.UpdateVersionHandlerFunc(func(params mod.UpdateVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation mod.UpdateVersion has not yet been implemented")
 		})
 	}
-	if api.ModVersionUpdateHandler == nil {
-		api.ModVersionUpdateHandler = mod.VersionUpdateHandlerFunc(func(params mod.VersionUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation mod.VersionUpdate has not yet been implemented")
+	if api.AuthVerifyAuthHandler == nil {
+		api.AuthVerifyAuthHandler = auth.VerifyAuthHandlerFunc(func(params auth.VerifyAuthParams) middleware.Responder {
+			return middleware.NotImplemented("operation auth.VerifyAuth has not yet been implemented")
 		})
 	}
 

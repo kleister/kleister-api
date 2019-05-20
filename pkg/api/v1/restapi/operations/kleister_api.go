@@ -46,287 +46,287 @@ func NewKleisterAPI(spec *loads.Document) *KleisterAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		AuthAuthLoginHandler: auth.AuthLoginHandlerFunc(func(params auth.AuthLoginParams) middleware.Responder {
-			return middleware.NotImplemented("operation AuthAuthLogin has not yet been implemented")
+		PackAppendBuildToVersionHandler: pack.AppendBuildToVersionHandlerFunc(func(params pack.AppendBuildToVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackAppendBuildToVersion has not yet been implemented")
 		}),
-		AuthAuthRefreshHandler: auth.AuthRefreshHandlerFunc(func(params auth.AuthRefreshParams) middleware.Responder {
-			return middleware.NotImplemented("operation AuthAuthRefresh has not yet been implemented")
+		ForgeAppendForgeToBuildHandler: forge.AppendForgeToBuildHandlerFunc(func(params forge.AppendForgeToBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation ForgeAppendForgeToBuild has not yet been implemented")
 		}),
-		AuthAuthVerifyHandler: auth.AuthVerifyHandlerFunc(func(params auth.AuthVerifyParams) middleware.Responder {
-			return middleware.NotImplemented("operation AuthAuthVerify has not yet been implemented")
+		MinecraftAppendMinecraftToBuildHandler: minecraft.AppendMinecraftToBuildHandlerFunc(func(params minecraft.AppendMinecraftToBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation MinecraftAppendMinecraftToBuild has not yet been implemented")
 		}),
-		PackBuildCreateHandler: pack.BuildCreateHandlerFunc(func(params pack.BuildCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackBuildCreate has not yet been implemented")
+		ModAppendModToTeamHandler: mod.AppendModToTeamHandlerFunc(func(params mod.AppendModToTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModAppendModToTeam has not yet been implemented")
 		}),
-		PackBuildDeleteHandler: pack.BuildDeleteHandlerFunc(func(params pack.BuildDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackBuildDelete has not yet been implemented")
+		ModAppendModToUserHandler: mod.AppendModToUserHandlerFunc(func(params mod.AppendModToUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModAppendModToUser has not yet been implemented")
 		}),
-		PackBuildIndexHandler: pack.BuildIndexHandlerFunc(func(params pack.BuildIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackBuildIndex has not yet been implemented")
+		PackAppendPackToTeamHandler: pack.AppendPackToTeamHandlerFunc(func(params pack.AppendPackToTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackAppendPackToTeam has not yet been implemented")
 		}),
-		PackBuildShowHandler: pack.BuildShowHandlerFunc(func(params pack.BuildShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackBuildShow has not yet been implemented")
+		PackAppendPackToUserHandler: pack.AppendPackToUserHandlerFunc(func(params pack.AppendPackToUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackAppendPackToUser has not yet been implemented")
 		}),
-		PackBuildUpdateHandler: pack.BuildUpdateHandlerFunc(func(params pack.BuildUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackBuildUpdate has not yet been implemented")
+		TeamAppendTeamToModHandler: team.AppendTeamToModHandlerFunc(func(params team.AppendTeamToModParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamAppendTeamToMod has not yet been implemented")
 		}),
-		PackBuildVersionAppendHandler: pack.BuildVersionAppendHandlerFunc(func(params pack.BuildVersionAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackBuildVersionAppend has not yet been implemented")
+		TeamAppendTeamToPackHandler: team.AppendTeamToPackHandlerFunc(func(params team.AppendTeamToPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamAppendTeamToPack has not yet been implemented")
 		}),
-		PackBuildVersionDeleteHandler: pack.BuildVersionDeleteHandlerFunc(func(params pack.BuildVersionDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackBuildVersionDelete has not yet been implemented")
+		TeamAppendTeamToUserHandler: team.AppendTeamToUserHandlerFunc(func(params team.AppendTeamToUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamAppendTeamToUser has not yet been implemented")
 		}),
-		PackBuildVersionIndexHandler: pack.BuildVersionIndexHandlerFunc(func(params pack.BuildVersionIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackBuildVersionIndex has not yet been implemented")
+		UserAppendUserToModHandler: user.AppendUserToModHandlerFunc(func(params user.AppendUserToModParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserAppendUserToMod has not yet been implemented")
 		}),
-		ForgeForgeBuildAppendHandler: forge.ForgeBuildAppendHandlerFunc(func(params forge.ForgeBuildAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation ForgeForgeBuildAppend has not yet been implemented")
+		UserAppendUserToPackHandler: user.AppendUserToPackHandlerFunc(func(params user.AppendUserToPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserAppendUserToPack has not yet been implemented")
 		}),
-		ForgeForgeBuildDeleteHandler: forge.ForgeBuildDeleteHandlerFunc(func(params forge.ForgeBuildDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation ForgeForgeBuildDelete has not yet been implemented")
+		UserAppendUserToTeamHandler: user.AppendUserToTeamHandlerFunc(func(params user.AppendUserToTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserAppendUserToTeam has not yet been implemented")
 		}),
-		ForgeForgeBuildIndexHandler: forge.ForgeBuildIndexHandlerFunc(func(params forge.ForgeBuildIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation ForgeForgeBuildIndex has not yet been implemented")
+		ModAppendVersionToBuildHandler: mod.AppendVersionToBuildHandlerFunc(func(params mod.AppendVersionToBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModAppendVersionToBuild has not yet been implemented")
 		}),
-		ForgeForgeIndexHandler: forge.ForgeIndexHandlerFunc(func(params forge.ForgeIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation ForgeForgeIndex has not yet been implemented")
+		PackCreateBuildHandler: pack.CreateBuildHandlerFunc(func(params pack.CreateBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackCreateBuild has not yet been implemented")
 		}),
-		ForgeForgeSearchHandler: forge.ForgeSearchHandlerFunc(func(params forge.ForgeSearchParams) middleware.Responder {
-			return middleware.NotImplemented("operation ForgeForgeSearch has not yet been implemented")
+		ModCreateModHandler: mod.CreateModHandlerFunc(func(params mod.CreateModParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModCreateMod has not yet been implemented")
 		}),
-		ForgeForgeUpdateHandler: forge.ForgeUpdateHandlerFunc(func(params forge.ForgeUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation ForgeForgeUpdate has not yet been implemented")
+		PackCreatePackHandler: pack.CreatePackHandlerFunc(func(params pack.CreatePackParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackCreatePack has not yet been implemented")
 		}),
-		MinecraftMinecraftBuildAppendHandler: minecraft.MinecraftBuildAppendHandlerFunc(func(params minecraft.MinecraftBuildAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation MinecraftMinecraftBuildAppend has not yet been implemented")
+		TeamCreateTeamHandler: team.CreateTeamHandlerFunc(func(params team.CreateTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamCreateTeam has not yet been implemented")
 		}),
-		MinecraftMinecraftBuildDeleteHandler: minecraft.MinecraftBuildDeleteHandlerFunc(func(params minecraft.MinecraftBuildDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation MinecraftMinecraftBuildDelete has not yet been implemented")
+		UserCreateUserHandler: user.CreateUserHandlerFunc(func(params user.CreateUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserCreateUser has not yet been implemented")
 		}),
-		MinecraftMinecraftBuildIndexHandler: minecraft.MinecraftBuildIndexHandlerFunc(func(params minecraft.MinecraftBuildIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation MinecraftMinecraftBuildIndex has not yet been implemented")
+		ModCreateVersionHandler: mod.CreateVersionHandlerFunc(func(params mod.CreateVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModCreateVersion has not yet been implemented")
 		}),
-		MinecraftMinecraftIndexHandler: minecraft.MinecraftIndexHandlerFunc(func(params minecraft.MinecraftIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation MinecraftMinecraftIndex has not yet been implemented")
+		PackDeleteBuildHandler: pack.DeleteBuildHandlerFunc(func(params pack.DeleteBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackDeleteBuild has not yet been implemented")
 		}),
-		MinecraftMinecraftSearchHandler: minecraft.MinecraftSearchHandlerFunc(func(params minecraft.MinecraftSearchParams) middleware.Responder {
-			return middleware.NotImplemented("operation MinecraftMinecraftSearch has not yet been implemented")
+		PackDeleteBuildFromVersionHandler: pack.DeleteBuildFromVersionHandlerFunc(func(params pack.DeleteBuildFromVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackDeleteBuildFromVersion has not yet been implemented")
 		}),
-		MinecraftMinecraftUpdateHandler: minecraft.MinecraftUpdateHandlerFunc(func(params minecraft.MinecraftUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation MinecraftMinecraftUpdate has not yet been implemented")
+		ForgeDeleteForgeFromBuildHandler: forge.DeleteForgeFromBuildHandlerFunc(func(params forge.DeleteForgeFromBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation ForgeDeleteForgeFromBuild has not yet been implemented")
 		}),
-		ModModCreateHandler: mod.ModCreateHandlerFunc(func(params mod.ModCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModCreate has not yet been implemented")
+		MinecraftDeleteMinecraftFromBuildHandler: minecraft.DeleteMinecraftFromBuildHandlerFunc(func(params minecraft.DeleteMinecraftFromBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation MinecraftDeleteMinecraftFromBuild has not yet been implemented")
 		}),
-		ModModDeleteHandler: mod.ModDeleteHandlerFunc(func(params mod.ModDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModDelete has not yet been implemented")
+		ModDeleteModHandler: mod.DeleteModHandlerFunc(func(params mod.DeleteModParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModDeleteMod has not yet been implemented")
 		}),
-		ModModIndexHandler: mod.ModIndexHandlerFunc(func(params mod.ModIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModIndex has not yet been implemented")
+		ModDeleteModFromTeamHandler: mod.DeleteModFromTeamHandlerFunc(func(params mod.DeleteModFromTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModDeleteModFromTeam has not yet been implemented")
 		}),
-		ModModShowHandler: mod.ModShowHandlerFunc(func(params mod.ModShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModShow has not yet been implemented")
+		ModDeleteModFromUserHandler: mod.DeleteModFromUserHandlerFunc(func(params mod.DeleteModFromUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModDeleteModFromUser has not yet been implemented")
 		}),
-		ModModTeamAppendHandler: mod.ModTeamAppendHandlerFunc(func(params mod.ModTeamAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModTeamAppend has not yet been implemented")
+		PackDeletePackHandler: pack.DeletePackHandlerFunc(func(params pack.DeletePackParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackDeletePack has not yet been implemented")
 		}),
-		ModModTeamDeleteHandler: mod.ModTeamDeleteHandlerFunc(func(params mod.ModTeamDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModTeamDelete has not yet been implemented")
+		PackDeletePackFromTeamHandler: pack.DeletePackFromTeamHandlerFunc(func(params pack.DeletePackFromTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackDeletePackFromTeam has not yet been implemented")
 		}),
-		ModModTeamIndexHandler: mod.ModTeamIndexHandlerFunc(func(params mod.ModTeamIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModTeamIndex has not yet been implemented")
+		PackDeletePackFromUserHandler: pack.DeletePackFromUserHandlerFunc(func(params pack.DeletePackFromUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackDeletePackFromUser has not yet been implemented")
 		}),
-		ModModTeamPermHandler: mod.ModTeamPermHandlerFunc(func(params mod.ModTeamPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModTeamPerm has not yet been implemented")
+		TeamDeleteTeamHandler: team.DeleteTeamHandlerFunc(func(params team.DeleteTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamDeleteTeam has not yet been implemented")
 		}),
-		ModModUpdateHandler: mod.ModUpdateHandlerFunc(func(params mod.ModUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModUpdate has not yet been implemented")
+		TeamDeleteTeamFromModHandler: team.DeleteTeamFromModHandlerFunc(func(params team.DeleteTeamFromModParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamDeleteTeamFromMod has not yet been implemented")
 		}),
-		ModModUserAppendHandler: mod.ModUserAppendHandlerFunc(func(params mod.ModUserAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModUserAppend has not yet been implemented")
+		TeamDeleteTeamFromPackHandler: team.DeleteTeamFromPackHandlerFunc(func(params team.DeleteTeamFromPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamDeleteTeamFromPack has not yet been implemented")
 		}),
-		ModModUserDeleteHandler: mod.ModUserDeleteHandlerFunc(func(params mod.ModUserDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModUserDelete has not yet been implemented")
+		TeamDeleteTeamFromUserHandler: team.DeleteTeamFromUserHandlerFunc(func(params team.DeleteTeamFromUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamDeleteTeamFromUser has not yet been implemented")
 		}),
-		ModModUserIndexHandler: mod.ModUserIndexHandlerFunc(func(params mod.ModUserIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModUserIndex has not yet been implemented")
+		UserDeleteUserHandler: user.DeleteUserHandlerFunc(func(params user.DeleteUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserDeleteUser has not yet been implemented")
 		}),
-		ModModUserPermHandler: mod.ModUserPermHandlerFunc(func(params mod.ModUserPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModModUserPerm has not yet been implemented")
+		UserDeleteUserFromModHandler: user.DeleteUserFromModHandlerFunc(func(params user.DeleteUserFromModParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserDeleteUserFromMod has not yet been implemented")
 		}),
-		PackPackCreateHandler: pack.PackCreateHandlerFunc(func(params pack.PackCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackCreate has not yet been implemented")
+		UserDeleteUserFromPackHandler: user.DeleteUserFromPackHandlerFunc(func(params user.DeleteUserFromPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserDeleteUserFromPack has not yet been implemented")
 		}),
-		PackPackDeleteHandler: pack.PackDeleteHandlerFunc(func(params pack.PackDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackDelete has not yet been implemented")
+		UserDeleteUserFromTeamHandler: user.DeleteUserFromTeamHandlerFunc(func(params user.DeleteUserFromTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserDeleteUserFromTeam has not yet been implemented")
 		}),
-		PackPackIndexHandler: pack.PackIndexHandlerFunc(func(params pack.PackIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackIndex has not yet been implemented")
+		ModDeleteVersionHandler: mod.DeleteVersionHandlerFunc(func(params mod.DeleteVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModDeleteVersion has not yet been implemented")
 		}),
-		PackPackShowHandler: pack.PackShowHandlerFunc(func(params pack.PackShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackShow has not yet been implemented")
+		ModDeleteVersionFromBuildHandler: mod.DeleteVersionFromBuildHandlerFunc(func(params mod.DeleteVersionFromBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModDeleteVersionFromBuild has not yet been implemented")
 		}),
-		PackPackTeamAppendHandler: pack.PackTeamAppendHandlerFunc(func(params pack.PackTeamAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackTeamAppend has not yet been implemented")
+		PackListBuildVersionsHandler: pack.ListBuildVersionsHandlerFunc(func(params pack.ListBuildVersionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackListBuildVersions has not yet been implemented")
 		}),
-		PackPackTeamDeleteHandler: pack.PackTeamDeleteHandlerFunc(func(params pack.PackTeamDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackTeamDelete has not yet been implemented")
+		PackListBuildsHandler: pack.ListBuildsHandlerFunc(func(params pack.ListBuildsParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackListBuilds has not yet been implemented")
 		}),
-		PackPackTeamIndexHandler: pack.PackTeamIndexHandlerFunc(func(params pack.PackTeamIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackTeamIndex has not yet been implemented")
+		ForgeListForgeBuildsHandler: forge.ListForgeBuildsHandlerFunc(func(params forge.ListForgeBuildsParams) middleware.Responder {
+			return middleware.NotImplemented("operation ForgeListForgeBuilds has not yet been implemented")
 		}),
-		PackPackTeamPermHandler: pack.PackTeamPermHandlerFunc(func(params pack.PackTeamPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackTeamPerm has not yet been implemented")
+		ForgeListForgesHandler: forge.ListForgesHandlerFunc(func(params forge.ListForgesParams) middleware.Responder {
+			return middleware.NotImplemented("operation ForgeListForges has not yet been implemented")
 		}),
-		PackPackUpdateHandler: pack.PackUpdateHandlerFunc(func(params pack.PackUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackUpdate has not yet been implemented")
+		MinecraftListMinecraftBuildsHandler: minecraft.ListMinecraftBuildsHandlerFunc(func(params minecraft.ListMinecraftBuildsParams) middleware.Responder {
+			return middleware.NotImplemented("operation MinecraftListMinecraftBuilds has not yet been implemented")
 		}),
-		PackPackUserAppendHandler: pack.PackUserAppendHandlerFunc(func(params pack.PackUserAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackUserAppend has not yet been implemented")
+		MinecraftListMinecraftsHandler: minecraft.ListMinecraftsHandlerFunc(func(params minecraft.ListMinecraftsParams) middleware.Responder {
+			return middleware.NotImplemented("operation MinecraftListMinecrafts has not yet been implemented")
 		}),
-		PackPackUserDeleteHandler: pack.PackUserDeleteHandlerFunc(func(params pack.PackUserDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackUserDelete has not yet been implemented")
+		ModListModTeamsHandler: mod.ListModTeamsHandlerFunc(func(params mod.ListModTeamsParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModListModTeams has not yet been implemented")
 		}),
-		PackPackUserIndexHandler: pack.PackUserIndexHandlerFunc(func(params pack.PackUserIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackUserIndex has not yet been implemented")
+		ModListModUsersHandler: mod.ListModUsersHandlerFunc(func(params mod.ListModUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModListModUsers has not yet been implemented")
 		}),
-		PackPackUserPermHandler: pack.PackUserPermHandlerFunc(func(params pack.PackUserPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation PackPackUserPerm has not yet been implemented")
+		ModListModsHandler: mod.ListModsHandlerFunc(func(params mod.ListModsParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModListMods has not yet been implemented")
 		}),
-		ProfileProfileShowHandler: profile.ProfileShowHandlerFunc(func(params profile.ProfileShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation ProfileProfileShow has not yet been implemented")
+		PackListPackTeamsHandler: pack.ListPackTeamsHandlerFunc(func(params pack.ListPackTeamsParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackListPackTeams has not yet been implemented")
 		}),
-		ProfileProfileTokenHandler: profile.ProfileTokenHandlerFunc(func(params profile.ProfileTokenParams) middleware.Responder {
-			return middleware.NotImplemented("operation ProfileProfileToken has not yet been implemented")
+		PackListPackUsersHandler: pack.ListPackUsersHandlerFunc(func(params pack.ListPackUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackListPackUsers has not yet been implemented")
 		}),
-		ProfileProfileUpdateHandler: profile.ProfileUpdateHandlerFunc(func(params profile.ProfileUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation ProfileProfileUpdate has not yet been implemented")
+		PackListPacksHandler: pack.ListPacksHandlerFunc(func(params pack.ListPacksParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackListPacks has not yet been implemented")
 		}),
-		TeamTeamCreateHandler: team.TeamCreateHandlerFunc(func(params team.TeamCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamCreate has not yet been implemented")
+		TeamListTeamModsHandler: team.ListTeamModsHandlerFunc(func(params team.ListTeamModsParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamListTeamMods has not yet been implemented")
 		}),
-		TeamTeamDeleteHandler: team.TeamDeleteHandlerFunc(func(params team.TeamDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamDelete has not yet been implemented")
+		TeamListTeamPacksHandler: team.ListTeamPacksHandlerFunc(func(params team.ListTeamPacksParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamListTeamPacks has not yet been implemented")
 		}),
-		TeamTeamIndexHandler: team.TeamIndexHandlerFunc(func(params team.TeamIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamIndex has not yet been implemented")
+		TeamListTeamUsersHandler: team.ListTeamUsersHandlerFunc(func(params team.ListTeamUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamListTeamUsers has not yet been implemented")
 		}),
-		TeamTeamModAppendHandler: team.TeamModAppendHandlerFunc(func(params team.TeamModAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamModAppend has not yet been implemented")
+		TeamListTeamsHandler: team.ListTeamsHandlerFunc(func(params team.ListTeamsParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamListTeams has not yet been implemented")
 		}),
-		TeamTeamModDeleteHandler: team.TeamModDeleteHandlerFunc(func(params team.TeamModDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamModDelete has not yet been implemented")
+		UserListUserModsHandler: user.ListUserModsHandlerFunc(func(params user.ListUserModsParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserListUserMods has not yet been implemented")
 		}),
-		TeamTeamModIndexHandler: team.TeamModIndexHandlerFunc(func(params team.TeamModIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamModIndex has not yet been implemented")
+		UserListUserPacksHandler: user.ListUserPacksHandlerFunc(func(params user.ListUserPacksParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserListUserPacks has not yet been implemented")
 		}),
-		TeamTeamModPermHandler: team.TeamModPermHandlerFunc(func(params team.TeamModPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamModPerm has not yet been implemented")
+		UserListUserTeamsHandler: user.ListUserTeamsHandlerFunc(func(params user.ListUserTeamsParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserListUserTeams has not yet been implemented")
 		}),
-		TeamTeamPackAppendHandler: team.TeamPackAppendHandlerFunc(func(params team.TeamPackAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamPackAppend has not yet been implemented")
+		UserListUsersHandler: user.ListUsersHandlerFunc(func(params user.ListUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserListUsers has not yet been implemented")
 		}),
-		TeamTeamPackDeleteHandler: team.TeamPackDeleteHandlerFunc(func(params team.TeamPackDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamPackDelete has not yet been implemented")
+		ModListVersionBuildsHandler: mod.ListVersionBuildsHandlerFunc(func(params mod.ListVersionBuildsParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModListVersionBuilds has not yet been implemented")
 		}),
-		TeamTeamPackIndexHandler: team.TeamPackIndexHandlerFunc(func(params team.TeamPackIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamPackIndex has not yet been implemented")
+		ModListVersionsHandler: mod.ListVersionsHandlerFunc(func(params mod.ListVersionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModListVersions has not yet been implemented")
 		}),
-		TeamTeamPackPermHandler: team.TeamPackPermHandlerFunc(func(params team.TeamPackPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamPackPerm has not yet been implemented")
+		AuthLoginUserHandler: auth.LoginUserHandlerFunc(func(params auth.LoginUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation AuthLoginUser has not yet been implemented")
 		}),
-		TeamTeamShowHandler: team.TeamShowHandlerFunc(func(params team.TeamShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamShow has not yet been implemented")
+		ModPermitModTeamHandler: mod.PermitModTeamHandlerFunc(func(params mod.PermitModTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModPermitModTeam has not yet been implemented")
 		}),
-		TeamTeamUpdateHandler: team.TeamUpdateHandlerFunc(func(params team.TeamUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamUpdate has not yet been implemented")
+		ModPermitModUserHandler: mod.PermitModUserHandlerFunc(func(params mod.PermitModUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModPermitModUser has not yet been implemented")
 		}),
-		TeamTeamUserAppendHandler: team.TeamUserAppendHandlerFunc(func(params team.TeamUserAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamUserAppend has not yet been implemented")
+		PackPermitPackTeamHandler: pack.PermitPackTeamHandlerFunc(func(params pack.PermitPackTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackPermitPackTeam has not yet been implemented")
 		}),
-		TeamTeamUserDeleteHandler: team.TeamUserDeleteHandlerFunc(func(params team.TeamUserDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamUserDelete has not yet been implemented")
+		PackPermitPackUserHandler: pack.PermitPackUserHandlerFunc(func(params pack.PermitPackUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackPermitPackUser has not yet been implemented")
 		}),
-		TeamTeamUserIndexHandler: team.TeamUserIndexHandlerFunc(func(params team.TeamUserIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamUserIndex has not yet been implemented")
+		TeamPermitTeamModHandler: team.PermitTeamModHandlerFunc(func(params team.PermitTeamModParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamPermitTeamMod has not yet been implemented")
 		}),
-		TeamTeamUserPermHandler: team.TeamUserPermHandlerFunc(func(params team.TeamUserPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation TeamTeamUserPerm has not yet been implemented")
+		TeamPermitTeamPackHandler: team.PermitTeamPackHandlerFunc(func(params team.PermitTeamPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamPermitTeamPack has not yet been implemented")
 		}),
-		UserUserCreateHandler: user.UserCreateHandlerFunc(func(params user.UserCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserCreate has not yet been implemented")
+		TeamPermitTeamUserHandler: team.PermitTeamUserHandlerFunc(func(params team.PermitTeamUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamPermitTeamUser has not yet been implemented")
 		}),
-		UserUserDeleteHandler: user.UserDeleteHandlerFunc(func(params user.UserDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserDelete has not yet been implemented")
+		UserPermitUserModHandler: user.PermitUserModHandlerFunc(func(params user.PermitUserModParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserPermitUserMod has not yet been implemented")
 		}),
-		UserUserIndexHandler: user.UserIndexHandlerFunc(func(params user.UserIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserIndex has not yet been implemented")
+		UserPermitUserPackHandler: user.PermitUserPackHandlerFunc(func(params user.PermitUserPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserPermitUserPack has not yet been implemented")
 		}),
-		UserUserModAppendHandler: user.UserModAppendHandlerFunc(func(params user.UserModAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserModAppend has not yet been implemented")
+		UserPermitUserTeamHandler: user.PermitUserTeamHandlerFunc(func(params user.PermitUserTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserPermitUserTeam has not yet been implemented")
 		}),
-		UserUserModDeleteHandler: user.UserModDeleteHandlerFunc(func(params user.UserModDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserModDelete has not yet been implemented")
+		AuthRefreshAuthHandler: auth.RefreshAuthHandlerFunc(func(params auth.RefreshAuthParams) middleware.Responder {
+			return middleware.NotImplemented("operation AuthRefreshAuth has not yet been implemented")
 		}),
-		UserUserModIndexHandler: user.UserModIndexHandlerFunc(func(params user.UserModIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserModIndex has not yet been implemented")
+		ForgeSearchForgesHandler: forge.SearchForgesHandlerFunc(func(params forge.SearchForgesParams) middleware.Responder {
+			return middleware.NotImplemented("operation ForgeSearchForges has not yet been implemented")
 		}),
-		UserUserModPermHandler: user.UserModPermHandlerFunc(func(params user.UserModPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserModPerm has not yet been implemented")
+		MinecraftSearchMinecraftsHandler: minecraft.SearchMinecraftsHandlerFunc(func(params minecraft.SearchMinecraftsParams) middleware.Responder {
+			return middleware.NotImplemented("operation MinecraftSearchMinecrafts has not yet been implemented")
 		}),
-		UserUserPackAppendHandler: user.UserPackAppendHandlerFunc(func(params user.UserPackAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserPackAppend has not yet been implemented")
+		PackShowBuildHandler: pack.ShowBuildHandlerFunc(func(params pack.ShowBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackShowBuild has not yet been implemented")
 		}),
-		UserUserPackDeleteHandler: user.UserPackDeleteHandlerFunc(func(params user.UserPackDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserPackDelete has not yet been implemented")
+		ModShowModHandler: mod.ShowModHandlerFunc(func(params mod.ShowModParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModShowMod has not yet been implemented")
 		}),
-		UserUserPackIndexHandler: user.UserPackIndexHandlerFunc(func(params user.UserPackIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserPackIndex has not yet been implemented")
+		PackShowPackHandler: pack.ShowPackHandlerFunc(func(params pack.ShowPackParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackShowPack has not yet been implemented")
 		}),
-		UserUserPackPermHandler: user.UserPackPermHandlerFunc(func(params user.UserPackPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserPackPerm has not yet been implemented")
+		ProfileShowProfileHandler: profile.ShowProfileHandlerFunc(func(params profile.ShowProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation ProfileShowProfile has not yet been implemented")
 		}),
-		UserUserShowHandler: user.UserShowHandlerFunc(func(params user.UserShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserShow has not yet been implemented")
+		TeamShowTeamHandler: team.ShowTeamHandlerFunc(func(params team.ShowTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamShowTeam has not yet been implemented")
 		}),
-		UserUserTeamAppendHandler: user.UserTeamAppendHandlerFunc(func(params user.UserTeamAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserTeamAppend has not yet been implemented")
+		UserShowUserHandler: user.ShowUserHandlerFunc(func(params user.ShowUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserShowUser has not yet been implemented")
 		}),
-		UserUserTeamDeleteHandler: user.UserTeamDeleteHandlerFunc(func(params user.UserTeamDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserTeamDelete has not yet been implemented")
+		ModShowVersionHandler: mod.ShowVersionHandlerFunc(func(params mod.ShowVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModShowVersion has not yet been implemented")
 		}),
-		UserUserTeamIndexHandler: user.UserTeamIndexHandlerFunc(func(params user.UserTeamIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserTeamIndex has not yet been implemented")
+		ProfileTokenProfileHandler: profile.TokenProfileHandlerFunc(func(params profile.TokenProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation ProfileTokenProfile has not yet been implemented")
 		}),
-		UserUserTeamPermHandler: user.UserTeamPermHandlerFunc(func(params user.UserTeamPermParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserTeamPerm has not yet been implemented")
+		PackUpdateBuildHandler: pack.UpdateBuildHandlerFunc(func(params pack.UpdateBuildParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackUpdateBuild has not yet been implemented")
 		}),
-		UserUserUpdateHandler: user.UserUpdateHandlerFunc(func(params user.UserUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation UserUserUpdate has not yet been implemented")
+		ForgeUpdateForgeHandler: forge.UpdateForgeHandlerFunc(func(params forge.UpdateForgeParams) middleware.Responder {
+			return middleware.NotImplemented("operation ForgeUpdateForge has not yet been implemented")
 		}),
-		ModVersionBuildAppendHandler: mod.VersionBuildAppendHandlerFunc(func(params mod.VersionBuildAppendParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModVersionBuildAppend has not yet been implemented")
+		MinecraftUpdateMinecraftHandler: minecraft.UpdateMinecraftHandlerFunc(func(params minecraft.UpdateMinecraftParams) middleware.Responder {
+			return middleware.NotImplemented("operation MinecraftUpdateMinecraft has not yet been implemented")
 		}),
-		ModVersionBuildDeleteHandler: mod.VersionBuildDeleteHandlerFunc(func(params mod.VersionBuildDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModVersionBuildDelete has not yet been implemented")
+		ModUpdateModHandler: mod.UpdateModHandlerFunc(func(params mod.UpdateModParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModUpdateMod has not yet been implemented")
 		}),
-		ModVersionBuildIndexHandler: mod.VersionBuildIndexHandlerFunc(func(params mod.VersionBuildIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModVersionBuildIndex has not yet been implemented")
+		PackUpdatePackHandler: pack.UpdatePackHandlerFunc(func(params pack.UpdatePackParams) middleware.Responder {
+			return middleware.NotImplemented("operation PackUpdatePack has not yet been implemented")
 		}),
-		ModVersionCreateHandler: mod.VersionCreateHandlerFunc(func(params mod.VersionCreateParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModVersionCreate has not yet been implemented")
+		ProfileUpdateProfileHandler: profile.UpdateProfileHandlerFunc(func(params profile.UpdateProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation ProfileUpdateProfile has not yet been implemented")
 		}),
-		ModVersionDeleteHandler: mod.VersionDeleteHandlerFunc(func(params mod.VersionDeleteParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModVersionDelete has not yet been implemented")
+		TeamUpdateTeamHandler: team.UpdateTeamHandlerFunc(func(params team.UpdateTeamParams) middleware.Responder {
+			return middleware.NotImplemented("operation TeamUpdateTeam has not yet been implemented")
 		}),
-		ModVersionIndexHandler: mod.VersionIndexHandlerFunc(func(params mod.VersionIndexParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModVersionIndex has not yet been implemented")
+		UserUpdateUserHandler: user.UpdateUserHandlerFunc(func(params user.UpdateUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation UserUpdateUser has not yet been implemented")
 		}),
-		ModVersionShowHandler: mod.VersionShowHandlerFunc(func(params mod.VersionShowParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModVersionShow has not yet been implemented")
+		ModUpdateVersionHandler: mod.UpdateVersionHandlerFunc(func(params mod.UpdateVersionParams) middleware.Responder {
+			return middleware.NotImplemented("operation ModUpdateVersion has not yet been implemented")
 		}),
-		ModVersionUpdateHandler: mod.VersionUpdateHandlerFunc(func(params mod.VersionUpdateParams) middleware.Responder {
-			return middleware.NotImplemented("operation ModVersionUpdate has not yet been implemented")
+		AuthVerifyAuthHandler: auth.VerifyAuthHandlerFunc(func(params auth.VerifyAuthParams) middleware.Responder {
+			return middleware.NotImplemented("operation AuthVerifyAuth has not yet been implemented")
 		}),
 	}
 }
@@ -359,194 +359,194 @@ type KleisterAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
-	// AuthAuthLoginHandler sets the operation handler for the auth login operation
-	AuthAuthLoginHandler auth.AuthLoginHandler
-	// AuthAuthRefreshHandler sets the operation handler for the auth refresh operation
-	AuthAuthRefreshHandler auth.AuthRefreshHandler
-	// AuthAuthVerifyHandler sets the operation handler for the auth verify operation
-	AuthAuthVerifyHandler auth.AuthVerifyHandler
-	// PackBuildCreateHandler sets the operation handler for the build create operation
-	PackBuildCreateHandler pack.BuildCreateHandler
-	// PackBuildDeleteHandler sets the operation handler for the build delete operation
-	PackBuildDeleteHandler pack.BuildDeleteHandler
-	// PackBuildIndexHandler sets the operation handler for the build index operation
-	PackBuildIndexHandler pack.BuildIndexHandler
-	// PackBuildShowHandler sets the operation handler for the build show operation
-	PackBuildShowHandler pack.BuildShowHandler
-	// PackBuildUpdateHandler sets the operation handler for the build update operation
-	PackBuildUpdateHandler pack.BuildUpdateHandler
-	// PackBuildVersionAppendHandler sets the operation handler for the build version append operation
-	PackBuildVersionAppendHandler pack.BuildVersionAppendHandler
-	// PackBuildVersionDeleteHandler sets the operation handler for the build version delete operation
-	PackBuildVersionDeleteHandler pack.BuildVersionDeleteHandler
-	// PackBuildVersionIndexHandler sets the operation handler for the build version index operation
-	PackBuildVersionIndexHandler pack.BuildVersionIndexHandler
-	// ForgeForgeBuildAppendHandler sets the operation handler for the forge build append operation
-	ForgeForgeBuildAppendHandler forge.ForgeBuildAppendHandler
-	// ForgeForgeBuildDeleteHandler sets the operation handler for the forge build delete operation
-	ForgeForgeBuildDeleteHandler forge.ForgeBuildDeleteHandler
-	// ForgeForgeBuildIndexHandler sets the operation handler for the forge build index operation
-	ForgeForgeBuildIndexHandler forge.ForgeBuildIndexHandler
-	// ForgeForgeIndexHandler sets the operation handler for the forge index operation
-	ForgeForgeIndexHandler forge.ForgeIndexHandler
-	// ForgeForgeSearchHandler sets the operation handler for the forge search operation
-	ForgeForgeSearchHandler forge.ForgeSearchHandler
-	// ForgeForgeUpdateHandler sets the operation handler for the forge update operation
-	ForgeForgeUpdateHandler forge.ForgeUpdateHandler
-	// MinecraftMinecraftBuildAppendHandler sets the operation handler for the minecraft build append operation
-	MinecraftMinecraftBuildAppendHandler minecraft.MinecraftBuildAppendHandler
-	// MinecraftMinecraftBuildDeleteHandler sets the operation handler for the minecraft build delete operation
-	MinecraftMinecraftBuildDeleteHandler minecraft.MinecraftBuildDeleteHandler
-	// MinecraftMinecraftBuildIndexHandler sets the operation handler for the minecraft build index operation
-	MinecraftMinecraftBuildIndexHandler minecraft.MinecraftBuildIndexHandler
-	// MinecraftMinecraftIndexHandler sets the operation handler for the minecraft index operation
-	MinecraftMinecraftIndexHandler minecraft.MinecraftIndexHandler
-	// MinecraftMinecraftSearchHandler sets the operation handler for the minecraft search operation
-	MinecraftMinecraftSearchHandler minecraft.MinecraftSearchHandler
-	// MinecraftMinecraftUpdateHandler sets the operation handler for the minecraft update operation
-	MinecraftMinecraftUpdateHandler minecraft.MinecraftUpdateHandler
-	// ModModCreateHandler sets the operation handler for the mod create operation
-	ModModCreateHandler mod.ModCreateHandler
-	// ModModDeleteHandler sets the operation handler for the mod delete operation
-	ModModDeleteHandler mod.ModDeleteHandler
-	// ModModIndexHandler sets the operation handler for the mod index operation
-	ModModIndexHandler mod.ModIndexHandler
-	// ModModShowHandler sets the operation handler for the mod show operation
-	ModModShowHandler mod.ModShowHandler
-	// ModModTeamAppendHandler sets the operation handler for the mod team append operation
-	ModModTeamAppendHandler mod.ModTeamAppendHandler
-	// ModModTeamDeleteHandler sets the operation handler for the mod team delete operation
-	ModModTeamDeleteHandler mod.ModTeamDeleteHandler
-	// ModModTeamIndexHandler sets the operation handler for the mod team index operation
-	ModModTeamIndexHandler mod.ModTeamIndexHandler
-	// ModModTeamPermHandler sets the operation handler for the mod team perm operation
-	ModModTeamPermHandler mod.ModTeamPermHandler
-	// ModModUpdateHandler sets the operation handler for the mod update operation
-	ModModUpdateHandler mod.ModUpdateHandler
-	// ModModUserAppendHandler sets the operation handler for the mod user append operation
-	ModModUserAppendHandler mod.ModUserAppendHandler
-	// ModModUserDeleteHandler sets the operation handler for the mod user delete operation
-	ModModUserDeleteHandler mod.ModUserDeleteHandler
-	// ModModUserIndexHandler sets the operation handler for the mod user index operation
-	ModModUserIndexHandler mod.ModUserIndexHandler
-	// ModModUserPermHandler sets the operation handler for the mod user perm operation
-	ModModUserPermHandler mod.ModUserPermHandler
-	// PackPackCreateHandler sets the operation handler for the pack create operation
-	PackPackCreateHandler pack.PackCreateHandler
-	// PackPackDeleteHandler sets the operation handler for the pack delete operation
-	PackPackDeleteHandler pack.PackDeleteHandler
-	// PackPackIndexHandler sets the operation handler for the pack index operation
-	PackPackIndexHandler pack.PackIndexHandler
-	// PackPackShowHandler sets the operation handler for the pack show operation
-	PackPackShowHandler pack.PackShowHandler
-	// PackPackTeamAppendHandler sets the operation handler for the pack team append operation
-	PackPackTeamAppendHandler pack.PackTeamAppendHandler
-	// PackPackTeamDeleteHandler sets the operation handler for the pack team delete operation
-	PackPackTeamDeleteHandler pack.PackTeamDeleteHandler
-	// PackPackTeamIndexHandler sets the operation handler for the pack team index operation
-	PackPackTeamIndexHandler pack.PackTeamIndexHandler
-	// PackPackTeamPermHandler sets the operation handler for the pack team perm operation
-	PackPackTeamPermHandler pack.PackTeamPermHandler
-	// PackPackUpdateHandler sets the operation handler for the pack update operation
-	PackPackUpdateHandler pack.PackUpdateHandler
-	// PackPackUserAppendHandler sets the operation handler for the pack user append operation
-	PackPackUserAppendHandler pack.PackUserAppendHandler
-	// PackPackUserDeleteHandler sets the operation handler for the pack user delete operation
-	PackPackUserDeleteHandler pack.PackUserDeleteHandler
-	// PackPackUserIndexHandler sets the operation handler for the pack user index operation
-	PackPackUserIndexHandler pack.PackUserIndexHandler
-	// PackPackUserPermHandler sets the operation handler for the pack user perm operation
-	PackPackUserPermHandler pack.PackUserPermHandler
-	// ProfileProfileShowHandler sets the operation handler for the profile show operation
-	ProfileProfileShowHandler profile.ProfileShowHandler
-	// ProfileProfileTokenHandler sets the operation handler for the profile token operation
-	ProfileProfileTokenHandler profile.ProfileTokenHandler
-	// ProfileProfileUpdateHandler sets the operation handler for the profile update operation
-	ProfileProfileUpdateHandler profile.ProfileUpdateHandler
-	// TeamTeamCreateHandler sets the operation handler for the team create operation
-	TeamTeamCreateHandler team.TeamCreateHandler
-	// TeamTeamDeleteHandler sets the operation handler for the team delete operation
-	TeamTeamDeleteHandler team.TeamDeleteHandler
-	// TeamTeamIndexHandler sets the operation handler for the team index operation
-	TeamTeamIndexHandler team.TeamIndexHandler
-	// TeamTeamModAppendHandler sets the operation handler for the team mod append operation
-	TeamTeamModAppendHandler team.TeamModAppendHandler
-	// TeamTeamModDeleteHandler sets the operation handler for the team mod delete operation
-	TeamTeamModDeleteHandler team.TeamModDeleteHandler
-	// TeamTeamModIndexHandler sets the operation handler for the team mod index operation
-	TeamTeamModIndexHandler team.TeamModIndexHandler
-	// TeamTeamModPermHandler sets the operation handler for the team mod perm operation
-	TeamTeamModPermHandler team.TeamModPermHandler
-	// TeamTeamPackAppendHandler sets the operation handler for the team pack append operation
-	TeamTeamPackAppendHandler team.TeamPackAppendHandler
-	// TeamTeamPackDeleteHandler sets the operation handler for the team pack delete operation
-	TeamTeamPackDeleteHandler team.TeamPackDeleteHandler
-	// TeamTeamPackIndexHandler sets the operation handler for the team pack index operation
-	TeamTeamPackIndexHandler team.TeamPackIndexHandler
-	// TeamTeamPackPermHandler sets the operation handler for the team pack perm operation
-	TeamTeamPackPermHandler team.TeamPackPermHandler
-	// TeamTeamShowHandler sets the operation handler for the team show operation
-	TeamTeamShowHandler team.TeamShowHandler
-	// TeamTeamUpdateHandler sets the operation handler for the team update operation
-	TeamTeamUpdateHandler team.TeamUpdateHandler
-	// TeamTeamUserAppendHandler sets the operation handler for the team user append operation
-	TeamTeamUserAppendHandler team.TeamUserAppendHandler
-	// TeamTeamUserDeleteHandler sets the operation handler for the team user delete operation
-	TeamTeamUserDeleteHandler team.TeamUserDeleteHandler
-	// TeamTeamUserIndexHandler sets the operation handler for the team user index operation
-	TeamTeamUserIndexHandler team.TeamUserIndexHandler
-	// TeamTeamUserPermHandler sets the operation handler for the team user perm operation
-	TeamTeamUserPermHandler team.TeamUserPermHandler
-	// UserUserCreateHandler sets the operation handler for the user create operation
-	UserUserCreateHandler user.UserCreateHandler
-	// UserUserDeleteHandler sets the operation handler for the user delete operation
-	UserUserDeleteHandler user.UserDeleteHandler
-	// UserUserIndexHandler sets the operation handler for the user index operation
-	UserUserIndexHandler user.UserIndexHandler
-	// UserUserModAppendHandler sets the operation handler for the user mod append operation
-	UserUserModAppendHandler user.UserModAppendHandler
-	// UserUserModDeleteHandler sets the operation handler for the user mod delete operation
-	UserUserModDeleteHandler user.UserModDeleteHandler
-	// UserUserModIndexHandler sets the operation handler for the user mod index operation
-	UserUserModIndexHandler user.UserModIndexHandler
-	// UserUserModPermHandler sets the operation handler for the user mod perm operation
-	UserUserModPermHandler user.UserModPermHandler
-	// UserUserPackAppendHandler sets the operation handler for the user pack append operation
-	UserUserPackAppendHandler user.UserPackAppendHandler
-	// UserUserPackDeleteHandler sets the operation handler for the user pack delete operation
-	UserUserPackDeleteHandler user.UserPackDeleteHandler
-	// UserUserPackIndexHandler sets the operation handler for the user pack index operation
-	UserUserPackIndexHandler user.UserPackIndexHandler
-	// UserUserPackPermHandler sets the operation handler for the user pack perm operation
-	UserUserPackPermHandler user.UserPackPermHandler
-	// UserUserShowHandler sets the operation handler for the user show operation
-	UserUserShowHandler user.UserShowHandler
-	// UserUserTeamAppendHandler sets the operation handler for the user team append operation
-	UserUserTeamAppendHandler user.UserTeamAppendHandler
-	// UserUserTeamDeleteHandler sets the operation handler for the user team delete operation
-	UserUserTeamDeleteHandler user.UserTeamDeleteHandler
-	// UserUserTeamIndexHandler sets the operation handler for the user team index operation
-	UserUserTeamIndexHandler user.UserTeamIndexHandler
-	// UserUserTeamPermHandler sets the operation handler for the user team perm operation
-	UserUserTeamPermHandler user.UserTeamPermHandler
-	// UserUserUpdateHandler sets the operation handler for the user update operation
-	UserUserUpdateHandler user.UserUpdateHandler
-	// ModVersionBuildAppendHandler sets the operation handler for the version build append operation
-	ModVersionBuildAppendHandler mod.VersionBuildAppendHandler
-	// ModVersionBuildDeleteHandler sets the operation handler for the version build delete operation
-	ModVersionBuildDeleteHandler mod.VersionBuildDeleteHandler
-	// ModVersionBuildIndexHandler sets the operation handler for the version build index operation
-	ModVersionBuildIndexHandler mod.VersionBuildIndexHandler
-	// ModVersionCreateHandler sets the operation handler for the version create operation
-	ModVersionCreateHandler mod.VersionCreateHandler
-	// ModVersionDeleteHandler sets the operation handler for the version delete operation
-	ModVersionDeleteHandler mod.VersionDeleteHandler
-	// ModVersionIndexHandler sets the operation handler for the version index operation
-	ModVersionIndexHandler mod.VersionIndexHandler
-	// ModVersionShowHandler sets the operation handler for the version show operation
-	ModVersionShowHandler mod.VersionShowHandler
-	// ModVersionUpdateHandler sets the operation handler for the version update operation
-	ModVersionUpdateHandler mod.VersionUpdateHandler
+	// PackAppendBuildToVersionHandler sets the operation handler for the append build to version operation
+	PackAppendBuildToVersionHandler pack.AppendBuildToVersionHandler
+	// ForgeAppendForgeToBuildHandler sets the operation handler for the append forge to build operation
+	ForgeAppendForgeToBuildHandler forge.AppendForgeToBuildHandler
+	// MinecraftAppendMinecraftToBuildHandler sets the operation handler for the append minecraft to build operation
+	MinecraftAppendMinecraftToBuildHandler minecraft.AppendMinecraftToBuildHandler
+	// ModAppendModToTeamHandler sets the operation handler for the append mod to team operation
+	ModAppendModToTeamHandler mod.AppendModToTeamHandler
+	// ModAppendModToUserHandler sets the operation handler for the append mod to user operation
+	ModAppendModToUserHandler mod.AppendModToUserHandler
+	// PackAppendPackToTeamHandler sets the operation handler for the append pack to team operation
+	PackAppendPackToTeamHandler pack.AppendPackToTeamHandler
+	// PackAppendPackToUserHandler sets the operation handler for the append pack to user operation
+	PackAppendPackToUserHandler pack.AppendPackToUserHandler
+	// TeamAppendTeamToModHandler sets the operation handler for the append team to mod operation
+	TeamAppendTeamToModHandler team.AppendTeamToModHandler
+	// TeamAppendTeamToPackHandler sets the operation handler for the append team to pack operation
+	TeamAppendTeamToPackHandler team.AppendTeamToPackHandler
+	// TeamAppendTeamToUserHandler sets the operation handler for the append team to user operation
+	TeamAppendTeamToUserHandler team.AppendTeamToUserHandler
+	// UserAppendUserToModHandler sets the operation handler for the append user to mod operation
+	UserAppendUserToModHandler user.AppendUserToModHandler
+	// UserAppendUserToPackHandler sets the operation handler for the append user to pack operation
+	UserAppendUserToPackHandler user.AppendUserToPackHandler
+	// UserAppendUserToTeamHandler sets the operation handler for the append user to team operation
+	UserAppendUserToTeamHandler user.AppendUserToTeamHandler
+	// ModAppendVersionToBuildHandler sets the operation handler for the append version to build operation
+	ModAppendVersionToBuildHandler mod.AppendVersionToBuildHandler
+	// PackCreateBuildHandler sets the operation handler for the create build operation
+	PackCreateBuildHandler pack.CreateBuildHandler
+	// ModCreateModHandler sets the operation handler for the create mod operation
+	ModCreateModHandler mod.CreateModHandler
+	// PackCreatePackHandler sets the operation handler for the create pack operation
+	PackCreatePackHandler pack.CreatePackHandler
+	// TeamCreateTeamHandler sets the operation handler for the create team operation
+	TeamCreateTeamHandler team.CreateTeamHandler
+	// UserCreateUserHandler sets the operation handler for the create user operation
+	UserCreateUserHandler user.CreateUserHandler
+	// ModCreateVersionHandler sets the operation handler for the create version operation
+	ModCreateVersionHandler mod.CreateVersionHandler
+	// PackDeleteBuildHandler sets the operation handler for the delete build operation
+	PackDeleteBuildHandler pack.DeleteBuildHandler
+	// PackDeleteBuildFromVersionHandler sets the operation handler for the delete build from version operation
+	PackDeleteBuildFromVersionHandler pack.DeleteBuildFromVersionHandler
+	// ForgeDeleteForgeFromBuildHandler sets the operation handler for the delete forge from build operation
+	ForgeDeleteForgeFromBuildHandler forge.DeleteForgeFromBuildHandler
+	// MinecraftDeleteMinecraftFromBuildHandler sets the operation handler for the delete minecraft from build operation
+	MinecraftDeleteMinecraftFromBuildHandler minecraft.DeleteMinecraftFromBuildHandler
+	// ModDeleteModHandler sets the operation handler for the delete mod operation
+	ModDeleteModHandler mod.DeleteModHandler
+	// ModDeleteModFromTeamHandler sets the operation handler for the delete mod from team operation
+	ModDeleteModFromTeamHandler mod.DeleteModFromTeamHandler
+	// ModDeleteModFromUserHandler sets the operation handler for the delete mod from user operation
+	ModDeleteModFromUserHandler mod.DeleteModFromUserHandler
+	// PackDeletePackHandler sets the operation handler for the delete pack operation
+	PackDeletePackHandler pack.DeletePackHandler
+	// PackDeletePackFromTeamHandler sets the operation handler for the delete pack from team operation
+	PackDeletePackFromTeamHandler pack.DeletePackFromTeamHandler
+	// PackDeletePackFromUserHandler sets the operation handler for the delete pack from user operation
+	PackDeletePackFromUserHandler pack.DeletePackFromUserHandler
+	// TeamDeleteTeamHandler sets the operation handler for the delete team operation
+	TeamDeleteTeamHandler team.DeleteTeamHandler
+	// TeamDeleteTeamFromModHandler sets the operation handler for the delete team from mod operation
+	TeamDeleteTeamFromModHandler team.DeleteTeamFromModHandler
+	// TeamDeleteTeamFromPackHandler sets the operation handler for the delete team from pack operation
+	TeamDeleteTeamFromPackHandler team.DeleteTeamFromPackHandler
+	// TeamDeleteTeamFromUserHandler sets the operation handler for the delete team from user operation
+	TeamDeleteTeamFromUserHandler team.DeleteTeamFromUserHandler
+	// UserDeleteUserHandler sets the operation handler for the delete user operation
+	UserDeleteUserHandler user.DeleteUserHandler
+	// UserDeleteUserFromModHandler sets the operation handler for the delete user from mod operation
+	UserDeleteUserFromModHandler user.DeleteUserFromModHandler
+	// UserDeleteUserFromPackHandler sets the operation handler for the delete user from pack operation
+	UserDeleteUserFromPackHandler user.DeleteUserFromPackHandler
+	// UserDeleteUserFromTeamHandler sets the operation handler for the delete user from team operation
+	UserDeleteUserFromTeamHandler user.DeleteUserFromTeamHandler
+	// ModDeleteVersionHandler sets the operation handler for the delete version operation
+	ModDeleteVersionHandler mod.DeleteVersionHandler
+	// ModDeleteVersionFromBuildHandler sets the operation handler for the delete version from build operation
+	ModDeleteVersionFromBuildHandler mod.DeleteVersionFromBuildHandler
+	// PackListBuildVersionsHandler sets the operation handler for the list build versions operation
+	PackListBuildVersionsHandler pack.ListBuildVersionsHandler
+	// PackListBuildsHandler sets the operation handler for the list builds operation
+	PackListBuildsHandler pack.ListBuildsHandler
+	// ForgeListForgeBuildsHandler sets the operation handler for the list forge builds operation
+	ForgeListForgeBuildsHandler forge.ListForgeBuildsHandler
+	// ForgeListForgesHandler sets the operation handler for the list forges operation
+	ForgeListForgesHandler forge.ListForgesHandler
+	// MinecraftListMinecraftBuildsHandler sets the operation handler for the list minecraft builds operation
+	MinecraftListMinecraftBuildsHandler minecraft.ListMinecraftBuildsHandler
+	// MinecraftListMinecraftsHandler sets the operation handler for the list minecrafts operation
+	MinecraftListMinecraftsHandler minecraft.ListMinecraftsHandler
+	// ModListModTeamsHandler sets the operation handler for the list mod teams operation
+	ModListModTeamsHandler mod.ListModTeamsHandler
+	// ModListModUsersHandler sets the operation handler for the list mod users operation
+	ModListModUsersHandler mod.ListModUsersHandler
+	// ModListModsHandler sets the operation handler for the list mods operation
+	ModListModsHandler mod.ListModsHandler
+	// PackListPackTeamsHandler sets the operation handler for the list pack teams operation
+	PackListPackTeamsHandler pack.ListPackTeamsHandler
+	// PackListPackUsersHandler sets the operation handler for the list pack users operation
+	PackListPackUsersHandler pack.ListPackUsersHandler
+	// PackListPacksHandler sets the operation handler for the list packs operation
+	PackListPacksHandler pack.ListPacksHandler
+	// TeamListTeamModsHandler sets the operation handler for the list team mods operation
+	TeamListTeamModsHandler team.ListTeamModsHandler
+	// TeamListTeamPacksHandler sets the operation handler for the list team packs operation
+	TeamListTeamPacksHandler team.ListTeamPacksHandler
+	// TeamListTeamUsersHandler sets the operation handler for the list team users operation
+	TeamListTeamUsersHandler team.ListTeamUsersHandler
+	// TeamListTeamsHandler sets the operation handler for the list teams operation
+	TeamListTeamsHandler team.ListTeamsHandler
+	// UserListUserModsHandler sets the operation handler for the list user mods operation
+	UserListUserModsHandler user.ListUserModsHandler
+	// UserListUserPacksHandler sets the operation handler for the list user packs operation
+	UserListUserPacksHandler user.ListUserPacksHandler
+	// UserListUserTeamsHandler sets the operation handler for the list user teams operation
+	UserListUserTeamsHandler user.ListUserTeamsHandler
+	// UserListUsersHandler sets the operation handler for the list users operation
+	UserListUsersHandler user.ListUsersHandler
+	// ModListVersionBuildsHandler sets the operation handler for the list version builds operation
+	ModListVersionBuildsHandler mod.ListVersionBuildsHandler
+	// ModListVersionsHandler sets the operation handler for the list versions operation
+	ModListVersionsHandler mod.ListVersionsHandler
+	// AuthLoginUserHandler sets the operation handler for the login user operation
+	AuthLoginUserHandler auth.LoginUserHandler
+	// ModPermitModTeamHandler sets the operation handler for the permit mod team operation
+	ModPermitModTeamHandler mod.PermitModTeamHandler
+	// ModPermitModUserHandler sets the operation handler for the permit mod user operation
+	ModPermitModUserHandler mod.PermitModUserHandler
+	// PackPermitPackTeamHandler sets the operation handler for the permit pack team operation
+	PackPermitPackTeamHandler pack.PermitPackTeamHandler
+	// PackPermitPackUserHandler sets the operation handler for the permit pack user operation
+	PackPermitPackUserHandler pack.PermitPackUserHandler
+	// TeamPermitTeamModHandler sets the operation handler for the permit team mod operation
+	TeamPermitTeamModHandler team.PermitTeamModHandler
+	// TeamPermitTeamPackHandler sets the operation handler for the permit team pack operation
+	TeamPermitTeamPackHandler team.PermitTeamPackHandler
+	// TeamPermitTeamUserHandler sets the operation handler for the permit team user operation
+	TeamPermitTeamUserHandler team.PermitTeamUserHandler
+	// UserPermitUserModHandler sets the operation handler for the permit user mod operation
+	UserPermitUserModHandler user.PermitUserModHandler
+	// UserPermitUserPackHandler sets the operation handler for the permit user pack operation
+	UserPermitUserPackHandler user.PermitUserPackHandler
+	// UserPermitUserTeamHandler sets the operation handler for the permit user team operation
+	UserPermitUserTeamHandler user.PermitUserTeamHandler
+	// AuthRefreshAuthHandler sets the operation handler for the refresh auth operation
+	AuthRefreshAuthHandler auth.RefreshAuthHandler
+	// ForgeSearchForgesHandler sets the operation handler for the search forges operation
+	ForgeSearchForgesHandler forge.SearchForgesHandler
+	// MinecraftSearchMinecraftsHandler sets the operation handler for the search minecrafts operation
+	MinecraftSearchMinecraftsHandler minecraft.SearchMinecraftsHandler
+	// PackShowBuildHandler sets the operation handler for the show build operation
+	PackShowBuildHandler pack.ShowBuildHandler
+	// ModShowModHandler sets the operation handler for the show mod operation
+	ModShowModHandler mod.ShowModHandler
+	// PackShowPackHandler sets the operation handler for the show pack operation
+	PackShowPackHandler pack.ShowPackHandler
+	// ProfileShowProfileHandler sets the operation handler for the show profile operation
+	ProfileShowProfileHandler profile.ShowProfileHandler
+	// TeamShowTeamHandler sets the operation handler for the show team operation
+	TeamShowTeamHandler team.ShowTeamHandler
+	// UserShowUserHandler sets the operation handler for the show user operation
+	UserShowUserHandler user.ShowUserHandler
+	// ModShowVersionHandler sets the operation handler for the show version operation
+	ModShowVersionHandler mod.ShowVersionHandler
+	// ProfileTokenProfileHandler sets the operation handler for the token profile operation
+	ProfileTokenProfileHandler profile.TokenProfileHandler
+	// PackUpdateBuildHandler sets the operation handler for the update build operation
+	PackUpdateBuildHandler pack.UpdateBuildHandler
+	// ForgeUpdateForgeHandler sets the operation handler for the update forge operation
+	ForgeUpdateForgeHandler forge.UpdateForgeHandler
+	// MinecraftUpdateMinecraftHandler sets the operation handler for the update minecraft operation
+	MinecraftUpdateMinecraftHandler minecraft.UpdateMinecraftHandler
+	// ModUpdateModHandler sets the operation handler for the update mod operation
+	ModUpdateModHandler mod.UpdateModHandler
+	// PackUpdatePackHandler sets the operation handler for the update pack operation
+	PackUpdatePackHandler pack.UpdatePackHandler
+	// ProfileUpdateProfileHandler sets the operation handler for the update profile operation
+	ProfileUpdateProfileHandler profile.UpdateProfileHandler
+	// TeamUpdateTeamHandler sets the operation handler for the update team operation
+	TeamUpdateTeamHandler team.UpdateTeamHandler
+	// UserUpdateUserHandler sets the operation handler for the update user operation
+	UserUpdateUserHandler user.UpdateUserHandler
+	// ModUpdateVersionHandler sets the operation handler for the update version operation
+	ModUpdateVersionHandler mod.UpdateVersionHandler
+	// AuthVerifyAuthHandler sets the operation handler for the verify auth operation
+	AuthVerifyAuthHandler auth.VerifyAuthHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -610,380 +610,380 @@ func (o *KleisterAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.AuthAuthLoginHandler == nil {
-		unregistered = append(unregistered, "auth.AuthLoginHandler")
+	if o.PackAppendBuildToVersionHandler == nil {
+		unregistered = append(unregistered, "pack.AppendBuildToVersionHandler")
 	}
 
-	if o.AuthAuthRefreshHandler == nil {
-		unregistered = append(unregistered, "auth.AuthRefreshHandler")
+	if o.ForgeAppendForgeToBuildHandler == nil {
+		unregistered = append(unregistered, "forge.AppendForgeToBuildHandler")
 	}
 
-	if o.AuthAuthVerifyHandler == nil {
-		unregistered = append(unregistered, "auth.AuthVerifyHandler")
+	if o.MinecraftAppendMinecraftToBuildHandler == nil {
+		unregistered = append(unregistered, "minecraft.AppendMinecraftToBuildHandler")
 	}
 
-	if o.PackBuildCreateHandler == nil {
-		unregistered = append(unregistered, "pack.BuildCreateHandler")
+	if o.ModAppendModToTeamHandler == nil {
+		unregistered = append(unregistered, "mod.AppendModToTeamHandler")
 	}
 
-	if o.PackBuildDeleteHandler == nil {
-		unregistered = append(unregistered, "pack.BuildDeleteHandler")
+	if o.ModAppendModToUserHandler == nil {
+		unregistered = append(unregistered, "mod.AppendModToUserHandler")
 	}
 
-	if o.PackBuildIndexHandler == nil {
-		unregistered = append(unregistered, "pack.BuildIndexHandler")
+	if o.PackAppendPackToTeamHandler == nil {
+		unregistered = append(unregistered, "pack.AppendPackToTeamHandler")
 	}
 
-	if o.PackBuildShowHandler == nil {
-		unregistered = append(unregistered, "pack.BuildShowHandler")
+	if o.PackAppendPackToUserHandler == nil {
+		unregistered = append(unregistered, "pack.AppendPackToUserHandler")
 	}
 
-	if o.PackBuildUpdateHandler == nil {
-		unregistered = append(unregistered, "pack.BuildUpdateHandler")
+	if o.TeamAppendTeamToModHandler == nil {
+		unregistered = append(unregistered, "team.AppendTeamToModHandler")
 	}
 
-	if o.PackBuildVersionAppendHandler == nil {
-		unregistered = append(unregistered, "pack.BuildVersionAppendHandler")
+	if o.TeamAppendTeamToPackHandler == nil {
+		unregistered = append(unregistered, "team.AppendTeamToPackHandler")
 	}
 
-	if o.PackBuildVersionDeleteHandler == nil {
-		unregistered = append(unregistered, "pack.BuildVersionDeleteHandler")
+	if o.TeamAppendTeamToUserHandler == nil {
+		unregistered = append(unregistered, "team.AppendTeamToUserHandler")
 	}
 
-	if o.PackBuildVersionIndexHandler == nil {
-		unregistered = append(unregistered, "pack.BuildVersionIndexHandler")
+	if o.UserAppendUserToModHandler == nil {
+		unregistered = append(unregistered, "user.AppendUserToModHandler")
 	}
 
-	if o.ForgeForgeBuildAppendHandler == nil {
-		unregistered = append(unregistered, "forge.ForgeBuildAppendHandler")
+	if o.UserAppendUserToPackHandler == nil {
+		unregistered = append(unregistered, "user.AppendUserToPackHandler")
 	}
 
-	if o.ForgeForgeBuildDeleteHandler == nil {
-		unregistered = append(unregistered, "forge.ForgeBuildDeleteHandler")
+	if o.UserAppendUserToTeamHandler == nil {
+		unregistered = append(unregistered, "user.AppendUserToTeamHandler")
 	}
 
-	if o.ForgeForgeBuildIndexHandler == nil {
-		unregistered = append(unregistered, "forge.ForgeBuildIndexHandler")
+	if o.ModAppendVersionToBuildHandler == nil {
+		unregistered = append(unregistered, "mod.AppendVersionToBuildHandler")
 	}
 
-	if o.ForgeForgeIndexHandler == nil {
-		unregistered = append(unregistered, "forge.ForgeIndexHandler")
+	if o.PackCreateBuildHandler == nil {
+		unregistered = append(unregistered, "pack.CreateBuildHandler")
 	}
 
-	if o.ForgeForgeSearchHandler == nil {
-		unregistered = append(unregistered, "forge.ForgeSearchHandler")
+	if o.ModCreateModHandler == nil {
+		unregistered = append(unregistered, "mod.CreateModHandler")
 	}
 
-	if o.ForgeForgeUpdateHandler == nil {
-		unregistered = append(unregistered, "forge.ForgeUpdateHandler")
+	if o.PackCreatePackHandler == nil {
+		unregistered = append(unregistered, "pack.CreatePackHandler")
 	}
 
-	if o.MinecraftMinecraftBuildAppendHandler == nil {
-		unregistered = append(unregistered, "minecraft.MinecraftBuildAppendHandler")
+	if o.TeamCreateTeamHandler == nil {
+		unregistered = append(unregistered, "team.CreateTeamHandler")
 	}
 
-	if o.MinecraftMinecraftBuildDeleteHandler == nil {
-		unregistered = append(unregistered, "minecraft.MinecraftBuildDeleteHandler")
+	if o.UserCreateUserHandler == nil {
+		unregistered = append(unregistered, "user.CreateUserHandler")
 	}
 
-	if o.MinecraftMinecraftBuildIndexHandler == nil {
-		unregistered = append(unregistered, "minecraft.MinecraftBuildIndexHandler")
+	if o.ModCreateVersionHandler == nil {
+		unregistered = append(unregistered, "mod.CreateVersionHandler")
 	}
 
-	if o.MinecraftMinecraftIndexHandler == nil {
-		unregistered = append(unregistered, "minecraft.MinecraftIndexHandler")
+	if o.PackDeleteBuildHandler == nil {
+		unregistered = append(unregistered, "pack.DeleteBuildHandler")
 	}
 
-	if o.MinecraftMinecraftSearchHandler == nil {
-		unregistered = append(unregistered, "minecraft.MinecraftSearchHandler")
+	if o.PackDeleteBuildFromVersionHandler == nil {
+		unregistered = append(unregistered, "pack.DeleteBuildFromVersionHandler")
 	}
 
-	if o.MinecraftMinecraftUpdateHandler == nil {
-		unregistered = append(unregistered, "minecraft.MinecraftUpdateHandler")
+	if o.ForgeDeleteForgeFromBuildHandler == nil {
+		unregistered = append(unregistered, "forge.DeleteForgeFromBuildHandler")
 	}
 
-	if o.ModModCreateHandler == nil {
-		unregistered = append(unregistered, "mod.ModCreateHandler")
+	if o.MinecraftDeleteMinecraftFromBuildHandler == nil {
+		unregistered = append(unregistered, "minecraft.DeleteMinecraftFromBuildHandler")
 	}
 
-	if o.ModModDeleteHandler == nil {
-		unregistered = append(unregistered, "mod.ModDeleteHandler")
+	if o.ModDeleteModHandler == nil {
+		unregistered = append(unregistered, "mod.DeleteModHandler")
 	}
 
-	if o.ModModIndexHandler == nil {
-		unregistered = append(unregistered, "mod.ModIndexHandler")
+	if o.ModDeleteModFromTeamHandler == nil {
+		unregistered = append(unregistered, "mod.DeleteModFromTeamHandler")
 	}
 
-	if o.ModModShowHandler == nil {
-		unregistered = append(unregistered, "mod.ModShowHandler")
+	if o.ModDeleteModFromUserHandler == nil {
+		unregistered = append(unregistered, "mod.DeleteModFromUserHandler")
 	}
 
-	if o.ModModTeamAppendHandler == nil {
-		unregistered = append(unregistered, "mod.ModTeamAppendHandler")
+	if o.PackDeletePackHandler == nil {
+		unregistered = append(unregistered, "pack.DeletePackHandler")
 	}
 
-	if o.ModModTeamDeleteHandler == nil {
-		unregistered = append(unregistered, "mod.ModTeamDeleteHandler")
+	if o.PackDeletePackFromTeamHandler == nil {
+		unregistered = append(unregistered, "pack.DeletePackFromTeamHandler")
 	}
 
-	if o.ModModTeamIndexHandler == nil {
-		unregistered = append(unregistered, "mod.ModTeamIndexHandler")
+	if o.PackDeletePackFromUserHandler == nil {
+		unregistered = append(unregistered, "pack.DeletePackFromUserHandler")
 	}
 
-	if o.ModModTeamPermHandler == nil {
-		unregistered = append(unregistered, "mod.ModTeamPermHandler")
+	if o.TeamDeleteTeamHandler == nil {
+		unregistered = append(unregistered, "team.DeleteTeamHandler")
 	}
 
-	if o.ModModUpdateHandler == nil {
-		unregistered = append(unregistered, "mod.ModUpdateHandler")
+	if o.TeamDeleteTeamFromModHandler == nil {
+		unregistered = append(unregistered, "team.DeleteTeamFromModHandler")
 	}
 
-	if o.ModModUserAppendHandler == nil {
-		unregistered = append(unregistered, "mod.ModUserAppendHandler")
+	if o.TeamDeleteTeamFromPackHandler == nil {
+		unregistered = append(unregistered, "team.DeleteTeamFromPackHandler")
 	}
 
-	if o.ModModUserDeleteHandler == nil {
-		unregistered = append(unregistered, "mod.ModUserDeleteHandler")
+	if o.TeamDeleteTeamFromUserHandler == nil {
+		unregistered = append(unregistered, "team.DeleteTeamFromUserHandler")
 	}
 
-	if o.ModModUserIndexHandler == nil {
-		unregistered = append(unregistered, "mod.ModUserIndexHandler")
+	if o.UserDeleteUserHandler == nil {
+		unregistered = append(unregistered, "user.DeleteUserHandler")
 	}
 
-	if o.ModModUserPermHandler == nil {
-		unregistered = append(unregistered, "mod.ModUserPermHandler")
+	if o.UserDeleteUserFromModHandler == nil {
+		unregistered = append(unregistered, "user.DeleteUserFromModHandler")
 	}
 
-	if o.PackPackCreateHandler == nil {
-		unregistered = append(unregistered, "pack.PackCreateHandler")
+	if o.UserDeleteUserFromPackHandler == nil {
+		unregistered = append(unregistered, "user.DeleteUserFromPackHandler")
 	}
 
-	if o.PackPackDeleteHandler == nil {
-		unregistered = append(unregistered, "pack.PackDeleteHandler")
+	if o.UserDeleteUserFromTeamHandler == nil {
+		unregistered = append(unregistered, "user.DeleteUserFromTeamHandler")
 	}
 
-	if o.PackPackIndexHandler == nil {
-		unregistered = append(unregistered, "pack.PackIndexHandler")
+	if o.ModDeleteVersionHandler == nil {
+		unregistered = append(unregistered, "mod.DeleteVersionHandler")
 	}
 
-	if o.PackPackShowHandler == nil {
-		unregistered = append(unregistered, "pack.PackShowHandler")
+	if o.ModDeleteVersionFromBuildHandler == nil {
+		unregistered = append(unregistered, "mod.DeleteVersionFromBuildHandler")
 	}
 
-	if o.PackPackTeamAppendHandler == nil {
-		unregistered = append(unregistered, "pack.PackTeamAppendHandler")
+	if o.PackListBuildVersionsHandler == nil {
+		unregistered = append(unregistered, "pack.ListBuildVersionsHandler")
 	}
 
-	if o.PackPackTeamDeleteHandler == nil {
-		unregistered = append(unregistered, "pack.PackTeamDeleteHandler")
+	if o.PackListBuildsHandler == nil {
+		unregistered = append(unregistered, "pack.ListBuildsHandler")
 	}
 
-	if o.PackPackTeamIndexHandler == nil {
-		unregistered = append(unregistered, "pack.PackTeamIndexHandler")
+	if o.ForgeListForgeBuildsHandler == nil {
+		unregistered = append(unregistered, "forge.ListForgeBuildsHandler")
 	}
 
-	if o.PackPackTeamPermHandler == nil {
-		unregistered = append(unregistered, "pack.PackTeamPermHandler")
+	if o.ForgeListForgesHandler == nil {
+		unregistered = append(unregistered, "forge.ListForgesHandler")
 	}
 
-	if o.PackPackUpdateHandler == nil {
-		unregistered = append(unregistered, "pack.PackUpdateHandler")
+	if o.MinecraftListMinecraftBuildsHandler == nil {
+		unregistered = append(unregistered, "minecraft.ListMinecraftBuildsHandler")
 	}
 
-	if o.PackPackUserAppendHandler == nil {
-		unregistered = append(unregistered, "pack.PackUserAppendHandler")
+	if o.MinecraftListMinecraftsHandler == nil {
+		unregistered = append(unregistered, "minecraft.ListMinecraftsHandler")
 	}
 
-	if o.PackPackUserDeleteHandler == nil {
-		unregistered = append(unregistered, "pack.PackUserDeleteHandler")
+	if o.ModListModTeamsHandler == nil {
+		unregistered = append(unregistered, "mod.ListModTeamsHandler")
 	}
 
-	if o.PackPackUserIndexHandler == nil {
-		unregistered = append(unregistered, "pack.PackUserIndexHandler")
+	if o.ModListModUsersHandler == nil {
+		unregistered = append(unregistered, "mod.ListModUsersHandler")
 	}
 
-	if o.PackPackUserPermHandler == nil {
-		unregistered = append(unregistered, "pack.PackUserPermHandler")
+	if o.ModListModsHandler == nil {
+		unregistered = append(unregistered, "mod.ListModsHandler")
 	}
 
-	if o.ProfileProfileShowHandler == nil {
-		unregistered = append(unregistered, "profile.ProfileShowHandler")
+	if o.PackListPackTeamsHandler == nil {
+		unregistered = append(unregistered, "pack.ListPackTeamsHandler")
 	}
 
-	if o.ProfileProfileTokenHandler == nil {
-		unregistered = append(unregistered, "profile.ProfileTokenHandler")
+	if o.PackListPackUsersHandler == nil {
+		unregistered = append(unregistered, "pack.ListPackUsersHandler")
 	}
 
-	if o.ProfileProfileUpdateHandler == nil {
-		unregistered = append(unregistered, "profile.ProfileUpdateHandler")
+	if o.PackListPacksHandler == nil {
+		unregistered = append(unregistered, "pack.ListPacksHandler")
 	}
 
-	if o.TeamTeamCreateHandler == nil {
-		unregistered = append(unregistered, "team.TeamCreateHandler")
+	if o.TeamListTeamModsHandler == nil {
+		unregistered = append(unregistered, "team.ListTeamModsHandler")
 	}
 
-	if o.TeamTeamDeleteHandler == nil {
-		unregistered = append(unregistered, "team.TeamDeleteHandler")
+	if o.TeamListTeamPacksHandler == nil {
+		unregistered = append(unregistered, "team.ListTeamPacksHandler")
 	}
 
-	if o.TeamTeamIndexHandler == nil {
-		unregistered = append(unregistered, "team.TeamIndexHandler")
+	if o.TeamListTeamUsersHandler == nil {
+		unregistered = append(unregistered, "team.ListTeamUsersHandler")
 	}
 
-	if o.TeamTeamModAppendHandler == nil {
-		unregistered = append(unregistered, "team.TeamModAppendHandler")
+	if o.TeamListTeamsHandler == nil {
+		unregistered = append(unregistered, "team.ListTeamsHandler")
 	}
 
-	if o.TeamTeamModDeleteHandler == nil {
-		unregistered = append(unregistered, "team.TeamModDeleteHandler")
+	if o.UserListUserModsHandler == nil {
+		unregistered = append(unregistered, "user.ListUserModsHandler")
 	}
 
-	if o.TeamTeamModIndexHandler == nil {
-		unregistered = append(unregistered, "team.TeamModIndexHandler")
+	if o.UserListUserPacksHandler == nil {
+		unregistered = append(unregistered, "user.ListUserPacksHandler")
 	}
 
-	if o.TeamTeamModPermHandler == nil {
-		unregistered = append(unregistered, "team.TeamModPermHandler")
+	if o.UserListUserTeamsHandler == nil {
+		unregistered = append(unregistered, "user.ListUserTeamsHandler")
 	}
 
-	if o.TeamTeamPackAppendHandler == nil {
-		unregistered = append(unregistered, "team.TeamPackAppendHandler")
+	if o.UserListUsersHandler == nil {
+		unregistered = append(unregistered, "user.ListUsersHandler")
 	}
 
-	if o.TeamTeamPackDeleteHandler == nil {
-		unregistered = append(unregistered, "team.TeamPackDeleteHandler")
+	if o.ModListVersionBuildsHandler == nil {
+		unregistered = append(unregistered, "mod.ListVersionBuildsHandler")
 	}
 
-	if o.TeamTeamPackIndexHandler == nil {
-		unregistered = append(unregistered, "team.TeamPackIndexHandler")
+	if o.ModListVersionsHandler == nil {
+		unregistered = append(unregistered, "mod.ListVersionsHandler")
 	}
 
-	if o.TeamTeamPackPermHandler == nil {
-		unregistered = append(unregistered, "team.TeamPackPermHandler")
+	if o.AuthLoginUserHandler == nil {
+		unregistered = append(unregistered, "auth.LoginUserHandler")
 	}
 
-	if o.TeamTeamShowHandler == nil {
-		unregistered = append(unregistered, "team.TeamShowHandler")
+	if o.ModPermitModTeamHandler == nil {
+		unregistered = append(unregistered, "mod.PermitModTeamHandler")
 	}
 
-	if o.TeamTeamUpdateHandler == nil {
-		unregistered = append(unregistered, "team.TeamUpdateHandler")
+	if o.ModPermitModUserHandler == nil {
+		unregistered = append(unregistered, "mod.PermitModUserHandler")
 	}
 
-	if o.TeamTeamUserAppendHandler == nil {
-		unregistered = append(unregistered, "team.TeamUserAppendHandler")
+	if o.PackPermitPackTeamHandler == nil {
+		unregistered = append(unregistered, "pack.PermitPackTeamHandler")
 	}
 
-	if o.TeamTeamUserDeleteHandler == nil {
-		unregistered = append(unregistered, "team.TeamUserDeleteHandler")
+	if o.PackPermitPackUserHandler == nil {
+		unregistered = append(unregistered, "pack.PermitPackUserHandler")
 	}
 
-	if o.TeamTeamUserIndexHandler == nil {
-		unregistered = append(unregistered, "team.TeamUserIndexHandler")
+	if o.TeamPermitTeamModHandler == nil {
+		unregistered = append(unregistered, "team.PermitTeamModHandler")
 	}
 
-	if o.TeamTeamUserPermHandler == nil {
-		unregistered = append(unregistered, "team.TeamUserPermHandler")
+	if o.TeamPermitTeamPackHandler == nil {
+		unregistered = append(unregistered, "team.PermitTeamPackHandler")
 	}
 
-	if o.UserUserCreateHandler == nil {
-		unregistered = append(unregistered, "user.UserCreateHandler")
+	if o.TeamPermitTeamUserHandler == nil {
+		unregistered = append(unregistered, "team.PermitTeamUserHandler")
 	}
 
-	if o.UserUserDeleteHandler == nil {
-		unregistered = append(unregistered, "user.UserDeleteHandler")
+	if o.UserPermitUserModHandler == nil {
+		unregistered = append(unregistered, "user.PermitUserModHandler")
 	}
 
-	if o.UserUserIndexHandler == nil {
-		unregistered = append(unregistered, "user.UserIndexHandler")
+	if o.UserPermitUserPackHandler == nil {
+		unregistered = append(unregistered, "user.PermitUserPackHandler")
 	}
 
-	if o.UserUserModAppendHandler == nil {
-		unregistered = append(unregistered, "user.UserModAppendHandler")
+	if o.UserPermitUserTeamHandler == nil {
+		unregistered = append(unregistered, "user.PermitUserTeamHandler")
 	}
 
-	if o.UserUserModDeleteHandler == nil {
-		unregistered = append(unregistered, "user.UserModDeleteHandler")
+	if o.AuthRefreshAuthHandler == nil {
+		unregistered = append(unregistered, "auth.RefreshAuthHandler")
 	}
 
-	if o.UserUserModIndexHandler == nil {
-		unregistered = append(unregistered, "user.UserModIndexHandler")
+	if o.ForgeSearchForgesHandler == nil {
+		unregistered = append(unregistered, "forge.SearchForgesHandler")
 	}
 
-	if o.UserUserModPermHandler == nil {
-		unregistered = append(unregistered, "user.UserModPermHandler")
+	if o.MinecraftSearchMinecraftsHandler == nil {
+		unregistered = append(unregistered, "minecraft.SearchMinecraftsHandler")
 	}
 
-	if o.UserUserPackAppendHandler == nil {
-		unregistered = append(unregistered, "user.UserPackAppendHandler")
+	if o.PackShowBuildHandler == nil {
+		unregistered = append(unregistered, "pack.ShowBuildHandler")
 	}
 
-	if o.UserUserPackDeleteHandler == nil {
-		unregistered = append(unregistered, "user.UserPackDeleteHandler")
+	if o.ModShowModHandler == nil {
+		unregistered = append(unregistered, "mod.ShowModHandler")
 	}
 
-	if o.UserUserPackIndexHandler == nil {
-		unregistered = append(unregistered, "user.UserPackIndexHandler")
+	if o.PackShowPackHandler == nil {
+		unregistered = append(unregistered, "pack.ShowPackHandler")
 	}
 
-	if o.UserUserPackPermHandler == nil {
-		unregistered = append(unregistered, "user.UserPackPermHandler")
+	if o.ProfileShowProfileHandler == nil {
+		unregistered = append(unregistered, "profile.ShowProfileHandler")
 	}
 
-	if o.UserUserShowHandler == nil {
-		unregistered = append(unregistered, "user.UserShowHandler")
+	if o.TeamShowTeamHandler == nil {
+		unregistered = append(unregistered, "team.ShowTeamHandler")
 	}
 
-	if o.UserUserTeamAppendHandler == nil {
-		unregistered = append(unregistered, "user.UserTeamAppendHandler")
+	if o.UserShowUserHandler == nil {
+		unregistered = append(unregistered, "user.ShowUserHandler")
 	}
 
-	if o.UserUserTeamDeleteHandler == nil {
-		unregistered = append(unregistered, "user.UserTeamDeleteHandler")
+	if o.ModShowVersionHandler == nil {
+		unregistered = append(unregistered, "mod.ShowVersionHandler")
 	}
 
-	if o.UserUserTeamIndexHandler == nil {
-		unregistered = append(unregistered, "user.UserTeamIndexHandler")
+	if o.ProfileTokenProfileHandler == nil {
+		unregistered = append(unregistered, "profile.TokenProfileHandler")
 	}
 
-	if o.UserUserTeamPermHandler == nil {
-		unregistered = append(unregistered, "user.UserTeamPermHandler")
+	if o.PackUpdateBuildHandler == nil {
+		unregistered = append(unregistered, "pack.UpdateBuildHandler")
 	}
 
-	if o.UserUserUpdateHandler == nil {
-		unregistered = append(unregistered, "user.UserUpdateHandler")
+	if o.ForgeUpdateForgeHandler == nil {
+		unregistered = append(unregistered, "forge.UpdateForgeHandler")
 	}
 
-	if o.ModVersionBuildAppendHandler == nil {
-		unregistered = append(unregistered, "mod.VersionBuildAppendHandler")
+	if o.MinecraftUpdateMinecraftHandler == nil {
+		unregistered = append(unregistered, "minecraft.UpdateMinecraftHandler")
 	}
 
-	if o.ModVersionBuildDeleteHandler == nil {
-		unregistered = append(unregistered, "mod.VersionBuildDeleteHandler")
+	if o.ModUpdateModHandler == nil {
+		unregistered = append(unregistered, "mod.UpdateModHandler")
 	}
 
-	if o.ModVersionBuildIndexHandler == nil {
-		unregistered = append(unregistered, "mod.VersionBuildIndexHandler")
+	if o.PackUpdatePackHandler == nil {
+		unregistered = append(unregistered, "pack.UpdatePackHandler")
 	}
 
-	if o.ModVersionCreateHandler == nil {
-		unregistered = append(unregistered, "mod.VersionCreateHandler")
+	if o.ProfileUpdateProfileHandler == nil {
+		unregistered = append(unregistered, "profile.UpdateProfileHandler")
 	}
 
-	if o.ModVersionDeleteHandler == nil {
-		unregistered = append(unregistered, "mod.VersionDeleteHandler")
+	if o.TeamUpdateTeamHandler == nil {
+		unregistered = append(unregistered, "team.UpdateTeamHandler")
 	}
 
-	if o.ModVersionIndexHandler == nil {
-		unregistered = append(unregistered, "mod.VersionIndexHandler")
+	if o.UserUpdateUserHandler == nil {
+		unregistered = append(unregistered, "user.UpdateUserHandler")
 	}
 
-	if o.ModVersionShowHandler == nil {
-		unregistered = append(unregistered, "mod.VersionShowHandler")
+	if o.ModUpdateVersionHandler == nil {
+		unregistered = append(unregistered, "mod.UpdateVersionHandler")
 	}
 
-	if o.ModVersionUpdateHandler == nil {
-		unregistered = append(unregistered, "mod.VersionUpdateHandler")
+	if o.AuthVerifyAuthHandler == nil {
+		unregistered = append(unregistered, "auth.VerifyAuthHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -1087,472 +1087,472 @@ func (o *KleisterAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/auth/login"] = auth.NewAuthLogin(o.context, o.AuthAuthLoginHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/auth/refresh"] = auth.NewAuthRefresh(o.context, o.AuthAuthRefreshHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/auth/verify/{token}"] = auth.NewAuthVerify(o.context, o.AuthAuthVerifyHandler)
+	o.handlers["POST"]["/packs/{packID}/builds/{buildID}/versions"] = pack.NewAppendBuildToVersion(o.context, o.PackAppendBuildToVersionHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/packs/{packID}/builds"] = pack.NewBuildCreate(o.context, o.PackBuildCreateHandler)
+	o.handlers["POST"]["/forge/{forgeID}/builds"] = forge.NewAppendForgeToBuild(o.context, o.ForgeAppendForgeToBuildHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/minecraft/{minecraftID}/builds"] = minecraft.NewAppendMinecraftToBuild(o.context, o.MinecraftAppendMinecraftToBuildHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/mods/{modID}/teams"] = mod.NewAppendModToTeam(o.context, o.ModAppendModToTeamHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/mods/{modID}/users"] = mod.NewAppendModToUser(o.context, o.ModAppendModToUserHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/packs/{packID}/teams"] = pack.NewAppendPackToTeam(o.context, o.PackAppendPackToTeamHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/packs/{packID}/users"] = pack.NewAppendPackToUser(o.context, o.PackAppendPackToUserHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/teams/{teamID}/mods"] = team.NewAppendTeamToMod(o.context, o.TeamAppendTeamToModHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/teams/{teamID}/packs"] = team.NewAppendTeamToPack(o.context, o.TeamAppendTeamToPackHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/teams/{teamID}/users"] = team.NewAppendTeamToUser(o.context, o.TeamAppendTeamToUserHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/users/{userID}/mods"] = user.NewAppendUserToMod(o.context, o.UserAppendUserToModHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/users/{userID}/packs"] = user.NewAppendUserToPack(o.context, o.UserAppendUserToPackHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/users/{userID}/teams"] = user.NewAppendUserToTeam(o.context, o.UserAppendUserToTeamHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/mods/{modID}/versions/{versionID}/builds"] = mod.NewAppendVersionToBuild(o.context, o.ModAppendVersionToBuildHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/packs/{packID}/builds"] = pack.NewCreateBuild(o.context, o.PackCreateBuildHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/mods"] = mod.NewCreateMod(o.context, o.ModCreateModHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/packs"] = pack.NewCreatePack(o.context, o.PackCreatePackHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/teams"] = team.NewCreateTeam(o.context, o.TeamCreateTeamHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/users"] = user.NewCreateUser(o.context, o.UserCreateUserHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/mods/{modID}/versions"] = mod.NewCreateVersion(o.context, o.ModCreateVersionHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/packs/{packID}/builds/{buildID}"] = pack.NewBuildDelete(o.context, o.PackBuildDeleteHandler)
+	o.handlers["DELETE"]["/packs/{packID}/builds/{buildID}"] = pack.NewDeleteBuild(o.context, o.PackDeleteBuildHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/packs/{packID}/builds/{buildID}/versions"] = pack.NewDeleteBuildFromVersion(o.context, o.PackDeleteBuildFromVersionHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/forge/{forgeID}/builds"] = forge.NewDeleteForgeFromBuild(o.context, o.ForgeDeleteForgeFromBuildHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/minecraft/{minecraftID}/builds"] = minecraft.NewDeleteMinecraftFromBuild(o.context, o.MinecraftDeleteMinecraftFromBuildHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/mods/{modID}"] = mod.NewDeleteMod(o.context, o.ModDeleteModHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/mods/{modID}/teams"] = mod.NewDeleteModFromTeam(o.context, o.ModDeleteModFromTeamHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/mods/{modID}/users"] = mod.NewDeleteModFromUser(o.context, o.ModDeleteModFromUserHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/packs/{packID}"] = pack.NewDeletePack(o.context, o.PackDeletePackHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/packs/{packID}/teams"] = pack.NewDeletePackFromTeam(o.context, o.PackDeletePackFromTeamHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/packs/{packID}/users"] = pack.NewDeletePackFromUser(o.context, o.PackDeletePackFromUserHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/teams/{teamID}"] = team.NewDeleteTeam(o.context, o.TeamDeleteTeamHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/teams/{teamID}/mods"] = team.NewDeleteTeamFromMod(o.context, o.TeamDeleteTeamFromModHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/teams/{teamID}/packs"] = team.NewDeleteTeamFromPack(o.context, o.TeamDeleteTeamFromPackHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/teams/{teamID}/users"] = team.NewDeleteTeamFromUser(o.context, o.TeamDeleteTeamFromUserHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/users/{userID}"] = user.NewDeleteUser(o.context, o.UserDeleteUserHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/users/{userID}/mods"] = user.NewDeleteUserFromMod(o.context, o.UserDeleteUserFromModHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/users/{userID}/packs"] = user.NewDeleteUserFromPack(o.context, o.UserDeleteUserFromPackHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/users/{userID}/teams"] = user.NewDeleteUserFromTeam(o.context, o.UserDeleteUserFromTeamHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/mods/{modID}/versions/{versionID}"] = mod.NewDeleteVersion(o.context, o.ModDeleteVersionHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/mods/{modID}/versions/{versionID}/builds"] = mod.NewDeleteVersionFromBuild(o.context, o.ModDeleteVersionFromBuildHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/packs/{packID}/builds"] = pack.NewBuildIndex(o.context, o.PackBuildIndexHandler)
+	o.handlers["GET"]["/packs/{packID}/builds/{buildID}/versions"] = pack.NewListBuildVersions(o.context, o.PackListBuildVersionsHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/packs/{packID}/builds/{buildID}"] = pack.NewBuildShow(o.context, o.PackBuildShowHandler)
+	o.handlers["GET"]["/packs/{packID}/builds"] = pack.NewListBuilds(o.context, o.PackListBuildsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/forge/{forgeID}/builds"] = forge.NewListForgeBuilds(o.context, o.ForgeListForgeBuildsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/forge"] = forge.NewListForges(o.context, o.ForgeListForgesHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/minecraft/{minecraftID}/builds"] = minecraft.NewListMinecraftBuilds(o.context, o.MinecraftListMinecraftBuildsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/minecraft"] = minecraft.NewListMinecrafts(o.context, o.MinecraftListMinecraftsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/mods/{modID}/teams"] = mod.NewListModTeams(o.context, o.ModListModTeamsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/mods/{modID}/users"] = mod.NewListModUsers(o.context, o.ModListModUsersHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/mods"] = mod.NewListMods(o.context, o.ModListModsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/packs/{packID}/teams"] = pack.NewListPackTeams(o.context, o.PackListPackTeamsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/packs/{packID}/users"] = pack.NewListPackUsers(o.context, o.PackListPackUsersHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/packs"] = pack.NewListPacks(o.context, o.PackListPacksHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/teams/{teamID}/mods"] = team.NewListTeamMods(o.context, o.TeamListTeamModsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/teams/{teamID}/packs"] = team.NewListTeamPacks(o.context, o.TeamListTeamPacksHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/teams/{teamID}/users"] = team.NewListTeamUsers(o.context, o.TeamListTeamUsersHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/teams"] = team.NewListTeams(o.context, o.TeamListTeamsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/users/{userID}/mods"] = user.NewListUserMods(o.context, o.UserListUserModsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/users/{userID}/packs"] = user.NewListUserPacks(o.context, o.UserListUserPacksHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/users/{userID}/teams"] = user.NewListUserTeams(o.context, o.UserListUserTeamsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/users"] = user.NewListUsers(o.context, o.UserListUsersHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/mods/{modID}/versions/{versionID}/builds"] = mod.NewListVersionBuilds(o.context, o.ModListVersionBuildsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/mods/{modID}/versions"] = mod.NewListVersions(o.context, o.ModListVersionsHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/auth/login"] = auth.NewLoginUser(o.context, o.AuthLoginUserHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/packs/{packID}/builds/{buildID}"] = pack.NewBuildUpdate(o.context, o.PackBuildUpdateHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/packs/{packID}/builds/{buildID}/versions"] = pack.NewBuildVersionAppend(o.context, o.PackBuildVersionAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/packs/{packID}/builds/{buildID}/versions"] = pack.NewBuildVersionDelete(o.context, o.PackBuildVersionDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/packs/{packID}/builds/{buildID}/versions"] = pack.NewBuildVersionIndex(o.context, o.PackBuildVersionIndexHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/forge/{forgeID}/builds"] = forge.NewForgeBuildAppend(o.context, o.ForgeForgeBuildAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/forge/{forgeID}/builds"] = forge.NewForgeBuildDelete(o.context, o.ForgeForgeBuildDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/forge/{forgeID}/builds"] = forge.NewForgeBuildIndex(o.context, o.ForgeForgeBuildIndexHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/forge"] = forge.NewForgeIndex(o.context, o.ForgeForgeIndexHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/forge/{forgeID}"] = forge.NewForgeSearch(o.context, o.ForgeForgeSearchHandler)
+	o.handlers["PUT"]["/mods/{modID}/teams"] = mod.NewPermitModTeam(o.context, o.ModPermitModTeamHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/forge"] = forge.NewForgeUpdate(o.context, o.ForgeForgeUpdateHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/minecraft/{minecraftID}/builds"] = minecraft.NewMinecraftBuildAppend(o.context, o.MinecraftMinecraftBuildAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/minecraft/{minecraftID}/builds"] = minecraft.NewMinecraftBuildDelete(o.context, o.MinecraftMinecraftBuildDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/minecraft/{minecraftID}/builds"] = minecraft.NewMinecraftBuildIndex(o.context, o.MinecraftMinecraftBuildIndexHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/minecraft"] = minecraft.NewMinecraftIndex(o.context, o.MinecraftMinecraftIndexHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/minecraft/{minecraftID}"] = minecraft.NewMinecraftSearch(o.context, o.MinecraftMinecraftSearchHandler)
+	o.handlers["PUT"]["/mods/{modID}/users"] = mod.NewPermitModUser(o.context, o.ModPermitModUserHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/minecraft"] = minecraft.NewMinecraftUpdate(o.context, o.MinecraftMinecraftUpdateHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/mods"] = mod.NewModCreate(o.context, o.ModModCreateHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/mods/{modID}"] = mod.NewModDelete(o.context, o.ModModDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/mods"] = mod.NewModIndex(o.context, o.ModModIndexHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/mods/{modID}"] = mod.NewModShow(o.context, o.ModModShowHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/mods/{modID}/teams"] = mod.NewModTeamAppend(o.context, o.ModModTeamAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/mods/{modID}/teams"] = mod.NewModTeamDelete(o.context, o.ModModTeamDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/mods/{modID}/teams"] = mod.NewModTeamIndex(o.context, o.ModModTeamIndexHandler)
+	o.handlers["PUT"]["/packs/{packID}/teams"] = pack.NewPermitPackTeam(o.context, o.PackPermitPackTeamHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/mods/{modID}/teams"] = mod.NewModTeamPerm(o.context, o.ModModTeamPermHandler)
+	o.handlers["PUT"]["/packs/{packID}/users"] = pack.NewPermitPackUser(o.context, o.PackPermitPackUserHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/mods/{modID}"] = mod.NewModUpdate(o.context, o.ModModUpdateHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/mods/{modID}/users"] = mod.NewModUserAppend(o.context, o.ModModUserAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/mods/{modID}/users"] = mod.NewModUserDelete(o.context, o.ModModUserDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/mods/{modID}/users"] = mod.NewModUserIndex(o.context, o.ModModUserIndexHandler)
+	o.handlers["PUT"]["/teams/{teamID}/mods"] = team.NewPermitTeamMod(o.context, o.TeamPermitTeamModHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/mods/{modID}/users"] = mod.NewModUserPerm(o.context, o.ModModUserPermHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/packs"] = pack.NewPackCreate(o.context, o.PackPackCreateHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/packs/{packID}"] = pack.NewPackDelete(o.context, o.PackPackDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/packs"] = pack.NewPackIndex(o.context, o.PackPackIndexHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/packs/{packID}"] = pack.NewPackShow(o.context, o.PackPackShowHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/packs/{packID}/teams"] = pack.NewPackTeamAppend(o.context, o.PackPackTeamAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/packs/{packID}/teams"] = pack.NewPackTeamDelete(o.context, o.PackPackTeamDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/packs/{packID}/teams"] = pack.NewPackTeamIndex(o.context, o.PackPackTeamIndexHandler)
+	o.handlers["PUT"]["/teams/{teamID}/packs"] = team.NewPermitTeamPack(o.context, o.TeamPermitTeamPackHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/packs/{packID}/teams"] = pack.NewPackTeamPerm(o.context, o.PackPackTeamPermHandler)
+	o.handlers["PUT"]["/teams/{teamID}/users"] = team.NewPermitTeamUser(o.context, o.TeamPermitTeamUserHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/packs/{packID}"] = pack.NewPackUpdate(o.context, o.PackPackUpdateHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/packs/{packID}/users"] = pack.NewPackUserAppend(o.context, o.PackPackUserAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/packs/{packID}/users"] = pack.NewPackUserDelete(o.context, o.PackPackUserDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/packs/{packID}/users"] = pack.NewPackUserIndex(o.context, o.PackPackUserIndexHandler)
+	o.handlers["PUT"]["/users/{userID}/mods"] = user.NewPermitUserMod(o.context, o.UserPermitUserModHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/packs/{packID}/users"] = pack.NewPackUserPerm(o.context, o.PackPackUserPermHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/profile/self"] = profile.NewProfileShow(o.context, o.ProfileProfileShowHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/profile/token"] = profile.NewProfileToken(o.context, o.ProfileProfileTokenHandler)
+	o.handlers["PUT"]["/users/{userID}/packs"] = user.NewPermitUserPack(o.context, o.UserPermitUserPackHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/profile/self"] = profile.NewProfileUpdate(o.context, o.ProfileProfileUpdateHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/teams"] = team.NewTeamCreate(o.context, o.TeamTeamCreateHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/teams/{teamID}"] = team.NewTeamDelete(o.context, o.TeamTeamDeleteHandler)
+	o.handlers["PUT"]["/users/{userID}/teams"] = user.NewPermitUserTeam(o.context, o.UserPermitUserTeamHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/teams"] = team.NewTeamIndex(o.context, o.TeamTeamIndexHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/teams/{teamID}/mods"] = team.NewTeamModAppend(o.context, o.TeamTeamModAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/teams/{teamID}/mods"] = team.NewTeamModDelete(o.context, o.TeamTeamModDeleteHandler)
+	o.handlers["GET"]["/auth/refresh"] = auth.NewRefreshAuth(o.context, o.AuthRefreshAuthHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/teams/{teamID}/mods"] = team.NewTeamModIndex(o.context, o.TeamTeamModIndexHandler)
+	o.handlers["GET"]["/forge/{forgeID}"] = forge.NewSearchForges(o.context, o.ForgeSearchForgesHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/minecraft/{minecraftID}"] = minecraft.NewSearchMinecrafts(o.context, o.MinecraftSearchMinecraftsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/packs/{packID}/builds/{buildID}"] = pack.NewShowBuild(o.context, o.PackShowBuildHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/mods/{modID}"] = mod.NewShowMod(o.context, o.ModShowModHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/packs/{packID}"] = pack.NewShowPack(o.context, o.PackShowPackHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/profile/self"] = profile.NewShowProfile(o.context, o.ProfileShowProfileHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/teams/{teamID}"] = team.NewShowTeam(o.context, o.TeamShowTeamHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/users/{userID}"] = user.NewShowUser(o.context, o.UserShowUserHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/mods/{modID}/versions/{versionID}"] = mod.NewShowVersion(o.context, o.ModShowVersionHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/profile/token"] = profile.NewTokenProfile(o.context, o.ProfileTokenProfileHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/teams/{teamID}/mods"] = team.NewTeamModPerm(o.context, o.TeamTeamModPermHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/teams/{teamID}/packs"] = team.NewTeamPackAppend(o.context, o.TeamTeamPackAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/teams/{teamID}/packs"] = team.NewTeamPackDelete(o.context, o.TeamTeamPackDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/teams/{teamID}/packs"] = team.NewTeamPackIndex(o.context, o.TeamTeamPackIndexHandler)
+	o.handlers["PUT"]["/packs/{packID}/builds/{buildID}"] = pack.NewUpdateBuild(o.context, o.PackUpdateBuildHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/teams/{teamID}/packs"] = team.NewTeamPackPerm(o.context, o.TeamTeamPackPermHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/teams/{teamID}"] = team.NewTeamShow(o.context, o.TeamTeamShowHandler)
+	o.handlers["PUT"]["/forge"] = forge.NewUpdateForge(o.context, o.ForgeUpdateForgeHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/teams/{teamID}"] = team.NewTeamUpdate(o.context, o.TeamTeamUpdateHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/teams/{teamID}/users"] = team.NewTeamUserAppend(o.context, o.TeamTeamUserAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/teams/{teamID}/users"] = team.NewTeamUserDelete(o.context, o.TeamTeamUserDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/teams/{teamID}/users"] = team.NewTeamUserIndex(o.context, o.TeamTeamUserIndexHandler)
+	o.handlers["PUT"]["/minecraft"] = minecraft.NewUpdateMinecraft(o.context, o.MinecraftUpdateMinecraftHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/teams/{teamID}/users"] = team.NewTeamUserPerm(o.context, o.TeamTeamUserPermHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/users"] = user.NewUserCreate(o.context, o.UserUserCreateHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/users/{userID}"] = user.NewUserDelete(o.context, o.UserUserDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/users"] = user.NewUserIndex(o.context, o.UserUserIndexHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/users/{userID}/mods"] = user.NewUserModAppend(o.context, o.UserUserModAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/users/{userID}/mods"] = user.NewUserModDelete(o.context, o.UserUserModDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/users/{userID}/mods"] = user.NewUserModIndex(o.context, o.UserUserModIndexHandler)
+	o.handlers["PUT"]["/mods/{modID}"] = mod.NewUpdateMod(o.context, o.ModUpdateModHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/users/{userID}/mods"] = user.NewUserModPerm(o.context, o.UserUserModPermHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/users/{userID}/packs"] = user.NewUserPackAppend(o.context, o.UserUserPackAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/users/{userID}/packs"] = user.NewUserPackDelete(o.context, o.UserUserPackDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/users/{userID}/packs"] = user.NewUserPackIndex(o.context, o.UserUserPackIndexHandler)
+	o.handlers["PUT"]["/packs/{packID}"] = pack.NewUpdatePack(o.context, o.PackUpdatePackHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/users/{userID}/packs"] = user.NewUserPackPerm(o.context, o.UserUserPackPermHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/users/{userID}"] = user.NewUserShow(o.context, o.UserUserShowHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/users/{userID}/teams"] = user.NewUserTeamAppend(o.context, o.UserUserTeamAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/users/{userID}/teams"] = user.NewUserTeamDelete(o.context, o.UserUserTeamDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/users/{userID}/teams"] = user.NewUserTeamIndex(o.context, o.UserUserTeamIndexHandler)
+	o.handlers["PUT"]["/profile/self"] = profile.NewUpdateProfile(o.context, o.ProfileUpdateProfileHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/users/{userID}/teams"] = user.NewUserTeamPerm(o.context, o.UserUserTeamPermHandler)
+	o.handlers["PUT"]["/teams/{teamID}"] = team.NewUpdateTeam(o.context, o.TeamUpdateTeamHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/users/{userID}"] = user.NewUserUpdate(o.context, o.UserUserUpdateHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/mods/{modID}/versions/{versionID}/builds"] = mod.NewVersionBuildAppend(o.context, o.ModVersionBuildAppendHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/mods/{modID}/versions/{versionID}/builds"] = mod.NewVersionBuildDelete(o.context, o.ModVersionBuildDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/mods/{modID}/versions/{versionID}/builds"] = mod.NewVersionBuildIndex(o.context, o.ModVersionBuildIndexHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/mods/{modID}/versions"] = mod.NewVersionCreate(o.context, o.ModVersionCreateHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/mods/{modID}/versions/{versionID}"] = mod.NewVersionDelete(o.context, o.ModVersionDeleteHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/mods/{modID}/versions"] = mod.NewVersionIndex(o.context, o.ModVersionIndexHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/mods/{modID}/versions/{versionID}"] = mod.NewVersionShow(o.context, o.ModVersionShowHandler)
+	o.handlers["PUT"]["/users/{userID}"] = user.NewUpdateUser(o.context, o.UserUpdateUserHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/mods/{modID}/versions/{versionID}"] = mod.NewVersionUpdate(o.context, o.ModVersionUpdateHandler)
+	o.handlers["PUT"]["/mods/{modID}/versions/{versionID}"] = mod.NewUpdateVersion(o.context, o.ModUpdateVersionHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/auth/verify/{token}"] = auth.NewVerifyAuth(o.context, o.AuthVerifyAuthHandler)
 
 }
 

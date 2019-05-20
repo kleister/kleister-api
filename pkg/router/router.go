@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/kleister/kleister-api/pkg/assets"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/middleware/header"
 	"github.com/kleister/kleister-api/pkg/middleware/prometheus"
@@ -16,7 +15,9 @@ import (
 	"github.com/kleister/kleister-api/pkg/upload"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
-	"github.com/webhippie/fail"
+
+	apiv1 "github.com/kleister/kleister-api/pkg/api/v1"
+	restapiv1 "github.com/kleister/kleister-api/pkg/api/v1/restapi"
 )
 
 // Server initializes the routing of the server.
@@ -49,23 +50,16 @@ func Server(cfg *config.Config, storage store.Store, uploads upload.Upload) http
 
 	mux.Route(cfg.Server.Root, func(root chi.Router) {
 		root.Route("/api", func(base chi.Router) {
-			base.Get("/v1.yml", func(w http.ResponseWriter, r *http.Request) {
-				content, err := assets.ReadFile("apiv1.yml")
-
-				if err != nil {
-					log.Error().
-						Err(err).
-						Msg("failed to read openapi definition")
-
-					fail.ErrorJSON(w, fail.Unexpected())
-					return
-				}
-
-				w.Header().Set("Content-Type", "text/vnd.yaml")
+			base.Get("/v1/swagger", func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 
-				io.WriteString(w, string(content))
+				io.WriteString(w, string(restapiv1.SwaggerJSON))
 			})
+
+			if api := apiv1.New(); api != nil {
+				base.Mount("/v1", middleware.NoCache(api.Handler))
+			}
 
 			if cfg.Server.Pprof {
 				base.Mount("/debug", middleware.Profiler())
