@@ -149,6 +149,40 @@ steps:
   depends_on:
   - finish
 
+- name: copy-openapi
+  image: webhippie/ruby:latest
+  pull: always
+  commands:
+  - V1=$(ruby -ryaml -e "puts YAML::load(open('openapi/v1.yml').read)['info']['version']")
+  - cp openapi/v1.yml dist/$V1.yml
+  when:
+    event:
+    - push
+  depends_on:
+  - gpgsign
+
+- name: upload-openapi
+  image: plugins/s3:1
+  pull: always
+  settings:
+    endpoint:
+      from_secret: s3_endpoint
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    bucket:
+      from_secret: s3_bucket
+    source: dist/*.yml
+    target: /openapi
+    strip_prefix: dist/
+    path_style: true
+  when:
+    event:
+    - push
+  depends_on:
+  - copy-openapi
+
 - name: upload-push
   image: plugins/s3:1
   pull: always
