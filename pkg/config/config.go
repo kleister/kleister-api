@@ -13,9 +13,10 @@ type Upload struct {
 // Server defines the webserver configuration.
 type Server struct {
 	Host  string
-	Root string
+	Root  string
 	Addr  string
 	Pprof bool
+	Docs  bool
 }
 
 // Metrics defines the metrics server configuration.

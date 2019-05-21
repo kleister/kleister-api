@@ -15,6 +15,7 @@ import (
 	"github.com/kleister/kleister-api/pkg/upload"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
+	"github.com/utahta/swagger-doc"
 
 	apiv1 "github.com/kleister/kleister-api/pkg/api/v1"
 	restapiv1 "github.com/kleister/kleister-api/pkg/api/v1/restapi"
@@ -50,16 +51,30 @@ func Server(cfg *config.Config, storage store.Store, uploads upload.Upload) http
 
 	mux.Route(cfg.Server.Root, func(root chi.Router) {
 		root.Route("/api", func(base chi.Router) {
-			base.Get("/v1/swagger", func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusOK)
+			base.Route("/v1", func(v1 chi.Router) {
+				if cfg.Server.Docs {
+					v1.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
+						w.Header().Set("Content-Type", "application/json")
+						w.WriteHeader(http.StatusOK)
 
-				io.WriteString(w, string(restapiv1.SwaggerJSON))
+						io.WriteString(w, string(restapiv1.SwaggerJSON))
+					})
+
+					v1.Handle("/docs", doc.NewRedocHandler(
+						path.Join(
+							cfg.Server.Root,
+							"api",
+							"v1",
+							"swagger",
+						),
+						"/api/v1/docs",
+					))
+				}
+
+				if api := apiv1.New(); api != nil {
+					v1.Mount("/", middleware.NoCache(api.Handler))
+				}
 			})
-
-			if api := apiv1.New(); api != nil {
-				base.Mount("/v1", middleware.NoCache(api.Handler))
-			}
 
 			if cfg.Server.Pprof {
 				base.Mount("/debug", middleware.Profiler())

@@ -55,6 +55,13 @@ func serverFlags(cfg *config.Config) []cli.Flag {
 			EnvVars:     []string{"KLEISTER_API_SERVER_PPROF"},
 			Destination: &cfg.Server.Pprof,
 		},
+		&cli.BoolFlag{
+			Name:        "server-docs",
+			Value:       true,
+			Usage:       "enable swagger documentation",
+			EnvVars:     []string{"KLEISTER_API_SERVER_DOCS"},
+			Destination: &cfg.Server.Docs,
+		},
 		&cli.StringFlag{
 			Name:        "server-host",
 			Value:       "http://localhost:8080",

@@ -1,11 +1,11 @@
 package file
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
-	"path"
 	"os"
-	"fmt"
+	"path"
 	"strconv"
 
 	"github.com/kleister/kleister-api/pkg/upload"
@@ -39,7 +39,7 @@ func (u *file) Close() error {
 // Handler implements an HTTP handler for asset uploads.
 func (u *file) Handler(root string) http.Handler {
 	return http.StripPrefix(
-		root + "/",
+		root+"/",
 		http.FileServer(
 			http.Dir(u.path()),
 		),

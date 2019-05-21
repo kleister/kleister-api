@@ -14,7 +14,7 @@ endif
 
 PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 SOURCES ?= $(shell find . -name "*.go" -type f -not -path "./vendor/*")
-GENERATE ?= $(IMPORT)/pkg/api/v1/restapi
+GENERATE ?= $(IMPORT)/pkg/api/v1
 
 TAGS ?=
 
@@ -50,7 +50,7 @@ sync:
 .PHONY: clean
 clean:
 	go clean -i ./...
-	rm -rf $(BIN) $(DIST)
+	rm -rf $(BIN) $(DIST) pkg/api/v1/models pkg/api/v1/restapi
 
 .PHONY: fmt
 fmt:
