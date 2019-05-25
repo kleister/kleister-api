@@ -200,7 +200,7 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 
 				return server.ListenAndServe()
 			}, func(reason error) {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 				defer cancel()
 
 				if err := server.Shutdown(ctx); err != nil {
@@ -232,7 +232,7 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 
 				return server.ListenAndServe()
 			}, func(reason error) {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 				defer cancel()
 
 				if err := server.Shutdown(ctx); err != nil {
