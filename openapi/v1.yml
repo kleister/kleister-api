@@ -37,11 +37,11 @@ paths:
         401:
           description: "Unauthorized if token is invalid"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /auth/refresh:
     get:
@@ -57,11 +57,11 @@ paths:
         401:
           description: "Unauthorized if failed to generate"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /auth/login:
     post:
@@ -92,11 +92,11 @@ paths:
         401:
           description: "Unauthorized if wrong credentials"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /profile/token:
     get:
@@ -112,15 +112,15 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         500:
           description: "Failed to generate a token"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /profile/self:
     get:
@@ -136,11 +136,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Retrieve an unlimited auth token"
@@ -162,19 +162,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /minecraft:
     get:
@@ -192,11 +192,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update the available Minecraft versions"
@@ -207,19 +207,19 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         503:
           description: "If remote source is not available"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /minecraft/{minecraft_id}:
     get:
@@ -243,11 +243,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /minecraft/{minecraft_id}/builds:
     get:
@@ -271,11 +271,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a build to a Minecraft version"
@@ -304,19 +304,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Build is already appended"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Unlink a build from a Minecraft version"
@@ -345,19 +345,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Build is not assigned"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /forge:
     get:
@@ -375,11 +375,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update the available Forge versions"
@@ -390,19 +390,19 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         503:
           description: "If remote source is not available"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /forge/{forge_id}:
     get:
@@ -426,11 +426,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /forge/{forge_id}/builds:
     get:
@@ -454,11 +454,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a build to a Forge version"
@@ -487,19 +487,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Build is already appended"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Unlink a build from a Forge version"
@@ -528,19 +528,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Build is not assigned"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /packs:
     get:
@@ -558,11 +558,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Create a new pack"
@@ -584,19 +584,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /packs/{pack_id}:
     get:
@@ -618,11 +618,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update a specific pack"
@@ -649,19 +649,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Delete a specific pack"
@@ -678,19 +678,19 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         400:
           description: "Failed to delete the pack"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /packs/{pack_id}/users:
     get:
@@ -714,11 +714,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a user to pack"
@@ -741,23 +741,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "User is already assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update user perms for pack"
@@ -780,23 +780,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "User is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Remove a user from pack"
@@ -819,23 +819,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "User is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /packs/{pack_id}/teams:
     get:
@@ -859,11 +859,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a team to pack"
@@ -886,23 +886,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Team is already assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update team perms for pack"
@@ -925,23 +925,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Team is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Remove a team from pack"
@@ -964,23 +964,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Team is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /packs/{pack_id}/builds:
     get:
@@ -1004,11 +1004,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Create a new build for a pack"
@@ -1035,19 +1035,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /packs/{pack_id}/builds/{build_id}:
     get:
@@ -1074,11 +1074,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update a specific build for a pack"
@@ -1110,19 +1110,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Delete a specific build for a pack"
@@ -1144,19 +1144,19 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         400:
           description: "Failed to delete the build"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /packs/{pack_id}/builds/{build_id}/versions:
     get:
@@ -1185,11 +1185,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a version to a build"
@@ -1217,23 +1217,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Version is already appended"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Unlink a version from a build"
@@ -1261,19 +1261,19 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         400:
           description: "Failed to unlink version"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /mods:
     get:
@@ -1291,11 +1291,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Create a new mod"
@@ -1317,19 +1317,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /mods/{mod_id}:
     get:
@@ -1351,11 +1351,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update a specific mod"
@@ -1382,19 +1382,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Delete a specific mod"
@@ -1411,19 +1411,19 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         400:
           description: "Failed to delete the mod"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /mods/{mod_id}/users:
     get:
@@ -1447,11 +1447,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a user to mod"
@@ -1474,23 +1474,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "User is already assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update user perms for mod"
@@ -1513,23 +1513,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "User is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Remove a user from mod"
@@ -1552,23 +1552,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "User is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /mods/{mod_id}/teams:
     get:
@@ -1592,11 +1592,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a team to mod"
@@ -1619,23 +1619,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Team is already assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update team perms for mod"
@@ -1658,23 +1658,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Team is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Remove a team from mod"
@@ -1697,23 +1697,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Team is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /mods/{mod_id}/versions:
     get:
@@ -1737,11 +1737,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Create a new version for a mod"
@@ -1768,19 +1768,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /mods/{mod_id}/versions/{version_id}:
     get:
@@ -1807,11 +1807,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update a specific version for a mod"
@@ -1843,19 +1843,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Delete a specific version for a mod"
@@ -1877,19 +1877,19 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         400:
           description: "Failed to delete the version"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /mods/{mod_id}/versions/{version_id}/builds:
     get:
@@ -1918,11 +1918,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a build to a version"
@@ -1950,23 +1950,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Build is already appended"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Unlink a build from a version"
@@ -1994,19 +1994,19 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         400:
           description: "Failed to unlink build"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /teams:
     get:
@@ -2024,11 +2024,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Create a new team"
@@ -2050,19 +2050,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /teams/{team_id}:
     get:
@@ -2084,11 +2084,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update a specific team"
@@ -2115,19 +2115,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Delete a specific team"
@@ -2144,19 +2144,19 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         400:
           description: "Failed to delete the team"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /teams/{team_id}/users:
     get:
@@ -2180,11 +2180,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a user to team"
@@ -2207,23 +2207,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "User is already assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update user perms for team"
@@ -2246,23 +2246,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "User is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Remove a user from team"
@@ -2285,23 +2285,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "User is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /teams/{team_id}/packs:
     get:
@@ -2325,11 +2325,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a pack to team"
@@ -2352,23 +2352,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Pack is already assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update pack perms for team"
@@ -2391,23 +2391,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Pack is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Remove a pack from team"
@@ -2430,23 +2430,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Pack is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /teams/{team_id}/mods:
     get:
@@ -2470,11 +2470,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a mod to team"
@@ -2497,23 +2497,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Mod is already assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update mod perms for team"
@@ -2536,23 +2536,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Mod is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Remove a mod from team"
@@ -2575,23 +2575,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Mod is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /users:
     get:
@@ -2609,11 +2609,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Create a new user"
@@ -2635,19 +2635,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /users/{user_id}:
     get:
@@ -2669,11 +2669,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update a specific user"
@@ -2700,19 +2700,19 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/responses/validation_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Delete a specific user"
@@ -2729,19 +2729,19 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         400:
           description: "Failed to delete the user"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /users/{user_id}/teams:
     get:
@@ -2765,11 +2765,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a team to user"
@@ -2792,23 +2792,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Team is already assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update team perms for user"
@@ -2831,23 +2831,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Team is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Remove a team from user"
@@ -2870,23 +2870,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Team is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /users/{user_id}/mods:
     get:
@@ -2910,11 +2910,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a mod to user"
@@ -2937,23 +2937,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Mod is already assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update mod perms for user"
@@ -2976,23 +2976,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Mod is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Remove a mod from user"
@@ -3015,23 +3015,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Mod is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
   /users/{user_id}/packs:
     get:
@@ -3055,11 +3055,11 @@ paths:
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     post:
       summary: "Assign a pack to user"
@@ -3082,23 +3082,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Pack is already assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     put:
       summary: "Update pack perms for user"
@@ -3121,23 +3121,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Pack is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
     delete:
       summary: "Remove a pack from user"
@@ -3160,23 +3160,23 @@ paths:
         200:
           description: "Plain success message"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         412:
           description: "Failed to parse request body"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         422:
           description: "Pack is not assigned"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
-            $ref: "#/responses/general_error"
+            $ref: "#/definitions/general_error"
 
 definitions:
   auth_verify:
@@ -3825,38 +3825,35 @@ definitions:
       build:
         type: "string"
 
-responses:
   general_error:
     description: General error for regular HTTP status codes
-    schema:
-      type: "object"
-      required:
-        - "status"
-        - "message"
-      properties:
-        status:
-          type: "integer"
-        message:
-          type: "string"
+    type: "object"
+    required:
+      - "status"
+      - "message"
+    properties:
+      status:
+        type: "integer"
+      message:
+        type: "string"
 
   validation_error:
     description: Validation error which shows failed fields
-    schema:
-      type: "object"
-      required:
-        - "status"
-        - "message"
-      properties:
-        status:
-          type: "integer"
-        message:
-          type: "string"
-        errors:
-          type: "array"
-          items:
-            type: "object"
-            properties:
-              field:
-                type: "string"
-              message:
-                type: "string"
+    type: "object"
+    required:
+      - "status"
+      - "message"
+    properties:
+      status:
+        type: "integer"
+      message:
+        type: "string"
+      errors:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            field:
+              type: "string"
+            message:
+              type: "string"
