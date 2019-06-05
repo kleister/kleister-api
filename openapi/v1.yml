@@ -14,7 +14,20 @@ consumes:
 produces:
   - "application/json"
 
+schemes:
+  - "http"
+  - "https"
+
+host: "try.kleister.tech"
 basePath: "/api/v1"
+
+securityDefinitions:
+  BasicAuth:
+    type: basic
+  HeaderAuth:
+    type: apiKey
+    in: header
+    name: X-API-Key
 
 paths:
   /auth/verify/{token}:
@@ -29,6 +42,7 @@ paths:
           description: "A token that have to be checked"
           type: "string"
           required: true
+      security: []
       responses:
         200:
           description: "Meta data of the provided token"
@@ -49,6 +63,7 @@ paths:
       operationId: "RefreshAuth"
       tags:
         - "auth"
+      security: []
       responses:
         200:
           description: "A refreshed token with expire"
@@ -75,15 +90,8 @@ paths:
           description: "The credentials to authenticate"
           required: true
           schema:
-            type: "object"
-            required:
-              - "username"
-              - "password"
-            properties:
-              username:
-                type: "string"
-              password:
-                type: "string"
+            $ref: "#/definitions/auth_login"
+      security: []
       responses:
         200:
           description: "A generated token with expire"
@@ -3179,6 +3187,18 @@ paths:
             $ref: "#/definitions/general_error"
 
 definitions:
+  auth_login:
+    type: "object"
+    required:
+      - "username"
+      - "password"
+    properties:
+      username:
+        type: "string"
+      password:
+        type: "string"
+        format: "password"
+
   auth_verify:
     type: "object"
     required:
