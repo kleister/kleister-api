@@ -1,7 +1,6 @@
 # Kleister: API server
 
 [![Build Status](https://cloud.drone.io/api/badges/kleister/kleister-api/status.svg)](https://cloud.drone.io/kleister/kleister-api)
-[![Stories in Ready](https://badge.waffle.io/kleister/kleister-api.svg?label=ready&title=Ready)](http://waffle.io/kleister/kleister-api)
 [![Join the Matrix chat at https://matrix.to/#/#kleister:matrix.org](https://img.shields.io/badge/matrix-%23kleister-7bc9a4.svg)](https://matrix.to/#/#kleister:matrix.org)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a7f12e6f17524e669df945546d4ee37c)](https://www.codacy.com/app/kleister/kleister-api?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kleister/kleister-api&amp;utm_campaign=Badge_Grade)
 [![Go Doc](https://godoc.org/github.com/kleister/kleister-api?status.svg)](http://godoc.org/github.com/kleister/kleister-api)
