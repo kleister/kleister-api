@@ -86,7 +86,7 @@ paths:
         - "auth"
       parameters:
         - in: "body"
-          name: "params"
+          name: "auth_login"
           description: "The credentials to authenticate"
           required: true
           schema:
@@ -157,7 +157,7 @@ paths:
         - "profile"
       parameters:
         - in: "body"
-          name: "params"
+          name: "profile"
           description: "The profile data to update"
           required: true
           schema:
@@ -297,7 +297,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "minecraft_build"
           description: "The build data to append"
           required: true
           schema:
@@ -338,7 +338,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "minecraft_build"
           description: "The build data to unlink"
           required: true
           schema:
@@ -480,7 +480,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "forge_build"
           description: "The build data to append"
           required: true
           schema:
@@ -521,7 +521,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "forge_build"
           description: "The build data to unlink"
           required: true
           schema:
@@ -579,7 +579,7 @@ paths:
         - "pack"
       parameters:
         - in: "body"
-          name: "params"
+          name: "pack"
           description: "The pack data to create"
           required: true
           schema:
@@ -644,7 +644,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "pack"
           description: "The pack data to update"
           required: true
           schema:
@@ -740,7 +740,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "pack_user"
           description: "The pack user data to assign"
           required: true
           schema:
@@ -779,7 +779,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "pack_user"
           description: "The pack user data to update"
           required: true
           schema:
@@ -818,7 +818,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "pack_user"
           description: "The pack user data to delete"
           required: true
           schema:
@@ -885,7 +885,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "pack_team"
           description: "The pack team data to assign"
           required: true
           schema:
@@ -924,7 +924,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "pack_team"
           description: "The pack team data to update"
           required: true
           schema:
@@ -963,7 +963,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "pack_team"
           description: "The pack team data to delete"
           required: true
           schema:
@@ -1030,7 +1030,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "build"
           description: "The build data to create"
           required: true
           schema:
@@ -1105,7 +1105,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "build"
           description: "The build data to update"
           required: true
           schema:
@@ -1216,7 +1216,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "build_version"
           description: "The version data to append to build"
           required: true
           schema:
@@ -1260,7 +1260,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "build_version"
           description: "The version data to unlink from build"
           required: true
           schema:
@@ -1312,7 +1312,7 @@ paths:
         - "mod"
       parameters:
         - in: "body"
-          name: "params"
+          name: "mod"
           description: "The mod data to create"
           required: true
           schema:
@@ -1377,7 +1377,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "mod"
           description: "The mod data to update"
           required: true
           schema:
@@ -1473,7 +1473,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "mod_user"
           description: "The mod user data to assign"
           required: true
           schema:
@@ -1512,7 +1512,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "mod_user"
           description: "The mod user data to update"
           required: true
           schema:
@@ -1551,7 +1551,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "mod_user"
           description: "The mod user data to delete"
           required: true
           schema:
@@ -1618,7 +1618,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "mod_team"
           description: "The mod team data to assign"
           required: true
           schema:
@@ -1657,7 +1657,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "mod_team"
           description: "The mod team data to update"
           required: true
           schema:
@@ -1696,7 +1696,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "mod_team"
           description: "The mod team data to delete"
           required: true
           schema:
@@ -1763,7 +1763,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "version"
           description: "The version data to create"
           required: true
           schema:
@@ -1838,7 +1838,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "version"
           description: "The version data to update"
           required: true
           schema:
@@ -1949,7 +1949,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "version_build"
           description: "The build data to append to version"
           required: true
           schema:
@@ -1993,7 +1993,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "version_build"
           description: "The build data to unlink from version"
           required: true
           schema:
@@ -2045,7 +2045,7 @@ paths:
         - "team"
       parameters:
         - in: "body"
-          name: "params"
+          name: "team"
           description: "The team data to create"
           required: true
           schema:
@@ -2110,7 +2110,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "team"
           description: "The team data to update"
           required: true
           schema:
@@ -2206,7 +2206,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "team_user"
           description: "The team user data to assign"
           required: true
           schema:
@@ -2245,7 +2245,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "team_user"
           description: "The team user data to update"
           required: true
           schema:
@@ -2284,7 +2284,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "team_user"
           description: "The team user data to delete"
           required: true
           schema:
@@ -2351,7 +2351,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "team_pack"
           description: "The team pack data to assign"
           required: true
           schema:
@@ -2390,7 +2390,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "team_pack"
           description: "The team pack data to update"
           required: true
           schema:
@@ -2429,7 +2429,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "team_pack"
           description: "The team pack data to delete"
           required: true
           schema:
@@ -2496,7 +2496,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "team_mod"
           description: "The team mod data to assign"
           required: true
           schema:
@@ -2535,7 +2535,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "team_mod"
           description: "The team mod data to update"
           required: true
           schema:
@@ -2574,7 +2574,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "team_mod"
           description: "The team mod data to delete"
           required: true
           schema:
@@ -2630,7 +2630,7 @@ paths:
         - "user"
       parameters:
         - in: "body"
-          name: "params"
+          name: "user"
           description: "The user data to create"
           required: true
           schema:
@@ -2695,7 +2695,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "user"
           description: "The user data to update"
           required: true
           schema:
@@ -2791,7 +2791,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "user_team"
           description: "The user team data to assign"
           required: true
           schema:
@@ -2830,7 +2830,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "user_team"
           description: "The user team data to update"
           required: true
           schema:
@@ -2869,7 +2869,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "user_team"
           description: "The user team data to delete"
           required: true
           schema:
@@ -2936,7 +2936,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "user_mod"
           description: "The user mod data to assign"
           required: true
           schema:
@@ -2975,7 +2975,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "user_mod"
           description: "The user mod data to update"
           required: true
           schema:
@@ -3014,7 +3014,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "user_mod"
           description: "The user mod data to delete"
           required: true
           schema:
@@ -3081,7 +3081,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "user_pack"
           description: "The user pack data to assign"
           required: true
           schema:
@@ -3120,7 +3120,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "user_pack"
           description: "The user pack data to update"
           required: true
           schema:
@@ -3159,7 +3159,7 @@ paths:
           type: "string"
           required: true
         - in: "body"
-          name: "params"
+          name: "user_pack"
           description: "The user pack data to delete"
           required: true
           schema:
@@ -3237,6 +3237,9 @@ definitions:
         type: "string"
       username:
         type: "string"
+      password:
+        type: "string"
+        format: "password"
       email:
         type: "string"
       admin:
@@ -3311,6 +3314,10 @@ definitions:
         type: "string"
       side:
         type: "string"
+        enum:
+          - "both"
+          - "server"
+          - "client"
       description:
         type: "string"
       author:
@@ -3338,11 +3345,6 @@ definitions:
       mod_id:
         type: "string"
         format: "uuid"
-      # mod:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/mod"
-      #   readonly: true
       slug:
         type: "string"
       name:
@@ -3366,17 +3368,9 @@ definitions:
       recommended_id:
         type: "string"
         format: "uuid"
-      # recommended:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/build"
       latest_id:
         type: "string"
         format: "uuid"
-      # latest:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/build"
       slug:
         type: "string"
       name:
@@ -3411,27 +3405,12 @@ definitions:
       pack_id:
         type: "string"
         format: "uuid"
-      # pack:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/pack"
-      #   readonly: true
       minecraft_id:
         type: "string"
         format: "uuid"
-      # minecraft:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/minecraft"
-      #   readonly: true
       forge_id:
         type: "string"
         format: "uuid"
-      # forge:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/forge"
-      #   readonly: true
       slug:
         type: "string"
       name:
@@ -3485,19 +3464,15 @@ definitions:
       team_id:
         type: "string"
         format: "uuid"
-      # team:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/team"
       pack_id:
         type: "string"
         format: "uuid"
-      # pack:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/pack"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   team_mod:
     type: "object"
@@ -3509,19 +3484,15 @@ definitions:
       team_id:
         type: "string"
         format: "uuid"
-      # team:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/team"
       mod_id:
         type: "string"
         format: "uuid"
-      # mod:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/mod"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   team_user:
     type: "object"
@@ -3533,19 +3504,15 @@ definitions:
       team_id:
         type: "string"
         format: "uuid"
-      # team:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/team"
       user_id:
         type: "string"
         format: "uuid"
-      # user:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/user"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   user:
     type: "object"
@@ -3561,6 +3528,9 @@ definitions:
         type: "string"
       username:
         type: "string"
+      password:
+        type: "string"
+        format: "password"
       email:
         type: "string"
       admin:
@@ -3584,19 +3554,15 @@ definitions:
       user_id:
         type: "string"
         format: "uuid"
-      # user:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/user"
       pack_id:
         type: "string"
         format: "uuid"
-      # pack:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/pack"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   user_mod:
     type: "object"
@@ -3608,19 +3574,15 @@ definitions:
       user_id:
         type: "string"
         format: "uuid"
-      # user:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/user"
       mod_id:
         type: "string"
         format: "uuid"
-      # mod:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/mod"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   build_version:
     type: "object"
@@ -3631,167 +3593,166 @@ definitions:
       build_id:
         type: "string"
         format: "uuid"
-      # build:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/build"
       version_id:
         type: "string"
         format: "uuid"
-      # version:
-      #   type: "object"
-      #   schema:
-      #     $ref: "#/definitions/version"
 
   mod_user_params:
     type: "object"
     required:
-      - "mod"
       - "user"
       - "perm"
     properties:
-      mod:
-        type: "string"
       user:
         type: "string"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   mod_team_params:
     type: "object"
     required:
-      - "mod"
       - "team"
       - "perm"
     properties:
-      mod:
-        type: "string"
       team:
         type: "string"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   pack_user_params:
     type: "object"
     required:
-      - "pack"
       - "user"
       - "perm"
     properties:
-      pack:
-        type: "string"
       user:
         type: "string"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   pack_team_params:
     type: "object"
     required:
-      - "pack"
       - "team"
       - "perm"
     properties:
-      pack:
-        type: "string"
       team:
         type: "string"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   team_user_params:
     type: "object"
     required:
-      - "team"
       - "user"
       - "perm"
     properties:
-      team:
-        type: "string"
       user:
         type: "string"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   team_pack_params:
     type: "object"
     required:
-      - "team"
       - "pack"
       - "perm"
     properties:
-      team:
-        type: "string"
       pack:
         type: "string"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   team_mod_params:
     type: "object"
     required:
-      - "team"
       - "mod"
       - "perm"
     properties:
-      team:
-        type: "string"
       mod:
         type: "string"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   user_team_params:
     type: "object"
     required:
-      - "user"
       - "team"
       - "perm"
     properties:
-      user:
-        type: "string"
       team:
         type: "string"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   user_mod_params:
     type: "object"
     required:
-      - "user"
       - "mod"
       - "perm"
     properties:
-      user:
-        type: "string"
       mod:
         type: "string"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   user_pack_params:
     type: "object"
     required:
-      - "user"
       - "pack"
       - "perm"
     properties:
-      user:
-        type: "string"
       pack:
         type: "string"
       perm:
         type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
 
   minecraft_build_params:
     type: "object"
     required:
-      - "minecraft"
       - "pack"
       - "build"
     properties:
-      minecraft:
-        type: "string"
       pack:
         type: "string"
       build:
@@ -3800,12 +3761,9 @@ definitions:
   forge_build_params:
     type: "object"
     required:
-      - "forge"
       - "pack"
       - "build"
     properties:
-      forge:
-        type: "string"
       pack:
         type: "string"
       build:
@@ -3814,15 +3772,9 @@ definitions:
   build_version_params:
     type: "object"
     required:
-      - "pack"
-      - "build"
       - "mod"
       - "version"
     properties:
-      pack:
-        type: "string"
-      build:
-        type: "string"
       mod:
         type: "string"
       version:
@@ -3831,15 +3783,9 @@ definitions:
   version_build_params:
     type: "object"
     required:
-      - "mod"
-      - "version"
       - "pack"
       - "build"
     properties:
-      mod:
-        type: "string"
-      version:
-        type: "string"
       pack:
         type: "string"
       build:
