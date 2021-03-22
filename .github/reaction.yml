@@ -1,1 +1,4 @@
-_extends: kleister-infra
+exemptLabels: []
+
+reactionComment: >
+  :wave: @{comment-author}, did you mean to use a [reaction](https://git.io/vhzhC) instead?
