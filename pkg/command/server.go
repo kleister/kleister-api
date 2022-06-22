@@ -107,7 +107,7 @@ func serverFlags(cfg *config.Config) []cli.Flag {
 		&cli.StringFlag{
 			Name:        "session-secret",
 			Value:       uniuri.NewLen(32),
-			Usage:       "Session encription secret",
+			Usage:       "Session encryption secret",
 			EnvVars:     []string{"KLEISTER_API_SESSION_SECRET"},
 			Destination: &cfg.Session.Secret,
 		},
