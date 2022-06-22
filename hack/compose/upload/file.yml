@@ -1,0 +1,11 @@
+version: '3.4'
+
+volumes:
+  file:
+
+services:
+  api:
+    environment:
+      - KLEISTER_API_UPLOAD_DSN=file:///var/lib/upload
+    volumes:
+      - file:/var/lib/upload

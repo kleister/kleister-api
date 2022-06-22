@@ -1,0 +1,31 @@
+version: '3.4'
+
+services:
+  mariadb:
+    image: mariadb:10.8
+    restart: always
+    environment:
+      - MARIADB_ROOT_PASSWORD=root
+      - MARIADB_USER=kleister
+      - MARIADB_PASSWORD=kleister
+      - MARIADB_DATABASE=kleister
+    volumes:
+      - mariadb:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+  postgres:
+    image: postgres:14.3
+    restart: always
+    environment:
+      - POSTGRES_USER=kleister
+      - POSTGRES_PASSWORD=kleister
+      - POSTGRES_DB=kleister
+    volumes:
+      - postgres:/var/lib/postgresql
+    ports:
+      - 5432:5432
+
+volumes:
+  mariadb:
+  postgres:

@@ -1,0 +1,73 @@
+---
+name: changes
+
+"on":
+  push:
+    branches:
+      - master
+
+jobs:
+  changelog:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout source
+        id: source
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.BOT_ACCESS_TOKEN }}
+
+      - name: Setup golang
+        id: golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18.1
+
+      - name: Run changelog
+        id: changelog
+        run: make changelog
+
+      - name: Commit changes
+        id: commit
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: GitHub Actions
+          author_email: github@kleister.eu
+          add: CHANGELOG.md
+          message: Automated changelog update
+          push: true
+          commit: --signoff
+
+  generate:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout source
+        id: source
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.BOT_ACCESS_TOKEN }}
+
+      - name: Setup golang
+        id: golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18.1
+
+      - name: Run generate
+        id: generate
+        run: make generate
+
+      - name: Commit changes
+        id: commit
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: GitHub Actions
+          author_email: github@kleister.eu
+          add: |
+            pkg/api/v1
+          message: Automated generate update
+          push: true
+          commit: --signoff
+
+...

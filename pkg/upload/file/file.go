@@ -1,14 +1,15 @@
 package file
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"strconv"
 
+	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/upload"
+	"github.com/pkg/errors"
 )
 
 type file struct {
@@ -16,8 +17,12 @@ type file struct {
 }
 
 // Info prepares some informational message about the handler.
-func (u *file) Info() string {
-	return fmt.Sprintf("prepared file storage at %s", u.path())
+func (u *file) Info() map[string]interface{} {
+	result := make(map[string]interface{})
+	result["driver"] = "file"
+	result["path"] = u.path()
+
+	return result
 }
 
 // Prepare simply prepares the upload handler.
@@ -33,6 +38,16 @@ func (u *file) Prepare() (upload.Upload, error) {
 
 // Close simply closes the upload handler.
 func (u *file) Close() error {
+	return nil
+}
+
+// Upload stores an attachment within the defined S3 bucket.
+func (u *file) Upload(path, ctype string, content []byte) error {
+	return nil
+}
+
+// Delete removes an attachment from the defined S3 bucket.
+func (u *file) Delete(path string) error {
 	return nil
 }
 
@@ -58,7 +73,7 @@ func (u *file) perms() os.FileMode {
 		return os.FileMode(u)
 	}
 
-	return 0755
+	return os.FileMode(0755)
 }
 
 // path cleans the dsn and returns a valid path.
@@ -70,17 +85,23 @@ func (u *file) path() string {
 }
 
 // New initializes a new file handler.
-func New(dsn *url.URL) (upload.Upload, error) {
+func New(cfg config.Upload) (upload.Upload, error) {
+	parsed, err := url.Parse(cfg.DSN)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse dsn")
+	}
+
 	f := &file{
-		dsn: dsn,
+		dsn: parsed,
 	}
 
 	return f.Prepare()
 }
 
 // Must simply calls New and panics on an error.
-func Must(dsn *url.URL) upload.Upload {
-	db, err := New(dsn)
+func Must(cfg config.Upload) upload.Upload {
+	db, err := New(cfg)
 
 	if err != nil {
 		panic(err)

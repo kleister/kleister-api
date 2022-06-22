@@ -1,3 +1,5 @@
+include .bingo/Variables.mk
+
 SHELL := bash
 NAME := kleister-api
 IMPORT := github.com/kleister/$(NAME)
@@ -6,29 +8,29 @@ DIST := dist
 
 ifeq ($(OS), Windows_NT)
 	EXECUTABLE := $(NAME).exe
-	HAS_GORUNPKG := $(shell where gorunpkg)
+	UNAME := Windows
 else
 	EXECUTABLE := $(NAME)
-	HAS_GORUNPKG := $(shell command -v gorunpkg)
+	UNAME := $(shell uname -s)
 endif
 
-PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
-SOURCES ?= $(shell find . -name "*.go" -type f -not -path "./vendor/*")
-GENERATE ?= $(IMPORT)/pkg/api/v1
+GOBUILD ?= CGO_ENABLED=0 go build
+PACKAGES ?= $(shell go list ./...)
+SOURCES ?= $(shell find . -name "*.go" -type f)
 
-TAGS ?=
+TAGS ?= netgo
 
 ifndef OUTPUT
-	ifneq ($(DRONE_TAG),)
-		OUTPUT ?= $(subst v,,$(DRONE_TAG))
+	ifeq ($(GITHUB_REF_TYPE), tag)
+		OUTPUT ?= $(subst v,,$(GITHUB_REF_NAME))
 	else
 		OUTPUT ?= testing
 	endif
 endif
 
 ifndef VERSION
-	ifneq ($(DRONE_TAG),)
-		VERSION ?= $(subst v,,$(DRONE_TAG))
+	ifeq ($(GITHUB_REF_TYPE), tag)
+		VERSION ?= $(subst v,,$(GITHUB_REF_NAME))
 	else
 		VERSION ?= $(shell git rev-parse --short HEAD)
 	endif
@@ -38,7 +40,12 @@ ifndef DATE
 	DATE := $(shell date -u '+%Y%m%d')
 endif
 
-LDFLAGS += -s -w -X "$(IMPORT)/pkg/version.String=$(VERSION)" -X "$(IMPORT)/pkg/version.Date=$(DATE)"
+ifndef SHA
+	SHA := $(shell git rev-parse --short HEAD)
+endif
+
+LDFLAGS += -s -w -extldflags "-static" -X "$(IMPORT)/pkg/version.String=$(VERSION)" -X "$(IMPORT)/pkg/version.Revision=$(SHA)" -X "$(IMPORT)/pkg/version.Date=$(DATE)"
+GCFLAGS += all=-N -l
 
 .PHONY: all
 all: build
@@ -61,20 +68,27 @@ vet:
 	go vet $(PACKAGES)
 
 .PHONY: staticcheck
-staticcheck: gorunpkg
-	gorunpkg honnef.co/go/tools/cmd/staticcheck -tags '$(TAGS)' $(PACKAGES)
+staticcheck: $(STATICCHECK)
+	$(STATICCHECK) -tags '$(TAGS)' $(PACKAGES)
 
 .PHONY: lint
-lint: gorunpkg
-	for PKG in $(PACKAGES); do gorunpkg golang.org/x/lint/golint -set_exit_status $$PKG || exit 1; done;
+lint: $(GOLINT)
+	for PKG in $(PACKAGES); do $(GOLINT) -set_exit_status $$PKG || exit 1; done;
 
 .PHONY: generate
-generate: gorunpkg
-	go generate $(GENERATE)
+generate: openapi
+
+.PHONY: openapi
+openapi: $(SWAGGER)
+	$(SWAGGER) generate server --target pkg/api/v1 --name Kleister --spec openapi/v1.yml --principal models.User --default-scheme https --exclude-main --regenerate-configureapi
+
+.PHONY: changelog
+changelog: $(CALENS)
+	$(CALENS) >| CHANGELOG.md
 
 .PHONY: test
-test: gorunpkg
-	gorunpkg github.com/haya14busa/goverage -v -coverprofile coverage.out $(PACKAGES)
+test:
+	go test -coverprofile coverage.out $(PACKAGES)
 
 .PHONY: install
 install: $(SOURCES)
@@ -84,40 +98,93 @@ install: $(SOURCES)
 build: $(BIN)/$(EXECUTABLE)
 
 $(BIN)/$(EXECUTABLE): $(SOURCES)
-	go build -i -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+	$(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(BIN)/$(EXECUTABLE)-debug: $(SOURCES)
+	$(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -gcflags '$(GCFLAGS)' -o $@ ./cmd/$(NAME)
 
 .PHONY: release
-release: release-dirs release-linux release-windows release-darwin release-copy release-check
+release: $(DIST) release-linux release-darwin release-windows release-checksum
 
-.PHONY: release-dirs
-release-dirs:
-	mkdir -p $(DIST)/binaries $(DIST)/release
+$(DIST):
+	mkdir -p $(DIST)
 
 .PHONY: release-linux
-release-linux: gorunpkg
-	gorunpkg github.com/mitchellh/gox -tags 'netgo $(TAGS)' -ldflags '-extldflags "-static" $(LDFLAGS)' -os 'linux' -arch 'amd64 386 arm64 arm' -output '$(DIST)/binaries/$(EXECUTABLE)-$(OUTPUT)-{{.OS}}-{{.Arch}}' ./cmd/$(NAME)
+release-linux: $(DIST) \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-386 \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-amd64 \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-5 \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-6 \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-7 \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm64 \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips64 \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mipsle \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips64le
 
-.PHONY: release-windows
-release-windows: gorunpkg
-	gorunpkg github.com/mitchellh/gox -tags 'netgo $(TAGS)' -ldflags '-extldflags "-static" $(LDFLAGS)' -os 'windows' -arch 'amd64' -output '$(DIST)/binaries/$(EXECUTABLE)-$(OUTPUT)-{{.OS}}-{{.Arch}}' ./cmd/$(NAME)
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-386:
+	GOOS=linux GOARCH=386 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-amd64:
+	GOOS=linux GOARCH=amd64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-5:
+	GOOS=linux GOARCH=arm GOARM=5 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-6:
+	GOOS=linux GOARCH=arm GOARM=6 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-7:
+	GOOS=linux GOARCH=arm GOARM=7 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm64:
+	GOOS=linux GOARCH=arm64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips:
+	GOOS=linux GOARCH=mips $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips64:
+	GOOS=linux GOARCH=mips64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mipsle:
+	GOOS=linux GOARCH=mipsle $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips64le:
+	GOOS=linux GOARCH=mips64le $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
 
 .PHONY: release-darwin
-release-darwin: gorunpkg
-	gorunpkg github.com/mitchellh/gox -tags 'netgo $(TAGS)' -ldflags '$(LDFLAGS)' -os 'darwin' -arch 'amd64' -output '$(DIST)/binaries/$(EXECUTABLE)-$(OUTPUT)-{{.OS}}-{{.Arch}}' ./cmd/$(NAME)
+release-darwin: $(DIST) \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-darwin-amd64 \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-darwin-arm64
 
-.PHONY: release-copy
-release-copy:
-	$(foreach file,$(wildcard $(DIST)/binaries/$(EXECUTABLE)-*),cp $(file) $(DIST)/release/$(notdir $(file));)
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-darwin-amd64:
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
 
-.PHONY: release-check
-release-check:
-	cd $(DIST)/release; $(foreach file,$(wildcard $(DIST)/release/$(EXECUTABLE)-*),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;)
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-darwin-arm64:
+	GOOS=darwin GOARCH=arm64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+.PHONY: release-windows
+release-windows: $(DIST) \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-386.exe \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-amd64.exe
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-386.exe:
+	GOOS=windows GOARCH=386 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-amd64.exe:
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+
+.PHONY: release-reduce
+release-reduce:
+	cd $(DIST); $(foreach file,$(wildcard $(DIST)/$(EXECUTABLE)-*),upx $(notdir $(file));)
+
+.PHONY: release-checksum
+release-checksum:
+	cd $(DIST); $(foreach file,$(wildcard $(DIST)/$(EXECUTABLE)-*),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;)
 
 .PHONY: release-finish
-release-finish: release-copy release-check
+release-finish: release-reduce release-checksum
 
-.PHONY: gorunpkg
-gorunpkg:
-ifndef HAS_GORUNPKG
-	go get -u github.com/vektah/gorunpkg
-endif
+.PHONY: watch
+watch: $(REFLEX)
+	$(REFLEX) -c reflex.conf

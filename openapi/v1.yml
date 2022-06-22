@@ -18,66 +18,22 @@ schemes:
   - "http"
   - "https"
 
-host: "try.kleister.tech"
+host: "try.kleister.eu"
 basePath: "/api/v1"
 
 securityDefinitions:
-  BasicAuth:
+  Basic:
     type: basic
-  HeaderAuth:
+  Header:
     type: apiKey
     in: header
     name: X-API-Key
 
+security:
+  - Basic: []
+  - Header: []
+
 paths:
-  /auth/verify/{token}:
-    get:
-      summary: "Verify validity for an authentication token"
-      operationId: "VerifyAuth"
-      tags:
-        - "auth"
-      parameters:
-        - in: "path"
-          name: "token"
-          description: "A token that have to be checked"
-          type: "string"
-          required: true
-      security: []
-      responses:
-        200:
-          description: "Meta data of the provided token"
-          schema:
-            $ref: "#/definitions/auth_verify"
-        401:
-          description: "Unauthorized if token is invalid"
-          schema:
-            $ref: "#/definitions/general_error"
-        default:
-          description: "Some error unrelated to the handler"
-          schema:
-            $ref: "#/definitions/general_error"
-
-  /auth/refresh:
-    get:
-      summary: "Refresh an auth token before it expires"
-      operationId: "RefreshAuth"
-      tags:
-        - "auth"
-      security: []
-      responses:
-        200:
-          description: "A refreshed token with expire"
-          schema:
-            $ref: "#/definitions/auth_token"
-        401:
-          description: "Unauthorized if failed to generate"
-          schema:
-            $ref: "#/definitions/general_error"
-        default:
-          description: "Some error unrelated to the handler"
-          schema:
-            $ref: "#/definitions/general_error"
-
   /auth/login:
     post:
       summary: "Authenticate an user by credentials"
@@ -99,6 +55,46 @@ paths:
             $ref: "#/definitions/auth_token"
         401:
           description: "Unauthorized if wrong credentials"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /auth/refresh:
+    get:
+      summary: "Refresh an auth token before it expires"
+      operationId: "RefreshAuth"
+      tags:
+        - "auth"
+      responses:
+        200:
+          description: "A refreshed token with expire"
+          schema:
+            $ref: "#/definitions/auth_token"
+        401:
+          description: "Unauthorized if failed to generate"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /auth/verify:
+    get:
+      summary: "Verify validity for an authentication token"
+      operationId: "VerifyAuth"
+      tags:
+        - "auth"
+      responses:
+        200:
+          description: "Meta data of the provided token"
+          schema:
+            $ref: "#/definitions/auth_verify"
+        401:
+          description: "Unauthorized if token is invalid"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -132,10 +128,10 @@ paths:
 
   /profile/self:
     get:
-      summary: "Retrieve an unlimited auth token"
+      summary: "Fetch profile details of the personal account"
       operationId: "ShowProfile"
       tags:
-        - profile
+        - "profile"
       responses:
         200:
           description: "The current profile data"
@@ -151,7 +147,7 @@ paths:
             $ref: "#/definitions/general_error"
 
     put:
-      summary: "Retrieve an unlimited auth token"
+      summary: "Update your own profile information"
       operationId: "UpdateProfile"
       tags:
         - "profile"
@@ -169,10 +165,6 @@ paths:
             $ref: "#/definitions/profile"
         403:
           description: "User is not authorized"
-          schema:
-            $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -280,6 +272,10 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Minecraft or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -302,6 +298,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/minecraft_build_params"
+            required:
+              - "build_id"
       responses:
         200:
           description: "A collection of assigned builds"
@@ -313,12 +311,16 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Minecraft or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
         412:
-          description: "Failed to parse request body"
+          description: "Build is already assigned"
           schema:
             $ref: "#/definitions/general_error"
         422:
-          description: "Build is already appended"
+          description: "Failed to validate request"
           schema:
             $ref: "#/definitions/validation_error"
         default:
@@ -343,6 +345,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/minecraft_build_params"
+            required:
+              - "build_id"
       responses:
         200:
           description: "A collection of assigned builds"
@@ -354,14 +358,14 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Minecraft or build not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Build is not assigned"
           schema:
-            $ref: "#/definitions/validation_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -463,6 +467,10 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Forge not found"
+          schema:
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -485,6 +493,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/forge_build_params"
+            required:
+              - "build_id"
       responses:
         200:
           description: "A collection of assigned builds"
@@ -496,12 +506,16 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Forge or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
         412:
-          description: "Failed to parse request body"
+          description: "Build is already assigned"
           schema:
             $ref: "#/definitions/general_error"
         422:
-          description: "Build is already appended"
+          description: "Failed to validate request"
           schema:
             $ref: "#/definitions/validation_error"
         default:
@@ -526,6 +540,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/forge_build_params"
+            required:
+              - "build_id"
       responses:
         200:
           description: "A collection of assigned builds"
@@ -537,14 +553,14 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Forge or build not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Build is not assigned"
           schema:
-            $ref: "#/definitions/validation_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -584,6 +600,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/pack"
+            required:
+              - "name"
       responses:
         200:
           description: "The created pack data"
@@ -591,10 +609,6 @@ paths:
             $ref: "#/definitions/pack"
         403:
           description: "User is not authorized"
-          schema:
-            $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -625,6 +639,10 @@ paths:
             $ref: "#/definitions/pack"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -658,8 +676,8 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Pack not found"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -689,6 +707,10 @@ paths:
             $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
           schema:
             $ref: "#/definitions/general_error"
         400:
@@ -723,6 +745,10 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -754,14 +780,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Pack or user not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "User is already assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -793,14 +823,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Pack or user not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "User is not assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -823,6 +857,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/pack_user_params"
+            required:
+              - "user_id"
       responses:
         200:
           description: "Plain success message"
@@ -832,11 +868,11 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Pack or user not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "User is not assigned"
           schema:
             $ref: "#/definitions/general_error"
@@ -866,6 +902,10 @@ paths:
               $ref: "#/definitions/team_pack"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -899,14 +939,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Pack or team not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Team is already assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -938,14 +982,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Pack or team not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Team is not assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -968,6 +1016,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/pack_team_params"
+            required:
+              - "team_id"
       responses:
         200:
           description: "Plain success message"
@@ -977,11 +1027,11 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Pack or team not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Team is not assigned"
           schema:
             $ref: "#/definitions/general_error"
@@ -1011,6 +1061,10 @@ paths:
               $ref: "#/definitions/build"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -1044,8 +1098,8 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Pack not found"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -1081,6 +1135,10 @@ paths:
             $ref: "#/definitions/build"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -1119,8 +1177,8 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Build or pack not found"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -1155,6 +1213,10 @@ paths:
             $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
           schema:
             $ref: "#/definitions/general_error"
         400:
@@ -1194,6 +1256,10 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -1230,12 +1296,16 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
         412:
-          description: "Failed to parse request body"
+          description: "Version is already assigned"
           schema:
             $ref: "#/definitions/general_error"
         422:
-          description: "Version is already appended"
+          description: "Failed to validate request"
           schema:
             $ref: "#/definitions/validation_error"
         default:
@@ -1265,6 +1335,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/build_version_params"
+            required:
+              - "version_id"
       responses:
         200:
           description: "Plain success message"
@@ -1274,8 +1346,16 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Version is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
         400:
-          description: "Failed to unlink version"
+          description: "Failed to unlink build"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -1317,6 +1397,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/mod"
+            required:
+              - "name"
       responses:
         200:
           description: "The created mod data"
@@ -1324,10 +1406,6 @@ paths:
             $ref: "#/definitions/mod"
         403:
           description: "User is not authorized"
-          schema:
-            $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -1358,6 +1436,10 @@ paths:
             $ref: "#/definitions/mod"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -1391,8 +1473,8 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Mod not found"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -1422,6 +1504,10 @@ paths:
             $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
           schema:
             $ref: "#/definitions/general_error"
         400:
@@ -1456,6 +1542,10 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -1487,14 +1577,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Mod or user not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "User is already assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -1526,14 +1620,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Mod or user not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "User is not assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -1556,6 +1654,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/mod_user_params"
+            required:
+              - "user_id"
       responses:
         200:
           description: "Plain success message"
@@ -1565,11 +1665,11 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Mod or user not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "User is not assigned"
           schema:
             $ref: "#/definitions/general_error"
@@ -1599,6 +1699,10 @@ paths:
               $ref: "#/definitions/team_mod"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -1632,14 +1736,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Mod or team not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Team is already assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -1671,14 +1779,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Mod or team not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Team is not assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -1701,6 +1813,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/mod_team_params"
+            required:
+              - "team_id"
       responses:
         200:
           description: "Plain success message"
@@ -1710,11 +1824,11 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Mod or team not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Team is not assigned"
           schema:
             $ref: "#/definitions/general_error"
@@ -1744,6 +1858,10 @@ paths:
               $ref: "#/definitions/version"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -1777,8 +1895,8 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Mod not found"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -1814,6 +1932,10 @@ paths:
             $ref: "#/definitions/version"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Version or mod not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -1852,8 +1974,8 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Version or mod not found"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -1888,6 +2010,10 @@ paths:
             $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Version or mod not found"
           schema:
             $ref: "#/definitions/general_error"
         400:
@@ -1927,6 +2053,10 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Version or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -1963,12 +2093,16 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Build, version or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
         412:
-          description: "Failed to parse request body"
+          description: "Build is already assigned"
           schema:
             $ref: "#/definitions/general_error"
         422:
-          description: "Build is already appended"
+          description: "Failed to validate request"
           schema:
             $ref: "#/definitions/validation_error"
         default:
@@ -2005,6 +2139,14 @@ paths:
             $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Version or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is not assigned"
           schema:
             $ref: "#/definitions/general_error"
         400:
@@ -2050,6 +2192,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/team"
+            required:
+              - "name"
       responses:
         200:
           description: "The created team data"
@@ -2057,10 +2201,6 @@ paths:
             $ref: "#/definitions/team"
         403:
           description: "User is not authorized"
-          schema:
-            $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -2091,6 +2231,10 @@ paths:
             $ref: "#/definitions/team"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -2124,8 +2268,8 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Team not found"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -2155,6 +2299,10 @@ paths:
             $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
           schema:
             $ref: "#/definitions/general_error"
         400:
@@ -2189,6 +2337,10 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
+          schema:
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -2220,14 +2372,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Team or user not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "User is already assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -2259,14 +2415,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Team or user not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "User is not assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -2289,6 +2449,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/team_user_params"
+            required:
+              - "user_id"
       responses:
         200:
           description: "Plain success message"
@@ -2298,11 +2460,11 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Team or user not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "User is not assigned"
           schema:
             $ref: "#/definitions/general_error"
@@ -2332,6 +2494,10 @@ paths:
               $ref: "#/definitions/team_pack"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -2365,14 +2531,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Team or pack not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Pack is already assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -2404,14 +2574,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Team or pack not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Pack is not assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -2434,6 +2608,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/team_pack_params"
+            required:
+              - "pack_id"
       responses:
         200:
           description: "Plain success message"
@@ -2443,11 +2619,11 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Team or pack not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Pack is not assigned"
           schema:
             $ref: "#/definitions/general_error"
@@ -2477,6 +2653,10 @@ paths:
               $ref: "#/definitions/team_mod"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -2510,12 +2690,16 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Team or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
         412:
-          description: "Failed to parse request body"
+          description: "Mod is already assigned"
           schema:
             $ref: "#/definitions/general_error"
         422:
-          description: "Mod is already assigned"
+          description: "Failed to validate request"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -2549,12 +2733,16 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "Team or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
         412:
-          description: "Failed to parse request body"
+          description: "Mod is not assigned"
           schema:
             $ref: "#/definitions/general_error"
         422:
-          description: "Mod is not assigned"
+          description: "Failed to validate request"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -2579,6 +2767,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/team_mod_params"
+            required:
+              - "mod_id"
       responses:
         200:
           description: "Plain success message"
@@ -2588,11 +2778,11 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "Team or mod not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Mod is not assigned"
           schema:
             $ref: "#/definitions/general_error"
@@ -2635,6 +2825,10 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/user"
+            required:
+              - "username"
+              - "password"
+              - "email"
       responses:
         200:
           description: "The created user data"
@@ -2642,10 +2836,6 @@ paths:
             $ref: "#/definitions/user"
         403:
           description: "User is not authorized"
-          schema:
-            $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -2676,6 +2866,10 @@ paths:
             $ref: "#/definitions/user"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -2709,8 +2903,8 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "User not found"
           schema:
             $ref: "#/definitions/general_error"
         422:
@@ -2740,6 +2934,10 @@ paths:
             $ref: "#/definitions/general_error"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
           schema:
             $ref: "#/definitions/general_error"
         400:
@@ -2774,6 +2972,10 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -2805,14 +3007,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "User or team not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Team is already assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -2844,14 +3050,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "User or team not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Team is not assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -2874,6 +3084,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/user_team_params"
+            required:
+              - "team_id"
       responses:
         200:
           description: "Plain success message"
@@ -2883,11 +3095,11 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "User or team not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Team is not assigned"
           schema:
             $ref: "#/definitions/general_error"
@@ -2917,6 +3129,10 @@ paths:
               $ref: "#/definitions/user_mod"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -2950,14 +3166,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "User or mod not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Mod is already assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -2989,14 +3209,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "User or mod not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Mod is not assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -3019,6 +3243,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/user_mod_params"
+            required:
+              - "mod_id"
       responses:
         200:
           description: "Plain success message"
@@ -3028,11 +3254,11 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "User or mod not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Mod is not assigned"
           schema:
             $ref: "#/definitions/general_error"
@@ -3062,6 +3288,10 @@ paths:
               $ref: "#/definitions/user_pack"
         403:
           description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
           schema:
             $ref: "#/definitions/general_error"
         default:
@@ -3095,14 +3325,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "User or pack not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Pack is already assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -3134,14 +3368,18 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "User or pack not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Pack is not assigned"
           schema:
             $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -3164,6 +3402,8 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/user_pack_params"
+            required:
+              - "pack_id"
       responses:
         200:
           description: "Plain success message"
@@ -3173,11 +3413,11 @@ paths:
           description: "User is not authorized"
           schema:
             $ref: "#/definitions/general_error"
-        412:
-          description: "Failed to parse request body"
+        404:
+          description: "User or pack not found"
           schema:
             $ref: "#/definitions/general_error"
-        422:
+        412:
           description: "Pack is not assigned"
           schema:
             $ref: "#/definitions/general_error"
@@ -3203,31 +3443,34 @@ definitions:
     type: "object"
     required:
       - "username"
-      - "created_at"
     properties:
       username:
         type: "string"
+        readOnly: true
       created_at:
         type: "string"
         format: "date-time"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
 
   auth_token:
     type: "object"
     required:
       - "token"
-      - "expires_at"
     properties:
       token:
         type: "string"
+        readOnly: true
       expires_at:
         type: "string"
         format: "date-time"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
 
   profile:
     type: "object"
-    required:
-      - "username"
-      - "email"
     properties:
       id:
         type: "string"
@@ -3235,23 +3478,42 @@ definitions:
         readOnly: true
       slug:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       username:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       password:
         type: "string"
         format: "password"
+        x-omitempty: true
+        x-nullable: true
       email:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       admin:
         type: "boolean"
+        readOnly: true
       active:
         type: "boolean"
+        readOnly: true
       created_at:
         type: "string"
         format: "date-time"
+        readOnly: true
       updated_at:
         type: "string"
         format: "date-time"
+        readOnly: true
+      teams:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_user"
 
   minecraft:
     type: "object"
@@ -3265,16 +3527,24 @@ definitions:
         readOnly: true
       slug:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       name:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       type:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       created_at:
         type: "string"
         format: "date-time"
+        readOnly: true
       updated_at:
         type: "string"
         format: "date-time"
+        readOnly: true
 
   forge:
     type: "object"
@@ -3288,16 +3558,24 @@ definitions:
         readOnly: true
       slug:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       name:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       minecraft:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       created_at:
         type: "string"
         format: "date-time"
+        readOnly: true
       updated_at:
         type: "string"
         format: "date-time"
+        readOnly: true
 
   mod:
     type: "object"
@@ -3310,28 +3588,44 @@ definitions:
         readOnly: true
       slug:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       name:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       side:
         type: "string"
         enum:
           - "both"
           - "server"
           - "client"
+        x-omitempty: true
+        x-nullable: true
       description:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       author:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       website:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       donate:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       created_at:
         type: "string"
         format: "date-time"
+        readOnly: true
       updated_at:
         type: "string"
         format: "date-time"
+        readOnly: true
 
   version:
     type: "object"
@@ -3345,16 +3639,26 @@ definitions:
       mod_id:
         type: "string"
         format: "uuid"
+      mod:
+        type: "object"
+        $ref: "#/definitions/mod"
+        readOnly: true
       slug:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       name:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       created_at:
         type: "string"
         format: "date-time"
+        readOnly: true
       updated_at:
         type: "string"
         format: "date-time"
+        readOnly: true
 
   pack:
     type: "object"
@@ -3368,29 +3672,61 @@ definitions:
       recommended_id:
         type: "string"
         format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      recommended:
+        type: "object"
+        $ref: "#/definitions/build"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
       latest_id:
         type: "string"
         format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      latest:
+        type: "object"
+        $ref: "#/definitions/build"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
       slug:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       name:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       website:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       published:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
       hidden:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
       private:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
       public:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
       created_at:
         type: "string"
         format: "date-time"
+        readOnly: true
       updated_at:
         type: "string"
         format: "date-time"
+        readOnly: true
 
   build:
     type: "object"
@@ -3405,34 +3741,72 @@ definitions:
       pack_id:
         type: "string"
         format: "uuid"
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
       minecraft_id:
         type: "string"
         format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      minecraft:
+        type: "object"
+        $ref: "#/definitions/minecraft"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
       forge_id:
         type: "string"
         format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      forge:
+        type: "object"
+        $ref: "#/definitions/forge"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
       slug:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       name:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       min_java:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       min_memory:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       published:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
       hidden:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
       private:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
       public:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
       created_at:
         type: "string"
         format: "date-time"
+        readOnly: true
       updated_at:
         type: "string"
         format: "date-time"
+        readOnly: true
 
   team:
     type: "object"
@@ -3445,14 +3819,41 @@ definitions:
         readOnly: true
       slug:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       name:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       created_at:
         type: "string"
         format: "date-time"
+        readOnly: true
       updated_at:
         type: "string"
         format: "date-time"
+        readOnly: true
+      users:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_user"
+      packs:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_pack"
+      mods:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_mod"
 
   team_pack:
     type: "object"
@@ -3464,15 +3865,31 @@ definitions:
       team_id:
         type: "string"
         format: "uuid"
+      team:
+        type: "object"
+        $ref: "#/definitions/team"
+        readOnly: true
       pack_id:
         type: "string"
         format: "uuid"
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
       perm:
         type: "string"
         enum:
           - "user"
           - "admin"
           - "owner"
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
 
   team_mod:
     type: "object"
@@ -3484,15 +3901,31 @@ definitions:
       team_id:
         type: "string"
         format: "uuid"
+      team:
+        type: "object"
+        $ref: "#/definitions/team"
+        readOnly: true
       mod_id:
         type: "string"
         format: "uuid"
+      mod:
+        type: "object"
+        $ref: "#/definitions/mod"
+        readOnly: true
       perm:
         type: "string"
         enum:
           - "user"
           - "admin"
           - "owner"
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
 
   team_user:
     type: "object"
@@ -3504,15 +3937,31 @@ definitions:
       team_id:
         type: "string"
         format: "uuid"
+      team:
+        type: "object"
+        $ref: "#/definitions/team"
+        readOnly: true
       user_id:
         type: "string"
         format: "uuid"
+      user:
+        type: "object"
+        $ref: "#/definitions/user"
+        readOnly: true
       perm:
         type: "string"
         enum:
           - "user"
           - "admin"
           - "owner"
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
 
   user:
     type: "object"
@@ -3526,23 +3975,58 @@ definitions:
         readOnly: true
       slug:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       username:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       password:
         type: "string"
         format: "password"
+        x-omitempty: true
+        x-nullable: true
       email:
         type: "string"
+        x-omitempty: true
+        x-nullable: true
       admin:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
       active:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
       created_at:
         type: "string"
         format: "date-time"
+        readOnly: true
       updated_at:
         type: "string"
         format: "date-time"
+        readOnly: true
+      teams:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_user"
+      packs:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_pack"
+      mods:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_mod"
 
   user_pack:
     type: "object"
@@ -3554,15 +4038,31 @@ definitions:
       user_id:
         type: "string"
         format: "uuid"
+      user:
+        type: "object"
+        $ref: "#/definitions/user"
+        readOnly: true
       pack_id:
         type: "string"
         format: "uuid"
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
       perm:
         type: "string"
         enum:
           - "user"
           - "admin"
           - "owner"
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
 
   user_mod:
     type: "object"
@@ -3574,15 +4074,31 @@ definitions:
       user_id:
         type: "string"
         format: "uuid"
+      user:
+        type: "object"
+        $ref: "#/definitions/user"
+        readOnly: true
       mod_id:
         type: "string"
         format: "uuid"
+      mode:
+        type: "object"
+        $ref: "#/definitions/mod"
+        readOnly: true
       perm:
         type: "string"
         enum:
           - "user"
           - "admin"
           - "owner"
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
 
   build_version:
     type: "object"
@@ -3593,9 +4109,25 @@ definitions:
       build_id:
         type: "string"
         format: "uuid"
+      build:
+        type: "object"
+        $ref: "#/definitions/build"
+        readOnly: true
       version_id:
         type: "string"
         format: "uuid"
+      version:
+        type: "object"
+        $ref: "#/definitions/version"
+        readOnly: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
 
   mod_user_params:
     type: "object"

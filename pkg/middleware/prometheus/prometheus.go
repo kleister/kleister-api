@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/kleister/kleister-api/pkg/metrics"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -13,8 +15,13 @@ var (
 )
 
 // Handler initializes the prometheus middleware.
-func Handler(token string) http.HandlerFunc {
-	h := promhttp.Handler()
+func Handler(registry *prometheus.Registry, token string) http.HandlerFunc {
+	h := promhttp.HandlerFor(
+		registry,
+		promhttp.HandlerOpts{
+			ErrorLog: metrics.Logger{},
+		},
+	)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		if token == "" {

@@ -1,0 +1,21 @@
+version: '3.4'
+
+volumes:
+  postgres:
+
+services:
+  api:
+    environment:
+      - KLEISTER_API_DATABASE_DSN=postgres://kleister:kleister@db:5432/kleister
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14.3
+    restart: always
+    environment:
+      - POSTGRES_USER=kleister
+      - POSTGRES_PASSWORD=kleister
+      - POSTGRES_DB=kleister
+    volumes:
+      - postgres:/var/lib/postgresql

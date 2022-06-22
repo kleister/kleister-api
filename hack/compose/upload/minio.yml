@@ -1,0 +1,23 @@
+version: '3.4'
+
+volumes:
+  minio:
+
+services:
+  api:
+    environment:
+      - KLEISTER_API_UPLOAD_DSN=minio://minioadmin:minioadmin@minio:9000/kleister
+    depends_on:
+      - minio
+
+  minio:
+    image: minio/minio:latest
+    restart: always
+    command:
+      - minio
+      - server
+      - /var/lib/minio
+    ports:
+      - 9000:9000
+    volumes:
+      - minio:/var/lib/minio

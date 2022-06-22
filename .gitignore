@@ -1,9 +1,5 @@
 coverage.out
 
-/pkg/api/v1/models/
-/pkg/api/v1/restapi/
-/pkg/assets/ab0x.go
-
 /bin
 /dist
 
