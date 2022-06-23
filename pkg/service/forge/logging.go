@@ -48,3 +48,25 @@ func (s *loggingService) List(ctx context.Context) ([]*model.Forge, error) {
 
 	return records, err
 }
+
+func (s *loggingService) Update(ctx context.Context) error {
+	start := time.Now()
+	err := s.service.Update(ctx)
+
+	logger := s.logger.With().
+		Str("request", s.requestID(ctx)).
+		Str("method", "update").
+		Dur("duration", time.Since(start)).
+		Logger()
+
+	if err != nil {
+		logger.Warn().
+			Err(err).
+			Msg("failed to update forge versions")
+	} else {
+		logger.Debug().
+			Msg("")
+	}
+
+	return err
+}

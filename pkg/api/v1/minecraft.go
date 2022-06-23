@@ -26,3 +26,35 @@ func ListMinecraftsHandler(minecraftService minecraftSvc.Service) minecraft.List
 		return minecraft.NewListMinecraftsOK().WithPayload(payload)
 	}
 }
+
+// UpdateMinecraftHandler implements the handler for the MinecraftUpdateMinecraft operation.
+func UpdateMinecraftHandler(minecraftService minecraftSvc.Service) minecraft.UpdateMinecraftHandlerFunc {
+	return func(params minecraft.UpdateMinecraftParams, principal *models.User) middleware.Responder {
+		if !*principal.Admin {
+			message := "only admins can access this resource"
+
+			return minecraft.NewUpdateMinecraftForbidden().WithPayload(&models.GeneralError{
+				Message: &message,
+			})
+		}
+
+		err := minecraftService.Update(params.HTTPRequest.Context())
+
+		if err != nil {
+			if err == minecraftSvc.ErrSyncUnavailable {
+				message := "minecraft version service is unavailable"
+
+				return minecraft.NewUpdateMinecraftServiceUnavailable().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return minecraft.NewUpdateMinecraftDefault(http.StatusInternalServerError)
+		}
+
+		message := "successfully updated minecraft versions"
+		return minecraft.NewUpdateMinecraftOK().WithPayload(&models.GeneralError{
+			Message: &message,
+		})
+	}
+}

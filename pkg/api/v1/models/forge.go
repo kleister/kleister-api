@@ -30,15 +30,11 @@ type Forge struct {
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// minecraft
-	// Required: true
-	Minecraft *string `json:"minecraft"`
+	Minecraft *string `json:"minecraft,omitempty"`
 
 	// name
 	// Required: true
 	Name *string `json:"name"`
-
-	// slug
-	Slug *string `json:"slug,omitempty"`
 
 	// updated at
 	// Read Only: true
@@ -55,10 +51,6 @@ func (m *Forge) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateMinecraft(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -94,15 +86,6 @@ func (m *Forge) validateID(formats strfmt.Registry) error {
 	}
 
 	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *Forge) validateMinecraft(formats strfmt.Registry) error {
-
-	if err := validate.Required("minecraft", "body", m.Minecraft); err != nil {
 		return err
 	}
 

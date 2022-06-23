@@ -33,12 +33,8 @@ type Minecraft struct {
 	// Required: true
 	Name *string `json:"name"`
 
-	// slug
-	Slug *string `json:"slug,omitempty"`
-
 	// type
-	// Required: true
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 
 	// updated at
 	// Read Only: true
@@ -59,10 +55,6 @@ func (m *Minecraft) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateType(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -103,15 +95,6 @@ func (m *Minecraft) validateID(formats strfmt.Registry) error {
 func (m *Minecraft) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *Minecraft) validateType(formats strfmt.Registry) error {
-
-	if err := validate.Required("type", "body", m.Type); err != nil {
 		return err
 	}
 

@@ -83,8 +83,18 @@ func New(
 	api.UserDeleteUserFromTeamHandler = DeleteUserFromTeamHandler(usersService, teamsService)
 
 	api.MinecraftListMinecraftsHandler = ListMinecraftsHandler(minecraftService)
+	api.MinecraftUpdateMinecraftHandler = UpdateMinecraftHandler(minecraftService)
+	// api.MinecraftSearchMinecraftsHandler = SearchMinecraftHandler(minecraftService)
+	// api.MinecraftListMinecraftBuildsHandler = ListMinecraftBuilds(minecraftService)
+	// api.MinecraftAppendMinecraftToBuildHandler = AppendMinecraftToBuildHandler(minecraftService, buildService)
+	// api.MinecraftDeleteMinecraftFromBuildHandler = DeleteMinecraftFromBuildHandler(minecraftService, buildService)
 
 	api.ForgeListForgesHandler = ListForgesHandler(forgeService)
+	api.ForgeUpdateForgeHandler = UpdateForgeHandler(forgeService)
+	// api.ForgeSearchForgesHandler = SearchForgeHandler(forgeService)
+	// api.ForgeListForgeBuildsHandler = ListForgeBuildsHandler(forgeService)
+	// api.ForgeAppendForgeToBuildHandler = AppendForgeToBuildHandler(forgeService, buildService)
+	// api.ForgeDeleteForgeFromBuildHandler = DeleteForgeFromBuildHandler(forgeService, buildService)
 
 	// TODO: needs context for request id logging?
 	api.HeaderAuth = func(val string) (*models.User, error) {
@@ -246,7 +256,6 @@ func convertTeamUser(record *model.TeamUser) *models.TeamUser {
 func convertMinecraft(record *model.Minecraft) *models.Minecraft {
 	return &models.Minecraft{
 		ID:        strfmt.UUID(record.ID),
-		Slug:      &record.Slug,
 		Name:      &record.Name,
 		Type:      &record.Type,
 		CreatedAt: strfmt.DateTime(record.CreatedAt),
@@ -256,10 +265,9 @@ func convertMinecraft(record *model.Minecraft) *models.Minecraft {
 
 func convertForge(record *model.Forge) *models.Forge {
 	return &models.Forge{
-		ID: strfmt.UUID(record.ID),
-		// Minecraft: convertMinecraft(record.Minecraft),
-		Slug:      &record.Slug,
+		ID:        strfmt.UUID(record.ID),
 		Name:      &record.Name,
+		Minecraft: &record.Minecraft,
 		CreatedAt: strfmt.DateTime(record.CreatedAt),
 		UpdatedAt: strfmt.DateTime(record.UpdatedAt),
 	}

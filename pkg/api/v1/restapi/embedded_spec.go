@@ -5211,8 +5211,7 @@ func init() {
     "forge": {
       "type": "object",
       "required": [
-        "name",
-        "minecraft"
+        "name"
       ],
       "properties": {
         "created_at": {
@@ -5231,11 +5230,6 @@ func init() {
           "x-omitempty": true
         },
         "name": {
-          "type": "string",
-          "x-nullable": true,
-          "x-omitempty": true
-        },
-        "slug": {
           "type": "string",
           "x-nullable": true,
           "x-omitempty": true
@@ -5281,8 +5275,7 @@ func init() {
     "minecraft": {
       "type": "object",
       "required": [
-        "name",
-        "type"
+        "name"
       ],
       "properties": {
         "created_at": {
@@ -5296,11 +5289,6 @@ func init() {
           "readOnly": true
         },
         "name": {
-          "type": "string",
-          "x-nullable": true,
-          "x-omitempty": true
-        },
-        "slug": {
           "type": "string",
           "x-nullable": true,
           "x-omitempty": true
@@ -11421,8 +11409,7 @@ func init() {
     "forge": {
       "type": "object",
       "required": [
-        "name",
-        "minecraft"
+        "name"
       ],
       "properties": {
         "created_at": {
@@ -11441,11 +11428,6 @@ func init() {
           "x-omitempty": true
         },
         "name": {
-          "type": "string",
-          "x-nullable": true,
-          "x-omitempty": true
-        },
-        "slug": {
           "type": "string",
           "x-nullable": true,
           "x-omitempty": true
@@ -11491,8 +11473,7 @@ func init() {
     "minecraft": {
       "type": "object",
       "required": [
-        "name",
-        "type"
+        "name"
       ],
       "properties": {
         "created_at": {
@@ -11506,11 +11487,6 @@ func init() {
           "readOnly": true
         },
         "name": {
-          "type": "string",
-          "x-nullable": true,
-          "x-omitempty": true
-        },
-        "slug": {
           "type": "string",
           "x-nullable": true,
           "x-omitempty": true

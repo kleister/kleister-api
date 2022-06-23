@@ -30,3 +30,11 @@ func (s *tracingService) List(ctx context.Context) ([]*model.Minecraft, error) {
 
 	return s.service.List(ctx)
 }
+
+func (s *tracingService) Update(ctx context.Context) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "minecraft.Service.Update")
+	span.SetTag("request", s.requestID(ctx))
+	defer span.Finish()
+
+	return s.service.Update(ctx)
+}

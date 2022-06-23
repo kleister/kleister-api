@@ -3519,16 +3519,11 @@ definitions:
     type: "object"
     required:
       - "name"
-      - "type"
     properties:
       id:
         type: "string"
         format: "uuid"
         readOnly: true
-      slug:
-        type: "string"
-        x-omitempty: true
-        x-nullable: true
       name:
         type: "string"
         x-omitempty: true
@@ -3550,16 +3545,11 @@ definitions:
     type: "object"
     required:
       - "name"
-      - "minecraft"
     properties:
       id:
         type: "string"
         format: "uuid"
         readOnly: true
-      slug:
-        type: "string"
-        x-omitempty: true
-        x-nullable: true
       name:
         type: "string"
         x-omitempty: true

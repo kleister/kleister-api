@@ -122,5 +122,39 @@ var (
 				return tx.Migrator().DropConstraint(&User{}, "Teams")
 			},
 		},
+		{
+			ID: "202206221600006",
+			Migrate: func(tx *gorm.DB) error {
+				type Minecraft struct {
+					ID        string `gorm:"primaryKey;length:36"`
+					Name      string `gorm:"unique;length:255"`
+					Type      string `gorm:"index;length:64"`
+					CreatedAt time.Time
+					UpdatedAt time.Time
+				}
+
+				return tx.Migrator().CreateTable(&Minecraft{})
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropTable("minecrafts")
+			},
+		},
+		{
+			ID: "202206221600007",
+			Migrate: func(tx *gorm.DB) error {
+				type Forge struct {
+					ID        string `gorm:"primaryKey;length:36"`
+					Name      string `gorm:"unique;length:255"`
+					Minecraft string `gorm:"index;length:64"`
+					CreatedAt time.Time
+					UpdatedAt time.Time
+				}
+
+				return tx.Migrator().CreateTable(&Forge{})
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropTable("forges")
+			},
+		},
 	}
 )

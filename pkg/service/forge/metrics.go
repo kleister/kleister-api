@@ -53,3 +53,12 @@ func (s *metricsService) List(ctx context.Context) ([]*model.Forge, error) {
 
 	return s.service.List(ctx)
 }
+
+func (s *metricsService) Update(ctx context.Context) error {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("update").Add(1)
+		s.requestLatency.WithLabelValues("update").Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	return s.service.Update(ctx)
+}

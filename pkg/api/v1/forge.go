@@ -26,3 +26,35 @@ func ListForgesHandler(forgeService forgeSvc.Service) forge.ListForgesHandlerFun
 		return forge.NewListForgesOK().WithPayload(payload)
 	}
 }
+
+// UpdateForgeHandler implements the handler for the ForgeUpdateForge operation.
+func UpdateForgeHandler(forgeService forgeSvc.Service) forge.UpdateForgeHandlerFunc {
+	return func(params forge.UpdateForgeParams, principal *models.User) middleware.Responder {
+		if !*principal.Admin {
+			message := "only admins can access this resource"
+
+			return forge.NewUpdateForgeForbidden().WithPayload(&models.GeneralError{
+				Message: &message,
+			})
+		}
+
+		err := forgeService.Update(params.HTTPRequest.Context())
+
+		if err != nil {
+			if err == forgeSvc.ErrSyncUnavailable {
+				message := "forge version service is unavailable"
+
+				return forge.NewUpdateForgeServiceUnavailable().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return forge.NewUpdateForgeDefault(http.StatusInternalServerError)
+		}
+
+		message := "successfully updated forge versions"
+		return forge.NewUpdateForgeOK().WithPayload(&models.GeneralError{
+			Message: &message,
+		})
+	}
+}
