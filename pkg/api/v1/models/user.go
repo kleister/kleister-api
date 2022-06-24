@@ -26,6 +26,9 @@ type User struct {
 	// admin
 	Admin *bool `json:"admin,omitempty"`
 
+	// avatar
+	Avatar *string `json:"avatar,omitempty"`
+
 	// created at
 	// Read Only: true
 	// Format: date-time

@@ -201,7 +201,7 @@ type AppendTeamToModUnprocessableEntity struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.GeneralError `json:"body,omitempty"`
+	Payload *models.ValidationError `json:"body,omitempty"`
 }
 
 // NewAppendTeamToModUnprocessableEntity creates AppendTeamToModUnprocessableEntity with default headers values
@@ -211,13 +211,13 @@ func NewAppendTeamToModUnprocessableEntity() *AppendTeamToModUnprocessableEntity
 }
 
 // WithPayload adds the payload to the append team to mod unprocessable entity response
-func (o *AppendTeamToModUnprocessableEntity) WithPayload(payload *models.GeneralError) *AppendTeamToModUnprocessableEntity {
+func (o *AppendTeamToModUnprocessableEntity) WithPayload(payload *models.ValidationError) *AppendTeamToModUnprocessableEntity {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the append team to mod unprocessable entity response
-func (o *AppendTeamToModUnprocessableEntity) SetPayload(payload *models.GeneralError) {
+func (o *AppendTeamToModUnprocessableEntity) SetPayload(payload *models.ValidationError) {
 	o.Payload = payload
 }
 

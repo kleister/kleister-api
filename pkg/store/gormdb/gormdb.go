@@ -12,10 +12,14 @@ import (
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/model"
+	"github.com/kleister/kleister-api/pkg/service/builds"
 	"github.com/kleister/kleister-api/pkg/service/forge"
 	"github.com/kleister/kleister-api/pkg/service/minecraft"
+	"github.com/kleister/kleister-api/pkg/service/mods"
+	"github.com/kleister/kleister-api/pkg/service/packs"
 	"github.com/kleister/kleister-api/pkg/service/teams"
 	"github.com/kleister/kleister-api/pkg/service/users"
+	"github.com/kleister/kleister-api/pkg/service/versions"
 	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/pkg/errors"
 	"gorm.io/driver/mysql"
@@ -41,6 +45,10 @@ type gormdbStore struct {
 	users     users.Store
 	minecraft minecraft.Store
 	forge     forge.Store
+	packs     packs.Store
+	builds    builds.Store
+	mods      mods.Store
+	versions  versions.Store
 }
 
 func (db *gormdbStore) Teams() teams.Store {
@@ -57,6 +65,22 @@ func (db *gormdbStore) Minecraft() minecraft.Store {
 
 func (db *gormdbStore) Forge() forge.Store {
 	return db.forge
+}
+
+func (db *gormdbStore) Packs() packs.Store {
+	return db.packs
+}
+
+func (db *gormdbStore) Builds() builds.Store {
+	return db.builds
+}
+
+func (db *gormdbStore) Mods() mods.Store {
+	return db.mods
+}
+
+func (db *gormdbStore) Versions() versions.Store {
+	return db.versions
 }
 
 func (db *gormdbStore) Admin(username, password, email string) error {
@@ -377,6 +401,22 @@ func New(cfg config.Database) (store.Store, error) {
 	}
 
 	client.forge = &Forge{
+		client: client,
+	}
+
+	client.packs = &Packs{
+		client: client,
+	}
+
+	client.builds = &Builds{
+		client: client,
+	}
+
+	client.mods = &Mods{
+		client: client,
+	}
+
+	client.versions = &Versions{
 		client: client,
 	}
 

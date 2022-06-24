@@ -201,7 +201,7 @@ type PermitTeamModUnprocessableEntity struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.GeneralError `json:"body,omitempty"`
+	Payload *models.ValidationError `json:"body,omitempty"`
 }
 
 // NewPermitTeamModUnprocessableEntity creates PermitTeamModUnprocessableEntity with default headers values
@@ -211,13 +211,13 @@ func NewPermitTeamModUnprocessableEntity() *PermitTeamModUnprocessableEntity {
 }
 
 // WithPayload adds the payload to the permit team mod unprocessable entity response
-func (o *PermitTeamModUnprocessableEntity) WithPayload(payload *models.GeneralError) *PermitTeamModUnprocessableEntity {
+func (o *PermitTeamModUnprocessableEntity) WithPayload(payload *models.ValidationError) *PermitTeamModUnprocessableEntity {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the permit team mod unprocessable entity response
-func (o *PermitTeamModUnprocessableEntity) SetPayload(payload *models.GeneralError) {
+func (o *PermitTeamModUnprocessableEntity) SetPayload(payload *models.ValidationError) {
 	o.Payload = payload
 }
 

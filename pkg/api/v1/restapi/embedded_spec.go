@@ -3471,7 +3471,7 @@ func init() {
           "422": {
             "description": "Failed to validate request",
             "schema": {
-              "$ref": "#/definitions/general_error"
+              "$ref": "#/definitions/validation_error"
             }
           },
           "default": {
@@ -3534,7 +3534,7 @@ func init() {
           "422": {
             "description": "Failed to validate request",
             "schema": {
-              "$ref": "#/definitions/general_error"
+              "$ref": "#/definitions/validation_error"
             }
           },
           "default": {
@@ -5153,6 +5153,15 @@ func init() {
           "type": "string",
           "format": "date-time",
           "readOnly": true
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/build_version"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
         }
       }
     },
@@ -5371,9 +5380,36 @@ func init() {
           "x-nullable": true,
           "x-omitempty": true
         },
+        "teams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/team_mod"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
         "updated_at": {
           "type": "string",
           "format": "date-time",
+          "readOnly": true
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/user_mod"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/version"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
           "readOnly": true
         },
         "website": {
@@ -5429,6 +5465,22 @@ func init() {
         "name"
       ],
       "properties": {
+        "background": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack_background",
+          "readOnly": true
+        },
+        "builds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/build"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
         "created_at": {
           "type": "string",
           "format": "date-time",
@@ -5438,6 +5490,13 @@ func init() {
           "type": "boolean",
           "x-nullable": true,
           "x-omitempty": true
+        },
+        "icon": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack_icon",
+          "readOnly": true
         },
         "id": {
           "type": "string",
@@ -5456,6 +5515,13 @@ func init() {
           "format": "uuid",
           "x-nullable": true,
           "x-omitempty": true
+        },
+        "logo": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack_logo",
+          "readOnly": true
         },
         "name": {
           "type": "string",
@@ -5495,12 +5561,219 @@ func init() {
           "x-nullable": true,
           "x-omitempty": true
         },
+        "teams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/team_pack"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
         "updated_at": {
           "type": "string",
           "format": "date-time",
           "readOnly": true
         },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/user_pack"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
         "website": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        }
+      }
+    },
+    "pack_background": {
+      "type": "object",
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "md5": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "pack": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack",
+          "readOnly": true
+        },
+        "pack_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "slug": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "upload": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "url": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        }
+      }
+    },
+    "pack_icon": {
+      "type": "object",
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "md5": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "pack": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack",
+          "readOnly": true
+        },
+        "pack_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "slug": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "upload": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "url": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        }
+      }
+    },
+    "pack_logo": {
+      "type": "object",
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "md5": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "pack": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack",
+          "readOnly": true
+        },
+        "pack_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "slug": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "upload": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "url": {
           "type": "string",
           "x-nullable": true,
           "x-omitempty": true
@@ -5558,6 +5831,11 @@ func init() {
           "type": "boolean",
           "readOnly": true
         },
+        "avatar": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
         "created_at": {
           "type": "string",
           "format": "date-time",
@@ -5571,6 +5849,24 @@ func init() {
         "id": {
           "type": "string",
           "format": "uuid",
+          "readOnly": true
+        },
+        "mods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/user_mod"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
+        "packs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/user_pack"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
           "readOnly": true
         },
         "password": {
@@ -5880,6 +6176,11 @@ func init() {
           "x-nullable": true,
           "x-omitempty": true
         },
+        "avatar": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
         "created_at": {
           "type": "string",
           "format": "date-time",
@@ -5958,14 +6259,14 @@ func init() {
           "format": "date-time",
           "readOnly": true
         },
-        "mod_id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "mode": {
+        "mod": {
           "type": "object",
           "$ref": "#/definitions/mod",
           "readOnly": true
+        },
+        "mod_id": {
+          "type": "string",
+          "format": "uuid"
         },
         "perm": {
           "type": "string",
@@ -6133,9 +6434,25 @@ func init() {
         "name"
       ],
       "properties": {
+        "builds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/build_version"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
         "created_at": {
           "type": "string",
           "format": "date-time",
+          "readOnly": true
+        },
+        "file": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/version_file",
           "readOnly": true
         },
         "id": {
@@ -6181,6 +6498,69 @@ func init() {
         },
         "pack": {
           "type": "string"
+        }
+      }
+    },
+    "version_file": {
+      "type": "object",
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "md5": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "slug": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "upload": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "url": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "version": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/version",
+          "readOnly": true
+        },
+        "version_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "x-omitempty": true
         }
       }
     }
@@ -9658,7 +10038,7 @@ func init() {
           "422": {
             "description": "Failed to validate request",
             "schema": {
-              "$ref": "#/definitions/general_error"
+              "$ref": "#/definitions/validation_error"
             }
           },
           "default": {
@@ -9721,7 +10101,7 @@ func init() {
           "422": {
             "description": "Failed to validate request",
             "schema": {
-              "$ref": "#/definitions/general_error"
+              "$ref": "#/definitions/validation_error"
             }
           },
           "default": {
@@ -11351,6 +11731,15 @@ func init() {
           "type": "string",
           "format": "date-time",
           "readOnly": true
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/build_version"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
         }
       }
     },
@@ -11569,9 +11958,36 @@ func init() {
           "x-nullable": true,
           "x-omitempty": true
         },
+        "teams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/team_mod"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
         "updated_at": {
           "type": "string",
           "format": "date-time",
+          "readOnly": true
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/user_mod"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/version"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
           "readOnly": true
         },
         "website": {
@@ -11627,6 +12043,22 @@ func init() {
         "name"
       ],
       "properties": {
+        "background": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack_background",
+          "readOnly": true
+        },
+        "builds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/build"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
         "created_at": {
           "type": "string",
           "format": "date-time",
@@ -11636,6 +12068,13 @@ func init() {
           "type": "boolean",
           "x-nullable": true,
           "x-omitempty": true
+        },
+        "icon": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack_icon",
+          "readOnly": true
         },
         "id": {
           "type": "string",
@@ -11654,6 +12093,13 @@ func init() {
           "format": "uuid",
           "x-nullable": true,
           "x-omitempty": true
+        },
+        "logo": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack_logo",
+          "readOnly": true
         },
         "name": {
           "type": "string",
@@ -11693,12 +12139,219 @@ func init() {
           "x-nullable": true,
           "x-omitempty": true
         },
+        "teams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/team_pack"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
         "updated_at": {
           "type": "string",
           "format": "date-time",
           "readOnly": true
         },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/user_pack"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
         "website": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        }
+      }
+    },
+    "pack_background": {
+      "type": "object",
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "md5": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "pack": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack",
+          "readOnly": true
+        },
+        "pack_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "slug": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "upload": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "url": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        }
+      }
+    },
+    "pack_icon": {
+      "type": "object",
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "md5": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "pack": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack",
+          "readOnly": true
+        },
+        "pack_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "slug": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "upload": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "url": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        }
+      }
+    },
+    "pack_logo": {
+      "type": "object",
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "md5": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "pack": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/pack",
+          "readOnly": true
+        },
+        "pack_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "slug": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "upload": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "url": {
           "type": "string",
           "x-nullable": true,
           "x-omitempty": true
@@ -11756,6 +12409,11 @@ func init() {
           "type": "boolean",
           "readOnly": true
         },
+        "avatar": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
         "created_at": {
           "type": "string",
           "format": "date-time",
@@ -11769,6 +12427,24 @@ func init() {
         "id": {
           "type": "string",
           "format": "uuid",
+          "readOnly": true
+        },
+        "mods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/user_mod"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
+        "packs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/user_pack"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
           "readOnly": true
         },
         "password": {
@@ -12078,6 +12754,11 @@ func init() {
           "x-nullable": true,
           "x-omitempty": true
         },
+        "avatar": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
         "created_at": {
           "type": "string",
           "format": "date-time",
@@ -12156,14 +12837,14 @@ func init() {
           "format": "date-time",
           "readOnly": true
         },
-        "mod_id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "mode": {
+        "mod": {
           "type": "object",
           "$ref": "#/definitions/mod",
           "readOnly": true
+        },
+        "mod_id": {
+          "type": "string",
+          "format": "uuid"
         },
         "perm": {
           "type": "string",
@@ -12323,9 +13004,25 @@ func init() {
         "name"
       ],
       "properties": {
+        "builds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/build_version"
+          },
+          "x-nullable": true,
+          "x-omitempty": true,
+          "readOnly": true
+        },
         "created_at": {
           "type": "string",
           "format": "date-time",
+          "readOnly": true
+        },
+        "file": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/version_file",
           "readOnly": true
         },
         "id": {
@@ -12371,6 +13068,69 @@ func init() {
         },
         "pack": {
           "type": "string"
+        }
+      }
+    },
+    "version_file": {
+      "type": "object",
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "md5": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "slug": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "upload": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "url": {
+          "type": "string",
+          "x-nullable": true,
+          "x-omitempty": true
+        },
+        "version": {
+          "type": "object",
+          "x-nullable": true,
+          "x-omitempty": true,
+          "$ref": "#/definitions/version",
+          "readOnly": true
+        },
+        "version_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "x-omitempty": true
         }
       }
     }

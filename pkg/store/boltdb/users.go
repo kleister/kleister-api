@@ -337,7 +337,7 @@ func (u *Users) AppendTeam(ctx context.Context, userID, teamID, perm string) err
 		CreatedAt: time.Now().UTC(),
 	}
 
-	if err := u.validatePerm(record); err != nil {
+	if err := u.validatePerm(record.Perm); err != nil {
 		return err
 	}
 
@@ -371,7 +371,7 @@ func (u *Users) PermitTeam(ctx context.Context, userID, teamID, perm string) err
 	record.Perm = perm
 	record.UpdatedAt = time.Now().UTC()
 
-	if err := u.validatePerm(record); err != nil {
+	if err := u.validatePerm(record.Perm); err != nil {
 		return err
 	}
 
@@ -397,6 +397,274 @@ func (u *Users) DropTeam(ctx context.Context, userID, teamID string) error {
 		q.And(
 			q.Eq("UserID", userID),
 			q.Eq("TeamID", teamID),
+		),
+	).First(record); err == storm.ErrNotFound {
+		return users.ErrNotAssigned
+	}
+
+	if err := tx.DeleteStruct(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// ListMods implements ListMods from users.Store interface.
+func (u *Users) ListMods(ctx context.Context, id string) ([]*model.UserMod, error) {
+	records := make([]*model.UserMod, 0)
+
+	if err := u.client.handle.Select(
+		q.Eq("UserID", id),
+	).Find(&records); err != nil && err != storm.ErrNotFound {
+		return records, err
+	}
+
+	for _, record := range records {
+		user := &model.User{}
+
+		if err := u.client.handle.Select(
+			q.Eq("ID", record.UserID),
+		).First(user); err != nil && err != storm.ErrNotFound {
+			return records, err
+		}
+
+		record.User = user
+
+		mod := &model.Mod{}
+
+		if err := u.client.handle.Select(
+			q.Eq("ID", record.ModID),
+		).First(mod); err != nil && err != storm.ErrNotFound {
+			return records, err
+		}
+
+		record.Mod = mod
+	}
+
+	return records, nil
+}
+
+// AppendMod implements AppendMod from users.Store interface.
+func (u *Users) AppendMod(ctx context.Context, userID, modID, perm string) error {
+	tx, err := u.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	if err := u.client.handle.Select(
+		q.And(
+			q.Eq("UserID", userID),
+			q.Eq("ModID", modID),
+		),
+	).First(new(model.UserMod)); err == nil {
+		return users.ErrAlreadyAssigned
+	}
+
+	record := &model.UserMod{
+		UserID:    userID,
+		ModID:     modID,
+		Perm:      perm,
+		UpdatedAt: time.Now().UTC(),
+		CreatedAt: time.Now().UTC(),
+	}
+
+	if err := u.validatePerm(record.Perm); err != nil {
+		return err
+	}
+
+	if err := tx.Save(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// PermitMod implements PermitMod from users.Store interface.
+func (u *Users) PermitMod(ctx context.Context, userID, modID, perm string) error {
+	tx, err := u.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	record := &model.UserMod{}
+
+	if err := u.client.handle.Select(
+		q.And(
+			q.Eq("UserID", userID),
+			q.Eq("ModID", modID),
+		),
+	).First(record); err == storm.ErrNotFound {
+		return users.ErrNotAssigned
+	}
+
+	record.Perm = perm
+	record.UpdatedAt = time.Now().UTC()
+
+	if err := u.validatePerm(record.Perm); err != nil {
+		return err
+	}
+
+	if err := tx.Save(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// DropMod implements DropMod from users.Store interface.
+func (u *Users) DropMod(ctx context.Context, userID, modID string) error {
+	tx, err := u.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	record := &model.UserMod{}
+
+	if err := u.client.handle.Select(
+		q.And(
+			q.Eq("UserID", userID),
+			q.Eq("ModID", modID),
+		),
+	).First(record); err == storm.ErrNotFound {
+		return users.ErrNotAssigned
+	}
+
+	if err := tx.DeleteStruct(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// ListPacks implements ListPacks from users.Store interface.
+func (u *Users) ListPacks(ctx context.Context, id string) ([]*model.UserPack, error) {
+	records := make([]*model.UserPack, 0)
+
+	if err := u.client.handle.Select(
+		q.Eq("UserID", id),
+	).Find(&records); err != nil && err != storm.ErrNotFound {
+		return records, err
+	}
+
+	for _, record := range records {
+		user := &model.User{}
+
+		if err := u.client.handle.Select(
+			q.Eq("ID", record.UserID),
+		).First(user); err != nil && err != storm.ErrNotFound {
+			return records, err
+		}
+
+		record.User = user
+
+		pack := &model.Pack{}
+
+		if err := u.client.handle.Select(
+			q.Eq("ID", record.PackID),
+		).First(pack); err != nil && err != storm.ErrNotFound {
+			return records, err
+		}
+
+		record.Pack = pack
+	}
+
+	return records, nil
+}
+
+// AppendPack implements AppendPack from users.Store interface.
+func (u *Users) AppendPack(ctx context.Context, userID, packID, perm string) error {
+	tx, err := u.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	if err := u.client.handle.Select(
+		q.And(
+			q.Eq("UserID", userID),
+			q.Eq("PackID", packID),
+		),
+	).First(new(model.UserPack)); err == nil {
+		return users.ErrAlreadyAssigned
+	}
+
+	record := &model.UserPack{
+		UserID:    userID,
+		PackID:    packID,
+		Perm:      perm,
+		UpdatedAt: time.Now().UTC(),
+		CreatedAt: time.Now().UTC(),
+	}
+
+	if err := u.validatePerm(record.Perm); err != nil {
+		return err
+	}
+
+	if err := tx.Save(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// PermitPack implements PermitPack from users.Store interface.
+func (u *Users) PermitPack(ctx context.Context, userID, packID, perm string) error {
+	tx, err := u.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	record := &model.UserPack{}
+
+	if err := u.client.handle.Select(
+		q.And(
+			q.Eq("UserID", userID),
+			q.Eq("PackID", packID),
+		),
+	).First(record); err == storm.ErrNotFound {
+		return users.ErrNotAssigned
+	}
+
+	record.Perm = perm
+	record.UpdatedAt = time.Now().UTC()
+
+	if err := u.validatePerm(record.Perm); err != nil {
+		return err
+	}
+
+	if err := tx.Save(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// DropPack implements DropPack from users.Store interface.
+func (u *Users) DropPack(ctx context.Context, userID, packID string) error {
+	tx, err := u.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	record := &model.UserPack{}
+
+	if err := u.client.handle.Select(
+		q.And(
+			q.Eq("UserID", userID),
+			q.Eq("PackID", packID),
 		),
 	).First(record); err == storm.ErrNotFound {
 		return users.ErrNotAssigned
@@ -529,8 +797,8 @@ func (u *Users) validateUpdate(record *model.User) error {
 	return nil
 }
 
-func (u *Users) validatePerm(record *model.TeamUser) error {
-	if ok := govalidator.IsIn(record.Perm, "user", "admin", "owner"); !ok {
+func (u *Users) validatePerm(perm string) error {
+	if ok := govalidator.IsIn(perm, "user", "admin", "owner"); !ok {
 		return validate.Errors{
 			Errors: []validate.Error{
 				{

@@ -125,3 +125,75 @@ func (s *metricsService) DropUser(ctx context.Context, teamID, userID string) er
 
 	return s.service.DropUser(ctx, teamID, userID)
 }
+
+func (s *metricsService) ListMods(ctx context.Context, name string) ([]*model.TeamMod, error) {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("listMods").Add(1)
+		s.requestLatency.WithLabelValues("listMods").Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	return s.service.ListMods(ctx, name)
+}
+
+func (s *metricsService) AppendMod(ctx context.Context, teamID, modID, perm string) error {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("appendMod").Add(1)
+		s.requestLatency.WithLabelValues("appendMod").Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	return s.service.AppendMod(ctx, teamID, modID, perm)
+}
+
+func (s *metricsService) PermitMod(ctx context.Context, teamID, modID, perm string) error {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("permitMod").Add(1)
+		s.requestLatency.WithLabelValues("permitMod").Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	return s.service.PermitMod(ctx, teamID, modID, perm)
+}
+
+func (s *metricsService) DropMod(ctx context.Context, teamID, modID string) error {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("dropMod").Add(1)
+		s.requestLatency.WithLabelValues("dropMod").Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	return s.service.DropMod(ctx, teamID, modID)
+}
+
+func (s *metricsService) ListPacks(ctx context.Context, name string) ([]*model.TeamPack, error) {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("listPacks").Add(1)
+		s.requestLatency.WithLabelValues("listPacks").Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	return s.service.ListPacks(ctx, name)
+}
+
+func (s *metricsService) AppendPack(ctx context.Context, teamID, packID, perm string) error {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("appendPack").Add(1)
+		s.requestLatency.WithLabelValues("appendPack").Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	return s.service.AppendPack(ctx, teamID, packID, perm)
+}
+
+func (s *metricsService) PermitPack(ctx context.Context, teamID, packID, perm string) error {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("permitPack").Add(1)
+		s.requestLatency.WithLabelValues("permitPack").Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	return s.service.PermitPack(ctx, teamID, packID, perm)
+}
+
+func (s *metricsService) DropPack(ctx context.Context, teamID, packID string) error {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("dropPack").Add(1)
+		s.requestLatency.WithLabelValues("dropPack").Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	return s.service.DropPack(ctx, teamID, packID)
+}

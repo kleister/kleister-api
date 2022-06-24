@@ -4,8 +4,10 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/kleister/kleister-api/pkg/api/v1/models"
 	"github.com/kleister/kleister-api/pkg/api/v1/restapi/operations/forge"
+	"github.com/kleister/kleister-api/pkg/model"
 	forgeSvc "github.com/kleister/kleister-api/pkg/service/forge"
 )
 
@@ -56,5 +58,15 @@ func UpdateForgeHandler(forgeService forgeSvc.Service) forge.UpdateForgeHandlerF
 		return forge.NewUpdateForgeOK().WithPayload(&models.GeneralError{
 			Message: &message,
 		})
+	}
+}
+
+func convertForge(record *model.Forge) *models.Forge {
+	return &models.Forge{
+		ID:        strfmt.UUID(record.ID),
+		Name:      &record.Name,
+		Minecraft: &record.Minecraft,
+		CreatedAt: strfmt.DateTime(record.CreatedAt),
+		UpdatedAt: strfmt.DateTime(record.UpdatedAt),
 	}
 }

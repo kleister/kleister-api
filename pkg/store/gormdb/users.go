@@ -74,10 +74,6 @@ func (u *Users) List(ctx context.Context) ([]*model.User, error) {
 		&records,
 	).Error
 
-	for _, record := range records {
-		fmt.Printf("%+v\n", record)
-	}
-
 	return records, err
 }
 
@@ -323,7 +319,7 @@ func (u *Users) AppendTeam(ctx context.Context, userID, teamID, perm string) err
 		Perm:   perm,
 	}
 
-	if err := u.validatePerm(record); err != nil {
+	if err := u.validatePerm(record.Perm); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -352,7 +348,7 @@ func (u *Users) PermitTeam(ctx context.Context, userID, teamID, perm string) err
 	record := &model.TeamUser{}
 	record.Perm = perm
 
-	if err := u.validatePerm(record); err != nil {
+	if err := u.validatePerm(record.Perm); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -400,6 +396,238 @@ func (u *Users) DropTeam(ctx context.Context, userID, teamID string) error {
 	return tx.Commit().Error
 }
 
+// ListMods implements ListMods from users.Store interface.
+func (u *Users) ListMods(ctx context.Context, id string) ([]*model.UserMod, error) {
+	records := make([]*model.UserMod, 0)
+
+	err := u.client.handle.Where(
+		"user_id = ?",
+		id,
+	).Model(
+		&model.UserMod{},
+	).Preload(
+		"User",
+	).Preload(
+		"Mod",
+	).Find(
+		&records,
+	).Error
+
+	return records, err
+}
+
+// AppendMod implements AppendMod from users.Store interface.
+func (u *Users) AppendMod(ctx context.Context, userID, modID, perm string) error {
+	if u.isAssignedToMod(userID, modID) {
+		return users.ErrAlreadyAssigned
+	}
+
+	tx := u.client.handle.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	record := &model.UserMod{
+		UserID: userID,
+		ModID:  modID,
+		Perm:   perm,
+	}
+
+	if err := u.validatePerm(record.Perm); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Create(record).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+// PermitMod implements PermitMod from users.Store interface.
+func (u *Users) PermitMod(ctx context.Context, userID, modID, perm string) error {
+	if u.isUnassignedFromMod(userID, modID) {
+		return users.ErrNotAssigned
+	}
+
+	tx := u.client.handle.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	record := &model.UserMod{}
+	record.Perm = perm
+
+	if err := u.validatePerm(record.Perm); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Where(
+		"user_id = ? AND mod_id = ?",
+		userID,
+		modID,
+	).Model(
+		&model.UserMod{},
+	).Updates(
+		record,
+	).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+// DropMod implements DropMod from users.Store interface.
+func (u *Users) DropMod(ctx context.Context, userID, modID string) error {
+	if u.isUnassignedFromMod(userID, modID) {
+		return users.ErrNotAssigned
+	}
+
+	tx := u.client.handle.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Where(
+		"user_id = ? AND mod_id = ?",
+		userID,
+		modID,
+	).Delete(
+		&model.UserMod{},
+	).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+// ListPacks implements ListPacks from users.Store interface.
+func (u *Users) ListPacks(ctx context.Context, id string) ([]*model.UserPack, error) {
+	records := make([]*model.UserPack, 0)
+
+	err := u.client.handle.Where(
+		"user_id = ?",
+		id,
+	).Model(
+		&model.UserPack{},
+	).Preload(
+		"User",
+	).Preload(
+		"Pack",
+	).Find(
+		&records,
+	).Error
+
+	return records, err
+}
+
+// AppendPack implements AppendPack from users.Store interface.
+func (u *Users) AppendPack(ctx context.Context, userID, packID, perm string) error {
+	if u.isAssignedToPack(userID, packID) {
+		return users.ErrAlreadyAssigned
+	}
+
+	tx := u.client.handle.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	record := &model.UserPack{
+		UserID: userID,
+		PackID: packID,
+		Perm:   perm,
+	}
+
+	if err := u.validatePerm(record.Perm); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Create(record).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+// PermitPack implements PermitPack from users.Store interface.
+func (u *Users) PermitPack(ctx context.Context, userID, packID, perm string) error {
+	if u.isUnassignedFromPack(userID, packID) {
+		return users.ErrNotAssigned
+	}
+
+	tx := u.client.handle.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	record := &model.UserPack{}
+	record.Perm = perm
+
+	if err := u.validatePerm(record.Perm); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Where(
+		"user_id = ? AND pack_id = ?",
+		userID,
+		packID,
+	).Model(
+		&model.UserPack{},
+	).Updates(
+		record,
+	).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+// DropPack implements DropPack from users.Store interface.
+func (u *Users) DropPack(ctx context.Context, userID, packID string) error {
+	if u.isUnassignedFromPack(userID, packID) {
+		return users.ErrNotAssigned
+	}
+
+	tx := u.client.handle.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Where(
+		"user_id = ? AND pack_id = ?",
+		userID,
+		packID,
+	).Delete(
+		&model.UserPack{},
+	).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
 func (u *Users) isAssignedToTeam(userID, teamID string) bool {
 	res := u.client.handle.Where(
 		"user_id = ? AND team_id = ?",
@@ -419,6 +647,54 @@ func (u *Users) isUnassignedFromTeam(userID, teamID string) bool {
 		teamID,
 	).Find(
 		&model.TeamUser{},
+	)
+
+	return res.RowsAffected == 0
+}
+
+func (u *Users) isAssignedToMod(userID, modID string) bool {
+	res := u.client.handle.Where(
+		"user_id = ? AND mod_id = ?",
+		userID,
+		modID,
+	).Find(
+		&model.UserMod{},
+	)
+
+	return res.RowsAffected != 0
+}
+
+func (u *Users) isUnassignedFromMod(userID, modID string) bool {
+	res := u.client.handle.Where(
+		"user_id = ? AND mod_id = ?",
+		userID,
+		modID,
+	).Find(
+		&model.UserMod{},
+	)
+
+	return res.RowsAffected == 0
+}
+
+func (u *Users) isAssignedToPack(userID, packID string) bool {
+	res := u.client.handle.Where(
+		"user_id = ? AND pack_id = ?",
+		userID,
+		packID,
+	).Find(
+		&model.UserPack{},
+	)
+
+	return res.RowsAffected != 0
+}
+
+func (u *Users) isUnassignedFromPack(userID, packID string) bool {
+	res := u.client.handle.Where(
+		"user_id = ? AND pack_id = ?",
+		userID,
+		packID,
+	).Find(
+		&model.UserPack{},
 	)
 
 	return res.RowsAffected == 0
@@ -542,8 +818,8 @@ func (u *Users) validateUpdate(record *model.User) error {
 	return nil
 }
 
-func (u *Users) validatePerm(record *model.TeamUser) error {
-	if ok := govalidator.IsIn(record.Perm, "user", "admin", "owner"); !ok {
+func (u *Users) validatePerm(perm string) error {
+	if ok := govalidator.IsIn(perm, "user", "admin", "owner"); !ok {
 		return validate.Errors{
 			Errors: []validate.Error{
 				{

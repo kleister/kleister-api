@@ -7,6 +7,7 @@ package models
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -19,10 +20,18 @@ import (
 // swagger:model version
 type Version struct {
 
+	// builds
+	// Read Only: true
+	Builds []*BuildVersion `json:"builds,omitempty"`
+
 	// created at
 	// Read Only: true
 	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
+
+	// file
+	// Read Only: true
+	File *VersionFile `json:"file,omitempty"`
 
 	// id
 	// Read Only: true
@@ -54,7 +63,15 @@ type Version struct {
 func (m *Version) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateBuilds(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateCreatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateFile(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -84,6 +101,32 @@ func (m *Version) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Version) validateBuilds(formats strfmt.Registry) error {
+	if swag.IsZero(m.Builds) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Builds); i++ {
+		if swag.IsZero(m.Builds[i]) { // not required
+			continue
+		}
+
+		if m.Builds[i] != nil {
+			if err := m.Builds[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("builds" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("builds" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 func (m *Version) validateCreatedAt(formats strfmt.Registry) error {
 	if swag.IsZero(m.CreatedAt) { // not required
 		return nil
@@ -91,6 +134,25 @@ func (m *Version) validateCreatedAt(formats strfmt.Registry) error {
 
 	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *Version) validateFile(formats strfmt.Registry) error {
+	if swag.IsZero(m.File) { // not required
+		return nil
+	}
+
+	if m.File != nil {
+		if err := m.File.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("file")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("file")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -164,7 +226,15 @@ func (m *Version) validateUpdatedAt(formats strfmt.Registry) error {
 func (m *Version) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.contextValidateBuilds(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.contextValidateCreatedAt(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateFile(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -186,10 +256,50 @@ func (m *Version) ContextValidate(ctx context.Context, formats strfmt.Registry) 
 	return nil
 }
 
+func (m *Version) contextValidateBuilds(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := validate.ReadOnly(ctx, "builds", "body", []*BuildVersion(m.Builds)); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Builds); i++ {
+
+		if m.Builds[i] != nil {
+			if err := m.Builds[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("builds" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("builds" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 func (m *Version) contextValidateCreatedAt(ctx context.Context, formats strfmt.Registry) error {
 
 	if err := validate.ReadOnly(ctx, "created_at", "body", strfmt.DateTime(m.CreatedAt)); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *Version) contextValidateFile(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.File != nil {
+		if err := m.File.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("file")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("file")
+			}
+			return err
+		}
 	}
 
 	return nil

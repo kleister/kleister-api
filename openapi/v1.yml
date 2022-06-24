@@ -2701,7 +2701,7 @@ paths:
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/definitions/general_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -2744,7 +2744,7 @@ paths:
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/definitions/general_error"
+            $ref: "#/definitions/validation_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -3480,6 +3480,10 @@ definitions:
         type: "string"
         x-omitempty: true
         x-nullable: true
+      email:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
       username:
         type: "string"
         x-omitempty: true
@@ -3489,7 +3493,7 @@ definitions:
         format: "password"
         x-omitempty: true
         x-nullable: true
-      email:
+      avatar:
         type: "string"
         x-omitempty: true
         x-nullable: true
@@ -3514,6 +3518,20 @@ definitions:
         readOnly: true
         items:
           $ref: "#/definitions/team_user"
+      packs:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_pack"
+      mods:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_mod"
 
   minecraft:
     type: "object"
@@ -3616,6 +3634,27 @@ definitions:
         type: "string"
         format: "date-time"
         readOnly: true
+      versions:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/version"
+      users:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_mod"
+      teams:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_mod"
 
   version:
     type: "object"
@@ -3626,6 +3665,12 @@ definitions:
         type: "string"
         format: "uuid"
         readOnly: true
+      file:
+        type: "object"
+        $ref: "#/definitions/version_file"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
       mod_id:
         type: "string"
         format: "uuid"
@@ -3649,6 +3694,64 @@ definitions:
         type: "string"
         format: "date-time"
         readOnly: true
+      builds:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/build_version"
+
+  version_file:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      version_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      version:
+        type: "object"
+        $ref: "#/definitions/version"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      content_type:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      md5:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      path:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      url:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      upload:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
 
   pack:
     type: "object"
@@ -3659,6 +3762,24 @@ definitions:
         type: "string"
         format: "uuid"
         readOnly: true
+      icon:
+        type: "object"
+        $ref: "#/definitions/pack_icon"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      logo:
+        type: "object"
+        $ref: "#/definitions/pack_logo"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      background:
+        type: "object"
+        $ref: "#/definitions/pack_background"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
       recommended_id:
         type: "string"
         format: "uuid"
@@ -3707,6 +3828,180 @@ definitions:
         x-nullable: true
       public:
         type: "boolean"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      builds:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/build"
+      users:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_pack"
+      teams:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_pack"
+
+  pack_icon:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      pack_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      content_type:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      md5:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      path:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      url:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      upload:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  pack_logo:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      pack_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      content_type:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      md5:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      path:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      url:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      upload:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  pack_background:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      pack_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      content_type:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      md5:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      path:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      url:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      upload:
+        type: "string"
         x-omitempty: true
         x-nullable: true
       created_at:
@@ -3797,6 +4092,13 @@ definitions:
         type: "string"
         format: "date-time"
         readOnly: true
+      versions:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/build_version"
 
   team:
     type: "object"
@@ -3967,6 +4269,10 @@ definitions:
         type: "string"
         x-omitempty: true
         x-nullable: true
+      email:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
       username:
         type: "string"
         x-omitempty: true
@@ -3976,7 +4282,7 @@ definitions:
         format: "password"
         x-omitempty: true
         x-nullable: true
-      email:
+      avatar:
         type: "string"
         x-omitempty: true
         x-nullable: true
@@ -4071,7 +4377,7 @@ definitions:
       mod_id:
         type: "string"
         format: "uuid"
-      mode:
+      mod:
         type: "object"
         $ref: "#/definitions/mod"
         readOnly: true

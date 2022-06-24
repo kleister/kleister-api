@@ -13,10 +13,14 @@ import (
 	"github.com/kleister/kleister-api/pkg/middleware/header"
 	"github.com/kleister/kleister-api/pkg/middleware/prometheus"
 	"github.com/kleister/kleister-api/pkg/middleware/requestid"
+	"github.com/kleister/kleister-api/pkg/service/builds"
 	"github.com/kleister/kleister-api/pkg/service/forge"
 	"github.com/kleister/kleister-api/pkg/service/minecraft"
+	"github.com/kleister/kleister-api/pkg/service/mods"
+	"github.com/kleister/kleister-api/pkg/service/packs"
 	"github.com/kleister/kleister-api/pkg/service/teams"
 	"github.com/kleister/kleister-api/pkg/service/users"
+	"github.com/kleister/kleister-api/pkg/service/versions"
 	"github.com/kleister/kleister-api/pkg/upload"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
@@ -32,6 +36,10 @@ func Server(
 	uploads upload.Upload,
 	usersService users.Service,
 	teamsService teams.Service,
+	packsService packs.Service,
+	buildsService builds.Service,
+	modsService mods.Service,
+	versionsService versions.Service,
 	minecraftService minecraft.Service,
 	forgeService forge.Service,
 ) http.Handler {
@@ -94,6 +102,10 @@ func Server(
 					uploads,
 					usersService,
 					teamsService,
+					packsService,
+					buildsService,
+					modsService,
+					versionsService,
 					minecraftService,
 					forgeService,
 				); api != nil {

@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/kleister/kleister-api/pkg/api/v1/models"
 	"github.com/kleister/kleister-api/pkg/api/v1/restapi/operations/profile"
 	"github.com/kleister/kleister-api/pkg/config"
+	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/service/users"
 	"github.com/kleister/kleister-api/pkg/token"
 	"github.com/kleister/kleister-api/pkg/validate"
@@ -87,5 +89,42 @@ func UpdateProfileHandler(usersService users.Service) profile.UpdateProfileHandl
 		}
 
 		return profile.NewUpdateProfileOK().WithPayload(convertProfile(updated))
+	}
+}
+
+// convertProfile is a simple helper to convert between different model formats.
+func convertProfile(record *model.User) *models.Profile {
+	teams := make([]*models.TeamUser, 0)
+
+	for _, team := range record.Teams {
+		teams = append(teams, convertTeamUser(team))
+	}
+
+	mods := make([]*models.UserMod, 0)
+
+	for _, mod := range record.Mods {
+		mods = append(mods, convertUserMod(mod))
+	}
+
+	packs := make([]*models.UserPack, 0)
+
+	for _, pack := range record.Packs {
+		packs = append(packs, convertUserPack(pack))
+	}
+
+	return &models.Profile{
+		ID:        strfmt.UUID(record.ID),
+		Slug:      &record.Slug,
+		Email:     &record.Email,
+		Username:  &record.Username,
+		Password:  nil,
+		Avatar:    &record.Avatar,
+		Active:    &record.Active,
+		Admin:     &record.Admin,
+		CreatedAt: strfmt.DateTime(record.CreatedAt),
+		UpdatedAt: strfmt.DateTime(record.UpdatedAt),
+		Teams:     teams,
+		Mods:      mods,
+		Packs:     packs,
 	}
 }

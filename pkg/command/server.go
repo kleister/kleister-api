@@ -13,10 +13,14 @@ import (
 	"github.com/kleister/kleister-api/pkg/metrics"
 	"github.com/kleister/kleister-api/pkg/middleware/requestid"
 	"github.com/kleister/kleister-api/pkg/router"
+	"github.com/kleister/kleister-api/pkg/service/builds"
 	"github.com/kleister/kleister-api/pkg/service/forge"
 	"github.com/kleister/kleister-api/pkg/service/minecraft"
+	"github.com/kleister/kleister-api/pkg/service/mods"
+	"github.com/kleister/kleister-api/pkg/service/packs"
 	"github.com/kleister/kleister-api/pkg/service/teams"
 	"github.com/kleister/kleister-api/pkg/service/users"
+	"github.com/kleister/kleister-api/pkg/service/versions"
 	"github.com/oklog/run"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -295,6 +299,58 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 			requestid.Get,
 		)
 
+		packsService := packs.NewTracingService(
+			packs.NewMetricsService(
+				packs.NewLoggingService(
+					packs.NewService(
+						storage.Packs(),
+					),
+					requestid.Get,
+				),
+				metrics,
+			),
+			requestid.Get,
+		)
+
+		buildsService := builds.NewTracingService(
+			builds.NewMetricsService(
+				builds.NewLoggingService(
+					builds.NewService(
+						storage.Builds(),
+					),
+					requestid.Get,
+				),
+				metrics,
+			),
+			requestid.Get,
+		)
+
+		modsService := mods.NewTracingService(
+			mods.NewMetricsService(
+				mods.NewLoggingService(
+					mods.NewService(
+						storage.Mods(),
+					),
+					requestid.Get,
+				),
+				metrics,
+			),
+			requestid.Get,
+		)
+
+		versionsService := versions.NewTracingService(
+			versions.NewMetricsService(
+				versions.NewLoggingService(
+					versions.NewService(
+						storage.Versions(),
+					),
+					requestid.Get,
+				),
+				metrics,
+			),
+			requestid.Get,
+		)
+
 		minecraftService := minecraft.NewTracingService(
 			minecraft.NewMetricsService(
 				minecraft.NewLoggingService(
@@ -331,6 +387,10 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 					uploads,
 					usersService,
 					teamsService,
+					packsService,
+					buildsService,
+					modsService,
+					versionsService,
 					minecraftService,
 					forgeService,
 				),

@@ -252,3 +252,197 @@ func (s *loggingService) DropUser(ctx context.Context, teamID, userID string) er
 
 	return err
 }
+
+func (s *loggingService) ListMods(ctx context.Context, name string) ([]*model.TeamMod, error) {
+	start := time.Now()
+	records, err := s.service.ListMods(ctx, name)
+
+	logger := s.logger.With().
+		Str("request", s.requestID(ctx)).
+		Str("method", "listMods").
+		Dur("duration", time.Since(start)).
+		Str("name", name).
+		Logger()
+
+	if err != nil {
+		logger.Warn().
+			Err(err).
+			Msg("failed to find all team mods")
+	} else {
+		logger.Debug().
+			Msg("")
+	}
+
+	return records, err
+}
+
+func (s *loggingService) AppendMod(ctx context.Context, teamID, modID, perm string) error {
+	start := time.Now()
+	err := s.service.AppendMod(ctx, teamID, modID, perm)
+
+	logger := s.logger.With().
+		Str("request", s.requestID(ctx)).
+		Str("method", "appendMod").
+		Dur("duration", time.Since(start)).
+		Str("team", teamID).
+		Str("mod", modID).
+		Str("perm", perm).
+		Logger()
+
+	if err != nil {
+		logger.Warn().
+			Err(err).
+			Msg("failed to append team to mod")
+	} else {
+		logger.Debug().
+			Msg("")
+	}
+
+	return err
+}
+
+func (s *loggingService) PermitMod(ctx context.Context, teamID, modID, perm string) error {
+	start := time.Now()
+	err := s.service.PermitMod(ctx, teamID, modID, perm)
+
+	logger := s.logger.With().
+		Str("request", s.requestID(ctx)).
+		Str("method", "permitMod").
+		Dur("duration", time.Since(start)).
+		Str("team", teamID).
+		Str("mod", modID).
+		Str("perm", perm).
+		Logger()
+
+	if err != nil {
+		logger.Warn().
+			Err(err).
+			Msg("failed to update mod perms")
+	} else {
+		logger.Debug().
+			Msg("")
+	}
+
+	return err
+}
+
+func (s *loggingService) DropMod(ctx context.Context, teamID, modID string) error {
+	start := time.Now()
+	err := s.service.DropMod(ctx, teamID, modID)
+
+	logger := s.logger.With().
+		Str("request", s.requestID(ctx)).
+		Str("method", "dropMod").
+		Dur("duration", time.Since(start)).
+		Str("team", teamID).
+		Str("mod", modID).
+		Logger()
+
+	if err != nil {
+		logger.Warn().
+			Err(err).
+			Msg("failed to drop team from mod")
+	} else {
+		logger.Debug().
+			Msg("")
+	}
+
+	return err
+}
+
+func (s *loggingService) ListPacks(ctx context.Context, name string) ([]*model.TeamPack, error) {
+	start := time.Now()
+	records, err := s.service.ListPacks(ctx, name)
+
+	logger := s.logger.With().
+		Str("request", s.requestID(ctx)).
+		Str("method", "listPacks").
+		Dur("duration", time.Since(start)).
+		Str("name", name).
+		Logger()
+
+	if err != nil {
+		logger.Warn().
+			Err(err).
+			Msg("failed to find all team packs")
+	} else {
+		logger.Debug().
+			Msg("")
+	}
+
+	return records, err
+}
+
+func (s *loggingService) AppendPack(ctx context.Context, teamID, packID, perm string) error {
+	start := time.Now()
+	err := s.service.AppendPack(ctx, teamID, packID, perm)
+
+	logger := s.logger.With().
+		Str("request", s.requestID(ctx)).
+		Str("method", "appendPack").
+		Dur("duration", time.Since(start)).
+		Str("team", teamID).
+		Str("pack", packID).
+		Str("perm", perm).
+		Logger()
+
+	if err != nil {
+		logger.Warn().
+			Err(err).
+			Msg("failed to append team to pack")
+	} else {
+		logger.Debug().
+			Msg("")
+	}
+
+	return err
+}
+
+func (s *loggingService) PermitPack(ctx context.Context, teamID, packID, perm string) error {
+	start := time.Now()
+	err := s.service.PermitPack(ctx, teamID, packID, perm)
+
+	logger := s.logger.With().
+		Str("request", s.requestID(ctx)).
+		Str("method", "permitPack").
+		Dur("duration", time.Since(start)).
+		Str("team", teamID).
+		Str("pack", packID).
+		Str("perm", perm).
+		Logger()
+
+	if err != nil {
+		logger.Warn().
+			Err(err).
+			Msg("failed to update pack perms")
+	} else {
+		logger.Debug().
+			Msg("")
+	}
+
+	return err
+}
+
+func (s *loggingService) DropPack(ctx context.Context, teamID, packID string) error {
+	start := time.Now()
+	err := s.service.DropPack(ctx, teamID, packID)
+
+	logger := s.logger.With().
+		Str("request", s.requestID(ctx)).
+		Str("method", "dropPack").
+		Dur("duration", time.Since(start)).
+		Str("team", teamID).
+		Str("pack", packID).
+		Logger()
+
+	if err != nil {
+		logger.Warn().
+			Err(err).
+			Msg("failed to drop team from pack")
+	} else {
+		logger.Debug().
+			Msg("")
+	}
+
+	return err
+}

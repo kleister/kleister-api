@@ -25,14 +25,14 @@ type UserMod struct {
 	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
+	// mod
+	// Read Only: true
+	Mod *Mod `json:"mod,omitempty"`
+
 	// mod id
 	// Required: true
 	// Format: uuid
 	ModID *strfmt.UUID `json:"mod_id"`
-
-	// mode
-	// Read Only: true
-	Mode *Mod `json:"mode,omitempty"`
 
 	// perm
 	// Required: true
@@ -62,11 +62,11 @@ func (m *UserMod) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateModID(formats); err != nil {
+	if err := m.validateMod(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateMode(formats); err != nil {
+	if err := m.validateModID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -104,6 +104,25 @@ func (m *UserMod) validateCreatedAt(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *UserMod) validateMod(formats strfmt.Registry) error {
+	if swag.IsZero(m.Mod) { // not required
+		return nil
+	}
+
+	if m.Mod != nil {
+		if err := m.Mod.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("mod")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("mod")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *UserMod) validateModID(formats strfmt.Registry) error {
 
 	if err := validate.Required("mod_id", "body", m.ModID); err != nil {
@@ -112,25 +131,6 @@ func (m *UserMod) validateModID(formats strfmt.Registry) error {
 
 	if err := validate.FormatOf("mod_id", "body", "uuid", m.ModID.String(), formats); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *UserMod) validateMode(formats strfmt.Registry) error {
-	if swag.IsZero(m.Mode) { // not required
-		return nil
-	}
-
-	if m.Mode != nil {
-		if err := m.Mode.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("mode")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("mode")
-			}
-			return err
-		}
 	}
 
 	return nil
@@ -234,7 +234,7 @@ func (m *UserMod) ContextValidate(ctx context.Context, formats strfmt.Registry) 
 		res = append(res, err)
 	}
 
-	if err := m.contextValidateMode(ctx, formats); err != nil {
+	if err := m.contextValidateMod(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -261,14 +261,14 @@ func (m *UserMod) contextValidateCreatedAt(ctx context.Context, formats strfmt.R
 	return nil
 }
 
-func (m *UserMod) contextValidateMode(ctx context.Context, formats strfmt.Registry) error {
+func (m *UserMod) contextValidateMod(ctx context.Context, formats strfmt.Registry) error {
 
-	if m.Mode != nil {
-		if err := m.Mode.ContextValidate(ctx, formats); err != nil {
+	if m.Mod != nil {
+		if err := m.Mod.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("mode")
+				return ve.ValidateName("mod")
 			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("mode")
+				return ce.ValidateName("mod")
 			}
 			return err
 		}

@@ -35,6 +35,16 @@ type Service interface {
 	AppendTeam(context.Context, string, string, string) error
 	PermitTeam(context.Context, string, string, string) error
 	DropTeam(context.Context, string, string) error
+
+	ListMods(context.Context, string) ([]*model.UserMod, error)
+	AppendMod(context.Context, string, string, string) error
+	PermitMod(context.Context, string, string, string) error
+	DropMod(context.Context, string, string) error
+
+	ListPacks(context.Context, string) ([]*model.UserPack, error)
+	AppendPack(context.Context, string, string, string) error
+	PermitPack(context.Context, string, string, string) error
+	DropPack(context.Context, string, string) error
 }
 
 // Store defines the interface to persist users.
@@ -51,6 +61,16 @@ type Store interface {
 	AppendTeam(context.Context, string, string, string) error
 	PermitTeam(context.Context, string, string, string) error
 	DropTeam(context.Context, string, string) error
+
+	ListMods(context.Context, string) ([]*model.UserMod, error)
+	AppendMod(context.Context, string, string, string) error
+	PermitMod(context.Context, string, string, string) error
+	DropMod(context.Context, string, string) error
+
+	ListPacks(context.Context, string) ([]*model.UserPack, error)
+	AppendPack(context.Context, string, string, string) error
+	PermitPack(context.Context, string, string, string) error
+	DropPack(context.Context, string, string) error
 }
 
 type service struct {
@@ -108,4 +128,48 @@ func (s *service) PermitTeam(ctx context.Context, userID, teamID, perm string) e
 
 func (s *service) DropTeam(ctx context.Context, userID, teamID string) error {
 	return s.users.DropTeam(ctx, userID, teamID)
+}
+
+func (s *service) ListMods(ctx context.Context, name string) ([]*model.UserMod, error) {
+	user, err := s.Show(ctx, name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return s.users.ListMods(ctx, user.ID)
+}
+
+func (s *service) AppendMod(ctx context.Context, userID, modID, perm string) error {
+	return s.users.AppendMod(ctx, userID, modID, perm)
+}
+
+func (s *service) PermitMod(ctx context.Context, userID, modID, perm string) error {
+	return s.users.PermitMod(ctx, userID, modID, perm)
+}
+
+func (s *service) DropMod(ctx context.Context, userID, modID string) error {
+	return s.users.DropMod(ctx, userID, modID)
+}
+
+func (s *service) ListPacks(ctx context.Context, name string) ([]*model.UserPack, error) {
+	user, err := s.Show(ctx, name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return s.users.ListPacks(ctx, user.ID)
+}
+
+func (s *service) AppendPack(ctx context.Context, userID, packID, perm string) error {
+	return s.users.AppendPack(ctx, userID, packID, perm)
+}
+
+func (s *service) PermitPack(ctx context.Context, userID, packID, perm string) error {
+	return s.users.PermitPack(ctx, userID, packID, perm)
+}
+
+func (s *service) DropPack(ctx context.Context, userID, packID string) error {
+	return s.users.DropPack(ctx, userID, packID)
 }

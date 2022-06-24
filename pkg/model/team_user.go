@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// TeamUser within Kleister.
+// TeamUser represents a team user model definition.
 type TeamUser struct {
 	TeamID    string `storm:"id,index" gorm:"index:idx_id,unique;length:36"`
 	Team      *Team

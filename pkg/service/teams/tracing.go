@@ -114,3 +114,69 @@ func (s *tracingService) DropUser(ctx context.Context, teamID, userID string) er
 
 	return s.service.DropUser(ctx, teamID, userID)
 }
+
+func (s *tracingService) ListMods(ctx context.Context, name string) ([]*model.TeamMod, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "teams.Service.ListMods")
+	span.SetTag("request", s.requestID(ctx))
+	span.SetTag("name", name)
+	defer span.Finish()
+
+	return s.service.ListMods(ctx, name)
+}
+
+func (s *tracingService) AppendMod(ctx context.Context, teamID, modID, perm string) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "teams.Service.AppendMod")
+	span.SetTag("request", s.requestID(ctx))
+	defer span.Finish()
+
+	return s.service.AppendMod(ctx, teamID, modID, perm)
+}
+
+func (s *tracingService) PermitMod(ctx context.Context, teamID, modID, perm string) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "teams.Service.PermitMod")
+	span.SetTag("request", s.requestID(ctx))
+	defer span.Finish()
+
+	return s.service.PermitMod(ctx, teamID, modID, perm)
+}
+
+func (s *tracingService) DropMod(ctx context.Context, teamID, modID string) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "teams.Service.DropMod")
+	span.SetTag("request", s.requestID(ctx))
+	defer span.Finish()
+
+	return s.service.DropMod(ctx, teamID, modID)
+}
+
+func (s *tracingService) ListPacks(ctx context.Context, name string) ([]*model.TeamPack, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "teams.Service.ListPacks")
+	span.SetTag("request", s.requestID(ctx))
+	span.SetTag("name", name)
+	defer span.Finish()
+
+	return s.service.ListPacks(ctx, name)
+}
+
+func (s *tracingService) AppendPack(ctx context.Context, teamID, packID, perm string) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "teams.Service.AppendPack")
+	span.SetTag("request", s.requestID(ctx))
+	defer span.Finish()
+
+	return s.service.AppendPack(ctx, teamID, packID, perm)
+}
+
+func (s *tracingService) PermitPack(ctx context.Context, teamID, packID, perm string) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "teams.Service.PermitPack")
+	span.SetTag("request", s.requestID(ctx))
+	defer span.Finish()
+
+	return s.service.PermitPack(ctx, teamID, packID, perm)
+}
+
+func (s *tracingService) DropPack(ctx context.Context, teamID, packID string) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "teams.Service.DropPack")
+	span.SetTag("request", s.requestID(ctx))
+	defer span.Finish()
+
+	return s.service.DropPack(ctx, teamID, packID)
+}

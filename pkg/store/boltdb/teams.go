@@ -277,7 +277,7 @@ func (t *Teams) AppendUser(ctx context.Context, teamID, userID, perm string) err
 		CreatedAt: time.Now().UTC(),
 	}
 
-	if err := t.validatePerm(record); err != nil {
+	if err := t.validatePerm(record.Perm); err != nil {
 		return err
 	}
 
@@ -311,7 +311,7 @@ func (t *Teams) PermitUser(ctx context.Context, teamID, userID, perm string) err
 	record.Perm = perm
 	record.UpdatedAt = time.Now().UTC()
 
-	if err := t.validatePerm(record); err != nil {
+	if err := t.validatePerm(record.Perm); err != nil {
 		return err
 	}
 
@@ -337,6 +337,274 @@ func (t *Teams) DropUser(ctx context.Context, teamID, userID string) error {
 		q.And(
 			q.Eq("TeamID", teamID),
 			q.Eq("UserID", userID),
+		),
+	).First(record); err == storm.ErrNotFound {
+		return teams.ErrNotAssigned
+	}
+
+	if err := tx.DeleteStruct(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// ListMods implements ListMods from teams.Store interface.
+func (t *Teams) ListMods(ctx context.Context, id string) ([]*model.TeamMod, error) {
+	records := make([]*model.TeamMod, 0)
+
+	if err := t.client.handle.Select(
+		q.Eq("TeamID", id),
+	).Find(&records); err != nil && err != storm.ErrNotFound {
+		return records, err
+	}
+
+	for _, record := range records {
+		team := &model.Team{}
+
+		if err := t.client.handle.Select(
+			q.Eq("ID", record.TeamID),
+		).First(team); err != nil && err != storm.ErrNotFound {
+			return records, err
+		}
+
+		record.Team = team
+
+		mod := &model.Mod{}
+
+		if err := t.client.handle.Select(
+			q.Eq("ID", record.ModID),
+		).First(mod); err != nil && err != storm.ErrNotFound {
+			return records, err
+		}
+
+		record.Mod = mod
+	}
+
+	return records, nil
+}
+
+// AppendMod implements AppendMod from teams.Store interface.
+func (t *Teams) AppendMod(ctx context.Context, teamID, modID, perm string) error {
+	tx, err := t.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	if err := t.client.handle.Select(
+		q.And(
+			q.Eq("TeamID", teamID),
+			q.Eq("ModID", modID),
+		),
+	).First(new(model.TeamMod)); err == nil {
+		return teams.ErrAlreadyAssigned
+	}
+
+	record := &model.TeamMod{
+		TeamID:    teamID,
+		ModID:     modID,
+		Perm:      perm,
+		UpdatedAt: time.Now().UTC(),
+		CreatedAt: time.Now().UTC(),
+	}
+
+	if err := t.validatePerm(record.Perm); err != nil {
+		return err
+	}
+
+	if err := tx.Save(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// PermitMod implements PermitMod from teams.Store interface.
+func (t *Teams) PermitMod(ctx context.Context, teamID, modID, perm string) error {
+	tx, err := t.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	record := &model.TeamMod{}
+
+	if err := t.client.handle.Select(
+		q.And(
+			q.Eq("TeamID", teamID),
+			q.Eq("ModID", modID),
+		),
+	).First(record); err == storm.ErrNotFound {
+		return teams.ErrNotAssigned
+	}
+
+	record.Perm = perm
+	record.UpdatedAt = time.Now().UTC()
+
+	if err := t.validatePerm(record.Perm); err != nil {
+		return err
+	}
+
+	if err := tx.Save(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// DropMod implements DropMod from teams.Store interface.
+func (t *Teams) DropMod(ctx context.Context, teamID, modID string) error {
+	tx, err := t.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	record := &model.TeamMod{}
+
+	if err := t.client.handle.Select(
+		q.And(
+			q.Eq("TeamID", teamID),
+			q.Eq("ModID", modID),
+		),
+	).First(record); err == storm.ErrNotFound {
+		return teams.ErrNotAssigned
+	}
+
+	if err := tx.DeleteStruct(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// ListPacks implements ListPacks from teams.Store interface.
+func (t *Teams) ListPacks(ctx context.Context, id string) ([]*model.TeamPack, error) {
+	records := make([]*model.TeamPack, 0)
+
+	if err := t.client.handle.Select(
+		q.Eq("TeamID", id),
+	).Find(&records); err != nil && err != storm.ErrNotFound {
+		return records, err
+	}
+
+	for _, record := range records {
+		team := &model.Team{}
+
+		if err := t.client.handle.Select(
+			q.Eq("ID", record.TeamID),
+		).First(team); err != nil && err != storm.ErrNotFound {
+			return records, err
+		}
+
+		record.Team = team
+
+		pack := &model.Pack{}
+
+		if err := t.client.handle.Select(
+			q.Eq("ID", record.PackID),
+		).First(pack); err != nil && err != storm.ErrNotFound {
+			return records, err
+		}
+
+		record.Pack = pack
+	}
+
+	return records, nil
+}
+
+// AppendPack implements AppendPack from teams.Store interface.
+func (t *Teams) AppendPack(ctx context.Context, teamID, packID, perm string) error {
+	tx, err := t.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	if err := t.client.handle.Select(
+		q.And(
+			q.Eq("TeamID", teamID),
+			q.Eq("PackID", packID),
+		),
+	).First(new(model.TeamPack)); err == nil {
+		return teams.ErrAlreadyAssigned
+	}
+
+	record := &model.TeamPack{
+		TeamID:    teamID,
+		PackID:    packID,
+		Perm:      perm,
+		UpdatedAt: time.Now().UTC(),
+		CreatedAt: time.Now().UTC(),
+	}
+
+	if err := t.validatePerm(record.Perm); err != nil {
+		return err
+	}
+
+	if err := tx.Save(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// PermitPack implements PermitPack from teams.Store interface.
+func (t *Teams) PermitPack(ctx context.Context, teamID, packID, perm string) error {
+	tx, err := t.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	record := &model.TeamPack{}
+
+	if err := t.client.handle.Select(
+		q.And(
+			q.Eq("TeamID", teamID),
+			q.Eq("PackID", packID),
+		),
+	).First(record); err == storm.ErrNotFound {
+		return teams.ErrNotAssigned
+	}
+
+	record.Perm = perm
+	record.UpdatedAt = time.Now().UTC()
+
+	if err := t.validatePerm(record.Perm); err != nil {
+		return err
+	}
+
+	if err := tx.Save(record); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// DropPack implements DropPack from teams.Store interface.
+func (t *Teams) DropPack(ctx context.Context, teamID, packID string) error {
+	tx, err := t.client.handle.Begin(true)
+
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	record := &model.TeamPack{}
+
+	if err := t.client.handle.Select(
+		q.And(
+			q.Eq("TeamID", teamID),
+			q.Eq("PackID", packID),
 		),
 	).First(record); err == storm.ErrNotFound {
 		return teams.ErrNotAssigned
@@ -432,8 +700,8 @@ func (t *Teams) validateUpdate(record *model.Team) error {
 	return nil
 }
 
-func (t *Teams) validatePerm(record *model.TeamUser) error {
-	if ok := govalidator.IsIn(record.Perm, "user", "admin", "owner"); !ok {
+func (t *Teams) validatePerm(perm string) error {
+	if ok := govalidator.IsIn(perm, "user", "admin", "owner"); !ok {
 		return validate.Errors{
 			Errors: []validate.Error{
 				{

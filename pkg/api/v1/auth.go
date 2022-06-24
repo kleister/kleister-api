@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/kleister/kleister-api/pkg/api/v1/models"
 	"github.com/kleister/kleister-api/pkg/api/v1/restapi/operations/auth"
 	"github.com/kleister/kleister-api/pkg/config"
@@ -67,5 +68,29 @@ func RefreshAuthHandler(cfg *config.Config) auth.RefreshAuthHandlerFunc {
 func VerifyAuthHandler() auth.VerifyAuthHandlerFunc {
 	return func(params auth.VerifyAuthParams, principal *models.User) middleware.Responder {
 		return auth.NewVerifyAuthOK().WithPayload(convertAuthVerify(principal))
+	}
+}
+
+func convertAuthToken(record *token.Result) *models.AuthToken {
+	if record.ExpiresAt.IsZero() {
+		return &models.AuthToken{
+			Token: record.Token,
+		}
+	}
+
+	expiresAt := strfmt.DateTime(record.ExpiresAt)
+
+	return &models.AuthToken{
+		Token:     record.Token,
+		ExpiresAt: &expiresAt,
+	}
+}
+
+func convertAuthVerify(record *models.User) *models.AuthVerify {
+	createdAt := strfmt.DateTime(record.CreatedAt)
+
+	return &models.AuthVerify{
+		Username:  *record.Username,
+		CreatedAt: &createdAt,
 	}
 }

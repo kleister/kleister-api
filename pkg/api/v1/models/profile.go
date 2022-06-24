@@ -28,6 +28,9 @@ type Profile struct {
 	// Read Only: true
 	Admin *bool `json:"admin,omitempty"`
 
+	// avatar
+	Avatar *string `json:"avatar,omitempty"`
+
 	// created at
 	// Read Only: true
 	// Format: date-time
@@ -40,6 +43,14 @@ type Profile struct {
 	// Read Only: true
 	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
+
+	// mods
+	// Read Only: true
+	Mods []*UserMod `json:"mods,omitempty"`
+
+	// packs
+	// Read Only: true
+	Packs []*UserPack `json:"packs,omitempty"`
 
 	// password
 	// Format: password
@@ -70,6 +81,14 @@ func (m *Profile) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMods(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePacks(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -110,6 +129,58 @@ func (m *Profile) validateID(formats strfmt.Registry) error {
 
 	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *Profile) validateMods(formats strfmt.Registry) error {
+	if swag.IsZero(m.Mods) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Mods); i++ {
+		if swag.IsZero(m.Mods[i]) { // not required
+			continue
+		}
+
+		if m.Mods[i] != nil {
+			if err := m.Mods[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("mods" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("mods" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *Profile) validatePacks(formats strfmt.Registry) error {
+	if swag.IsZero(m.Packs) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Packs); i++ {
+		if swag.IsZero(m.Packs[i]) { // not required
+			continue
+		}
+
+		if m.Packs[i] != nil {
+			if err := m.Packs[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("packs" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("packs" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -185,6 +256,14 @@ func (m *Profile) ContextValidate(ctx context.Context, formats strfmt.Registry) 
 		res = append(res, err)
 	}
 
+	if err := m.contextValidateMods(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidatePacks(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.contextValidateTeams(ctx, formats); err != nil {
 		res = append(res, err)
 	}
@@ -230,6 +309,54 @@ func (m *Profile) contextValidateID(ctx context.Context, formats strfmt.Registry
 
 	if err := validate.ReadOnly(ctx, "id", "body", strfmt.UUID(m.ID)); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *Profile) contextValidateMods(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := validate.ReadOnly(ctx, "mods", "body", []*UserMod(m.Mods)); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Mods); i++ {
+
+		if m.Mods[i] != nil {
+			if err := m.Mods[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("mods" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("mods" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *Profile) contextValidatePacks(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := validate.ReadOnly(ctx, "packs", "body", []*UserPack(m.Packs)); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Packs); i++ {
+
+		if m.Packs[i] != nil {
+			if err := m.Packs[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("packs" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("packs" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

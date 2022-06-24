@@ -4,9 +4,12 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/kleister/kleister-api/pkg/api/v1/models"
 	"github.com/kleister/kleister-api/pkg/api/v1/restapi/operations/user"
 	"github.com/kleister/kleister-api/pkg/model"
+	"github.com/kleister/kleister-api/pkg/service/mods"
+	"github.com/kleister/kleister-api/pkg/service/packs"
 	"github.com/kleister/kleister-api/pkg/service/teams"
 	"github.com/kleister/kleister-api/pkg/service/users"
 	"github.com/kleister/kleister-api/pkg/validate"
@@ -480,5 +483,544 @@ func DeleteUserFromTeamHandler(usersService users.Service, teamsService teams.Se
 		return user.NewDeleteUserFromTeamOK().WithPayload(&models.GeneralError{
 			Message: &message,
 		})
+	}
+}
+
+// ListUserModsHandler implements the handler for the ListUserMods operation.
+func ListUserModsHandler(usersService users.Service) user.ListUserModsHandlerFunc {
+	return func(params user.ListUserModsParams, principal *models.User) middleware.Responder {
+		if !*principal.Admin {
+			message := "only admins can access this resource"
+
+			return user.NewListUserModsForbidden().WithPayload(&models.GeneralError{
+				Message: &message,
+			})
+		}
+
+		records, err := usersService.ListMods(params.HTTPRequest.Context(), params.UserID)
+
+		if err != nil {
+			// TODO: add handler if user not found
+			return user.NewListUserModsDefault(http.StatusInternalServerError)
+		}
+
+		payload := make([]*models.UserMod, len(records))
+		for id, record := range records {
+			payload[id] = convertUserMod(record)
+		}
+
+		return user.NewListUserModsOK().WithPayload(payload)
+	}
+}
+
+// AppendUserToModHandler implements the handler for the AppendUserToMod operation.
+func AppendUserToModHandler(usersService users.Service, modsService mods.Service) user.AppendUserToModHandlerFunc {
+	return func(params user.AppendUserToModParams, principal *models.User) middleware.Responder {
+		if !*principal.Admin {
+			message := "only admins can access this resource"
+
+			return user.NewAppendUserToModForbidden().WithPayload(&models.GeneralError{
+				Message: &message,
+			})
+		}
+
+		t, err := usersService.Show(params.HTTPRequest.Context(), params.UserID)
+
+		if err != nil {
+			if err == users.ErrNotFound {
+				message := "user not found"
+
+				return user.NewAppendUserToModNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewAppendUserToModDefault(http.StatusInternalServerError)
+		}
+
+		u, err := modsService.Show(params.HTTPRequest.Context(), *params.UserMod.Mod)
+
+		if err != nil {
+			if err == mods.ErrNotFound {
+				message := "mod not found"
+
+				return user.NewAppendUserToModNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewAppendUserToModDefault(http.StatusInternalServerError)
+		}
+
+		if err := usersService.AppendMod(params.HTTPRequest.Context(), t.ID, u.ID, *params.UserMod.Perm); err != nil {
+			if err == users.ErrAlreadyAssigned {
+				message := "mod is already assigned"
+
+				return user.NewAppendUserToModPreconditionFailed().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			if v, ok := err.(validate.Errors); ok {
+				message := "failed to validate user mod"
+
+				payload := &models.ValidationError{
+					Message: &message,
+				}
+
+				for _, verr := range v.Errors {
+					payload.Errors = append(payload.Errors, &models.ValidationErrorErrorsItems0{
+						Field:   verr.Field,
+						Message: verr.Error.Error(),
+					})
+				}
+
+				return user.NewAppendUserToModUnprocessableEntity().WithPayload(payload)
+			}
+
+			return user.NewAppendUserToModDefault(http.StatusInternalServerError)
+		}
+
+		message := "successfully assigned user to mod"
+		return user.NewAppendUserToModOK().WithPayload(&models.GeneralError{
+			Message: &message,
+		})
+	}
+}
+
+// PermitUserModHandler implements the handler for the PermitUserMod operation.
+func PermitUserModHandler(usersService users.Service, modsService mods.Service) user.PermitUserModHandlerFunc {
+	return func(params user.PermitUserModParams, principal *models.User) middleware.Responder {
+		if !*principal.Admin {
+			message := "only admins can access this resource"
+
+			return user.NewPermitUserModForbidden().WithPayload(&models.GeneralError{
+				Message: &message,
+			})
+		}
+
+		t, err := usersService.Show(params.HTTPRequest.Context(), params.UserID)
+
+		if err != nil {
+			if err == users.ErrNotFound {
+				message := "user not found"
+
+				return user.NewPermitUserModNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewPermitUserModDefault(http.StatusInternalServerError)
+		}
+
+		u, err := modsService.Show(params.HTTPRequest.Context(), *params.UserMod.Mod)
+
+		if err != nil {
+			if err == mods.ErrNotFound {
+				message := "mod not found"
+
+				return user.NewPermitUserModNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewPermitUserModDefault(http.StatusInternalServerError)
+		}
+
+		if err := usersService.PermitMod(params.HTTPRequest.Context(), t.ID, u.ID, *params.UserMod.Perm); err != nil {
+			if err == users.ErrNotAssigned {
+				message := "mod is not assigned"
+
+				return user.NewPermitUserModPreconditionFailed().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			if v, ok := err.(validate.Errors); ok {
+				message := "failed to validate user mod"
+
+				payload := &models.ValidationError{
+					Message: &message,
+				}
+
+				for _, verr := range v.Errors {
+					payload.Errors = append(payload.Errors, &models.ValidationErrorErrorsItems0{
+						Field:   verr.Field,
+						Message: verr.Error.Error(),
+					})
+				}
+
+				return user.NewPermitUserModUnprocessableEntity().WithPayload(payload)
+			}
+
+			return user.NewPermitUserModDefault(http.StatusInternalServerError)
+		}
+
+		message := "successfully updated mod perms"
+		return user.NewPermitUserModOK().WithPayload(&models.GeneralError{
+			Message: &message,
+		})
+	}
+}
+
+// DeleteUserFromModHandler implements the handler for the DeleteUserFromMod operation.
+func DeleteUserFromModHandler(usersService users.Service, modsService mods.Service) user.DeleteUserFromModHandlerFunc {
+	return func(params user.DeleteUserFromModParams, principal *models.User) middleware.Responder {
+		if !*principal.Admin {
+			message := "only admins can access this resource"
+
+			return user.NewDeleteUserFromModForbidden().WithPayload(&models.GeneralError{
+				Message: &message,
+			})
+		}
+
+		t, err := usersService.Show(params.HTTPRequest.Context(), params.UserID)
+
+		if err != nil {
+			if err == users.ErrNotFound {
+				message := "user not found"
+
+				return user.NewDeleteUserFromModNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewDeleteUserFromModDefault(http.StatusInternalServerError)
+		}
+
+		u, err := modsService.Show(params.HTTPRequest.Context(), *params.UserMod.Mod)
+
+		if err != nil {
+			if err == mods.ErrNotFound {
+				message := "mod not found"
+
+				return user.NewDeleteUserFromModNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewDeleteUserFromModDefault(http.StatusInternalServerError)
+		}
+
+		if err := usersService.DropMod(params.HTTPRequest.Context(), t.ID, u.ID); err != nil {
+			if err == users.ErrNotAssigned {
+				message := "mod is not assigned"
+
+				return user.NewDeleteUserFromModPreconditionFailed().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewDeleteUserFromModDefault(http.StatusInternalServerError)
+		}
+
+		message := "successfully removed from mod"
+		return user.NewDeleteUserFromModOK().WithPayload(&models.GeneralError{
+			Message: &message,
+		})
+	}
+}
+
+// ListUserPacksHandler implements the handler for the ListUserPacks operation.
+func ListUserPacksHandler(usersService users.Service) user.ListUserPacksHandlerFunc {
+	return func(params user.ListUserPacksParams, principal *models.User) middleware.Responder {
+		if !*principal.Admin {
+			message := "only admins can access this resource"
+
+			return user.NewListUserPacksForbidden().WithPayload(&models.GeneralError{
+				Message: &message,
+			})
+		}
+
+		records, err := usersService.ListPacks(params.HTTPRequest.Context(), params.UserID)
+
+		if err != nil {
+			// TODO: add handler if user not found
+			return user.NewListUserPacksDefault(http.StatusInternalServerError)
+		}
+
+		payload := make([]*models.UserPack, len(records))
+		for id, record := range records {
+			payload[id] = convertUserPack(record)
+		}
+
+		return user.NewListUserPacksOK().WithPayload(payload)
+	}
+}
+
+// AppendUserToPackHandler implements the handler for the AppendUserToPack operation.
+func AppendUserToPackHandler(usersService users.Service, packsService packs.Service) user.AppendUserToPackHandlerFunc {
+	return func(params user.AppendUserToPackParams, principal *models.User) middleware.Responder {
+		if !*principal.Admin {
+			message := "only admins can access this resource"
+
+			return user.NewAppendUserToPackForbidden().WithPayload(&models.GeneralError{
+				Message: &message,
+			})
+		}
+
+		t, err := usersService.Show(params.HTTPRequest.Context(), params.UserID)
+
+		if err != nil {
+			if err == users.ErrNotFound {
+				message := "user not found"
+
+				return user.NewAppendUserToPackNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewAppendUserToPackDefault(http.StatusInternalServerError)
+		}
+
+		u, err := packsService.Show(params.HTTPRequest.Context(), *params.UserPack.Pack)
+
+		if err != nil {
+			if err == packs.ErrNotFound {
+				message := "pack not found"
+
+				return user.NewAppendUserToPackNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewAppendUserToPackDefault(http.StatusInternalServerError)
+		}
+
+		if err := usersService.AppendPack(params.HTTPRequest.Context(), t.ID, u.ID, *params.UserPack.Perm); err != nil {
+			if err == users.ErrAlreadyAssigned {
+				message := "pack is already assigned"
+
+				return user.NewAppendUserToPackPreconditionFailed().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			if v, ok := err.(validate.Errors); ok {
+				message := "failed to validate user pack"
+
+				payload := &models.ValidationError{
+					Message: &message,
+				}
+
+				for _, verr := range v.Errors {
+					payload.Errors = append(payload.Errors, &models.ValidationErrorErrorsItems0{
+						Field:   verr.Field,
+						Message: verr.Error.Error(),
+					})
+				}
+
+				return user.NewAppendUserToPackUnprocessableEntity().WithPayload(payload)
+			}
+
+			return user.NewAppendUserToPackDefault(http.StatusInternalServerError)
+		}
+
+		message := "successfully assigned user to pack"
+		return user.NewAppendUserToPackOK().WithPayload(&models.GeneralError{
+			Message: &message,
+		})
+	}
+}
+
+// PermitUserPackHandler implements the handler for the PermitUserPack operation.
+func PermitUserPackHandler(usersService users.Service, packsService packs.Service) user.PermitUserPackHandlerFunc {
+	return func(params user.PermitUserPackParams, principal *models.User) middleware.Responder {
+		if !*principal.Admin {
+			message := "only admins can access this resource"
+
+			return user.NewPermitUserPackForbidden().WithPayload(&models.GeneralError{
+				Message: &message,
+			})
+		}
+
+		t, err := usersService.Show(params.HTTPRequest.Context(), params.UserID)
+
+		if err != nil {
+			if err == users.ErrNotFound {
+				message := "user not found"
+
+				return user.NewPermitUserPackNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewPermitUserPackDefault(http.StatusInternalServerError)
+		}
+
+		u, err := packsService.Show(params.HTTPRequest.Context(), *params.UserPack.Pack)
+
+		if err != nil {
+			if err == packs.ErrNotFound {
+				message := "pack not found"
+
+				return user.NewPermitUserPackNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewPermitUserPackDefault(http.StatusInternalServerError)
+		}
+
+		if err := usersService.PermitPack(params.HTTPRequest.Context(), t.ID, u.ID, *params.UserPack.Perm); err != nil {
+			if err == users.ErrNotAssigned {
+				message := "pack is not assigned"
+
+				return user.NewPermitUserPackPreconditionFailed().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			if v, ok := err.(validate.Errors); ok {
+				message := "failed to validate user pack"
+
+				payload := &models.ValidationError{
+					Message: &message,
+				}
+
+				for _, verr := range v.Errors {
+					payload.Errors = append(payload.Errors, &models.ValidationErrorErrorsItems0{
+						Field:   verr.Field,
+						Message: verr.Error.Error(),
+					})
+				}
+
+				return user.NewPermitUserPackUnprocessableEntity().WithPayload(payload)
+			}
+
+			return user.NewPermitUserPackDefault(http.StatusInternalServerError)
+		}
+
+		message := "successfully updated pack perms"
+		return user.NewPermitUserPackOK().WithPayload(&models.GeneralError{
+			Message: &message,
+		})
+	}
+}
+
+// DeleteUserFromPackHandler implements the handler for the DeleteUserFromPack operation.
+func DeleteUserFromPackHandler(usersService users.Service, packsService packs.Service) user.DeleteUserFromPackHandlerFunc {
+	return func(params user.DeleteUserFromPackParams, principal *models.User) middleware.Responder {
+		if !*principal.Admin {
+			message := "only admins can access this resource"
+
+			return user.NewDeleteUserFromPackForbidden().WithPayload(&models.GeneralError{
+				Message: &message,
+			})
+		}
+
+		t, err := usersService.Show(params.HTTPRequest.Context(), params.UserID)
+
+		if err != nil {
+			if err == users.ErrNotFound {
+				message := "user not found"
+
+				return user.NewDeleteUserFromPackNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewDeleteUserFromPackDefault(http.StatusInternalServerError)
+		}
+
+		u, err := packsService.Show(params.HTTPRequest.Context(), *params.UserPack.Pack)
+
+		if err != nil {
+			if err == packs.ErrNotFound {
+				message := "pack not found"
+
+				return user.NewDeleteUserFromPackNotFound().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewDeleteUserFromPackDefault(http.StatusInternalServerError)
+		}
+
+		if err := usersService.DropPack(params.HTTPRequest.Context(), t.ID, u.ID); err != nil {
+			if err == users.ErrNotAssigned {
+				message := "pack is not assigned"
+
+				return user.NewDeleteUserFromPackPreconditionFailed().WithPayload(&models.GeneralError{
+					Message: &message,
+				})
+			}
+
+			return user.NewDeleteUserFromPackDefault(http.StatusInternalServerError)
+		}
+
+		message := "successfully removed from pack"
+		return user.NewDeleteUserFromPackOK().WithPayload(&models.GeneralError{
+			Message: &message,
+		})
+	}
+}
+
+// convertUser is a simple helper to convert between different model formats.
+func convertUser(record *model.User) *models.User {
+	teams := make([]*models.TeamUser, 0)
+
+	for _, team := range record.Teams {
+		teams = append(teams, convertTeamUser(team))
+	}
+
+	mods := make([]*models.UserMod, 0)
+
+	for _, mod := range record.Mods {
+		mods = append(mods, convertUserMod(mod))
+	}
+
+	packs := make([]*models.UserPack, 0)
+
+	for _, pack := range record.Packs {
+		packs = append(packs, convertUserPack(pack))
+	}
+
+	return &models.User{
+		ID:        strfmt.UUID(record.ID),
+		Slug:      &record.Slug,
+		Email:     &record.Email,
+		Username:  &record.Username,
+		Password:  nil,
+		Avatar:    &record.Avatar,
+		Active:    &record.Active,
+		Admin:     &record.Admin,
+		CreatedAt: strfmt.DateTime(record.CreatedAt),
+		UpdatedAt: strfmt.DateTime(record.UpdatedAt),
+		Teams:     teams,
+		Mods:      mods,
+		Packs:     packs,
+	}
+}
+
+// convertUserPack is a simple helper to convert between different model formats.
+func convertUserPack(record *model.UserPack) *models.UserPack {
+	userID := strfmt.UUID(record.UserID)
+	packID := strfmt.UUID(record.PackID)
+
+	return &models.UserPack{
+		UserID:    &userID,
+		User:      convertUser(record.User),
+		PackID:    &packID,
+		Pack:      convertPack(record.Pack),
+		Perm:      &record.Perm,
+		CreatedAt: strfmt.DateTime(record.CreatedAt),
+		UpdatedAt: strfmt.DateTime(record.UpdatedAt),
+	}
+}
+
+// convertUserMod is a simple helper to convert between different model formats.
+func convertUserMod(record *model.UserMod) *models.UserMod {
+	userID := strfmt.UUID(record.UserID)
+	modID := strfmt.UUID(record.ModID)
+
+	return &models.UserMod{
+		UserID:    &userID,
+		User:      convertUser(record.User),
+		ModID:     &modID,
+		Mod:       convertMod(record.Mod),
+		Perm:      &record.Perm,
+		CreatedAt: strfmt.DateTime(record.CreatedAt),
+		UpdatedAt: strfmt.DateTime(record.UpdatedAt),
 	}
 }

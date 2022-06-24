@@ -4,8 +4,10 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/kleister/kleister-api/pkg/api/v1/models"
 	"github.com/kleister/kleister-api/pkg/api/v1/restapi/operations/minecraft"
+	"github.com/kleister/kleister-api/pkg/model"
 	minecraftSvc "github.com/kleister/kleister-api/pkg/service/minecraft"
 )
 
@@ -56,5 +58,15 @@ func UpdateMinecraftHandler(minecraftService minecraftSvc.Service) minecraft.Upd
 		return minecraft.NewUpdateMinecraftOK().WithPayload(&models.GeneralError{
 			Message: &message,
 		})
+	}
+}
+
+func convertMinecraft(record *model.Minecraft) *models.Minecraft {
+	return &models.Minecraft{
+		ID:        strfmt.UUID(record.ID),
+		Name:      &record.Name,
+		Type:      &record.Type,
+		CreatedAt: strfmt.DateTime(record.CreatedAt),
+		UpdatedAt: strfmt.DateTime(record.UpdatedAt),
 	}
 }
