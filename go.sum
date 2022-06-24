@@ -650,6 +650,8 @@ github.com/uber/jaeger-lib v2.4.1+incompatible h1:td4jdvLcExb4cBISKIpHuGoVXh+dVK
 github.com/uber/jaeger-lib v2.4.1+incompatible/go.mod h1:ComeNDZlWwrWnDv8aPp0Ba6+uUTzImX/AauajbLI56U=
 github.com/urfave/cli/v2 v2.10.2 h1:x3p8awjp/2arX+Nl/G2040AZpOCHS/eMJJ1/a+mye4Y=
 github.com/urfave/cli/v2 v2.10.2/go.mod h1:f8iq5LtQ/bLxafbdBSLPPNsgaW0l/2fYYEHhAyPlwvo=
+github.com/urfave/cli/v2 v2.10.3 h1:oi571Fxz5aHugfBAJd5nkwSk3fzATXtMlpxdLylSCMo=
+github.com/urfave/cli/v2 v2.10.3/go.mod h1:f8iq5LtQ/bLxafbdBSLPPNsgaW0l/2fYYEHhAyPlwvo=
 github.com/utahta/swagger-doc v0.0.1 h1:Qi6NDp+X+F1WEGOkeXm/C49LmJy3A3xaLPnbYU0B/dY=
 github.com/utahta/swagger-doc v0.0.1/go.mod h1:sKIq9G+0qgQoYf6KLn8eoueH/BLSOQ0N37Rm9SYv+7g=
 github.com/vektah/gorunpkg v0.0.0-20181021090735-2c603e7a186c/go.mod h1:MZ9IjObqALnFhMpmWFj2XIY6l9B02Ah54Q4ZUkq/nx0=
