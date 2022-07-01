@@ -36,7 +36,7 @@ require (
 	github.com/vincent-petithory/dataurl v1.0.0
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
-	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e
+	golang.org/x/net v0.0.0-20220630215102-69896b714898
 	gorm.io/driver/mysql v1.3.4
 	gorm.io/driver/postgres v1.3.7
 	gorm.io/gorm v1.23.6
