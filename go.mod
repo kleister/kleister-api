@@ -1,6 +1,6 @@
 module github.com/kleister/kleister-api
 
-go 1.18
+go 1.19
 
 require (
 	github.com/Machiel/slugify v1.0.1
