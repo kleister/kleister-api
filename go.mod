@@ -6,7 +6,7 @@ require (
 	github.com/Machiel/slugify v1.0.1
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/asdine/storm/v3 v3.2.1
-	github.com/aws/aws-sdk-go v1.44.68
+	github.com/aws/aws-sdk-go v1.44.69
 	github.com/cenkalti/backoff/v4 v4.1.3
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e
 	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5
