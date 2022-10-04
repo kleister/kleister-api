@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.110
 	github.com/cenkalti/backoff/v4 v4.1.3
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e
-	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5
+	github.com/dchest/uniuri v0.0.0-20220929095258-3027df40b6ce
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-gormigrate/gormigrate/v2 v2.0.2
 	github.com/go-openapi/errors v0.20.3
