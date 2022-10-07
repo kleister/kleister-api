@@ -39,7 +39,7 @@ require (
 	golang.org/x/net v0.0.0-20221002022538-bcab6841153b
 	gorm.io/driver/mysql v1.4.0
 	gorm.io/driver/postgres v1.4.1
-	gorm.io/gorm v1.23.10
+	gorm.io/gorm v1.24.0
 )
 
 require (
