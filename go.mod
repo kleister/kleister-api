@@ -37,7 +37,7 @@ require (
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be
 	golang.org/x/net v0.0.0-20221002022538-bcab6841153b
-	gorm.io/driver/mysql v1.4.0
+	gorm.io/driver/mysql v1.4.1
 	gorm.io/driver/postgres v1.4.4
 	gorm.io/gorm v1.24.0
 )
