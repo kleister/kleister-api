@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/Machiel/slugify v1.0.1
-	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
+	github.com/asaskevich/govalidator/v11 v11.0.1
 	github.com/asdine/storm/v3 v3.2.1
 	github.com/aws/aws-sdk-go v1.44.114
 	github.com/cenkalti/backoff/v4 v4.1.3
