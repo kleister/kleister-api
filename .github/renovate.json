@@ -44,6 +44,17 @@
           "semanticCommitType": "deps",
           "semanticCommitScope": "patch",
           "automerge": true
+      },
+      {
+        "description": "Automerge untagged golang libs",
+        "groupName": "patch updates",
+        "matchPackageNames": [
+            "golang.org/x/crypto",
+            "golang.org/x/net"
+        ],
+        "semanticCommitType": "deps",
+        "semanticCommitScope": "patch",
+        "automerge": true
       }
   ],
   "labels": [
