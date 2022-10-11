@@ -16,7 +16,8 @@ import (
 // CreatePackOKCode is the HTTP code returned for type CreatePackOK
 const CreatePackOKCode int = 200
 
-/*CreatePackOK The created pack data
+/*
+CreatePackOK The created pack data
 
 swagger:response createPackOK
 */
@@ -60,7 +61,8 @@ func (o *CreatePackOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // CreatePackForbiddenCode is the HTTP code returned for type CreatePackForbidden
 const CreatePackForbiddenCode int = 403
 
-/*CreatePackForbidden User is not authorized
+/*
+CreatePackForbidden User is not authorized
 
 swagger:response createPackForbidden
 */
@@ -104,7 +106,8 @@ func (o *CreatePackForbidden) WriteResponse(rw http.ResponseWriter, producer run
 // CreatePackUnprocessableEntityCode is the HTTP code returned for type CreatePackUnprocessableEntity
 const CreatePackUnprocessableEntityCode int = 422
 
-/*CreatePackUnprocessableEntity Failed to validate request
+/*
+CreatePackUnprocessableEntity Failed to validate request
 
 swagger:response createPackUnprocessableEntity
 */
@@ -145,7 +148,8 @@ func (o *CreatePackUnprocessableEntity) WriteResponse(rw http.ResponseWriter, pr
 	}
 }
 
-/*CreatePackDefault Some error unrelated to the handler
+/*
+CreatePackDefault Some error unrelated to the handler
 
 swagger:response createPackDefault
 */

@@ -16,7 +16,8 @@ import (
 // AppendMinecraftToBuildOKCode is the HTTP code returned for type AppendMinecraftToBuildOK
 const AppendMinecraftToBuildOKCode int = 200
 
-/*AppendMinecraftToBuildOK A collection of assigned builds
+/*
+AppendMinecraftToBuildOK A collection of assigned builds
 
 swagger:response appendMinecraftToBuildOK
 */
@@ -63,7 +64,8 @@ func (o *AppendMinecraftToBuildOK) WriteResponse(rw http.ResponseWriter, produce
 // AppendMinecraftToBuildForbiddenCode is the HTTP code returned for type AppendMinecraftToBuildForbidden
 const AppendMinecraftToBuildForbiddenCode int = 403
 
-/*AppendMinecraftToBuildForbidden User is not authorized
+/*
+AppendMinecraftToBuildForbidden User is not authorized
 
 swagger:response appendMinecraftToBuildForbidden
 */
@@ -107,7 +109,8 @@ func (o *AppendMinecraftToBuildForbidden) WriteResponse(rw http.ResponseWriter, 
 // AppendMinecraftToBuildNotFoundCode is the HTTP code returned for type AppendMinecraftToBuildNotFound
 const AppendMinecraftToBuildNotFoundCode int = 404
 
-/*AppendMinecraftToBuildNotFound Minecraft or build not found
+/*
+AppendMinecraftToBuildNotFound Minecraft or build not found
 
 swagger:response appendMinecraftToBuildNotFound
 */
@@ -151,7 +154,8 @@ func (o *AppendMinecraftToBuildNotFound) WriteResponse(rw http.ResponseWriter, p
 // AppendMinecraftToBuildPreconditionFailedCode is the HTTP code returned for type AppendMinecraftToBuildPreconditionFailed
 const AppendMinecraftToBuildPreconditionFailedCode int = 412
 
-/*AppendMinecraftToBuildPreconditionFailed Build is already assigned
+/*
+AppendMinecraftToBuildPreconditionFailed Build is already assigned
 
 swagger:response appendMinecraftToBuildPreconditionFailed
 */
@@ -195,7 +199,8 @@ func (o *AppendMinecraftToBuildPreconditionFailed) WriteResponse(rw http.Respons
 // AppendMinecraftToBuildUnprocessableEntityCode is the HTTP code returned for type AppendMinecraftToBuildUnprocessableEntity
 const AppendMinecraftToBuildUnprocessableEntityCode int = 422
 
-/*AppendMinecraftToBuildUnprocessableEntity Failed to validate request
+/*
+AppendMinecraftToBuildUnprocessableEntity Failed to validate request
 
 swagger:response appendMinecraftToBuildUnprocessableEntity
 */
@@ -236,7 +241,8 @@ func (o *AppendMinecraftToBuildUnprocessableEntity) WriteResponse(rw http.Respon
 	}
 }
 
-/*AppendMinecraftToBuildDefault Some error unrelated to the handler
+/*
+AppendMinecraftToBuildDefault Some error unrelated to the handler
 
 swagger:response appendMinecraftToBuildDefault
 */

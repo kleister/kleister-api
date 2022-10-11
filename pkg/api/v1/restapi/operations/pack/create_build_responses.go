@@ -16,7 +16,8 @@ import (
 // CreateBuildOKCode is the HTTP code returned for type CreateBuildOK
 const CreateBuildOKCode int = 200
 
-/*CreateBuildOK The created build data
+/*
+CreateBuildOK The created build data
 
 swagger:response createBuildOK
 */
@@ -60,7 +61,8 @@ func (o *CreateBuildOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 // CreateBuildForbiddenCode is the HTTP code returned for type CreateBuildForbidden
 const CreateBuildForbiddenCode int = 403
 
-/*CreateBuildForbidden User is not authorized
+/*
+CreateBuildForbidden User is not authorized
 
 swagger:response createBuildForbidden
 */
@@ -104,7 +106,8 @@ func (o *CreateBuildForbidden) WriteResponse(rw http.ResponseWriter, producer ru
 // CreateBuildNotFoundCode is the HTTP code returned for type CreateBuildNotFound
 const CreateBuildNotFoundCode int = 404
 
-/*CreateBuildNotFound Pack not found
+/*
+CreateBuildNotFound Pack not found
 
 swagger:response createBuildNotFound
 */
@@ -148,7 +151,8 @@ func (o *CreateBuildNotFound) WriteResponse(rw http.ResponseWriter, producer run
 // CreateBuildUnprocessableEntityCode is the HTTP code returned for type CreateBuildUnprocessableEntity
 const CreateBuildUnprocessableEntityCode int = 422
 
-/*CreateBuildUnprocessableEntity Failed to validate request
+/*
+CreateBuildUnprocessableEntity Failed to validate request
 
 swagger:response createBuildUnprocessableEntity
 */
@@ -189,7 +193,8 @@ func (o *CreateBuildUnprocessableEntity) WriteResponse(rw http.ResponseWriter, p
 	}
 }
 
-/*CreateBuildDefault Some error unrelated to the handler
+/*
+CreateBuildDefault Some error unrelated to the handler
 
 swagger:response createBuildDefault
 */

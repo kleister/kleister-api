@@ -31,10 +31,10 @@ func NewListUsers(ctx *middleware.Context, handler ListUsersHandler) *ListUsers 
 	return &ListUsers{Context: ctx, Handler: handler}
 }
 
-/* ListUsers swagger:route GET /users user listUsers
+/*
+	ListUsers swagger:route GET /users user listUsers
 
 Fetch all available users
-
 */
 type ListUsers struct {
 	Context *middleware.Context

@@ -16,7 +16,8 @@ import (
 // DeleteUserOKCode is the HTTP code returned for type DeleteUserOK
 const DeleteUserOKCode int = 200
 
-/*DeleteUserOK Plain success message
+/*
+DeleteUserOK Plain success message
 
 swagger:response deleteUserOK
 */
@@ -60,7 +61,8 @@ func (o *DeleteUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // DeleteUserBadRequestCode is the HTTP code returned for type DeleteUserBadRequest
 const DeleteUserBadRequestCode int = 400
 
-/*DeleteUserBadRequest Failed to delete the user
+/*
+DeleteUserBadRequest Failed to delete the user
 
 swagger:response deleteUserBadRequest
 */
@@ -104,7 +106,8 @@ func (o *DeleteUserBadRequest) WriteResponse(rw http.ResponseWriter, producer ru
 // DeleteUserForbiddenCode is the HTTP code returned for type DeleteUserForbidden
 const DeleteUserForbiddenCode int = 403
 
-/*DeleteUserForbidden User is not authorized
+/*
+DeleteUserForbidden User is not authorized
 
 swagger:response deleteUserForbidden
 */
@@ -148,7 +151,8 @@ func (o *DeleteUserForbidden) WriteResponse(rw http.ResponseWriter, producer run
 // DeleteUserNotFoundCode is the HTTP code returned for type DeleteUserNotFound
 const DeleteUserNotFoundCode int = 404
 
-/*DeleteUserNotFound User not found
+/*
+DeleteUserNotFound User not found
 
 swagger:response deleteUserNotFound
 */
@@ -189,7 +193,8 @@ func (o *DeleteUserNotFound) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
-/*DeleteUserDefault Some error unrelated to the handler
+/*
+DeleteUserDefault Some error unrelated to the handler
 
 swagger:response deleteUserDefault
 */

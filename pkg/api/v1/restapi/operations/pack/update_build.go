@@ -31,10 +31,10 @@ func NewUpdateBuild(ctx *middleware.Context, handler UpdateBuildHandler) *Update
 	return &UpdateBuild{Context: ctx, Handler: handler}
 }
 
-/* UpdateBuild swagger:route PUT /packs/{pack_id}/builds/{build_id} pack updateBuild
+/*
+	UpdateBuild swagger:route PUT /packs/{pack_id}/builds/{build_id} pack updateBuild
 
 Update a specific build for a pack
-
 */
 type UpdateBuild struct {
 	Context *middleware.Context

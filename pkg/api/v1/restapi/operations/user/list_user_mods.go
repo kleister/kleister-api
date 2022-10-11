@@ -31,10 +31,10 @@ func NewListUserMods(ctx *middleware.Context, handler ListUserModsHandler) *List
 	return &ListUserMods{Context: ctx, Handler: handler}
 }
 
-/* ListUserMods swagger:route GET /users/{user_id}/mods user listUserMods
+/*
+	ListUserMods swagger:route GET /users/{user_id}/mods user listUserMods
 
 Fetch all mods assigned to user
-
 */
 type ListUserMods struct {
 	Context *middleware.Context

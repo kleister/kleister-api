@@ -16,7 +16,8 @@ import (
 // UpdateVersionOKCode is the HTTP code returned for type UpdateVersionOK
 const UpdateVersionOKCode int = 200
 
-/*UpdateVersionOK The updated version details
+/*
+UpdateVersionOK The updated version details
 
 swagger:response updateVersionOK
 */
@@ -60,7 +61,8 @@ func (o *UpdateVersionOK) WriteResponse(rw http.ResponseWriter, producer runtime
 // UpdateVersionForbiddenCode is the HTTP code returned for type UpdateVersionForbidden
 const UpdateVersionForbiddenCode int = 403
 
-/*UpdateVersionForbidden User is not authorized
+/*
+UpdateVersionForbidden User is not authorized
 
 swagger:response updateVersionForbidden
 */
@@ -104,7 +106,8 @@ func (o *UpdateVersionForbidden) WriteResponse(rw http.ResponseWriter, producer 
 // UpdateVersionNotFoundCode is the HTTP code returned for type UpdateVersionNotFound
 const UpdateVersionNotFoundCode int = 404
 
-/*UpdateVersionNotFound Version or mod not found
+/*
+UpdateVersionNotFound Version or mod not found
 
 swagger:response updateVersionNotFound
 */
@@ -148,7 +151,8 @@ func (o *UpdateVersionNotFound) WriteResponse(rw http.ResponseWriter, producer r
 // UpdateVersionUnprocessableEntityCode is the HTTP code returned for type UpdateVersionUnprocessableEntity
 const UpdateVersionUnprocessableEntityCode int = 422
 
-/*UpdateVersionUnprocessableEntity Failed to validate request
+/*
+UpdateVersionUnprocessableEntity Failed to validate request
 
 swagger:response updateVersionUnprocessableEntity
 */
@@ -189,7 +193,8 @@ func (o *UpdateVersionUnprocessableEntity) WriteResponse(rw http.ResponseWriter,
 	}
 }
 
-/*UpdateVersionDefault Some error unrelated to the handler
+/*
+UpdateVersionDefault Some error unrelated to the handler
 
 swagger:response updateVersionDefault
 */

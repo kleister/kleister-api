@@ -29,10 +29,10 @@ func NewLoginUser(ctx *middleware.Context, handler LoginUserHandler) *LoginUser 
 	return &LoginUser{Context: ctx, Handler: handler}
 }
 
-/* LoginUser swagger:route POST /auth/login auth loginUser
+/*
+	LoginUser swagger:route POST /auth/login auth loginUser
 
 Authenticate an user by credentials
-
 */
 type LoginUser struct {
 	Context *middleware.Context

@@ -16,7 +16,8 @@ import (
 // DeleteVersionFromBuildOKCode is the HTTP code returned for type DeleteVersionFromBuildOK
 const DeleteVersionFromBuildOKCode int = 200
 
-/*DeleteVersionFromBuildOK Plain success message
+/*
+DeleteVersionFromBuildOK Plain success message
 
 swagger:response deleteVersionFromBuildOK
 */
@@ -60,7 +61,8 @@ func (o *DeleteVersionFromBuildOK) WriteResponse(rw http.ResponseWriter, produce
 // DeleteVersionFromBuildBadRequestCode is the HTTP code returned for type DeleteVersionFromBuildBadRequest
 const DeleteVersionFromBuildBadRequestCode int = 400
 
-/*DeleteVersionFromBuildBadRequest Failed to unlink build
+/*
+DeleteVersionFromBuildBadRequest Failed to unlink build
 
 swagger:response deleteVersionFromBuildBadRequest
 */
@@ -104,7 +106,8 @@ func (o *DeleteVersionFromBuildBadRequest) WriteResponse(rw http.ResponseWriter,
 // DeleteVersionFromBuildForbiddenCode is the HTTP code returned for type DeleteVersionFromBuildForbidden
 const DeleteVersionFromBuildForbiddenCode int = 403
 
-/*DeleteVersionFromBuildForbidden User is not authorized
+/*
+DeleteVersionFromBuildForbidden User is not authorized
 
 swagger:response deleteVersionFromBuildForbidden
 */
@@ -148,7 +151,8 @@ func (o *DeleteVersionFromBuildForbidden) WriteResponse(rw http.ResponseWriter, 
 // DeleteVersionFromBuildNotFoundCode is the HTTP code returned for type DeleteVersionFromBuildNotFound
 const DeleteVersionFromBuildNotFoundCode int = 404
 
-/*DeleteVersionFromBuildNotFound Version or mod not found
+/*
+DeleteVersionFromBuildNotFound Version or mod not found
 
 swagger:response deleteVersionFromBuildNotFound
 */
@@ -192,7 +196,8 @@ func (o *DeleteVersionFromBuildNotFound) WriteResponse(rw http.ResponseWriter, p
 // DeleteVersionFromBuildPreconditionFailedCode is the HTTP code returned for type DeleteVersionFromBuildPreconditionFailed
 const DeleteVersionFromBuildPreconditionFailedCode int = 412
 
-/*DeleteVersionFromBuildPreconditionFailed Build is not assigned
+/*
+DeleteVersionFromBuildPreconditionFailed Build is not assigned
 
 swagger:response deleteVersionFromBuildPreconditionFailed
 */
@@ -233,7 +238,8 @@ func (o *DeleteVersionFromBuildPreconditionFailed) WriteResponse(rw http.Respons
 	}
 }
 
-/*DeleteVersionFromBuildDefault Some error unrelated to the handler
+/*
+DeleteVersionFromBuildDefault Some error unrelated to the handler
 
 swagger:response deleteVersionFromBuildDefault
 */

@@ -16,7 +16,8 @@ import (
 // DeletePackOKCode is the HTTP code returned for type DeletePackOK
 const DeletePackOKCode int = 200
 
-/*DeletePackOK Plain success message
+/*
+DeletePackOK Plain success message
 
 swagger:response deletePackOK
 */
@@ -60,7 +61,8 @@ func (o *DeletePackOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // DeletePackBadRequestCode is the HTTP code returned for type DeletePackBadRequest
 const DeletePackBadRequestCode int = 400
 
-/*DeletePackBadRequest Failed to delete the pack
+/*
+DeletePackBadRequest Failed to delete the pack
 
 swagger:response deletePackBadRequest
 */
@@ -104,7 +106,8 @@ func (o *DeletePackBadRequest) WriteResponse(rw http.ResponseWriter, producer ru
 // DeletePackForbiddenCode is the HTTP code returned for type DeletePackForbidden
 const DeletePackForbiddenCode int = 403
 
-/*DeletePackForbidden User is not authorized
+/*
+DeletePackForbidden User is not authorized
 
 swagger:response deletePackForbidden
 */
@@ -148,7 +151,8 @@ func (o *DeletePackForbidden) WriteResponse(rw http.ResponseWriter, producer run
 // DeletePackNotFoundCode is the HTTP code returned for type DeletePackNotFound
 const DeletePackNotFoundCode int = 404
 
-/*DeletePackNotFound Pack not found
+/*
+DeletePackNotFound Pack not found
 
 swagger:response deletePackNotFound
 */
@@ -189,7 +193,8 @@ func (o *DeletePackNotFound) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
-/*DeletePackDefault Some error unrelated to the handler
+/*
+DeletePackDefault Some error unrelated to the handler
 
 swagger:response deletePackDefault
 */

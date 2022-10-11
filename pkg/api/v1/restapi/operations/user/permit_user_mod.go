@@ -31,10 +31,10 @@ func NewPermitUserMod(ctx *middleware.Context, handler PermitUserModHandler) *Pe
 	return &PermitUserMod{Context: ctx, Handler: handler}
 }
 
-/* PermitUserMod swagger:route PUT /users/{user_id}/mods user permitUserMod
+/*
+	PermitUserMod swagger:route PUT /users/{user_id}/mods user permitUserMod
 
 Update mod perms for user
-
 */
 type PermitUserMod struct {
 	Context *middleware.Context

@@ -16,7 +16,8 @@ import (
 // LoginUserOKCode is the HTTP code returned for type LoginUserOK
 const LoginUserOKCode int = 200
 
-/*LoginUserOK A generated token with expire
+/*
+LoginUserOK A generated token with expire
 
 swagger:response loginUserOK
 */
@@ -60,7 +61,8 @@ func (o *LoginUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pro
 // LoginUserUnauthorizedCode is the HTTP code returned for type LoginUserUnauthorized
 const LoginUserUnauthorizedCode int = 401
 
-/*LoginUserUnauthorized Unauthorized if wrong credentials
+/*
+LoginUserUnauthorized Unauthorized if wrong credentials
 
 swagger:response loginUserUnauthorized
 */
@@ -101,7 +103,8 @@ func (o *LoginUserUnauthorized) WriteResponse(rw http.ResponseWriter, producer r
 	}
 }
 
-/*LoginUserDefault Some error unrelated to the handler
+/*
+LoginUserDefault Some error unrelated to the handler
 
 swagger:response loginUserDefault
 */

@@ -2,13 +2,15 @@ package boltdb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/Machiel/slugify"
-	"github.com/asaskevich/govalidator"
 	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/q"
+	"github.com/go-ozzo/ozzo-validation/is"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/google/uuid"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/service/mods"
@@ -218,31 +220,25 @@ func (m *Mods) Delete(ctx context.Context, name string) error {
 func (m *Mods) validateCreate(record *model.Mod) error {
 	errs := validate.Errors{}
 
-	if ok := govalidator.IsByteLength(record.Slug, 3, 255); !ok {
+	if err := validation.Validate(
+		record.Slug,
+		validation.Length(3, 255),
+		validation.By(m.uniqueValueIsPresent("slug", record.ID)),
+	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "slug",
-			Error: fmt.Errorf("is not between 3 and 255 characters long"),
+			Error: err,
 		})
 	}
 
-	if m.uniqueValueIsPresent("Slug", record.Slug, record.ID) {
-		errs.Errors = append(errs.Errors, validate.Error{
-			Field: "slug",
-			Error: fmt.Errorf("is already taken"),
-		})
-	}
-
-	if ok := govalidator.IsByteLength(record.Name, 3, 255); !ok {
+	if err := validation.Validate(
+		record.Name,
+		validation.Length(3, 255),
+		validation.By(m.uniqueValueIsPresent("name", record.ID)),
+	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "name",
-			Error: fmt.Errorf("is not between 3 and 255 characters long"),
-		})
-	}
-
-	if m.uniqueValueIsPresent("Name", record.Name, record.ID) {
-		errs.Errors = append(errs.Errors, validate.Error{
-			Field: "name",
-			Error: fmt.Errorf("is already taken"),
+			Error: err,
 		})
 	}
 
@@ -256,38 +252,37 @@ func (m *Mods) validateCreate(record *model.Mod) error {
 func (m *Mods) validateUpdate(record *model.Mod) error {
 	errs := validate.Errors{}
 
-	if ok := govalidator.IsUUIDv4(record.ID); !ok {
+	if err := validation.Validate(
+		record.ID,
+		validation.Required,
+		is.UUIDv4,
+		validation.By(m.uniqueValueIsPresent("id", record.ID)),
+	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "id",
-			Error: fmt.Errorf("is not a valid uuid v4"),
+			Error: err,
 		})
 	}
 
-	if ok := govalidator.IsByteLength(record.Slug, 3, 255); !ok {
+	if err := validation.Validate(
+		record.Slug,
+		validation.Length(3, 255),
+		validation.By(m.uniqueValueIsPresent("slug", record.ID)),
+	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "slug",
-			Error: fmt.Errorf("is not between 3 and 255 characters long"),
+			Error: err,
 		})
 	}
 
-	if m.uniqueValueIsPresent("Slug", record.Slug, record.ID) {
-		errs.Errors = append(errs.Errors, validate.Error{
-			Field: "slug",
-			Error: fmt.Errorf("is already taken"),
-		})
-	}
-
-	if ok := govalidator.IsByteLength(record.Name, 3, 255); !ok {
+	if err := validation.Validate(
+		record.Name,
+		validation.Length(3, 255),
+		validation.By(m.uniqueValueIsPresent("name", record.ID)),
+	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "name",
-			Error: fmt.Errorf("is not between 3 and 255 characters long"),
-		})
-	}
-
-	if m.uniqueValueIsPresent("Name", record.Name, record.ID) {
-		errs.Errors = append(errs.Errors, validate.Error{
-			Field: "name",
-			Error: fmt.Errorf("is already taken"),
+			Error: err,
 		})
 	}
 
@@ -298,17 +293,21 @@ func (m *Mods) validateUpdate(record *model.Mod) error {
 	return nil
 }
 
-func (m *Mods) uniqueValueIsPresent(key, val, id string) bool {
-	if err := m.client.handle.Select(
-		q.And(
-			q.Eq(key, val),
-			q.Not(
-				q.Eq("ID", id),
-			),
-		),
-	).First(new(model.Mod)); err == storm.ErrNotFound {
-		return false
-	}
+func (m *Mods) uniqueValueIsPresent(key, id string) func(value interface{}) error {
+	return func(value interface{}) error {
+		val, _ := value.(string)
 
-	return true
+		if err := m.client.handle.Select(
+			q.And(
+				q.Eq(key, val),
+				q.Not(
+					q.Eq("ID", id),
+				),
+			),
+		).First(new(model.Mod)); err == storm.ErrNotFound {
+			return nil
+		}
+
+		return errors.New("taken")
+	}
 }

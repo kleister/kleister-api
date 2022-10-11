@@ -16,7 +16,8 @@ import (
 // UpdateModOKCode is the HTTP code returned for type UpdateModOK
 const UpdateModOKCode int = 200
 
-/*UpdateModOK The updated mod details
+/*
+UpdateModOK The updated mod details
 
 swagger:response updateModOK
 */
@@ -60,7 +61,8 @@ func (o *UpdateModOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pro
 // UpdateModForbiddenCode is the HTTP code returned for type UpdateModForbidden
 const UpdateModForbiddenCode int = 403
 
-/*UpdateModForbidden User is not authorized
+/*
+UpdateModForbidden User is not authorized
 
 swagger:response updateModForbidden
 */
@@ -104,7 +106,8 @@ func (o *UpdateModForbidden) WriteResponse(rw http.ResponseWriter, producer runt
 // UpdateModNotFoundCode is the HTTP code returned for type UpdateModNotFound
 const UpdateModNotFoundCode int = 404
 
-/*UpdateModNotFound Mod not found
+/*
+UpdateModNotFound Mod not found
 
 swagger:response updateModNotFound
 */
@@ -148,7 +151,8 @@ func (o *UpdateModNotFound) WriteResponse(rw http.ResponseWriter, producer runti
 // UpdateModUnprocessableEntityCode is the HTTP code returned for type UpdateModUnprocessableEntity
 const UpdateModUnprocessableEntityCode int = 422
 
-/*UpdateModUnprocessableEntity Failed to validate request
+/*
+UpdateModUnprocessableEntity Failed to validate request
 
 swagger:response updateModUnprocessableEntity
 */
@@ -189,7 +193,8 @@ func (o *UpdateModUnprocessableEntity) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
-/*UpdateModDefault Some error unrelated to the handler
+/*
+UpdateModDefault Some error unrelated to the handler
 
 swagger:response updateModDefault
 */

@@ -16,7 +16,8 @@ import (
 // DeleteForgeFromBuildOKCode is the HTTP code returned for type DeleteForgeFromBuildOK
 const DeleteForgeFromBuildOKCode int = 200
 
-/*DeleteForgeFromBuildOK A collection of assigned builds
+/*
+DeleteForgeFromBuildOK A collection of assigned builds
 
 swagger:response deleteForgeFromBuildOK
 */
@@ -63,7 +64,8 @@ func (o *DeleteForgeFromBuildOK) WriteResponse(rw http.ResponseWriter, producer 
 // DeleteForgeFromBuildForbiddenCode is the HTTP code returned for type DeleteForgeFromBuildForbidden
 const DeleteForgeFromBuildForbiddenCode int = 403
 
-/*DeleteForgeFromBuildForbidden User is not authorized
+/*
+DeleteForgeFromBuildForbidden User is not authorized
 
 swagger:response deleteForgeFromBuildForbidden
 */
@@ -107,7 +109,8 @@ func (o *DeleteForgeFromBuildForbidden) WriteResponse(rw http.ResponseWriter, pr
 // DeleteForgeFromBuildNotFoundCode is the HTTP code returned for type DeleteForgeFromBuildNotFound
 const DeleteForgeFromBuildNotFoundCode int = 404
 
-/*DeleteForgeFromBuildNotFound Forge or build not found
+/*
+DeleteForgeFromBuildNotFound Forge or build not found
 
 swagger:response deleteForgeFromBuildNotFound
 */
@@ -151,7 +154,8 @@ func (o *DeleteForgeFromBuildNotFound) WriteResponse(rw http.ResponseWriter, pro
 // DeleteForgeFromBuildPreconditionFailedCode is the HTTP code returned for type DeleteForgeFromBuildPreconditionFailed
 const DeleteForgeFromBuildPreconditionFailedCode int = 412
 
-/*DeleteForgeFromBuildPreconditionFailed Build is not assigned
+/*
+DeleteForgeFromBuildPreconditionFailed Build is not assigned
 
 swagger:response deleteForgeFromBuildPreconditionFailed
 */
@@ -192,7 +196,8 @@ func (o *DeleteForgeFromBuildPreconditionFailed) WriteResponse(rw http.ResponseW
 	}
 }
 
-/*DeleteForgeFromBuildDefault Some error unrelated to the handler
+/*
+DeleteForgeFromBuildDefault Some error unrelated to the handler
 
 swagger:response deleteForgeFromBuildDefault
 */

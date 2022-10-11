@@ -31,10 +31,10 @@ func NewDeleteUserFromMod(ctx *middleware.Context, handler DeleteUserFromModHand
 	return &DeleteUserFromMod{Context: ctx, Handler: handler}
 }
 
-/* DeleteUserFromMod swagger:route DELETE /users/{user_id}/mods user deleteUserFromMod
+/*
+	DeleteUserFromMod swagger:route DELETE /users/{user_id}/mods user deleteUserFromMod
 
 Remove a mod from user
-
 */
 type DeleteUserFromMod struct {
 	Context *middleware.Context

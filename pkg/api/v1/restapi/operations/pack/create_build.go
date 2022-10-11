@@ -31,10 +31,10 @@ func NewCreateBuild(ctx *middleware.Context, handler CreateBuildHandler) *Create
 	return &CreateBuild{Context: ctx, Handler: handler}
 }
 
-/* CreateBuild swagger:route POST /packs/{pack_id}/builds pack createBuild
+/*
+	CreateBuild swagger:route POST /packs/{pack_id}/builds pack createBuild
 
 Create a new build for a pack
-
 */
 type CreateBuild struct {
 	Context *middleware.Context

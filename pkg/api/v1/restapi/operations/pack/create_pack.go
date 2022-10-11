@@ -31,10 +31,10 @@ func NewCreatePack(ctx *middleware.Context, handler CreatePackHandler) *CreatePa
 	return &CreatePack{Context: ctx, Handler: handler}
 }
 
-/* CreatePack swagger:route POST /packs pack createPack
+/*
+	CreatePack swagger:route POST /packs pack createPack
 
 Create a new pack
-
 */
 type CreatePack struct {
 	Context *middleware.Context

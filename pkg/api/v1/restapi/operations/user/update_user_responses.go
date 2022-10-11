@@ -16,7 +16,8 @@ import (
 // UpdateUserOKCode is the HTTP code returned for type UpdateUserOK
 const UpdateUserOKCode int = 200
 
-/*UpdateUserOK The updated user details
+/*
+UpdateUserOK The updated user details
 
 swagger:response updateUserOK
 */
@@ -60,7 +61,8 @@ func (o *UpdateUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // UpdateUserForbiddenCode is the HTTP code returned for type UpdateUserForbidden
 const UpdateUserForbiddenCode int = 403
 
-/*UpdateUserForbidden User is not authorized
+/*
+UpdateUserForbidden User is not authorized
 
 swagger:response updateUserForbidden
 */
@@ -104,7 +106,8 @@ func (o *UpdateUserForbidden) WriteResponse(rw http.ResponseWriter, producer run
 // UpdateUserNotFoundCode is the HTTP code returned for type UpdateUserNotFound
 const UpdateUserNotFoundCode int = 404
 
-/*UpdateUserNotFound User not found
+/*
+UpdateUserNotFound User not found
 
 swagger:response updateUserNotFound
 */
@@ -148,7 +151,8 @@ func (o *UpdateUserNotFound) WriteResponse(rw http.ResponseWriter, producer runt
 // UpdateUserUnprocessableEntityCode is the HTTP code returned for type UpdateUserUnprocessableEntity
 const UpdateUserUnprocessableEntityCode int = 422
 
-/*UpdateUserUnprocessableEntity Failed to validate request
+/*
+UpdateUserUnprocessableEntity Failed to validate request
 
 swagger:response updateUserUnprocessableEntity
 */
@@ -189,7 +193,8 @@ func (o *UpdateUserUnprocessableEntity) WriteResponse(rw http.ResponseWriter, pr
 	}
 }
 
-/*UpdateUserDefault Some error unrelated to the handler
+/*
+UpdateUserDefault Some error unrelated to the handler
 
 swagger:response updateUserDefault
 */

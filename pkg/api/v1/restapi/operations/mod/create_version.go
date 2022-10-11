@@ -31,10 +31,10 @@ func NewCreateVersion(ctx *middleware.Context, handler CreateVersionHandler) *Cr
 	return &CreateVersion{Context: ctx, Handler: handler}
 }
 
-/* CreateVersion swagger:route POST /mods/{mod_id}/versions mod createVersion
+/*
+	CreateVersion swagger:route POST /mods/{mod_id}/versions mod createVersion
 
 Create a new version for a mod
-
 */
 type CreateVersion struct {
 	Context *middleware.Context

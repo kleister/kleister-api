@@ -16,7 +16,8 @@ import (
 // AppendModToTeamOKCode is the HTTP code returned for type AppendModToTeamOK
 const AppendModToTeamOKCode int = 200
 
-/*AppendModToTeamOK Plain success message
+/*
+AppendModToTeamOK Plain success message
 
 swagger:response appendModToTeamOK
 */
@@ -60,7 +61,8 @@ func (o *AppendModToTeamOK) WriteResponse(rw http.ResponseWriter, producer runti
 // AppendModToTeamForbiddenCode is the HTTP code returned for type AppendModToTeamForbidden
 const AppendModToTeamForbiddenCode int = 403
 
-/*AppendModToTeamForbidden User is not authorized
+/*
+AppendModToTeamForbidden User is not authorized
 
 swagger:response appendModToTeamForbidden
 */
@@ -104,7 +106,8 @@ func (o *AppendModToTeamForbidden) WriteResponse(rw http.ResponseWriter, produce
 // AppendModToTeamNotFoundCode is the HTTP code returned for type AppendModToTeamNotFound
 const AppendModToTeamNotFoundCode int = 404
 
-/*AppendModToTeamNotFound Mod or team not found
+/*
+AppendModToTeamNotFound Mod or team not found
 
 swagger:response appendModToTeamNotFound
 */
@@ -148,7 +151,8 @@ func (o *AppendModToTeamNotFound) WriteResponse(rw http.ResponseWriter, producer
 // AppendModToTeamPreconditionFailedCode is the HTTP code returned for type AppendModToTeamPreconditionFailed
 const AppendModToTeamPreconditionFailedCode int = 412
 
-/*AppendModToTeamPreconditionFailed Team is already assigned
+/*
+AppendModToTeamPreconditionFailed Team is already assigned
 
 swagger:response appendModToTeamPreconditionFailed
 */
@@ -192,7 +196,8 @@ func (o *AppendModToTeamPreconditionFailed) WriteResponse(rw http.ResponseWriter
 // AppendModToTeamUnprocessableEntityCode is the HTTP code returned for type AppendModToTeamUnprocessableEntity
 const AppendModToTeamUnprocessableEntityCode int = 422
 
-/*AppendModToTeamUnprocessableEntity Failed to validate request
+/*
+AppendModToTeamUnprocessableEntity Failed to validate request
 
 swagger:response appendModToTeamUnprocessableEntity
 */
@@ -233,7 +238,8 @@ func (o *AppendModToTeamUnprocessableEntity) WriteResponse(rw http.ResponseWrite
 	}
 }
 
-/*AppendModToTeamDefault Some error unrelated to the handler
+/*
+AppendModToTeamDefault Some error unrelated to the handler
 
 swagger:response appendModToTeamDefault
 */

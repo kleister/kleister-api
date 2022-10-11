@@ -16,7 +16,8 @@ import (
 // CreateTeamOKCode is the HTTP code returned for type CreateTeamOK
 const CreateTeamOKCode int = 200
 
-/*CreateTeamOK The created team data
+/*
+CreateTeamOK The created team data
 
 swagger:response createTeamOK
 */
@@ -60,7 +61,8 @@ func (o *CreateTeamOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // CreateTeamForbiddenCode is the HTTP code returned for type CreateTeamForbidden
 const CreateTeamForbiddenCode int = 403
 
-/*CreateTeamForbidden User is not authorized
+/*
+CreateTeamForbidden User is not authorized
 
 swagger:response createTeamForbidden
 */
@@ -104,7 +106,8 @@ func (o *CreateTeamForbidden) WriteResponse(rw http.ResponseWriter, producer run
 // CreateTeamUnprocessableEntityCode is the HTTP code returned for type CreateTeamUnprocessableEntity
 const CreateTeamUnprocessableEntityCode int = 422
 
-/*CreateTeamUnprocessableEntity Failed to validate request
+/*
+CreateTeamUnprocessableEntity Failed to validate request
 
 swagger:response createTeamUnprocessableEntity
 */
@@ -145,7 +148,8 @@ func (o *CreateTeamUnprocessableEntity) WriteResponse(rw http.ResponseWriter, pr
 	}
 }
 
-/*CreateTeamDefault Some error unrelated to the handler
+/*
+CreateTeamDefault Some error unrelated to the handler
 
 swagger:response createTeamDefault
 */

@@ -31,10 +31,10 @@ func NewListMods(ctx *middleware.Context, handler ListModsHandler) *ListMods {
 	return &ListMods{Context: ctx, Handler: handler}
 }
 
-/* ListMods swagger:route GET /mods mod listMods
+/*
+	ListMods swagger:route GET /mods mod listMods
 
 Fetch all available mods
-
 */
 type ListMods struct {
 	Context *middleware.Context

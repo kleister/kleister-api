@@ -16,7 +16,8 @@ import (
 // ShowVersionOKCode is the HTTP code returned for type ShowVersionOK
 const ShowVersionOKCode int = 200
 
-/*ShowVersionOK The fetched version details
+/*
+ShowVersionOK The fetched version details
 
 swagger:response showVersionOK
 */
@@ -60,7 +61,8 @@ func (o *ShowVersionOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 // ShowVersionForbiddenCode is the HTTP code returned for type ShowVersionForbidden
 const ShowVersionForbiddenCode int = 403
 
-/*ShowVersionForbidden User is not authorized
+/*
+ShowVersionForbidden User is not authorized
 
 swagger:response showVersionForbidden
 */
@@ -104,7 +106,8 @@ func (o *ShowVersionForbidden) WriteResponse(rw http.ResponseWriter, producer ru
 // ShowVersionNotFoundCode is the HTTP code returned for type ShowVersionNotFound
 const ShowVersionNotFoundCode int = 404
 
-/*ShowVersionNotFound Version or mod not found
+/*
+ShowVersionNotFound Version or mod not found
 
 swagger:response showVersionNotFound
 */
@@ -145,7 +148,8 @@ func (o *ShowVersionNotFound) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
-/*ShowVersionDefault Some error unrelated to the handler
+/*
+ShowVersionDefault Some error unrelated to the handler
 
 swagger:response showVersionDefault
 */

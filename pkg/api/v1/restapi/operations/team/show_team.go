@@ -31,10 +31,10 @@ func NewShowTeam(ctx *middleware.Context, handler ShowTeamHandler) *ShowTeam {
 	return &ShowTeam{Context: ctx, Handler: handler}
 }
 
-/* ShowTeam swagger:route GET /teams/{team_id} team showTeam
+/*
+	ShowTeam swagger:route GET /teams/{team_id} team showTeam
 
 Fetch a specific team
-
 */
 type ShowTeam struct {
 	Context *middleware.Context

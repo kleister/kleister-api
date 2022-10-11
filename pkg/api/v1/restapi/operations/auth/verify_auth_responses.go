@@ -16,7 +16,8 @@ import (
 // VerifyAuthOKCode is the HTTP code returned for type VerifyAuthOK
 const VerifyAuthOKCode int = 200
 
-/*VerifyAuthOK Meta data of the provided token
+/*
+VerifyAuthOK Meta data of the provided token
 
 swagger:response verifyAuthOK
 */
@@ -60,7 +61,8 @@ func (o *VerifyAuthOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // VerifyAuthUnauthorizedCode is the HTTP code returned for type VerifyAuthUnauthorized
 const VerifyAuthUnauthorizedCode int = 401
 
-/*VerifyAuthUnauthorized Unauthorized if token is invalid
+/*
+VerifyAuthUnauthorized Unauthorized if token is invalid
 
 swagger:response verifyAuthUnauthorized
 */
@@ -101,7 +103,8 @@ func (o *VerifyAuthUnauthorized) WriteResponse(rw http.ResponseWriter, producer 
 	}
 }
 
-/*VerifyAuthDefault Some error unrelated to the handler
+/*
+VerifyAuthDefault Some error unrelated to the handler
 
 swagger:response verifyAuthDefault
 */

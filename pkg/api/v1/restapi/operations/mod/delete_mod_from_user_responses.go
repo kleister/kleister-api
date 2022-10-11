@@ -16,7 +16,8 @@ import (
 // DeleteModFromUserOKCode is the HTTP code returned for type DeleteModFromUserOK
 const DeleteModFromUserOKCode int = 200
 
-/*DeleteModFromUserOK Plain success message
+/*
+DeleteModFromUserOK Plain success message
 
 swagger:response deleteModFromUserOK
 */
@@ -60,7 +61,8 @@ func (o *DeleteModFromUserOK) WriteResponse(rw http.ResponseWriter, producer run
 // DeleteModFromUserForbiddenCode is the HTTP code returned for type DeleteModFromUserForbidden
 const DeleteModFromUserForbiddenCode int = 403
 
-/*DeleteModFromUserForbidden User is not authorized
+/*
+DeleteModFromUserForbidden User is not authorized
 
 swagger:response deleteModFromUserForbidden
 */
@@ -104,7 +106,8 @@ func (o *DeleteModFromUserForbidden) WriteResponse(rw http.ResponseWriter, produ
 // DeleteModFromUserNotFoundCode is the HTTP code returned for type DeleteModFromUserNotFound
 const DeleteModFromUserNotFoundCode int = 404
 
-/*DeleteModFromUserNotFound Mod or user not found
+/*
+DeleteModFromUserNotFound Mod or user not found
 
 swagger:response deleteModFromUserNotFound
 */
@@ -148,7 +151,8 @@ func (o *DeleteModFromUserNotFound) WriteResponse(rw http.ResponseWriter, produc
 // DeleteModFromUserPreconditionFailedCode is the HTTP code returned for type DeleteModFromUserPreconditionFailed
 const DeleteModFromUserPreconditionFailedCode int = 412
 
-/*DeleteModFromUserPreconditionFailed User is not assigned
+/*
+DeleteModFromUserPreconditionFailed User is not assigned
 
 swagger:response deleteModFromUserPreconditionFailed
 */
@@ -189,7 +193,8 @@ func (o *DeleteModFromUserPreconditionFailed) WriteResponse(rw http.ResponseWrit
 	}
 }
 
-/*DeleteModFromUserDefault Some error unrelated to the handler
+/*
+DeleteModFromUserDefault Some error unrelated to the handler
 
 swagger:response deleteModFromUserDefault
 */

@@ -31,10 +31,10 @@ func NewAppendForgeToBuild(ctx *middleware.Context, handler AppendForgeToBuildHa
 	return &AppendForgeToBuild{Context: ctx, Handler: handler}
 }
 
-/* AppendForgeToBuild swagger:route POST /forge/{forge_id}/builds forge appendForgeToBuild
+/*
+	AppendForgeToBuild swagger:route POST /forge/{forge_id}/builds forge appendForgeToBuild
 
 Assign a build to a Forge version
-
 */
 type AppendForgeToBuild struct {
 	Context *middleware.Context

@@ -16,7 +16,8 @@ import (
 // UpdatePackOKCode is the HTTP code returned for type UpdatePackOK
 const UpdatePackOKCode int = 200
 
-/*UpdatePackOK The updated pack details
+/*
+UpdatePackOK The updated pack details
 
 swagger:response updatePackOK
 */
@@ -60,7 +61,8 @@ func (o *UpdatePackOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // UpdatePackForbiddenCode is the HTTP code returned for type UpdatePackForbidden
 const UpdatePackForbiddenCode int = 403
 
-/*UpdatePackForbidden User is not authorized
+/*
+UpdatePackForbidden User is not authorized
 
 swagger:response updatePackForbidden
 */
@@ -104,7 +106,8 @@ func (o *UpdatePackForbidden) WriteResponse(rw http.ResponseWriter, producer run
 // UpdatePackNotFoundCode is the HTTP code returned for type UpdatePackNotFound
 const UpdatePackNotFoundCode int = 404
 
-/*UpdatePackNotFound Pack not found
+/*
+UpdatePackNotFound Pack not found
 
 swagger:response updatePackNotFound
 */
@@ -148,7 +151,8 @@ func (o *UpdatePackNotFound) WriteResponse(rw http.ResponseWriter, producer runt
 // UpdatePackUnprocessableEntityCode is the HTTP code returned for type UpdatePackUnprocessableEntity
 const UpdatePackUnprocessableEntityCode int = 422
 
-/*UpdatePackUnprocessableEntity Failed to validate request
+/*
+UpdatePackUnprocessableEntity Failed to validate request
 
 swagger:response updatePackUnprocessableEntity
 */
@@ -189,7 +193,8 @@ func (o *UpdatePackUnprocessableEntity) WriteResponse(rw http.ResponseWriter, pr
 	}
 }
 
-/*UpdatePackDefault Some error unrelated to the handler
+/*
+UpdatePackDefault Some error unrelated to the handler
 
 swagger:response updatePackDefault
 */

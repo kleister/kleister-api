@@ -16,7 +16,8 @@ import (
 // DeleteMinecraftFromBuildOKCode is the HTTP code returned for type DeleteMinecraftFromBuildOK
 const DeleteMinecraftFromBuildOKCode int = 200
 
-/*DeleteMinecraftFromBuildOK A collection of assigned builds
+/*
+DeleteMinecraftFromBuildOK A collection of assigned builds
 
 swagger:response deleteMinecraftFromBuildOK
 */
@@ -63,7 +64,8 @@ func (o *DeleteMinecraftFromBuildOK) WriteResponse(rw http.ResponseWriter, produ
 // DeleteMinecraftFromBuildForbiddenCode is the HTTP code returned for type DeleteMinecraftFromBuildForbidden
 const DeleteMinecraftFromBuildForbiddenCode int = 403
 
-/*DeleteMinecraftFromBuildForbidden User is not authorized
+/*
+DeleteMinecraftFromBuildForbidden User is not authorized
 
 swagger:response deleteMinecraftFromBuildForbidden
 */
@@ -107,7 +109,8 @@ func (o *DeleteMinecraftFromBuildForbidden) WriteResponse(rw http.ResponseWriter
 // DeleteMinecraftFromBuildNotFoundCode is the HTTP code returned for type DeleteMinecraftFromBuildNotFound
 const DeleteMinecraftFromBuildNotFoundCode int = 404
 
-/*DeleteMinecraftFromBuildNotFound Minecraft or build not found
+/*
+DeleteMinecraftFromBuildNotFound Minecraft or build not found
 
 swagger:response deleteMinecraftFromBuildNotFound
 */
@@ -151,7 +154,8 @@ func (o *DeleteMinecraftFromBuildNotFound) WriteResponse(rw http.ResponseWriter,
 // DeleteMinecraftFromBuildPreconditionFailedCode is the HTTP code returned for type DeleteMinecraftFromBuildPreconditionFailed
 const DeleteMinecraftFromBuildPreconditionFailedCode int = 412
 
-/*DeleteMinecraftFromBuildPreconditionFailed Build is not assigned
+/*
+DeleteMinecraftFromBuildPreconditionFailed Build is not assigned
 
 swagger:response deleteMinecraftFromBuildPreconditionFailed
 */
@@ -192,7 +196,8 @@ func (o *DeleteMinecraftFromBuildPreconditionFailed) WriteResponse(rw http.Respo
 	}
 }
 
-/*DeleteMinecraftFromBuildDefault Some error unrelated to the handler
+/*
+DeleteMinecraftFromBuildDefault Some error unrelated to the handler
 
 swagger:response deleteMinecraftFromBuildDefault
 */

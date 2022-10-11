@@ -31,10 +31,10 @@ func NewDeletePack(ctx *middleware.Context, handler DeletePackHandler) *DeletePa
 	return &DeletePack{Context: ctx, Handler: handler}
 }
 
-/* DeletePack swagger:route DELETE /packs/{pack_id} pack deletePack
+/*
+	DeletePack swagger:route DELETE /packs/{pack_id} pack deletePack
 
 Delete a specific pack
-
 */
 type DeletePack struct {
 	Context *middleware.Context

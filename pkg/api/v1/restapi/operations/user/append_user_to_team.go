@@ -31,10 +31,10 @@ func NewAppendUserToTeam(ctx *middleware.Context, handler AppendUserToTeamHandle
 	return &AppendUserToTeam{Context: ctx, Handler: handler}
 }
 
-/* AppendUserToTeam swagger:route POST /users/{user_id}/teams user appendUserToTeam
+/*
+	AppendUserToTeam swagger:route POST /users/{user_id}/teams user appendUserToTeam
 
 Assign a team to user
-
 */
 type AppendUserToTeam struct {
 	Context *middleware.Context

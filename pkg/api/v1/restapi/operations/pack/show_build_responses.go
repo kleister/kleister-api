@@ -16,7 +16,8 @@ import (
 // ShowBuildOKCode is the HTTP code returned for type ShowBuildOK
 const ShowBuildOKCode int = 200
 
-/*ShowBuildOK The fetched build details
+/*
+ShowBuildOK The fetched build details
 
 swagger:response showBuildOK
 */
@@ -60,7 +61,8 @@ func (o *ShowBuildOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pro
 // ShowBuildForbiddenCode is the HTTP code returned for type ShowBuildForbidden
 const ShowBuildForbiddenCode int = 403
 
-/*ShowBuildForbidden User is not authorized
+/*
+ShowBuildForbidden User is not authorized
 
 swagger:response showBuildForbidden
 */
@@ -104,7 +106,8 @@ func (o *ShowBuildForbidden) WriteResponse(rw http.ResponseWriter, producer runt
 // ShowBuildNotFoundCode is the HTTP code returned for type ShowBuildNotFound
 const ShowBuildNotFoundCode int = 404
 
-/*ShowBuildNotFound Build or pack not found
+/*
+ShowBuildNotFound Build or pack not found
 
 swagger:response showBuildNotFound
 */
@@ -145,7 +148,8 @@ func (o *ShowBuildNotFound) WriteResponse(rw http.ResponseWriter, producer runti
 	}
 }
 
-/*ShowBuildDefault Some error unrelated to the handler
+/*
+ShowBuildDefault Some error unrelated to the handler
 
 swagger:response showBuildDefault
 */

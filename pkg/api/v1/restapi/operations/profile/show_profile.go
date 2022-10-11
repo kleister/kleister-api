@@ -31,10 +31,10 @@ func NewShowProfile(ctx *middleware.Context, handler ShowProfileHandler) *ShowPr
 	return &ShowProfile{Context: ctx, Handler: handler}
 }
 
-/* ShowProfile swagger:route GET /profile/self profile showProfile
+/*
+	ShowProfile swagger:route GET /profile/self profile showProfile
 
 Fetch profile details of the personal account
-
 */
 type ShowProfile struct {
 	Context *middleware.Context

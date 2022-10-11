@@ -16,7 +16,8 @@ import (
 // CreateUserOKCode is the HTTP code returned for type CreateUserOK
 const CreateUserOKCode int = 200
 
-/*CreateUserOK The created user data
+/*
+CreateUserOK The created user data
 
 swagger:response createUserOK
 */
@@ -60,7 +61,8 @@ func (o *CreateUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // CreateUserForbiddenCode is the HTTP code returned for type CreateUserForbidden
 const CreateUserForbiddenCode int = 403
 
-/*CreateUserForbidden User is not authorized
+/*
+CreateUserForbidden User is not authorized
 
 swagger:response createUserForbidden
 */
@@ -104,7 +106,8 @@ func (o *CreateUserForbidden) WriteResponse(rw http.ResponseWriter, producer run
 // CreateUserUnprocessableEntityCode is the HTTP code returned for type CreateUserUnprocessableEntity
 const CreateUserUnprocessableEntityCode int = 422
 
-/*CreateUserUnprocessableEntity Failed to validate request
+/*
+CreateUserUnprocessableEntity Failed to validate request
 
 swagger:response createUserUnprocessableEntity
 */
@@ -145,7 +148,8 @@ func (o *CreateUserUnprocessableEntity) WriteResponse(rw http.ResponseWriter, pr
 	}
 }
 
-/*CreateUserDefault Some error unrelated to the handler
+/*
+CreateUserDefault Some error unrelated to the handler
 
 swagger:response createUserDefault
 */

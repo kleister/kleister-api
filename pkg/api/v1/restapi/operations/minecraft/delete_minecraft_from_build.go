@@ -31,10 +31,10 @@ func NewDeleteMinecraftFromBuild(ctx *middleware.Context, handler DeleteMinecraf
 	return &DeleteMinecraftFromBuild{Context: ctx, Handler: handler}
 }
 
-/* DeleteMinecraftFromBuild swagger:route DELETE /minecraft/{minecraft_id}/builds minecraft deleteMinecraftFromBuild
+/*
+	DeleteMinecraftFromBuild swagger:route DELETE /minecraft/{minecraft_id}/builds minecraft deleteMinecraftFromBuild
 
 Unlink a build from a Minecraft version
-
 */
 type DeleteMinecraftFromBuild struct {
 	Context *middleware.Context

@@ -31,10 +31,10 @@ func NewUpdateForge(ctx *middleware.Context, handler UpdateForgeHandler) *Update
 	return &UpdateForge{Context: ctx, Handler: handler}
 }
 
-/* UpdateForge swagger:route PUT /forge forge updateForge
+/*
+	UpdateForge swagger:route PUT /forge forge updateForge
 
 Update the available Forge versions
-
 */
 type UpdateForge struct {
 	Context *middleware.Context

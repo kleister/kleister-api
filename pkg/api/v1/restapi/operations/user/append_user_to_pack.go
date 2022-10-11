@@ -31,10 +31,10 @@ func NewAppendUserToPack(ctx *middleware.Context, handler AppendUserToPackHandle
 	return &AppendUserToPack{Context: ctx, Handler: handler}
 }
 
-/* AppendUserToPack swagger:route POST /users/{user_id}/packs user appendUserToPack
+/*
+	AppendUserToPack swagger:route POST /users/{user_id}/packs user appendUserToPack
 
 Assign a pack to user
-
 */
 type AppendUserToPack struct {
 	Context *middleware.Context

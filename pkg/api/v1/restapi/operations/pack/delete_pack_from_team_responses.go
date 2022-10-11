@@ -16,7 +16,8 @@ import (
 // DeletePackFromTeamOKCode is the HTTP code returned for type DeletePackFromTeamOK
 const DeletePackFromTeamOKCode int = 200
 
-/*DeletePackFromTeamOK Plain success message
+/*
+DeletePackFromTeamOK Plain success message
 
 swagger:response deletePackFromTeamOK
 */
@@ -60,7 +61,8 @@ func (o *DeletePackFromTeamOK) WriteResponse(rw http.ResponseWriter, producer ru
 // DeletePackFromTeamForbiddenCode is the HTTP code returned for type DeletePackFromTeamForbidden
 const DeletePackFromTeamForbiddenCode int = 403
 
-/*DeletePackFromTeamForbidden User is not authorized
+/*
+DeletePackFromTeamForbidden User is not authorized
 
 swagger:response deletePackFromTeamForbidden
 */
@@ -104,7 +106,8 @@ func (o *DeletePackFromTeamForbidden) WriteResponse(rw http.ResponseWriter, prod
 // DeletePackFromTeamNotFoundCode is the HTTP code returned for type DeletePackFromTeamNotFound
 const DeletePackFromTeamNotFoundCode int = 404
 
-/*DeletePackFromTeamNotFound Pack or team not found
+/*
+DeletePackFromTeamNotFound Pack or team not found
 
 swagger:response deletePackFromTeamNotFound
 */
@@ -148,7 +151,8 @@ func (o *DeletePackFromTeamNotFound) WriteResponse(rw http.ResponseWriter, produ
 // DeletePackFromTeamPreconditionFailedCode is the HTTP code returned for type DeletePackFromTeamPreconditionFailed
 const DeletePackFromTeamPreconditionFailedCode int = 412
 
-/*DeletePackFromTeamPreconditionFailed Team is not assigned
+/*
+DeletePackFromTeamPreconditionFailed Team is not assigned
 
 swagger:response deletePackFromTeamPreconditionFailed
 */
@@ -189,7 +193,8 @@ func (o *DeletePackFromTeamPreconditionFailed) WriteResponse(rw http.ResponseWri
 	}
 }
 
-/*DeletePackFromTeamDefault Some error unrelated to the handler
+/*
+DeletePackFromTeamDefault Some error unrelated to the handler
 
 swagger:response deletePackFromTeamDefault
 */

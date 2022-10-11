@@ -31,10 +31,10 @@ func NewSearchMinecrafts(ctx *middleware.Context, handler SearchMinecraftsHandle
 	return &SearchMinecrafts{Context: ctx, Handler: handler}
 }
 
-/* SearchMinecrafts swagger:route GET /minecraft/{minecraft_id} minecraft searchMinecrafts
+/*
+	SearchMinecrafts swagger:route GET /minecraft/{minecraft_id} minecraft searchMinecrafts
 
 Search for available Minecraft versions
-
 */
 type SearchMinecrafts struct {
 	Context *middleware.Context

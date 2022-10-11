@@ -16,7 +16,8 @@ import (
 // DeleteBuildOKCode is the HTTP code returned for type DeleteBuildOK
 const DeleteBuildOKCode int = 200
 
-/*DeleteBuildOK Plain success message
+/*
+DeleteBuildOK Plain success message
 
 swagger:response deleteBuildOK
 */
@@ -60,7 +61,8 @@ func (o *DeleteBuildOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 // DeleteBuildBadRequestCode is the HTTP code returned for type DeleteBuildBadRequest
 const DeleteBuildBadRequestCode int = 400
 
-/*DeleteBuildBadRequest Failed to delete the build
+/*
+DeleteBuildBadRequest Failed to delete the build
 
 swagger:response deleteBuildBadRequest
 */
@@ -104,7 +106,8 @@ func (o *DeleteBuildBadRequest) WriteResponse(rw http.ResponseWriter, producer r
 // DeleteBuildForbiddenCode is the HTTP code returned for type DeleteBuildForbidden
 const DeleteBuildForbiddenCode int = 403
 
-/*DeleteBuildForbidden User is not authorized
+/*
+DeleteBuildForbidden User is not authorized
 
 swagger:response deleteBuildForbidden
 */
@@ -148,7 +151,8 @@ func (o *DeleteBuildForbidden) WriteResponse(rw http.ResponseWriter, producer ru
 // DeleteBuildNotFoundCode is the HTTP code returned for type DeleteBuildNotFound
 const DeleteBuildNotFoundCode int = 404
 
-/*DeleteBuildNotFound Build or pack not found
+/*
+DeleteBuildNotFound Build or pack not found
 
 swagger:response deleteBuildNotFound
 */
@@ -189,7 +193,8 @@ func (o *DeleteBuildNotFound) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
-/*DeleteBuildDefault Some error unrelated to the handler
+/*
+DeleteBuildDefault Some error unrelated to the handler
 
 swagger:response deleteBuildDefault
 */

@@ -16,7 +16,8 @@ import (
 // PermitUserModOKCode is the HTTP code returned for type PermitUserModOK
 const PermitUserModOKCode int = 200
 
-/*PermitUserModOK Plain success message
+/*
+PermitUserModOK Plain success message
 
 swagger:response permitUserModOK
 */
@@ -60,7 +61,8 @@ func (o *PermitUserModOK) WriteResponse(rw http.ResponseWriter, producer runtime
 // PermitUserModForbiddenCode is the HTTP code returned for type PermitUserModForbidden
 const PermitUserModForbiddenCode int = 403
 
-/*PermitUserModForbidden User is not authorized
+/*
+PermitUserModForbidden User is not authorized
 
 swagger:response permitUserModForbidden
 */
@@ -104,7 +106,8 @@ func (o *PermitUserModForbidden) WriteResponse(rw http.ResponseWriter, producer 
 // PermitUserModNotFoundCode is the HTTP code returned for type PermitUserModNotFound
 const PermitUserModNotFoundCode int = 404
 
-/*PermitUserModNotFound User or mod not found
+/*
+PermitUserModNotFound User or mod not found
 
 swagger:response permitUserModNotFound
 */
@@ -148,7 +151,8 @@ func (o *PermitUserModNotFound) WriteResponse(rw http.ResponseWriter, producer r
 // PermitUserModPreconditionFailedCode is the HTTP code returned for type PermitUserModPreconditionFailed
 const PermitUserModPreconditionFailedCode int = 412
 
-/*PermitUserModPreconditionFailed Mod is not assigned
+/*
+PermitUserModPreconditionFailed Mod is not assigned
 
 swagger:response permitUserModPreconditionFailed
 */
@@ -192,7 +196,8 @@ func (o *PermitUserModPreconditionFailed) WriteResponse(rw http.ResponseWriter, 
 // PermitUserModUnprocessableEntityCode is the HTTP code returned for type PermitUserModUnprocessableEntity
 const PermitUserModUnprocessableEntityCode int = 422
 
-/*PermitUserModUnprocessableEntity Failed to validate request
+/*
+PermitUserModUnprocessableEntity Failed to validate request
 
 swagger:response permitUserModUnprocessableEntity
 */
@@ -233,7 +238,8 @@ func (o *PermitUserModUnprocessableEntity) WriteResponse(rw http.ResponseWriter,
 	}
 }
 
-/*PermitUserModDefault Some error unrelated to the handler
+/*
+PermitUserModDefault Some error unrelated to the handler
 
 swagger:response permitUserModDefault
 */

@@ -16,7 +16,8 @@ import (
 // ShowUserOKCode is the HTTP code returned for type ShowUserOK
 const ShowUserOKCode int = 200
 
-/*ShowUserOK The fetched user details
+/*
+ShowUserOK The fetched user details
 
 swagger:response showUserOK
 */
@@ -60,7 +61,8 @@ func (o *ShowUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Prod
 // ShowUserForbiddenCode is the HTTP code returned for type ShowUserForbidden
 const ShowUserForbiddenCode int = 403
 
-/*ShowUserForbidden User is not authorized
+/*
+ShowUserForbidden User is not authorized
 
 swagger:response showUserForbidden
 */
@@ -104,7 +106,8 @@ func (o *ShowUserForbidden) WriteResponse(rw http.ResponseWriter, producer runti
 // ShowUserNotFoundCode is the HTTP code returned for type ShowUserNotFound
 const ShowUserNotFoundCode int = 404
 
-/*ShowUserNotFound User not found
+/*
+ShowUserNotFound User not found
 
 swagger:response showUserNotFound
 */
@@ -145,7 +148,8 @@ func (o *ShowUserNotFound) WriteResponse(rw http.ResponseWriter, producer runtim
 	}
 }
 
-/*ShowUserDefault Some error unrelated to the handler
+/*
+ShowUserDefault Some error unrelated to the handler
 
 swagger:response showUserDefault
 */

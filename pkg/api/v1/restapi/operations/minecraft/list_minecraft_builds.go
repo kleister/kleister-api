@@ -31,10 +31,10 @@ func NewListMinecraftBuilds(ctx *middleware.Context, handler ListMinecraftBuilds
 	return &ListMinecraftBuilds{Context: ctx, Handler: handler}
 }
 
-/* ListMinecraftBuilds swagger:route GET /minecraft/{minecraft_id}/builds minecraft listMinecraftBuilds
+/*
+	ListMinecraftBuilds swagger:route GET /minecraft/{minecraft_id}/builds minecraft listMinecraftBuilds
 
 Fetch the builds assigned to a Minecraft version
-
 */
 type ListMinecraftBuilds struct {
 	Context *middleware.Context

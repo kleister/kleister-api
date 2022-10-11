@@ -16,7 +16,8 @@ import (
 // ListMinecraftsOKCode is the HTTP code returned for type ListMinecraftsOK
 const ListMinecraftsOKCode int = 200
 
-/*ListMinecraftsOK A collection of Minecraft versions
+/*
+ListMinecraftsOK A collection of Minecraft versions
 
 swagger:response listMinecraftsOK
 */
@@ -63,7 +64,8 @@ func (o *ListMinecraftsOK) WriteResponse(rw http.ResponseWriter, producer runtim
 // ListMinecraftsForbiddenCode is the HTTP code returned for type ListMinecraftsForbidden
 const ListMinecraftsForbiddenCode int = 403
 
-/*ListMinecraftsForbidden User is not authorized
+/*
+ListMinecraftsForbidden User is not authorized
 
 swagger:response listMinecraftsForbidden
 */
@@ -104,7 +106,8 @@ func (o *ListMinecraftsForbidden) WriteResponse(rw http.ResponseWriter, producer
 	}
 }
 
-/*ListMinecraftsDefault Some error unrelated to the handler
+/*
+ListMinecraftsDefault Some error unrelated to the handler
 
 swagger:response listMinecraftsDefault
 */

@@ -31,10 +31,10 @@ func NewDeleteBuildFromVersion(ctx *middleware.Context, handler DeleteBuildFromV
 	return &DeleteBuildFromVersion{Context: ctx, Handler: handler}
 }
 
-/* DeleteBuildFromVersion swagger:route DELETE /packs/{pack_id}/builds/{build_id}/versions pack deleteBuildFromVersion
+/*
+	DeleteBuildFromVersion swagger:route DELETE /packs/{pack_id}/builds/{build_id}/versions pack deleteBuildFromVersion
 
 Unlink a version from a build
-
 */
 type DeleteBuildFromVersion struct {
 	Context *middleware.Context

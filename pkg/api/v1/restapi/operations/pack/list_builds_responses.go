@@ -16,7 +16,8 @@ import (
 // ListBuildsOKCode is the HTTP code returned for type ListBuildsOK
 const ListBuildsOKCode int = 200
 
-/*ListBuildsOK A collection of builds
+/*
+ListBuildsOK A collection of builds
 
 swagger:response listBuildsOK
 */
@@ -63,7 +64,8 @@ func (o *ListBuildsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // ListBuildsForbiddenCode is the HTTP code returned for type ListBuildsForbidden
 const ListBuildsForbiddenCode int = 403
 
-/*ListBuildsForbidden User is not authorized
+/*
+ListBuildsForbidden User is not authorized
 
 swagger:response listBuildsForbidden
 */
@@ -107,7 +109,8 @@ func (o *ListBuildsForbidden) WriteResponse(rw http.ResponseWriter, producer run
 // ListBuildsNotFoundCode is the HTTP code returned for type ListBuildsNotFound
 const ListBuildsNotFoundCode int = 404
 
-/*ListBuildsNotFound Pack not found
+/*
+ListBuildsNotFound Pack not found
 
 swagger:response listBuildsNotFound
 */
@@ -148,7 +151,8 @@ func (o *ListBuildsNotFound) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
-/*ListBuildsDefault Some error unrelated to the handler
+/*
+ListBuildsDefault Some error unrelated to the handler
 
 swagger:response listBuildsDefault
 */

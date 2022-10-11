@@ -16,7 +16,8 @@ import (
 // ShowModOKCode is the HTTP code returned for type ShowModOK
 const ShowModOKCode int = 200
 
-/*ShowModOK The fetched mod details
+/*
+ShowModOK The fetched mod details
 
 swagger:response showModOK
 */
@@ -60,7 +61,8 @@ func (o *ShowModOK) WriteResponse(rw http.ResponseWriter, producer runtime.Produ
 // ShowModForbiddenCode is the HTTP code returned for type ShowModForbidden
 const ShowModForbiddenCode int = 403
 
-/*ShowModForbidden User is not authorized
+/*
+ShowModForbidden User is not authorized
 
 swagger:response showModForbidden
 */
@@ -104,7 +106,8 @@ func (o *ShowModForbidden) WriteResponse(rw http.ResponseWriter, producer runtim
 // ShowModNotFoundCode is the HTTP code returned for type ShowModNotFound
 const ShowModNotFoundCode int = 404
 
-/*ShowModNotFound Mod not found
+/*
+ShowModNotFound Mod not found
 
 swagger:response showModNotFound
 */
@@ -145,7 +148,8 @@ func (o *ShowModNotFound) WriteResponse(rw http.ResponseWriter, producer runtime
 	}
 }
 
-/*ShowModDefault Some error unrelated to the handler
+/*
+ShowModDefault Some error unrelated to the handler
 
 swagger:response showModDefault
 */

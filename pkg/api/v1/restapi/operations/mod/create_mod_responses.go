@@ -16,7 +16,8 @@ import (
 // CreateModOKCode is the HTTP code returned for type CreateModOK
 const CreateModOKCode int = 200
 
-/*CreateModOK The created mod data
+/*
+CreateModOK The created mod data
 
 swagger:response createModOK
 */
@@ -60,7 +61,8 @@ func (o *CreateModOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pro
 // CreateModForbiddenCode is the HTTP code returned for type CreateModForbidden
 const CreateModForbiddenCode int = 403
 
-/*CreateModForbidden User is not authorized
+/*
+CreateModForbidden User is not authorized
 
 swagger:response createModForbidden
 */
@@ -104,7 +106,8 @@ func (o *CreateModForbidden) WriteResponse(rw http.ResponseWriter, producer runt
 // CreateModUnprocessableEntityCode is the HTTP code returned for type CreateModUnprocessableEntity
 const CreateModUnprocessableEntityCode int = 422
 
-/*CreateModUnprocessableEntity Failed to validate request
+/*
+CreateModUnprocessableEntity Failed to validate request
 
 swagger:response createModUnprocessableEntity
 */
@@ -145,7 +148,8 @@ func (o *CreateModUnprocessableEntity) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
-/*CreateModDefault Some error unrelated to the handler
+/*
+CreateModDefault Some error unrelated to the handler
 
 swagger:response createModDefault
 */

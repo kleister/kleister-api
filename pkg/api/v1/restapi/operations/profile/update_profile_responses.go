@@ -16,7 +16,8 @@ import (
 // UpdateProfileOKCode is the HTTP code returned for type UpdateProfileOK
 const UpdateProfileOKCode int = 200
 
-/*UpdateProfileOK The updated profile data
+/*
+UpdateProfileOK The updated profile data
 
 swagger:response updateProfileOK
 */
@@ -60,7 +61,8 @@ func (o *UpdateProfileOK) WriteResponse(rw http.ResponseWriter, producer runtime
 // UpdateProfileForbiddenCode is the HTTP code returned for type UpdateProfileForbidden
 const UpdateProfileForbiddenCode int = 403
 
-/*UpdateProfileForbidden User is not authorized
+/*
+UpdateProfileForbidden User is not authorized
 
 swagger:response updateProfileForbidden
 */
@@ -104,7 +106,8 @@ func (o *UpdateProfileForbidden) WriteResponse(rw http.ResponseWriter, producer 
 // UpdateProfileUnprocessableEntityCode is the HTTP code returned for type UpdateProfileUnprocessableEntity
 const UpdateProfileUnprocessableEntityCode int = 422
 
-/*UpdateProfileUnprocessableEntity Failed to validate request
+/*
+UpdateProfileUnprocessableEntity Failed to validate request
 
 swagger:response updateProfileUnprocessableEntity
 */
@@ -145,7 +148,8 @@ func (o *UpdateProfileUnprocessableEntity) WriteResponse(rw http.ResponseWriter,
 	}
 }
 
-/*UpdateProfileDefault Some error unrelated to the handler
+/*
+UpdateProfileDefault Some error unrelated to the handler
 
 swagger:response updateProfileDefault
 */

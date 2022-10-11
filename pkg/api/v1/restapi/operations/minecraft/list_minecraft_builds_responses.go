@@ -16,7 +16,8 @@ import (
 // ListMinecraftBuildsOKCode is the HTTP code returned for type ListMinecraftBuildsOK
 const ListMinecraftBuildsOKCode int = 200
 
-/*ListMinecraftBuildsOK A collection of assigned builds
+/*
+ListMinecraftBuildsOK A collection of assigned builds
 
 swagger:response listMinecraftBuildsOK
 */
@@ -63,7 +64,8 @@ func (o *ListMinecraftBuildsOK) WriteResponse(rw http.ResponseWriter, producer r
 // ListMinecraftBuildsForbiddenCode is the HTTP code returned for type ListMinecraftBuildsForbidden
 const ListMinecraftBuildsForbiddenCode int = 403
 
-/*ListMinecraftBuildsForbidden User is not authorized
+/*
+ListMinecraftBuildsForbidden User is not authorized
 
 swagger:response listMinecraftBuildsForbidden
 */
@@ -107,7 +109,8 @@ func (o *ListMinecraftBuildsForbidden) WriteResponse(rw http.ResponseWriter, pro
 // ListMinecraftBuildsNotFoundCode is the HTTP code returned for type ListMinecraftBuildsNotFound
 const ListMinecraftBuildsNotFoundCode int = 404
 
-/*ListMinecraftBuildsNotFound Minecraft or build not found
+/*
+ListMinecraftBuildsNotFound Minecraft or build not found
 
 swagger:response listMinecraftBuildsNotFound
 */
@@ -148,7 +151,8 @@ func (o *ListMinecraftBuildsNotFound) WriteResponse(rw http.ResponseWriter, prod
 	}
 }
 
-/*ListMinecraftBuildsDefault Some error unrelated to the handler
+/*
+ListMinecraftBuildsDefault Some error unrelated to the handler
 
 swagger:response listMinecraftBuildsDefault
 */

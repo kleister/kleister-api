@@ -16,7 +16,8 @@ import (
 // DeleteModFromTeamOKCode is the HTTP code returned for type DeleteModFromTeamOK
 const DeleteModFromTeamOKCode int = 200
 
-/*DeleteModFromTeamOK Plain success message
+/*
+DeleteModFromTeamOK Plain success message
 
 swagger:response deleteModFromTeamOK
 */
@@ -60,7 +61,8 @@ func (o *DeleteModFromTeamOK) WriteResponse(rw http.ResponseWriter, producer run
 // DeleteModFromTeamForbiddenCode is the HTTP code returned for type DeleteModFromTeamForbidden
 const DeleteModFromTeamForbiddenCode int = 403
 
-/*DeleteModFromTeamForbidden User is not authorized
+/*
+DeleteModFromTeamForbidden User is not authorized
 
 swagger:response deleteModFromTeamForbidden
 */
@@ -104,7 +106,8 @@ func (o *DeleteModFromTeamForbidden) WriteResponse(rw http.ResponseWriter, produ
 // DeleteModFromTeamNotFoundCode is the HTTP code returned for type DeleteModFromTeamNotFound
 const DeleteModFromTeamNotFoundCode int = 404
 
-/*DeleteModFromTeamNotFound Mod or team not found
+/*
+DeleteModFromTeamNotFound Mod or team not found
 
 swagger:response deleteModFromTeamNotFound
 */
@@ -148,7 +151,8 @@ func (o *DeleteModFromTeamNotFound) WriteResponse(rw http.ResponseWriter, produc
 // DeleteModFromTeamPreconditionFailedCode is the HTTP code returned for type DeleteModFromTeamPreconditionFailed
 const DeleteModFromTeamPreconditionFailedCode int = 412
 
-/*DeleteModFromTeamPreconditionFailed Team is not assigned
+/*
+DeleteModFromTeamPreconditionFailed Team is not assigned
 
 swagger:response deleteModFromTeamPreconditionFailed
 */
@@ -189,7 +193,8 @@ func (o *DeleteModFromTeamPreconditionFailed) WriteResponse(rw http.ResponseWrit
 	}
 }
 
-/*DeleteModFromTeamDefault Some error unrelated to the handler
+/*
+DeleteModFromTeamDefault Some error unrelated to the handler
 
 swagger:response deleteModFromTeamDefault
 */

@@ -16,7 +16,8 @@ import (
 // AppendBuildToVersionOKCode is the HTTP code returned for type AppendBuildToVersionOK
 const AppendBuildToVersionOKCode int = 200
 
-/*AppendBuildToVersionOK Plain success message
+/*
+AppendBuildToVersionOK Plain success message
 
 swagger:response appendBuildToVersionOK
 */
@@ -60,7 +61,8 @@ func (o *AppendBuildToVersionOK) WriteResponse(rw http.ResponseWriter, producer 
 // AppendBuildToVersionForbiddenCode is the HTTP code returned for type AppendBuildToVersionForbidden
 const AppendBuildToVersionForbiddenCode int = 403
 
-/*AppendBuildToVersionForbidden User is not authorized
+/*
+AppendBuildToVersionForbidden User is not authorized
 
 swagger:response appendBuildToVersionForbidden
 */
@@ -104,7 +106,8 @@ func (o *AppendBuildToVersionForbidden) WriteResponse(rw http.ResponseWriter, pr
 // AppendBuildToVersionNotFoundCode is the HTTP code returned for type AppendBuildToVersionNotFound
 const AppendBuildToVersionNotFoundCode int = 404
 
-/*AppendBuildToVersionNotFound Build or pack not found
+/*
+AppendBuildToVersionNotFound Build or pack not found
 
 swagger:response appendBuildToVersionNotFound
 */
@@ -148,7 +151,8 @@ func (o *AppendBuildToVersionNotFound) WriteResponse(rw http.ResponseWriter, pro
 // AppendBuildToVersionPreconditionFailedCode is the HTTP code returned for type AppendBuildToVersionPreconditionFailed
 const AppendBuildToVersionPreconditionFailedCode int = 412
 
-/*AppendBuildToVersionPreconditionFailed Version is already assigned
+/*
+AppendBuildToVersionPreconditionFailed Version is already assigned
 
 swagger:response appendBuildToVersionPreconditionFailed
 */
@@ -192,7 +196,8 @@ func (o *AppendBuildToVersionPreconditionFailed) WriteResponse(rw http.ResponseW
 // AppendBuildToVersionUnprocessableEntityCode is the HTTP code returned for type AppendBuildToVersionUnprocessableEntity
 const AppendBuildToVersionUnprocessableEntityCode int = 422
 
-/*AppendBuildToVersionUnprocessableEntity Failed to validate request
+/*
+AppendBuildToVersionUnprocessableEntity Failed to validate request
 
 swagger:response appendBuildToVersionUnprocessableEntity
 */
@@ -233,7 +238,8 @@ func (o *AppendBuildToVersionUnprocessableEntity) WriteResponse(rw http.Response
 	}
 }
 
-/*AppendBuildToVersionDefault Some error unrelated to the handler
+/*
+AppendBuildToVersionDefault Some error unrelated to the handler
 
 swagger:response appendBuildToVersionDefault
 */

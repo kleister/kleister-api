@@ -16,7 +16,8 @@ import (
 // PermitPackTeamOKCode is the HTTP code returned for type PermitPackTeamOK
 const PermitPackTeamOKCode int = 200
 
-/*PermitPackTeamOK Plain success message
+/*
+PermitPackTeamOK Plain success message
 
 swagger:response permitPackTeamOK
 */
@@ -60,7 +61,8 @@ func (o *PermitPackTeamOK) WriteResponse(rw http.ResponseWriter, producer runtim
 // PermitPackTeamForbiddenCode is the HTTP code returned for type PermitPackTeamForbidden
 const PermitPackTeamForbiddenCode int = 403
 
-/*PermitPackTeamForbidden User is not authorized
+/*
+PermitPackTeamForbidden User is not authorized
 
 swagger:response permitPackTeamForbidden
 */
@@ -104,7 +106,8 @@ func (o *PermitPackTeamForbidden) WriteResponse(rw http.ResponseWriter, producer
 // PermitPackTeamNotFoundCode is the HTTP code returned for type PermitPackTeamNotFound
 const PermitPackTeamNotFoundCode int = 404
 
-/*PermitPackTeamNotFound Pack or team not found
+/*
+PermitPackTeamNotFound Pack or team not found
 
 swagger:response permitPackTeamNotFound
 */
@@ -148,7 +151,8 @@ func (o *PermitPackTeamNotFound) WriteResponse(rw http.ResponseWriter, producer 
 // PermitPackTeamPreconditionFailedCode is the HTTP code returned for type PermitPackTeamPreconditionFailed
 const PermitPackTeamPreconditionFailedCode int = 412
 
-/*PermitPackTeamPreconditionFailed Team is not assigned
+/*
+PermitPackTeamPreconditionFailed Team is not assigned
 
 swagger:response permitPackTeamPreconditionFailed
 */
@@ -192,7 +196,8 @@ func (o *PermitPackTeamPreconditionFailed) WriteResponse(rw http.ResponseWriter,
 // PermitPackTeamUnprocessableEntityCode is the HTTP code returned for type PermitPackTeamUnprocessableEntity
 const PermitPackTeamUnprocessableEntityCode int = 422
 
-/*PermitPackTeamUnprocessableEntity Failed to validate request
+/*
+PermitPackTeamUnprocessableEntity Failed to validate request
 
 swagger:response permitPackTeamUnprocessableEntity
 */
@@ -233,7 +238,8 @@ func (o *PermitPackTeamUnprocessableEntity) WriteResponse(rw http.ResponseWriter
 	}
 }
 
-/*PermitPackTeamDefault Some error unrelated to the handler
+/*
+PermitPackTeamDefault Some error unrelated to the handler
 
 swagger:response permitPackTeamDefault
 */

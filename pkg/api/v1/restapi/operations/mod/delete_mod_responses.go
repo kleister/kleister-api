@@ -16,7 +16,8 @@ import (
 // DeleteModOKCode is the HTTP code returned for type DeleteModOK
 const DeleteModOKCode int = 200
 
-/*DeleteModOK Plain success message
+/*
+DeleteModOK Plain success message
 
 swagger:response deleteModOK
 */
@@ -60,7 +61,8 @@ func (o *DeleteModOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pro
 // DeleteModBadRequestCode is the HTTP code returned for type DeleteModBadRequest
 const DeleteModBadRequestCode int = 400
 
-/*DeleteModBadRequest Failed to delete the mod
+/*
+DeleteModBadRequest Failed to delete the mod
 
 swagger:response deleteModBadRequest
 */
@@ -104,7 +106,8 @@ func (o *DeleteModBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 // DeleteModForbiddenCode is the HTTP code returned for type DeleteModForbidden
 const DeleteModForbiddenCode int = 403
 
-/*DeleteModForbidden User is not authorized
+/*
+DeleteModForbidden User is not authorized
 
 swagger:response deleteModForbidden
 */
@@ -148,7 +151,8 @@ func (o *DeleteModForbidden) WriteResponse(rw http.ResponseWriter, producer runt
 // DeleteModNotFoundCode is the HTTP code returned for type DeleteModNotFound
 const DeleteModNotFoundCode int = 404
 
-/*DeleteModNotFound Mod not found
+/*
+DeleteModNotFound Mod not found
 
 swagger:response deleteModNotFound
 */
@@ -189,7 +193,8 @@ func (o *DeleteModNotFound) WriteResponse(rw http.ResponseWriter, producer runti
 	}
 }
 
-/*DeleteModDefault Some error unrelated to the handler
+/*
+DeleteModDefault Some error unrelated to the handler
 
 swagger:response deleteModDefault
 */

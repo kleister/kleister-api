@@ -16,7 +16,8 @@ import (
 // DeleteVersionOKCode is the HTTP code returned for type DeleteVersionOK
 const DeleteVersionOKCode int = 200
 
-/*DeleteVersionOK Plain success message
+/*
+DeleteVersionOK Plain success message
 
 swagger:response deleteVersionOK
 */
@@ -60,7 +61,8 @@ func (o *DeleteVersionOK) WriteResponse(rw http.ResponseWriter, producer runtime
 // DeleteVersionBadRequestCode is the HTTP code returned for type DeleteVersionBadRequest
 const DeleteVersionBadRequestCode int = 400
 
-/*DeleteVersionBadRequest Failed to delete the version
+/*
+DeleteVersionBadRequest Failed to delete the version
 
 swagger:response deleteVersionBadRequest
 */
@@ -104,7 +106,8 @@ func (o *DeleteVersionBadRequest) WriteResponse(rw http.ResponseWriter, producer
 // DeleteVersionForbiddenCode is the HTTP code returned for type DeleteVersionForbidden
 const DeleteVersionForbiddenCode int = 403
 
-/*DeleteVersionForbidden User is not authorized
+/*
+DeleteVersionForbidden User is not authorized
 
 swagger:response deleteVersionForbidden
 */
@@ -148,7 +151,8 @@ func (o *DeleteVersionForbidden) WriteResponse(rw http.ResponseWriter, producer 
 // DeleteVersionNotFoundCode is the HTTP code returned for type DeleteVersionNotFound
 const DeleteVersionNotFoundCode int = 404
 
-/*DeleteVersionNotFound Version or mod not found
+/*
+DeleteVersionNotFound Version or mod not found
 
 swagger:response deleteVersionNotFound
 */
@@ -189,7 +193,8 @@ func (o *DeleteVersionNotFound) WriteResponse(rw http.ResponseWriter, producer r
 	}
 }
 
-/*DeleteVersionDefault Some error unrelated to the handler
+/*
+DeleteVersionDefault Some error unrelated to the handler
 
 swagger:response deleteVersionDefault
 */

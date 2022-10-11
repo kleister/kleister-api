@@ -31,10 +31,10 @@ func NewAppendBuildToVersion(ctx *middleware.Context, handler AppendBuildToVersi
 	return &AppendBuildToVersion{Context: ctx, Handler: handler}
 }
 
-/* AppendBuildToVersion swagger:route POST /packs/{pack_id}/builds/{build_id}/versions pack appendBuildToVersion
+/*
+	AppendBuildToVersion swagger:route POST /packs/{pack_id}/builds/{build_id}/versions pack appendBuildToVersion
 
 Assign a version to a build
-
 */
 type AppendBuildToVersion struct {
 	Context *middleware.Context

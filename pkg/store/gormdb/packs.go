@@ -6,7 +6,8 @@ import (
 	"fmt"
 
 	"github.com/Machiel/slugify"
-	"github.com/asaskevich/govalidator"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/google/uuid"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/service/packs"
@@ -218,31 +219,25 @@ func (p *Packs) Delete(ctx context.Context, name string) error {
 func (p *Packs) validateCreate(record *model.Pack) error {
 	errs := validate.Errors{}
 
-	if ok := govalidator.IsByteLength(record.Slug, 3, 255); !ok {
+	if err := validation.Validate(
+		record.Slug,
+		validation.Length(3, 255),
+		validation.By(p.uniqueValueIsPresent("slug", record.ID)),
+	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "slug",
-			Error: fmt.Errorf("is not between 3 and 255 characters long"),
+			Error: err,
 		})
 	}
 
-	if p.uniqueValueIsPresent("slug", record.Slug, record.ID) {
-		errs.Errors = append(errs.Errors, validate.Error{
-			Field: "slug",
-			Error: fmt.Errorf("is already taken"),
-		})
-	}
-
-	if ok := govalidator.IsByteLength(record.Name, 3, 255); !ok {
+	if err := validation.Validate(
+		record.Name,
+		validation.Length(3, 255),
+		validation.By(p.uniqueValueIsPresent("name", record.ID)),
+	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "name",
-			Error: fmt.Errorf("is not between 3 and 255 characters long"),
-		})
-	}
-
-	if p.uniqueValueIsPresent("name", record.Name, record.ID) {
-		errs.Errors = append(errs.Errors, validate.Error{
-			Field: "name",
-			Error: fmt.Errorf("is already taken"),
+			Error: err,
 		})
 	}
 
@@ -256,38 +251,37 @@ func (p *Packs) validateCreate(record *model.Pack) error {
 func (p *Packs) validateUpdate(record *model.Pack) error {
 	errs := validate.Errors{}
 
-	if ok := govalidator.IsUUIDv4(record.ID); !ok {
+	if err := validation.Validate(
+		record.ID,
+		validation.Required,
+		is.UUIDv4,
+		validation.By(p.uniqueValueIsPresent("id", record.ID)),
+	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "id",
-			Error: fmt.Errorf("is not a valid uuid v4"),
+			Error: err,
 		})
 	}
 
-	if ok := govalidator.IsByteLength(record.Slug, 3, 255); !ok {
+	if err := validation.Validate(
+		record.Slug,
+		validation.Length(3, 255),
+		validation.By(p.uniqueValueIsPresent("slug", record.ID)),
+	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "slug",
-			Error: fmt.Errorf("is not between 3 and 255 characters long"),
+			Error: err,
 		})
 	}
 
-	if p.uniqueValueIsPresent("slug", record.Slug, record.ID) {
-		errs.Errors = append(errs.Errors, validate.Error{
-			Field: "slug",
-			Error: fmt.Errorf("is already taken"),
-		})
-	}
-
-	if ok := govalidator.IsByteLength(record.Name, 3, 255); !ok {
+	if err := validation.Validate(
+		record.Name,
+		validation.Length(3, 255),
+		validation.By(p.uniqueValueIsPresent("name", record.ID)),
+	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "name",
-			Error: fmt.Errorf("is not between 3 and 255 characters long"),
-		})
-	}
-
-	if p.uniqueValueIsPresent("name", record.Name, record.ID) {
-		errs.Errors = append(errs.Errors, validate.Error{
-			Field: "name",
-			Error: fmt.Errorf("is already taken"),
+			Error: err,
 		})
 	}
 
@@ -298,16 +292,24 @@ func (p *Packs) validateUpdate(record *model.Pack) error {
 	return nil
 }
 
-func (p *Packs) uniqueValueIsPresent(key, val, id string) bool {
-	res := p.client.handle.Where(
-		fmt.Sprintf("%s = ?", key),
-		val,
-	).Not(
-		"id = ?",
-		id,
-	).Find(
-		&model.Pack{},
-	)
+func (p *Packs) uniqueValueIsPresent(key, id string) func(value interface{}) error {
+	return func(value interface{}) error {
+		val, _ := value.(string)
 
-	return res.RowsAffected != 0
+		res := p.client.handle.Where(
+			fmt.Sprintf("%s = ?", key),
+			val,
+		).Not(
+			"id = ?",
+			id,
+		).Find(
+			&model.Pack{},
+		)
+
+		if res.RowsAffected != 0 {
+			return errors.New("is already taken")
+		}
+
+		return nil
+	}
 }

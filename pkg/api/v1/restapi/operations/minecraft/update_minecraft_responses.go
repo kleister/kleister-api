@@ -16,7 +16,8 @@ import (
 // UpdateMinecraftOKCode is the HTTP code returned for type UpdateMinecraftOK
 const UpdateMinecraftOKCode int = 200
 
-/*UpdateMinecraftOK Plain success message
+/*
+UpdateMinecraftOK Plain success message
 
 swagger:response updateMinecraftOK
 */
@@ -60,7 +61,8 @@ func (o *UpdateMinecraftOK) WriteResponse(rw http.ResponseWriter, producer runti
 // UpdateMinecraftForbiddenCode is the HTTP code returned for type UpdateMinecraftForbidden
 const UpdateMinecraftForbiddenCode int = 403
 
-/*UpdateMinecraftForbidden User is not authorized
+/*
+UpdateMinecraftForbidden User is not authorized
 
 swagger:response updateMinecraftForbidden
 */
@@ -104,7 +106,8 @@ func (o *UpdateMinecraftForbidden) WriteResponse(rw http.ResponseWriter, produce
 // UpdateMinecraftServiceUnavailableCode is the HTTP code returned for type UpdateMinecraftServiceUnavailable
 const UpdateMinecraftServiceUnavailableCode int = 503
 
-/*UpdateMinecraftServiceUnavailable If remote source is not available
+/*
+UpdateMinecraftServiceUnavailable If remote source is not available
 
 swagger:response updateMinecraftServiceUnavailable
 */
@@ -145,7 +148,8 @@ func (o *UpdateMinecraftServiceUnavailable) WriteResponse(rw http.ResponseWriter
 	}
 }
 
-/*UpdateMinecraftDefault Some error unrelated to the handler
+/*
+UpdateMinecraftDefault Some error unrelated to the handler
 
 swagger:response updateMinecraftDefault
 */

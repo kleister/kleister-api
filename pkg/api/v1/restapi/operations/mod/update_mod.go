@@ -31,10 +31,10 @@ func NewUpdateMod(ctx *middleware.Context, handler UpdateModHandler) *UpdateMod 
 	return &UpdateMod{Context: ctx, Handler: handler}
 }
 
-/* UpdateMod swagger:route PUT /mods/{mod_id} mod updateMod
+/*
+	UpdateMod swagger:route PUT /mods/{mod_id} mod updateMod
 
 Update a specific mod
-
 */
 type UpdateMod struct {
 	Context *middleware.Context

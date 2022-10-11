@@ -31,10 +31,10 @@ func NewDeleteBuild(ctx *middleware.Context, handler DeleteBuildHandler) *Delete
 	return &DeleteBuild{Context: ctx, Handler: handler}
 }
 
-/* DeleteBuild swagger:route DELETE /packs/{pack_id}/builds/{build_id} pack deleteBuild
+/*
+	DeleteBuild swagger:route DELETE /packs/{pack_id}/builds/{build_id} pack deleteBuild
 
 Delete a specific build for a pack
-
 */
 type DeleteBuild struct {
 	Context *middleware.Context

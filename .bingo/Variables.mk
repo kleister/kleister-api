@@ -35,15 +35,15 @@ $(REFLEX): $(BINGO_DIR)/reflex.mod
 	@echo "(re)installing $(GOBIN)/reflex-v0.3.1"
 	@cd $(BINGO_DIR) && $(GO) build -mod=mod -modfile=reflex.mod -o=$(GOBIN)/reflex-v0.3.1 "github.com/cespare/reflex"
 
-STATICCHECK := $(GOBIN)/staticcheck-v0.3.2
+STATICCHECK := $(GOBIN)/staticcheck-v0.3.3
 $(STATICCHECK): $(BINGO_DIR)/staticcheck.mod
 	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
-	@echo "(re)installing $(GOBIN)/staticcheck-v0.3.2"
-	@cd $(BINGO_DIR) && $(GO) build -mod=mod -modfile=staticcheck.mod -o=$(GOBIN)/staticcheck-v0.3.2 "honnef.co/go/tools/cmd/staticcheck"
+	@echo "(re)installing $(GOBIN)/staticcheck-v0.3.3"
+	@cd $(BINGO_DIR) && $(GO) build -mod=mod -modfile=staticcheck.mod -o=$(GOBIN)/staticcheck-v0.3.3 "honnef.co/go/tools/cmd/staticcheck"
 
-SWAGGER := $(GOBIN)/swagger-v0.29.0
+SWAGGER := $(GOBIN)/swagger-v0.30.3
 $(SWAGGER): $(BINGO_DIR)/swagger.mod
 	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
-	@echo "(re)installing $(GOBIN)/swagger-v0.29.0"
-	@cd $(BINGO_DIR) && $(GO) build -mod=mod -modfile=swagger.mod -o=$(GOBIN)/swagger-v0.29.0 "github.com/go-swagger/go-swagger/cmd/swagger"
+	@echo "(re)installing $(GOBIN)/swagger-v0.30.3"
+	@cd $(BINGO_DIR) && $(GO) build -mod=mod -modfile=swagger.mod -o=$(GOBIN)/swagger-v0.30.3 "github.com/go-swagger/go-swagger/cmd/swagger"
 

@@ -16,7 +16,8 @@ import (
 // ShowPackOKCode is the HTTP code returned for type ShowPackOK
 const ShowPackOKCode int = 200
 
-/*ShowPackOK The fetched pack details
+/*
+ShowPackOK The fetched pack details
 
 swagger:response showPackOK
 */
@@ -60,7 +61,8 @@ func (o *ShowPackOK) WriteResponse(rw http.ResponseWriter, producer runtime.Prod
 // ShowPackForbiddenCode is the HTTP code returned for type ShowPackForbidden
 const ShowPackForbiddenCode int = 403
 
-/*ShowPackForbidden User is not authorized
+/*
+ShowPackForbidden User is not authorized
 
 swagger:response showPackForbidden
 */
@@ -104,7 +106,8 @@ func (o *ShowPackForbidden) WriteResponse(rw http.ResponseWriter, producer runti
 // ShowPackNotFoundCode is the HTTP code returned for type ShowPackNotFound
 const ShowPackNotFoundCode int = 404
 
-/*ShowPackNotFound Pack not found
+/*
+ShowPackNotFound Pack not found
 
 swagger:response showPackNotFound
 */
@@ -145,7 +148,8 @@ func (o *ShowPackNotFound) WriteResponse(rw http.ResponseWriter, producer runtim
 	}
 }
 
-/*ShowPackDefault Some error unrelated to the handler
+/*
+ShowPackDefault Some error unrelated to the handler
 
 swagger:response showPackDefault
 */

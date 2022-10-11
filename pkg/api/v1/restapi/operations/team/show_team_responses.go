@@ -16,7 +16,8 @@ import (
 // ShowTeamOKCode is the HTTP code returned for type ShowTeamOK
 const ShowTeamOKCode int = 200
 
-/*ShowTeamOK The fetched team details
+/*
+ShowTeamOK The fetched team details
 
 swagger:response showTeamOK
 */
@@ -60,7 +61,8 @@ func (o *ShowTeamOK) WriteResponse(rw http.ResponseWriter, producer runtime.Prod
 // ShowTeamForbiddenCode is the HTTP code returned for type ShowTeamForbidden
 const ShowTeamForbiddenCode int = 403
 
-/*ShowTeamForbidden User is not authorized
+/*
+ShowTeamForbidden User is not authorized
 
 swagger:response showTeamForbidden
 */
@@ -104,7 +106,8 @@ func (o *ShowTeamForbidden) WriteResponse(rw http.ResponseWriter, producer runti
 // ShowTeamNotFoundCode is the HTTP code returned for type ShowTeamNotFound
 const ShowTeamNotFoundCode int = 404
 
-/*ShowTeamNotFound Team not found
+/*
+ShowTeamNotFound Team not found
 
 swagger:response showTeamNotFound
 */
@@ -145,7 +148,8 @@ func (o *ShowTeamNotFound) WriteResponse(rw http.ResponseWriter, producer runtim
 	}
 }
 
-/*ShowTeamDefault Some error unrelated to the handler
+/*
+ShowTeamDefault Some error unrelated to the handler
 
 swagger:response showTeamDefault
 */

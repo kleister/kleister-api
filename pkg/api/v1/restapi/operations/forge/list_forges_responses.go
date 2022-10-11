@@ -16,7 +16,8 @@ import (
 // ListForgesOKCode is the HTTP code returned for type ListForgesOK
 const ListForgesOKCode int = 200
 
-/*ListForgesOK A collection of Forge versions
+/*
+ListForgesOK A collection of Forge versions
 
 swagger:response listForgesOK
 */
@@ -63,7 +64,8 @@ func (o *ListForgesOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // ListForgesForbiddenCode is the HTTP code returned for type ListForgesForbidden
 const ListForgesForbiddenCode int = 403
 
-/*ListForgesForbidden User is not authorized
+/*
+ListForgesForbidden User is not authorized
 
 swagger:response listForgesForbidden
 */
@@ -104,7 +106,8 @@ func (o *ListForgesForbidden) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
-/*ListForgesDefault Some error unrelated to the handler
+/*
+ListForgesDefault Some error unrelated to the handler
 
 swagger:response listForgesDefault
 */

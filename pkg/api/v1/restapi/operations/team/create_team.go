@@ -31,10 +31,10 @@ func NewCreateTeam(ctx *middleware.Context, handler CreateTeamHandler) *CreateTe
 	return &CreateTeam{Context: ctx, Handler: handler}
 }
 
-/* CreateTeam swagger:route POST /teams team createTeam
+/*
+	CreateTeam swagger:route POST /teams team createTeam
 
 Create a new team
-
 */
 type CreateTeam struct {
 	Context *middleware.Context

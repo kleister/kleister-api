@@ -31,10 +31,10 @@ func NewListForges(ctx *middleware.Context, handler ListForgesHandler) *ListForg
 	return &ListForges{Context: ctx, Handler: handler}
 }
 
-/* ListForges swagger:route GET /forge forge listForges
+/*
+	ListForges swagger:route GET /forge forge listForges
 
 Fetch the available Forge versions
-
 */
 type ListForges struct {
 	Context *middleware.Context
