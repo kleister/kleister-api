@@ -31,10 +31,10 @@ func NewListBuilds(ctx *middleware.Context, handler ListBuildsHandler) *ListBuil
 	return &ListBuilds{Context: ctx, Handler: handler}
 }
 
-/*
-	ListBuilds swagger:route GET /packs/{pack_id}/builds pack listBuilds
+/* ListBuilds swagger:route GET /packs/{pack_id}/builds pack listBuilds
 
 Fetch all available builds for a pack
+
 */
 type ListBuilds struct {
 	Context *middleware.Context

@@ -31,10 +31,10 @@ func NewUpdateTeam(ctx *middleware.Context, handler UpdateTeamHandler) *UpdateTe
 	return &UpdateTeam{Context: ctx, Handler: handler}
 }
 
-/*
-	UpdateTeam swagger:route PUT /teams/{team_id} team updateTeam
+/* UpdateTeam swagger:route PUT /teams/{team_id} team updateTeam
 
 Update a specific team
+
 */
 type UpdateTeam struct {
 	Context *middleware.Context

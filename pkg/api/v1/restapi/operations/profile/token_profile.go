@@ -31,10 +31,10 @@ func NewTokenProfile(ctx *middleware.Context, handler TokenProfileHandler) *Toke
 	return &TokenProfile{Context: ctx, Handler: handler}
 }
 
-/*
-	TokenProfile swagger:route GET /profile/token profile tokenProfile
+/* TokenProfile swagger:route GET /profile/token profile tokenProfile
 
 Retrieve an unlimited auth token
+
 */
 type TokenProfile struct {
 	Context *middleware.Context

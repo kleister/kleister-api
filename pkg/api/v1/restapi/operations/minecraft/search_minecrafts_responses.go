@@ -16,8 +16,7 @@ import (
 // SearchMinecraftsOKCode is the HTTP code returned for type SearchMinecraftsOK
 const SearchMinecraftsOKCode int = 200
 
-/*
-SearchMinecraftsOK A collection of Minecraft versions
+/*SearchMinecraftsOK A collection of Minecraft versions
 
 swagger:response searchMinecraftsOK
 */
@@ -64,8 +63,7 @@ func (o *SearchMinecraftsOK) WriteResponse(rw http.ResponseWriter, producer runt
 // SearchMinecraftsForbiddenCode is the HTTP code returned for type SearchMinecraftsForbidden
 const SearchMinecraftsForbiddenCode int = 403
 
-/*
-SearchMinecraftsForbidden User is not authorized
+/*SearchMinecraftsForbidden User is not authorized
 
 swagger:response searchMinecraftsForbidden
 */
@@ -106,8 +104,7 @@ func (o *SearchMinecraftsForbidden) WriteResponse(rw http.ResponseWriter, produc
 	}
 }
 
-/*
-SearchMinecraftsDefault Some error unrelated to the handler
+/*SearchMinecraftsDefault Some error unrelated to the handler
 
 swagger:response searchMinecraftsDefault
 */

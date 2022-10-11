@@ -31,10 +31,10 @@ func NewDeleteMod(ctx *middleware.Context, handler DeleteModHandler) *DeleteMod 
 	return &DeleteMod{Context: ctx, Handler: handler}
 }
 
-/*
-	DeleteMod swagger:route DELETE /mods/{mod_id} mod deleteMod
+/* DeleteMod swagger:route DELETE /mods/{mod_id} mod deleteMod
 
 Delete a specific mod
+
 */
 type DeleteMod struct {
 	Context *middleware.Context

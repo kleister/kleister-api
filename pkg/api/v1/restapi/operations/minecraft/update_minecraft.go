@@ -31,10 +31,10 @@ func NewUpdateMinecraft(ctx *middleware.Context, handler UpdateMinecraftHandler)
 	return &UpdateMinecraft{Context: ctx, Handler: handler}
 }
 
-/*
-	UpdateMinecraft swagger:route PUT /minecraft minecraft updateMinecraft
+/* UpdateMinecraft swagger:route PUT /minecraft minecraft updateMinecraft
 
 Update the available Minecraft versions
+
 */
 type UpdateMinecraft struct {
 	Context *middleware.Context

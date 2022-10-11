@@ -16,8 +16,7 @@ import (
 // AppendForgeToBuildOKCode is the HTTP code returned for type AppendForgeToBuildOK
 const AppendForgeToBuildOKCode int = 200
 
-/*
-AppendForgeToBuildOK A collection of assigned builds
+/*AppendForgeToBuildOK A collection of assigned builds
 
 swagger:response appendForgeToBuildOK
 */
@@ -64,8 +63,7 @@ func (o *AppendForgeToBuildOK) WriteResponse(rw http.ResponseWriter, producer ru
 // AppendForgeToBuildForbiddenCode is the HTTP code returned for type AppendForgeToBuildForbidden
 const AppendForgeToBuildForbiddenCode int = 403
 
-/*
-AppendForgeToBuildForbidden User is not authorized
+/*AppendForgeToBuildForbidden User is not authorized
 
 swagger:response appendForgeToBuildForbidden
 */
@@ -109,8 +107,7 @@ func (o *AppendForgeToBuildForbidden) WriteResponse(rw http.ResponseWriter, prod
 // AppendForgeToBuildNotFoundCode is the HTTP code returned for type AppendForgeToBuildNotFound
 const AppendForgeToBuildNotFoundCode int = 404
 
-/*
-AppendForgeToBuildNotFound Forge or build not found
+/*AppendForgeToBuildNotFound Forge or build not found
 
 swagger:response appendForgeToBuildNotFound
 */
@@ -154,8 +151,7 @@ func (o *AppendForgeToBuildNotFound) WriteResponse(rw http.ResponseWriter, produ
 // AppendForgeToBuildPreconditionFailedCode is the HTTP code returned for type AppendForgeToBuildPreconditionFailed
 const AppendForgeToBuildPreconditionFailedCode int = 412
 
-/*
-AppendForgeToBuildPreconditionFailed Build is already assigned
+/*AppendForgeToBuildPreconditionFailed Build is already assigned
 
 swagger:response appendForgeToBuildPreconditionFailed
 */
@@ -199,8 +195,7 @@ func (o *AppendForgeToBuildPreconditionFailed) WriteResponse(rw http.ResponseWri
 // AppendForgeToBuildUnprocessableEntityCode is the HTTP code returned for type AppendForgeToBuildUnprocessableEntity
 const AppendForgeToBuildUnprocessableEntityCode int = 422
 
-/*
-AppendForgeToBuildUnprocessableEntity Failed to validate request
+/*AppendForgeToBuildUnprocessableEntity Failed to validate request
 
 swagger:response appendForgeToBuildUnprocessableEntity
 */
@@ -241,8 +236,7 @@ func (o *AppendForgeToBuildUnprocessableEntity) WriteResponse(rw http.ResponseWr
 	}
 }
 
-/*
-AppendForgeToBuildDefault Some error unrelated to the handler
+/*AppendForgeToBuildDefault Some error unrelated to the handler
 
 swagger:response appendForgeToBuildDefault
 */

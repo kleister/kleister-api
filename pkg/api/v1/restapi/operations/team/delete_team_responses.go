@@ -16,8 +16,7 @@ import (
 // DeleteTeamOKCode is the HTTP code returned for type DeleteTeamOK
 const DeleteTeamOKCode int = 200
 
-/*
-DeleteTeamOK Plain success message
+/*DeleteTeamOK Plain success message
 
 swagger:response deleteTeamOK
 */
@@ -61,8 +60,7 @@ func (o *DeleteTeamOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // DeleteTeamBadRequestCode is the HTTP code returned for type DeleteTeamBadRequest
 const DeleteTeamBadRequestCode int = 400
 
-/*
-DeleteTeamBadRequest Failed to delete the team
+/*DeleteTeamBadRequest Failed to delete the team
 
 swagger:response deleteTeamBadRequest
 */
@@ -106,8 +104,7 @@ func (o *DeleteTeamBadRequest) WriteResponse(rw http.ResponseWriter, producer ru
 // DeleteTeamForbiddenCode is the HTTP code returned for type DeleteTeamForbidden
 const DeleteTeamForbiddenCode int = 403
 
-/*
-DeleteTeamForbidden User is not authorized
+/*DeleteTeamForbidden User is not authorized
 
 swagger:response deleteTeamForbidden
 */
@@ -151,8 +148,7 @@ func (o *DeleteTeamForbidden) WriteResponse(rw http.ResponseWriter, producer run
 // DeleteTeamNotFoundCode is the HTTP code returned for type DeleteTeamNotFound
 const DeleteTeamNotFoundCode int = 404
 
-/*
-DeleteTeamNotFound Team not found
+/*DeleteTeamNotFound Team not found
 
 swagger:response deleteTeamNotFound
 */
@@ -193,8 +189,7 @@ func (o *DeleteTeamNotFound) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
-/*
-DeleteTeamDefault Some error unrelated to the handler
+/*DeleteTeamDefault Some error unrelated to the handler
 
 swagger:response deleteTeamDefault
 */

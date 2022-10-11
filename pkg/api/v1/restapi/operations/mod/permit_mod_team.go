@@ -31,10 +31,10 @@ func NewPermitModTeam(ctx *middleware.Context, handler PermitModTeamHandler) *Pe
 	return &PermitModTeam{Context: ctx, Handler: handler}
 }
 
-/*
-	PermitModTeam swagger:route PUT /mods/{mod_id}/teams mod permitModTeam
+/* PermitModTeam swagger:route PUT /mods/{mod_id}/teams mod permitModTeam
 
 Update team perms for mod
+
 */
 type PermitModTeam struct {
 	Context *middleware.Context

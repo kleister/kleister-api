@@ -16,8 +16,7 @@ import (
 // ListTeamsOKCode is the HTTP code returned for type ListTeamsOK
 const ListTeamsOKCode int = 200
 
-/*
-ListTeamsOK A collection of teams
+/*ListTeamsOK A collection of teams
 
 swagger:response listTeamsOK
 */
@@ -64,8 +63,7 @@ func (o *ListTeamsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pro
 // ListTeamsForbiddenCode is the HTTP code returned for type ListTeamsForbidden
 const ListTeamsForbiddenCode int = 403
 
-/*
-ListTeamsForbidden User is not authorized
+/*ListTeamsForbidden User is not authorized
 
 swagger:response listTeamsForbidden
 */
@@ -106,8 +104,7 @@ func (o *ListTeamsForbidden) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
-/*
-ListTeamsDefault Some error unrelated to the handler
+/*ListTeamsDefault Some error unrelated to the handler
 
 swagger:response listTeamsDefault
 */

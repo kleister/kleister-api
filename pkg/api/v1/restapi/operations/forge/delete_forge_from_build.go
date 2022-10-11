@@ -31,10 +31,10 @@ func NewDeleteForgeFromBuild(ctx *middleware.Context, handler DeleteForgeFromBui
 	return &DeleteForgeFromBuild{Context: ctx, Handler: handler}
 }
 
-/*
-	DeleteForgeFromBuild swagger:route DELETE /forge/{forge_id}/builds forge deleteForgeFromBuild
+/* DeleteForgeFromBuild swagger:route DELETE /forge/{forge_id}/builds forge deleteForgeFromBuild
 
 Unlink a build from a Forge version
+
 */
 type DeleteForgeFromBuild struct {
 	Context *middleware.Context

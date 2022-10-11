@@ -16,8 +16,7 @@ import (
 // PermitPackUserOKCode is the HTTP code returned for type PermitPackUserOK
 const PermitPackUserOKCode int = 200
 
-/*
-PermitPackUserOK Plain success message
+/*PermitPackUserOK Plain success message
 
 swagger:response permitPackUserOK
 */
@@ -61,8 +60,7 @@ func (o *PermitPackUserOK) WriteResponse(rw http.ResponseWriter, producer runtim
 // PermitPackUserForbiddenCode is the HTTP code returned for type PermitPackUserForbidden
 const PermitPackUserForbiddenCode int = 403
 
-/*
-PermitPackUserForbidden User is not authorized
+/*PermitPackUserForbidden User is not authorized
 
 swagger:response permitPackUserForbidden
 */
@@ -106,8 +104,7 @@ func (o *PermitPackUserForbidden) WriteResponse(rw http.ResponseWriter, producer
 // PermitPackUserNotFoundCode is the HTTP code returned for type PermitPackUserNotFound
 const PermitPackUserNotFoundCode int = 404
 
-/*
-PermitPackUserNotFound Pack or user not found
+/*PermitPackUserNotFound Pack or user not found
 
 swagger:response permitPackUserNotFound
 */
@@ -151,8 +148,7 @@ func (o *PermitPackUserNotFound) WriteResponse(rw http.ResponseWriter, producer 
 // PermitPackUserPreconditionFailedCode is the HTTP code returned for type PermitPackUserPreconditionFailed
 const PermitPackUserPreconditionFailedCode int = 412
 
-/*
-PermitPackUserPreconditionFailed User is not assigned
+/*PermitPackUserPreconditionFailed User is not assigned
 
 swagger:response permitPackUserPreconditionFailed
 */
@@ -196,8 +192,7 @@ func (o *PermitPackUserPreconditionFailed) WriteResponse(rw http.ResponseWriter,
 // PermitPackUserUnprocessableEntityCode is the HTTP code returned for type PermitPackUserUnprocessableEntity
 const PermitPackUserUnprocessableEntityCode int = 422
 
-/*
-PermitPackUserUnprocessableEntity Failed to validate request
+/*PermitPackUserUnprocessableEntity Failed to validate request
 
 swagger:response permitPackUserUnprocessableEntity
 */
@@ -238,8 +233,7 @@ func (o *PermitPackUserUnprocessableEntity) WriteResponse(rw http.ResponseWriter
 	}
 }
 
-/*
-PermitPackUserDefault Some error unrelated to the handler
+/*PermitPackUserDefault Some error unrelated to the handler
 
 swagger:response permitPackUserDefault
 */

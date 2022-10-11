@@ -31,10 +31,10 @@ func NewSearchForges(ctx *middleware.Context, handler SearchForgesHandler) *Sear
 	return &SearchForges{Context: ctx, Handler: handler}
 }
 
-/*
-	SearchForges swagger:route GET /forge/{forge_id} forge searchForges
+/* SearchForges swagger:route GET /forge/{forge_id} forge searchForges
 
 Search for available Forge versions
+
 */
 type SearchForges struct {
 	Context *middleware.Context

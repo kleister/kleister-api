@@ -16,8 +16,7 @@ import (
 // DeleteUserFromPackOKCode is the HTTP code returned for type DeleteUserFromPackOK
 const DeleteUserFromPackOKCode int = 200
 
-/*
-DeleteUserFromPackOK Plain success message
+/*DeleteUserFromPackOK Plain success message
 
 swagger:response deleteUserFromPackOK
 */
@@ -61,8 +60,7 @@ func (o *DeleteUserFromPackOK) WriteResponse(rw http.ResponseWriter, producer ru
 // DeleteUserFromPackForbiddenCode is the HTTP code returned for type DeleteUserFromPackForbidden
 const DeleteUserFromPackForbiddenCode int = 403
 
-/*
-DeleteUserFromPackForbidden User is not authorized
+/*DeleteUserFromPackForbidden User is not authorized
 
 swagger:response deleteUserFromPackForbidden
 */
@@ -106,8 +104,7 @@ func (o *DeleteUserFromPackForbidden) WriteResponse(rw http.ResponseWriter, prod
 // DeleteUserFromPackNotFoundCode is the HTTP code returned for type DeleteUserFromPackNotFound
 const DeleteUserFromPackNotFoundCode int = 404
 
-/*
-DeleteUserFromPackNotFound User or pack not found
+/*DeleteUserFromPackNotFound User or pack not found
 
 swagger:response deleteUserFromPackNotFound
 */
@@ -151,8 +148,7 @@ func (o *DeleteUserFromPackNotFound) WriteResponse(rw http.ResponseWriter, produ
 // DeleteUserFromPackPreconditionFailedCode is the HTTP code returned for type DeleteUserFromPackPreconditionFailed
 const DeleteUserFromPackPreconditionFailedCode int = 412
 
-/*
-DeleteUserFromPackPreconditionFailed Pack is not assigned
+/*DeleteUserFromPackPreconditionFailed Pack is not assigned
 
 swagger:response deleteUserFromPackPreconditionFailed
 */
@@ -193,8 +189,7 @@ func (o *DeleteUserFromPackPreconditionFailed) WriteResponse(rw http.ResponseWri
 	}
 }
 
-/*
-DeleteUserFromPackDefault Some error unrelated to the handler
+/*DeleteUserFromPackDefault Some error unrelated to the handler
 
 swagger:response deleteUserFromPackDefault
 */

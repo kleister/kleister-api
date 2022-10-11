@@ -16,8 +16,7 @@ import (
 // AppendUserToTeamOKCode is the HTTP code returned for type AppendUserToTeamOK
 const AppendUserToTeamOKCode int = 200
 
-/*
-AppendUserToTeamOK Plain success message
+/*AppendUserToTeamOK Plain success message
 
 swagger:response appendUserToTeamOK
 */
@@ -61,8 +60,7 @@ func (o *AppendUserToTeamOK) WriteResponse(rw http.ResponseWriter, producer runt
 // AppendUserToTeamForbiddenCode is the HTTP code returned for type AppendUserToTeamForbidden
 const AppendUserToTeamForbiddenCode int = 403
 
-/*
-AppendUserToTeamForbidden User is not authorized
+/*AppendUserToTeamForbidden User is not authorized
 
 swagger:response appendUserToTeamForbidden
 */
@@ -106,8 +104,7 @@ func (o *AppendUserToTeamForbidden) WriteResponse(rw http.ResponseWriter, produc
 // AppendUserToTeamNotFoundCode is the HTTP code returned for type AppendUserToTeamNotFound
 const AppendUserToTeamNotFoundCode int = 404
 
-/*
-AppendUserToTeamNotFound User or team not found
+/*AppendUserToTeamNotFound User or team not found
 
 swagger:response appendUserToTeamNotFound
 */
@@ -151,8 +148,7 @@ func (o *AppendUserToTeamNotFound) WriteResponse(rw http.ResponseWriter, produce
 // AppendUserToTeamPreconditionFailedCode is the HTTP code returned for type AppendUserToTeamPreconditionFailed
 const AppendUserToTeamPreconditionFailedCode int = 412
 
-/*
-AppendUserToTeamPreconditionFailed Team is already assigned
+/*AppendUserToTeamPreconditionFailed Team is already assigned
 
 swagger:response appendUserToTeamPreconditionFailed
 */
@@ -196,8 +192,7 @@ func (o *AppendUserToTeamPreconditionFailed) WriteResponse(rw http.ResponseWrite
 // AppendUserToTeamUnprocessableEntityCode is the HTTP code returned for type AppendUserToTeamUnprocessableEntity
 const AppendUserToTeamUnprocessableEntityCode int = 422
 
-/*
-AppendUserToTeamUnprocessableEntity Failed to validate request
+/*AppendUserToTeamUnprocessableEntity Failed to validate request
 
 swagger:response appendUserToTeamUnprocessableEntity
 */
@@ -238,8 +233,7 @@ func (o *AppendUserToTeamUnprocessableEntity) WriteResponse(rw http.ResponseWrit
 	}
 }
 
-/*
-AppendUserToTeamDefault Some error unrelated to the handler
+/*AppendUserToTeamDefault Some error unrelated to the handler
 
 swagger:response appendUserToTeamDefault
 */

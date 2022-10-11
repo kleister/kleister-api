@@ -31,10 +31,10 @@ func NewCreateMod(ctx *middleware.Context, handler CreateModHandler) *CreateMod 
 	return &CreateMod{Context: ctx, Handler: handler}
 }
 
-/*
-	CreateMod swagger:route POST /mods mod createMod
+/* CreateMod swagger:route POST /mods mod createMod
 
 Create a new mod
+
 */
 type CreateMod struct {
 	Context *middleware.Context

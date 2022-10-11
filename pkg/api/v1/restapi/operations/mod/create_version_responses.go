@@ -16,8 +16,7 @@ import (
 // CreateVersionOKCode is the HTTP code returned for type CreateVersionOK
 const CreateVersionOKCode int = 200
 
-/*
-CreateVersionOK The created version data
+/*CreateVersionOK The created version data
 
 swagger:response createVersionOK
 */
@@ -61,8 +60,7 @@ func (o *CreateVersionOK) WriteResponse(rw http.ResponseWriter, producer runtime
 // CreateVersionForbiddenCode is the HTTP code returned for type CreateVersionForbidden
 const CreateVersionForbiddenCode int = 403
 
-/*
-CreateVersionForbidden User is not authorized
+/*CreateVersionForbidden User is not authorized
 
 swagger:response createVersionForbidden
 */
@@ -106,8 +104,7 @@ func (o *CreateVersionForbidden) WriteResponse(rw http.ResponseWriter, producer 
 // CreateVersionNotFoundCode is the HTTP code returned for type CreateVersionNotFound
 const CreateVersionNotFoundCode int = 404
 
-/*
-CreateVersionNotFound Mod not found
+/*CreateVersionNotFound Mod not found
 
 swagger:response createVersionNotFound
 */
@@ -151,8 +148,7 @@ func (o *CreateVersionNotFound) WriteResponse(rw http.ResponseWriter, producer r
 // CreateVersionUnprocessableEntityCode is the HTTP code returned for type CreateVersionUnprocessableEntity
 const CreateVersionUnprocessableEntityCode int = 422
 
-/*
-CreateVersionUnprocessableEntity Failed to validate request
+/*CreateVersionUnprocessableEntity Failed to validate request
 
 swagger:response createVersionUnprocessableEntity
 */
@@ -193,8 +189,7 @@ func (o *CreateVersionUnprocessableEntity) WriteResponse(rw http.ResponseWriter,
 	}
 }
 
-/*
-CreateVersionDefault Some error unrelated to the handler
+/*CreateVersionDefault Some error unrelated to the handler
 
 swagger:response createVersionDefault
 */

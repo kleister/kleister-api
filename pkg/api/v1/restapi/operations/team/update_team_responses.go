@@ -16,8 +16,7 @@ import (
 // UpdateTeamOKCode is the HTTP code returned for type UpdateTeamOK
 const UpdateTeamOKCode int = 200
 
-/*
-UpdateTeamOK The updated team details
+/*UpdateTeamOK The updated team details
 
 swagger:response updateTeamOK
 */
@@ -61,8 +60,7 @@ func (o *UpdateTeamOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 // UpdateTeamForbiddenCode is the HTTP code returned for type UpdateTeamForbidden
 const UpdateTeamForbiddenCode int = 403
 
-/*
-UpdateTeamForbidden User is not authorized
+/*UpdateTeamForbidden User is not authorized
 
 swagger:response updateTeamForbidden
 */
@@ -106,8 +104,7 @@ func (o *UpdateTeamForbidden) WriteResponse(rw http.ResponseWriter, producer run
 // UpdateTeamNotFoundCode is the HTTP code returned for type UpdateTeamNotFound
 const UpdateTeamNotFoundCode int = 404
 
-/*
-UpdateTeamNotFound Team not found
+/*UpdateTeamNotFound Team not found
 
 swagger:response updateTeamNotFound
 */
@@ -151,8 +148,7 @@ func (o *UpdateTeamNotFound) WriteResponse(rw http.ResponseWriter, producer runt
 // UpdateTeamUnprocessableEntityCode is the HTTP code returned for type UpdateTeamUnprocessableEntity
 const UpdateTeamUnprocessableEntityCode int = 422
 
-/*
-UpdateTeamUnprocessableEntity Failed to validate request
+/*UpdateTeamUnprocessableEntity Failed to validate request
 
 swagger:response updateTeamUnprocessableEntity
 */
@@ -193,8 +189,7 @@ func (o *UpdateTeamUnprocessableEntity) WriteResponse(rw http.ResponseWriter, pr
 	}
 }
 
-/*
-UpdateTeamDefault Some error unrelated to the handler
+/*UpdateTeamDefault Some error unrelated to the handler
 
 swagger:response updateTeamDefault
 */

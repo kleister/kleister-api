@@ -31,10 +31,10 @@ func NewVerifyAuth(ctx *middleware.Context, handler VerifyAuthHandler) *VerifyAu
 	return &VerifyAuth{Context: ctx, Handler: handler}
 }
 
-/*
-	VerifyAuth swagger:route GET /auth/verify auth verifyAuth
+/* VerifyAuth swagger:route GET /auth/verify auth verifyAuth
 
 Verify validity for an authentication token
+
 */
 type VerifyAuth struct {
 	Context *middleware.Context

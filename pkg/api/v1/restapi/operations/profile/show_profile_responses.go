@@ -16,8 +16,7 @@ import (
 // ShowProfileOKCode is the HTTP code returned for type ShowProfileOK
 const ShowProfileOKCode int = 200
 
-/*
-ShowProfileOK The current profile data
+/*ShowProfileOK The current profile data
 
 swagger:response showProfileOK
 */
@@ -61,8 +60,7 @@ func (o *ShowProfileOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 // ShowProfileForbiddenCode is the HTTP code returned for type ShowProfileForbidden
 const ShowProfileForbiddenCode int = 403
 
-/*
-ShowProfileForbidden User is not authorized
+/*ShowProfileForbidden User is not authorized
 
 swagger:response showProfileForbidden
 */
@@ -103,8 +101,7 @@ func (o *ShowProfileForbidden) WriteResponse(rw http.ResponseWriter, producer ru
 	}
 }
 
-/*
-ShowProfileDefault Some error unrelated to the handler
+/*ShowProfileDefault Some error unrelated to the handler
 
 swagger:response showProfileDefault
 */

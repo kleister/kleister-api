@@ -16,8 +16,7 @@ import (
 // PermitTeamModOKCode is the HTTP code returned for type PermitTeamModOK
 const PermitTeamModOKCode int = 200
 
-/*
-PermitTeamModOK Plain success message
+/*PermitTeamModOK Plain success message
 
 swagger:response permitTeamModOK
 */
@@ -61,8 +60,7 @@ func (o *PermitTeamModOK) WriteResponse(rw http.ResponseWriter, producer runtime
 // PermitTeamModForbiddenCode is the HTTP code returned for type PermitTeamModForbidden
 const PermitTeamModForbiddenCode int = 403
 
-/*
-PermitTeamModForbidden User is not authorized
+/*PermitTeamModForbidden User is not authorized
 
 swagger:response permitTeamModForbidden
 */
@@ -106,8 +104,7 @@ func (o *PermitTeamModForbidden) WriteResponse(rw http.ResponseWriter, producer 
 // PermitTeamModNotFoundCode is the HTTP code returned for type PermitTeamModNotFound
 const PermitTeamModNotFoundCode int = 404
 
-/*
-PermitTeamModNotFound Team or user not found
+/*PermitTeamModNotFound Team or user not found
 
 swagger:response permitTeamModNotFound
 */
@@ -151,8 +148,7 @@ func (o *PermitTeamModNotFound) WriteResponse(rw http.ResponseWriter, producer r
 // PermitTeamModPreconditionFailedCode is the HTTP code returned for type PermitTeamModPreconditionFailed
 const PermitTeamModPreconditionFailedCode int = 412
 
-/*
-PermitTeamModPreconditionFailed Mod is not assigned
+/*PermitTeamModPreconditionFailed Mod is not assigned
 
 swagger:response permitTeamModPreconditionFailed
 */
@@ -196,8 +192,7 @@ func (o *PermitTeamModPreconditionFailed) WriteResponse(rw http.ResponseWriter, 
 // PermitTeamModUnprocessableEntityCode is the HTTP code returned for type PermitTeamModUnprocessableEntity
 const PermitTeamModUnprocessableEntityCode int = 422
 
-/*
-PermitTeamModUnprocessableEntity Failed to validate request
+/*PermitTeamModUnprocessableEntity Failed to validate request
 
 swagger:response permitTeamModUnprocessableEntity
 */
@@ -238,8 +233,7 @@ func (o *PermitTeamModUnprocessableEntity) WriteResponse(rw http.ResponseWriter,
 	}
 }
 
-/*
-PermitTeamModDefault Some error unrelated to the handler
+/*PermitTeamModDefault Some error unrelated to the handler
 
 swagger:response permitTeamModDefault
 */

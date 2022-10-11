@@ -31,10 +31,10 @@ func NewDeleteVersion(ctx *middleware.Context, handler DeleteVersionHandler) *De
 	return &DeleteVersion{Context: ctx, Handler: handler}
 }
 
-/*
-	DeleteVersion swagger:route DELETE /mods/{mod_id}/versions/{version_id} mod deleteVersion
+/* DeleteVersion swagger:route DELETE /mods/{mod_id}/versions/{version_id} mod deleteVersion
 
 Delete a specific version for a mod
+
 */
 type DeleteVersion struct {
 	Context *middleware.Context

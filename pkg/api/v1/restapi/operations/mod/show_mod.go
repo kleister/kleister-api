@@ -31,10 +31,10 @@ func NewShowMod(ctx *middleware.Context, handler ShowModHandler) *ShowMod {
 	return &ShowMod{Context: ctx, Handler: handler}
 }
 
-/*
-	ShowMod swagger:route GET /mods/{mod_id} mod showMod
+/* ShowMod swagger:route GET /mods/{mod_id} mod showMod
 
 Fetch a specific mod
+
 */
 type ShowMod struct {
 	Context *middleware.Context

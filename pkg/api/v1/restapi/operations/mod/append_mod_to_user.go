@@ -31,10 +31,10 @@ func NewAppendModToUser(ctx *middleware.Context, handler AppendModToUserHandler)
 	return &AppendModToUser{Context: ctx, Handler: handler}
 }
 
-/*
-	AppendModToUser swagger:route POST /mods/{mod_id}/users mod appendModToUser
+/* AppendModToUser swagger:route POST /mods/{mod_id}/users mod appendModToUser
 
 Assign a user to mod
+
 */
 type AppendModToUser struct {
 	Context *middleware.Context

@@ -16,8 +16,7 @@ import (
 // ListVersionBuildsOKCode is the HTTP code returned for type ListVersionBuildsOK
 const ListVersionBuildsOKCode int = 200
 
-/*
-ListVersionBuildsOK A collection of version builds
+/*ListVersionBuildsOK A collection of version builds
 
 swagger:response listVersionBuildsOK
 */
@@ -64,8 +63,7 @@ func (o *ListVersionBuildsOK) WriteResponse(rw http.ResponseWriter, producer run
 // ListVersionBuildsForbiddenCode is the HTTP code returned for type ListVersionBuildsForbidden
 const ListVersionBuildsForbiddenCode int = 403
 
-/*
-ListVersionBuildsForbidden User is not authorized
+/*ListVersionBuildsForbidden User is not authorized
 
 swagger:response listVersionBuildsForbidden
 */
@@ -109,8 +107,7 @@ func (o *ListVersionBuildsForbidden) WriteResponse(rw http.ResponseWriter, produ
 // ListVersionBuildsNotFoundCode is the HTTP code returned for type ListVersionBuildsNotFound
 const ListVersionBuildsNotFoundCode int = 404
 
-/*
-ListVersionBuildsNotFound Version or mod not found
+/*ListVersionBuildsNotFound Version or mod not found
 
 swagger:response listVersionBuildsNotFound
 */
@@ -151,8 +148,7 @@ func (o *ListVersionBuildsNotFound) WriteResponse(rw http.ResponseWriter, produc
 	}
 }
 
-/*
-ListVersionBuildsDefault Some error unrelated to the handler
+/*ListVersionBuildsDefault Some error unrelated to the handler
 
 swagger:response listVersionBuildsDefault
 */

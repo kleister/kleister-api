@@ -16,8 +16,7 @@ import (
 // ListForgeBuildsOKCode is the HTTP code returned for type ListForgeBuildsOK
 const ListForgeBuildsOKCode int = 200
 
-/*
-ListForgeBuildsOK A collection of assigned builds
+/*ListForgeBuildsOK A collection of assigned builds
 
 swagger:response listForgeBuildsOK
 */
@@ -64,8 +63,7 @@ func (o *ListForgeBuildsOK) WriteResponse(rw http.ResponseWriter, producer runti
 // ListForgeBuildsForbiddenCode is the HTTP code returned for type ListForgeBuildsForbidden
 const ListForgeBuildsForbiddenCode int = 403
 
-/*
-ListForgeBuildsForbidden User is not authorized
+/*ListForgeBuildsForbidden User is not authorized
 
 swagger:response listForgeBuildsForbidden
 */
@@ -109,8 +107,7 @@ func (o *ListForgeBuildsForbidden) WriteResponse(rw http.ResponseWriter, produce
 // ListForgeBuildsNotFoundCode is the HTTP code returned for type ListForgeBuildsNotFound
 const ListForgeBuildsNotFoundCode int = 404
 
-/*
-ListForgeBuildsNotFound Forge not found
+/*ListForgeBuildsNotFound Forge not found
 
 swagger:response listForgeBuildsNotFound
 */
@@ -151,8 +148,7 @@ func (o *ListForgeBuildsNotFound) WriteResponse(rw http.ResponseWriter, producer
 	}
 }
 
-/*
-ListForgeBuildsDefault Some error unrelated to the handler
+/*ListForgeBuildsDefault Some error unrelated to the handler
 
 swagger:response listForgeBuildsDefault
 */

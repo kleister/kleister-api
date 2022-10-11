@@ -16,8 +16,7 @@ import (
 // TokenProfileOKCode is the HTTP code returned for type TokenProfileOK
 const TokenProfileOKCode int = 200
 
-/*
-TokenProfileOK The unlimited auth token
+/*TokenProfileOK The unlimited auth token
 
 swagger:response tokenProfileOK
 */
@@ -61,8 +60,7 @@ func (o *TokenProfileOK) WriteResponse(rw http.ResponseWriter, producer runtime.
 // TokenProfileForbiddenCode is the HTTP code returned for type TokenProfileForbidden
 const TokenProfileForbiddenCode int = 403
 
-/*
-TokenProfileForbidden User is not authorized
+/*TokenProfileForbidden User is not authorized
 
 swagger:response tokenProfileForbidden
 */
@@ -106,8 +104,7 @@ func (o *TokenProfileForbidden) WriteResponse(rw http.ResponseWriter, producer r
 // TokenProfileInternalServerErrorCode is the HTTP code returned for type TokenProfileInternalServerError
 const TokenProfileInternalServerErrorCode int = 500
 
-/*
-TokenProfileInternalServerError Failed to generate a token
+/*TokenProfileInternalServerError Failed to generate a token
 
 swagger:response tokenProfileInternalServerError
 */
@@ -148,8 +145,7 @@ func (o *TokenProfileInternalServerError) WriteResponse(rw http.ResponseWriter, 
 	}
 }
 
-/*
-TokenProfileDefault Some error unrelated to the handler
+/*TokenProfileDefault Some error unrelated to the handler
 
 swagger:response tokenProfileDefault
 */

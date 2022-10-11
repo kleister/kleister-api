@@ -31,10 +31,10 @@ func NewUpdatePack(ctx *middleware.Context, handler UpdatePackHandler) *UpdatePa
 	return &UpdatePack{Context: ctx, Handler: handler}
 }
 
-/*
-	UpdatePack swagger:route PUT /packs/{pack_id} pack updatePack
+/* UpdatePack swagger:route PUT /packs/{pack_id} pack updatePack
 
 Update a specific pack
+
 */
 type UpdatePack struct {
 	Context *middleware.Context

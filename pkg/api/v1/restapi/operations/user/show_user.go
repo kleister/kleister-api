@@ -31,10 +31,10 @@ func NewShowUser(ctx *middleware.Context, handler ShowUserHandler) *ShowUser {
 	return &ShowUser{Context: ctx, Handler: handler}
 }
 
-/*
-	ShowUser swagger:route GET /users/{user_id} user showUser
+/* ShowUser swagger:route GET /users/{user_id} user showUser
 
 Fetch a specific user
+
 */
 type ShowUser struct {
 	Context *middleware.Context

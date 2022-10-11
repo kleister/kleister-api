@@ -31,10 +31,10 @@ func NewShowBuild(ctx *middleware.Context, handler ShowBuildHandler) *ShowBuild 
 	return &ShowBuild{Context: ctx, Handler: handler}
 }
 
-/*
-	ShowBuild swagger:route GET /packs/{pack_id}/builds/{build_id} pack showBuild
+/* ShowBuild swagger:route GET /packs/{pack_id}/builds/{build_id} pack showBuild
 
 Fetch a specific build for a pack
+
 */
 type ShowBuild struct {
 	Context *middleware.Context

@@ -16,8 +16,7 @@ import (
 // RefreshAuthOKCode is the HTTP code returned for type RefreshAuthOK
 const RefreshAuthOKCode int = 200
 
-/*
-RefreshAuthOK A refreshed token with expire
+/*RefreshAuthOK A refreshed token with expire
 
 swagger:response refreshAuthOK
 */
@@ -61,8 +60,7 @@ func (o *RefreshAuthOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 // RefreshAuthUnauthorizedCode is the HTTP code returned for type RefreshAuthUnauthorized
 const RefreshAuthUnauthorizedCode int = 401
 
-/*
-RefreshAuthUnauthorized Unauthorized if failed to generate
+/*RefreshAuthUnauthorized Unauthorized if failed to generate
 
 swagger:response refreshAuthUnauthorized
 */
@@ -103,8 +101,7 @@ func (o *RefreshAuthUnauthorized) WriteResponse(rw http.ResponseWriter, producer
 	}
 }
 
-/*
-RefreshAuthDefault Some error unrelated to the handler
+/*RefreshAuthDefault Some error unrelated to the handler
 
 swagger:response refreshAuthDefault
 */

@@ -31,10 +31,10 @@ func NewListBuildVersions(ctx *middleware.Context, handler ListBuildVersionsHand
 	return &ListBuildVersions{Context: ctx, Handler: handler}
 }
 
-/*
-	ListBuildVersions swagger:route GET /packs/{pack_id}/builds/{build_id}/versions pack listBuildVersions
+/* ListBuildVersions swagger:route GET /packs/{pack_id}/builds/{build_id}/versions pack listBuildVersions
 
 Fetch all versions assigned to build
+
 */
 type ListBuildVersions struct {
 	Context *middleware.Context

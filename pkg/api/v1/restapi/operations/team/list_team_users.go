@@ -31,10 +31,10 @@ func NewListTeamUsers(ctx *middleware.Context, handler ListTeamUsersHandler) *Li
 	return &ListTeamUsers{Context: ctx, Handler: handler}
 }
 
-/*
-	ListTeamUsers swagger:route GET /teams/{team_id}/users team listTeamUsers
+/* ListTeamUsers swagger:route GET /teams/{team_id}/users team listTeamUsers
 
 Fetch all users assigned to team
+
 */
 type ListTeamUsers struct {
 	Context *middleware.Context

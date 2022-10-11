@@ -16,8 +16,7 @@ import (
 // SearchForgesOKCode is the HTTP code returned for type SearchForgesOK
 const SearchForgesOKCode int = 200
 
-/*
-SearchForgesOK A collection of Forge versions
+/*SearchForgesOK A collection of Forge versions
 
 swagger:response searchForgesOK
 */
@@ -64,8 +63,7 @@ func (o *SearchForgesOK) WriteResponse(rw http.ResponseWriter, producer runtime.
 // SearchForgesForbiddenCode is the HTTP code returned for type SearchForgesForbidden
 const SearchForgesForbiddenCode int = 403
 
-/*
-SearchForgesForbidden User is not authorized
+/*SearchForgesForbidden User is not authorized
 
 swagger:response searchForgesForbidden
 */
@@ -106,8 +104,7 @@ func (o *SearchForgesForbidden) WriteResponse(rw http.ResponseWriter, producer r
 	}
 }
 
-/*
-SearchForgesDefault Some error unrelated to the handler
+/*SearchForgesDefault Some error unrelated to the handler
 
 swagger:response searchForgesDefault
 */

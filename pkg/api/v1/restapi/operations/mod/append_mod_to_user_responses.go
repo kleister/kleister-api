@@ -16,8 +16,7 @@ import (
 // AppendModToUserOKCode is the HTTP code returned for type AppendModToUserOK
 const AppendModToUserOKCode int = 200
 
-/*
-AppendModToUserOK Plain success message
+/*AppendModToUserOK Plain success message
 
 swagger:response appendModToUserOK
 */
@@ -61,8 +60,7 @@ func (o *AppendModToUserOK) WriteResponse(rw http.ResponseWriter, producer runti
 // AppendModToUserForbiddenCode is the HTTP code returned for type AppendModToUserForbidden
 const AppendModToUserForbiddenCode int = 403
 
-/*
-AppendModToUserForbidden User is not authorized
+/*AppendModToUserForbidden User is not authorized
 
 swagger:response appendModToUserForbidden
 */
@@ -106,8 +104,7 @@ func (o *AppendModToUserForbidden) WriteResponse(rw http.ResponseWriter, produce
 // AppendModToUserNotFoundCode is the HTTP code returned for type AppendModToUserNotFound
 const AppendModToUserNotFoundCode int = 404
 
-/*
-AppendModToUserNotFound Mod or user not found
+/*AppendModToUserNotFound Mod or user not found
 
 swagger:response appendModToUserNotFound
 */
@@ -151,8 +148,7 @@ func (o *AppendModToUserNotFound) WriteResponse(rw http.ResponseWriter, producer
 // AppendModToUserPreconditionFailedCode is the HTTP code returned for type AppendModToUserPreconditionFailed
 const AppendModToUserPreconditionFailedCode int = 412
 
-/*
-AppendModToUserPreconditionFailed User is already assigned
+/*AppendModToUserPreconditionFailed User is already assigned
 
 swagger:response appendModToUserPreconditionFailed
 */
@@ -196,8 +192,7 @@ func (o *AppendModToUserPreconditionFailed) WriteResponse(rw http.ResponseWriter
 // AppendModToUserUnprocessableEntityCode is the HTTP code returned for type AppendModToUserUnprocessableEntity
 const AppendModToUserUnprocessableEntityCode int = 422
 
-/*
-AppendModToUserUnprocessableEntity Failed to validate request
+/*AppendModToUserUnprocessableEntity Failed to validate request
 
 swagger:response appendModToUserUnprocessableEntity
 */
@@ -238,8 +233,7 @@ func (o *AppendModToUserUnprocessableEntity) WriteResponse(rw http.ResponseWrite
 	}
 }
 
-/*
-AppendModToUserDefault Some error unrelated to the handler
+/*AppendModToUserDefault Some error unrelated to the handler
 
 swagger:response appendModToUserDefault
 */

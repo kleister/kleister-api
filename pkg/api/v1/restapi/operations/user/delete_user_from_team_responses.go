@@ -16,8 +16,7 @@ import (
 // DeleteUserFromTeamOKCode is the HTTP code returned for type DeleteUserFromTeamOK
 const DeleteUserFromTeamOKCode int = 200
 
-/*
-DeleteUserFromTeamOK Plain success message
+/*DeleteUserFromTeamOK Plain success message
 
 swagger:response deleteUserFromTeamOK
 */
@@ -61,8 +60,7 @@ func (o *DeleteUserFromTeamOK) WriteResponse(rw http.ResponseWriter, producer ru
 // DeleteUserFromTeamForbiddenCode is the HTTP code returned for type DeleteUserFromTeamForbidden
 const DeleteUserFromTeamForbiddenCode int = 403
 
-/*
-DeleteUserFromTeamForbidden User is not authorized
+/*DeleteUserFromTeamForbidden User is not authorized
 
 swagger:response deleteUserFromTeamForbidden
 */
@@ -106,8 +104,7 @@ func (o *DeleteUserFromTeamForbidden) WriteResponse(rw http.ResponseWriter, prod
 // DeleteUserFromTeamNotFoundCode is the HTTP code returned for type DeleteUserFromTeamNotFound
 const DeleteUserFromTeamNotFoundCode int = 404
 
-/*
-DeleteUserFromTeamNotFound User or team not found
+/*DeleteUserFromTeamNotFound User or team not found
 
 swagger:response deleteUserFromTeamNotFound
 */
@@ -151,8 +148,7 @@ func (o *DeleteUserFromTeamNotFound) WriteResponse(rw http.ResponseWriter, produ
 // DeleteUserFromTeamPreconditionFailedCode is the HTTP code returned for type DeleteUserFromTeamPreconditionFailed
 const DeleteUserFromTeamPreconditionFailedCode int = 412
 
-/*
-DeleteUserFromTeamPreconditionFailed Team is not assigned
+/*DeleteUserFromTeamPreconditionFailed Team is not assigned
 
 swagger:response deleteUserFromTeamPreconditionFailed
 */
@@ -193,8 +189,7 @@ func (o *DeleteUserFromTeamPreconditionFailed) WriteResponse(rw http.ResponseWri
 	}
 }
 
-/*
-DeleteUserFromTeamDefault Some error unrelated to the handler
+/*DeleteUserFromTeamDefault Some error unrelated to the handler
 
 swagger:response deleteUserFromTeamDefault
 */

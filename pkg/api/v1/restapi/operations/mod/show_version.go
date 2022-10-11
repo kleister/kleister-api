@@ -31,10 +31,10 @@ func NewShowVersion(ctx *middleware.Context, handler ShowVersionHandler) *ShowVe
 	return &ShowVersion{Context: ctx, Handler: handler}
 }
 
-/*
-	ShowVersion swagger:route GET /mods/{mod_id}/versions/{version_id} mod showVersion
+/* ShowVersion swagger:route GET /mods/{mod_id}/versions/{version_id} mod showVersion
 
 Fetch a specific version for a mod
+
 */
 type ShowVersion struct {
 	Context *middleware.Context

@@ -16,8 +16,7 @@ import (
 // ListModUsersOKCode is the HTTP code returned for type ListModUsersOK
 const ListModUsersOKCode int = 200
 
-/*
-ListModUsersOK A collection of mod users
+/*ListModUsersOK A collection of mod users
 
 swagger:response listModUsersOK
 */
@@ -64,8 +63,7 @@ func (o *ListModUsersOK) WriteResponse(rw http.ResponseWriter, producer runtime.
 // ListModUsersForbiddenCode is the HTTP code returned for type ListModUsersForbidden
 const ListModUsersForbiddenCode int = 403
 
-/*
-ListModUsersForbidden User is not authorized
+/*ListModUsersForbidden User is not authorized
 
 swagger:response listModUsersForbidden
 */
@@ -109,8 +107,7 @@ func (o *ListModUsersForbidden) WriteResponse(rw http.ResponseWriter, producer r
 // ListModUsersNotFoundCode is the HTTP code returned for type ListModUsersNotFound
 const ListModUsersNotFoundCode int = 404
 
-/*
-ListModUsersNotFound Mod not found
+/*ListModUsersNotFound Mod not found
 
 swagger:response listModUsersNotFound
 */
@@ -151,8 +148,7 @@ func (o *ListModUsersNotFound) WriteResponse(rw http.ResponseWriter, producer ru
 	}
 }
 
-/*
-ListModUsersDefault Some error unrelated to the handler
+/*ListModUsersDefault Some error unrelated to the handler
 
 swagger:response listModUsersDefault
 */

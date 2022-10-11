@@ -31,10 +31,10 @@ func NewDeleteTeamFromUser(ctx *middleware.Context, handler DeleteTeamFromUserHa
 	return &DeleteTeamFromUser{Context: ctx, Handler: handler}
 }
 
-/*
-	DeleteTeamFromUser swagger:route DELETE /teams/{team_id}/users team deleteTeamFromUser
+/* DeleteTeamFromUser swagger:route DELETE /teams/{team_id}/users team deleteTeamFromUser
 
 Remove a user from team
+
 */
 type DeleteTeamFromUser struct {
 	Context *middleware.Context

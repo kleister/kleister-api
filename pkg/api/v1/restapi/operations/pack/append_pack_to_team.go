@@ -31,10 +31,10 @@ func NewAppendPackToTeam(ctx *middleware.Context, handler AppendPackToTeamHandle
 	return &AppendPackToTeam{Context: ctx, Handler: handler}
 }
 
-/*
-	AppendPackToTeam swagger:route POST /packs/{pack_id}/teams pack appendPackToTeam
+/* AppendPackToTeam swagger:route POST /packs/{pack_id}/teams pack appendPackToTeam
 
 Assign a team to pack
+
 */
 type AppendPackToTeam struct {
 	Context *middleware.Context

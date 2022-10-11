@@ -16,8 +16,7 @@ import (
 // PermitUserTeamOKCode is the HTTP code returned for type PermitUserTeamOK
 const PermitUserTeamOKCode int = 200
 
-/*
-PermitUserTeamOK Plain success message
+/*PermitUserTeamOK Plain success message
 
 swagger:response permitUserTeamOK
 */
@@ -61,8 +60,7 @@ func (o *PermitUserTeamOK) WriteResponse(rw http.ResponseWriter, producer runtim
 // PermitUserTeamForbiddenCode is the HTTP code returned for type PermitUserTeamForbidden
 const PermitUserTeamForbiddenCode int = 403
 
-/*
-PermitUserTeamForbidden User is not authorized
+/*PermitUserTeamForbidden User is not authorized
 
 swagger:response permitUserTeamForbidden
 */
@@ -106,8 +104,7 @@ func (o *PermitUserTeamForbidden) WriteResponse(rw http.ResponseWriter, producer
 // PermitUserTeamNotFoundCode is the HTTP code returned for type PermitUserTeamNotFound
 const PermitUserTeamNotFoundCode int = 404
 
-/*
-PermitUserTeamNotFound User or team not found
+/*PermitUserTeamNotFound User or team not found
 
 swagger:response permitUserTeamNotFound
 */
@@ -151,8 +148,7 @@ func (o *PermitUserTeamNotFound) WriteResponse(rw http.ResponseWriter, producer 
 // PermitUserTeamPreconditionFailedCode is the HTTP code returned for type PermitUserTeamPreconditionFailed
 const PermitUserTeamPreconditionFailedCode int = 412
 
-/*
-PermitUserTeamPreconditionFailed Team is not assigned
+/*PermitUserTeamPreconditionFailed Team is not assigned
 
 swagger:response permitUserTeamPreconditionFailed
 */
@@ -196,8 +192,7 @@ func (o *PermitUserTeamPreconditionFailed) WriteResponse(rw http.ResponseWriter,
 // PermitUserTeamUnprocessableEntityCode is the HTTP code returned for type PermitUserTeamUnprocessableEntity
 const PermitUserTeamUnprocessableEntityCode int = 422
 
-/*
-PermitUserTeamUnprocessableEntity Failed to validate request
+/*PermitUserTeamUnprocessableEntity Failed to validate request
 
 swagger:response permitUserTeamUnprocessableEntity
 */
@@ -238,8 +233,7 @@ func (o *PermitUserTeamUnprocessableEntity) WriteResponse(rw http.ResponseWriter
 	}
 }
 
-/*
-PermitUserTeamDefault Some error unrelated to the handler
+/*PermitUserTeamDefault Some error unrelated to the handler
 
 swagger:response permitUserTeamDefault
 */

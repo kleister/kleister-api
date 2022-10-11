@@ -16,8 +16,7 @@ import (
 // AppendUserToPackOKCode is the HTTP code returned for type AppendUserToPackOK
 const AppendUserToPackOKCode int = 200
 
-/*
-AppendUserToPackOK Plain success message
+/*AppendUserToPackOK Plain success message
 
 swagger:response appendUserToPackOK
 */
@@ -61,8 +60,7 @@ func (o *AppendUserToPackOK) WriteResponse(rw http.ResponseWriter, producer runt
 // AppendUserToPackForbiddenCode is the HTTP code returned for type AppendUserToPackForbidden
 const AppendUserToPackForbiddenCode int = 403
 
-/*
-AppendUserToPackForbidden User is not authorized
+/*AppendUserToPackForbidden User is not authorized
 
 swagger:response appendUserToPackForbidden
 */
@@ -106,8 +104,7 @@ func (o *AppendUserToPackForbidden) WriteResponse(rw http.ResponseWriter, produc
 // AppendUserToPackNotFoundCode is the HTTP code returned for type AppendUserToPackNotFound
 const AppendUserToPackNotFoundCode int = 404
 
-/*
-AppendUserToPackNotFound User or pack not found
+/*AppendUserToPackNotFound User or pack not found
 
 swagger:response appendUserToPackNotFound
 */
@@ -151,8 +148,7 @@ func (o *AppendUserToPackNotFound) WriteResponse(rw http.ResponseWriter, produce
 // AppendUserToPackPreconditionFailedCode is the HTTP code returned for type AppendUserToPackPreconditionFailed
 const AppendUserToPackPreconditionFailedCode int = 412
 
-/*
-AppendUserToPackPreconditionFailed Pack is already assigned
+/*AppendUserToPackPreconditionFailed Pack is already assigned
 
 swagger:response appendUserToPackPreconditionFailed
 */
@@ -196,8 +192,7 @@ func (o *AppendUserToPackPreconditionFailed) WriteResponse(rw http.ResponseWrite
 // AppendUserToPackUnprocessableEntityCode is the HTTP code returned for type AppendUserToPackUnprocessableEntity
 const AppendUserToPackUnprocessableEntityCode int = 422
 
-/*
-AppendUserToPackUnprocessableEntity Failed to validate request
+/*AppendUserToPackUnprocessableEntity Failed to validate request
 
 swagger:response appendUserToPackUnprocessableEntity
 */
@@ -238,8 +233,7 @@ func (o *AppendUserToPackUnprocessableEntity) WriteResponse(rw http.ResponseWrit
 	}
 }
 
-/*
-AppendUserToPackDefault Some error unrelated to the handler
+/*AppendUserToPackDefault Some error unrelated to the handler
 
 swagger:response appendUserToPackDefault
 */

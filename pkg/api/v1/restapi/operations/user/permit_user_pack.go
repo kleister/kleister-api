@@ -31,10 +31,10 @@ func NewPermitUserPack(ctx *middleware.Context, handler PermitUserPackHandler) *
 	return &PermitUserPack{Context: ctx, Handler: handler}
 }
 
-/*
-	PermitUserPack swagger:route PUT /users/{user_id}/packs user permitUserPack
+/* PermitUserPack swagger:route PUT /users/{user_id}/packs user permitUserPack
 
 Update pack perms for user
+
 */
 type PermitUserPack struct {
 	Context *middleware.Context

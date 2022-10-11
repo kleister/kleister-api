@@ -16,8 +16,7 @@ import (
 // UpdateForgeOKCode is the HTTP code returned for type UpdateForgeOK
 const UpdateForgeOKCode int = 200
 
-/*
-UpdateForgeOK Plain success message
+/*UpdateForgeOK Plain success message
 
 swagger:response updateForgeOK
 */
@@ -61,8 +60,7 @@ func (o *UpdateForgeOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 // UpdateForgeForbiddenCode is the HTTP code returned for type UpdateForgeForbidden
 const UpdateForgeForbiddenCode int = 403
 
-/*
-UpdateForgeForbidden User is not authorized
+/*UpdateForgeForbidden User is not authorized
 
 swagger:response updateForgeForbidden
 */
@@ -106,8 +104,7 @@ func (o *UpdateForgeForbidden) WriteResponse(rw http.ResponseWriter, producer ru
 // UpdateForgeServiceUnavailableCode is the HTTP code returned for type UpdateForgeServiceUnavailable
 const UpdateForgeServiceUnavailableCode int = 503
 
-/*
-UpdateForgeServiceUnavailable If remote source is not available
+/*UpdateForgeServiceUnavailable If remote source is not available
 
 swagger:response updateForgeServiceUnavailable
 */
@@ -148,8 +145,7 @@ func (o *UpdateForgeServiceUnavailable) WriteResponse(rw http.ResponseWriter, pr
 	}
 }
 
-/*
-UpdateForgeDefault Some error unrelated to the handler
+/*UpdateForgeDefault Some error unrelated to the handler
 
 swagger:response updateForgeDefault
 */

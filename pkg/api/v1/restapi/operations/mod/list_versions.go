@@ -31,10 +31,10 @@ func NewListVersions(ctx *middleware.Context, handler ListVersionsHandler) *List
 	return &ListVersions{Context: ctx, Handler: handler}
 }
 
-/*
-	ListVersions swagger:route GET /mods/{mod_id}/versions mod listVersions
+/* ListVersions swagger:route GET /mods/{mod_id}/versions mod listVersions
 
 Fetch all available versions for a mod
+
 */
 type ListVersions struct {
 	Context *middleware.Context

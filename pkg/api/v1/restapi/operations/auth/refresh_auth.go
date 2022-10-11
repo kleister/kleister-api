@@ -31,10 +31,10 @@ func NewRefreshAuth(ctx *middleware.Context, handler RefreshAuthHandler) *Refres
 	return &RefreshAuth{Context: ctx, Handler: handler}
 }
 
-/*
-	RefreshAuth swagger:route GET /auth/refresh auth refreshAuth
+/* RefreshAuth swagger:route GET /auth/refresh auth refreshAuth
 
 Refresh an auth token before it expires
+
 */
 type RefreshAuth struct {
 	Context *middleware.Context

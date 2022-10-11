@@ -16,8 +16,7 @@ import (
 // AppendTeamToPackOKCode is the HTTP code returned for type AppendTeamToPackOK
 const AppendTeamToPackOKCode int = 200
 
-/*
-AppendTeamToPackOK Plain success message
+/*AppendTeamToPackOK Plain success message
 
 swagger:response appendTeamToPackOK
 */
@@ -61,8 +60,7 @@ func (o *AppendTeamToPackOK) WriteResponse(rw http.ResponseWriter, producer runt
 // AppendTeamToPackForbiddenCode is the HTTP code returned for type AppendTeamToPackForbidden
 const AppendTeamToPackForbiddenCode int = 403
 
-/*
-AppendTeamToPackForbidden User is not authorized
+/*AppendTeamToPackForbidden User is not authorized
 
 swagger:response appendTeamToPackForbidden
 */
@@ -106,8 +104,7 @@ func (o *AppendTeamToPackForbidden) WriteResponse(rw http.ResponseWriter, produc
 // AppendTeamToPackNotFoundCode is the HTTP code returned for type AppendTeamToPackNotFound
 const AppendTeamToPackNotFoundCode int = 404
 
-/*
-AppendTeamToPackNotFound Team or pack not found
+/*AppendTeamToPackNotFound Team or pack not found
 
 swagger:response appendTeamToPackNotFound
 */
@@ -151,8 +148,7 @@ func (o *AppendTeamToPackNotFound) WriteResponse(rw http.ResponseWriter, produce
 // AppendTeamToPackPreconditionFailedCode is the HTTP code returned for type AppendTeamToPackPreconditionFailed
 const AppendTeamToPackPreconditionFailedCode int = 412
 
-/*
-AppendTeamToPackPreconditionFailed Pack is already assigned
+/*AppendTeamToPackPreconditionFailed Pack is already assigned
 
 swagger:response appendTeamToPackPreconditionFailed
 */
@@ -196,8 +192,7 @@ func (o *AppendTeamToPackPreconditionFailed) WriteResponse(rw http.ResponseWrite
 // AppendTeamToPackUnprocessableEntityCode is the HTTP code returned for type AppendTeamToPackUnprocessableEntity
 const AppendTeamToPackUnprocessableEntityCode int = 422
 
-/*
-AppendTeamToPackUnprocessableEntity Failed to validate request
+/*AppendTeamToPackUnprocessableEntity Failed to validate request
 
 swagger:response appendTeamToPackUnprocessableEntity
 */
@@ -238,8 +233,7 @@ func (o *AppendTeamToPackUnprocessableEntity) WriteResponse(rw http.ResponseWrit
 	}
 }
 
-/*
-AppendTeamToPackDefault Some error unrelated to the handler
+/*AppendTeamToPackDefault Some error unrelated to the handler
 
 swagger:response appendTeamToPackDefault
 */

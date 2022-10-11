@@ -31,10 +31,10 @@ func NewAppendModToTeam(ctx *middleware.Context, handler AppendModToTeamHandler)
 	return &AppendModToTeam{Context: ctx, Handler: handler}
 }
 
-/*
-	AppendModToTeam swagger:route POST /mods/{mod_id}/teams mod appendModToTeam
+/* AppendModToTeam swagger:route POST /mods/{mod_id}/teams mod appendModToTeam
 
 Assign a team to mod
+
 */
 type AppendModToTeam struct {
 	Context *middleware.Context

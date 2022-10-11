@@ -31,10 +31,10 @@ func NewUpdateProfile(ctx *middleware.Context, handler UpdateProfileHandler) *Up
 	return &UpdateProfile{Context: ctx, Handler: handler}
 }
 
-/*
-	UpdateProfile swagger:route PUT /profile/self profile updateProfile
+/* UpdateProfile swagger:route PUT /profile/self profile updateProfile
 
 Update your own profile information
+
 */
 type UpdateProfile struct {
 	Context *middleware.Context

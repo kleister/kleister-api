@@ -31,10 +31,10 @@ func NewAppendMinecraftToBuild(ctx *middleware.Context, handler AppendMinecraftT
 	return &AppendMinecraftToBuild{Context: ctx, Handler: handler}
 }
 
-/*
-	AppendMinecraftToBuild swagger:route POST /minecraft/{minecraft_id}/builds minecraft appendMinecraftToBuild
+/* AppendMinecraftToBuild swagger:route POST /minecraft/{minecraft_id}/builds minecraft appendMinecraftToBuild
 
 Assign a build to a Minecraft version
+
 */
 type AppendMinecraftToBuild struct {
 	Context *middleware.Context

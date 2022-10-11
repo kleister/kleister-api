@@ -31,10 +31,10 @@ func NewShowPack(ctx *middleware.Context, handler ShowPackHandler) *ShowPack {
 	return &ShowPack{Context: ctx, Handler: handler}
 }
 
-/*
-	ShowPack swagger:route GET /packs/{pack_id} pack showPack
+/* ShowPack swagger:route GET /packs/{pack_id} pack showPack
 
 Fetch a specific pack
+
 */
 type ShowPack struct {
 	Context *middleware.Context

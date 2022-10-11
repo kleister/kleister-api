@@ -31,10 +31,10 @@ func NewUpdateVersion(ctx *middleware.Context, handler UpdateVersionHandler) *Up
 	return &UpdateVersion{Context: ctx, Handler: handler}
 }
 
-/*
-	UpdateVersion swagger:route PUT /mods/{mod_id}/versions/{version_id} mod updateVersion
+/* UpdateVersion swagger:route PUT /mods/{mod_id}/versions/{version_id} mod updateVersion
 
 Update a specific version for a mod
+
 */
 type UpdateVersion struct {
 	Context *middleware.Context

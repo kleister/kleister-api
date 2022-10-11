@@ -16,8 +16,7 @@ import (
 // UpdateBuildOKCode is the HTTP code returned for type UpdateBuildOK
 const UpdateBuildOKCode int = 200
 
-/*
-UpdateBuildOK The updated build details
+/*UpdateBuildOK The updated build details
 
 swagger:response updateBuildOK
 */
@@ -61,8 +60,7 @@ func (o *UpdateBuildOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 // UpdateBuildForbiddenCode is the HTTP code returned for type UpdateBuildForbidden
 const UpdateBuildForbiddenCode int = 403
 
-/*
-UpdateBuildForbidden User is not authorized
+/*UpdateBuildForbidden User is not authorized
 
 swagger:response updateBuildForbidden
 */
@@ -106,8 +104,7 @@ func (o *UpdateBuildForbidden) WriteResponse(rw http.ResponseWriter, producer ru
 // UpdateBuildNotFoundCode is the HTTP code returned for type UpdateBuildNotFound
 const UpdateBuildNotFoundCode int = 404
 
-/*
-UpdateBuildNotFound Build or pack not found
+/*UpdateBuildNotFound Build or pack not found
 
 swagger:response updateBuildNotFound
 */
@@ -151,8 +148,7 @@ func (o *UpdateBuildNotFound) WriteResponse(rw http.ResponseWriter, producer run
 // UpdateBuildUnprocessableEntityCode is the HTTP code returned for type UpdateBuildUnprocessableEntity
 const UpdateBuildUnprocessableEntityCode int = 422
 
-/*
-UpdateBuildUnprocessableEntity Failed to validate request
+/*UpdateBuildUnprocessableEntity Failed to validate request
 
 swagger:response updateBuildUnprocessableEntity
 */
@@ -193,8 +189,7 @@ func (o *UpdateBuildUnprocessableEntity) WriteResponse(rw http.ResponseWriter, p
 	}
 }
 
-/*
-UpdateBuildDefault Some error unrelated to the handler
+/*UpdateBuildDefault Some error unrelated to the handler
 
 swagger:response updateBuildDefault
 */
