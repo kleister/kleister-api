@@ -99,6 +99,8 @@ github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e h1:xizeG5ksKSdyN
 github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e/go.mod h1:x7AK2h2QzaXVEFi1tbMYMDuvHcCEr1QdMDrg3hkW24Q=
 github.com/dchest/uniuri v0.0.0-20220929095258-3027df40b6ce h1:uHEdbpdf5QdO6Koxr10tA+p85JPbLHzwG3+uGysF0WY=
 github.com/dchest/uniuri v0.0.0-20220929095258-3027df40b6ce/go.mod h1:fSzm4SLHzNZvWLvWJew423PhAzkpNQYq+uNLq4kxhkY=
+github.com/dchest/uniuri v1.2.0 h1:koIcOUdrTIivZgSLhHQvKgqdWZq5d7KdMEWF1Ud6+5g=
+github.com/dchest/uniuri v1.2.0/go.mod h1:fSzm4SLHzNZvWLvWJew423PhAzkpNQYq+uNLq4kxhkY=
 github.com/denisenkom/go-mssqldb v0.12.0 h1:VtrkII767ttSPNRfFekePK3sctr+joXgO58stqQbtUA=
 github.com/docker/go-units v0.4.0 h1:3uh0PgVws3nIA0Q+MwDC8yjEPf9zjRfZZWXZYDct3Tw=
 github.com/docker/go-units v0.4.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
