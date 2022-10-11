@@ -8,7 +8,7 @@
   "packageRules": [
       {
           "description": "Semantic commits for major updates",
-          "groupName": "major updates",
+          "groupName": "major versions",
           "matchDatasources": [
               "github-releases"
           ],
@@ -21,7 +21,7 @@
       },
       {
           "description": "Semantic commits for minor updates",
-          "groupName": "minor updates",
+          "groupName": "minor versions",
           "matchDatasources": [
               "github-releases"
           ],
@@ -34,7 +34,7 @@
       },
       {
           "description": "Semantic commits for patch updates",
-          "groupName": "patch updates",
+          "groupName": "patch versions",
           "matchDatasources": [
               "github-releases"
           ],
@@ -47,7 +47,7 @@
       },
       {
         "description": "Automerge untagged golang libs",
-        "groupName": "patch updates",
+        "groupName": "untagged libraries",
         "matchPackageNames": [
             "golang.org/x/crypto",
             "golang.org/x/net"
