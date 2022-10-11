@@ -18,7 +18,6 @@ require (
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-openapi/swag v0.22.3
 	github.com/go-openapi/validate v0.22.0
-	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/google/uuid v1.3.0
 	github.com/jessevdk/go-flags v1.5.0
