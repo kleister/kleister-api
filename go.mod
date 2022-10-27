@@ -22,7 +22,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/joho/godotenv v1.4.0
-	github.com/kleister/go-forge v1.0.0
+	github.com/kleister/go-forge v1.0.1
 	github.com/kleister/go-minecraft v0.2.1
 	github.com/oklog/run v1.1.0
 	github.com/opentracing/opentracing-go v1.2.0
