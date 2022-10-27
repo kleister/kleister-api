@@ -379,6 +379,8 @@ github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+o
 github.com/klauspost/compress v1.13.6/go.mod h1:/3/Vjq9QcHkK5uEr5lBEmyoZ1iFhe47etQ6QUkpK6sk=
 github.com/kleister/go-forge v1.0.0 h1:HTt9zp3EX9kNY5dZPAbjPSIMYWCCxlid+2llavYHvNY=
 github.com/kleister/go-forge v1.0.0/go.mod h1:r5bYBhxRmbQxJlwDvsvSqVifDcExlUQnBTAzE3LqxEo=
+github.com/kleister/go-forge v1.0.1 h1:1KygJJZOC7b4zhX1k4oCnrsmIzjDGmA9VJWfp1bR/jM=
+github.com/kleister/go-forge v1.0.1/go.mod h1:nhm4NJXVh6zlVwAzex2j3qiC0R9P9sDzlxGWRgatlxQ=
 github.com/kleister/go-minecraft v0.2.1 h1:Rx57yImNxsG/nfSnB+qRbaNzyQl+QuvYXPtez65Idt0=
 github.com/kleister/go-minecraft v0.2.1/go.mod h1:Hy21+ggBbw9y0TeGR4ULVnmj+Wfy8gMm70kdav48Kvs=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
