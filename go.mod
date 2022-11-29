@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/Machiel/slugify v1.0.1
 	github.com/asdine/storm/v3 v3.2.1
-	github.com/aws/aws-sdk-go v1.44.146
+	github.com/aws/aws-sdk-go v1.44.147
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e
 	github.com/dchest/uniuri v1.2.0
