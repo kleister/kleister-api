@@ -35,8 +35,8 @@ require (
 	github.com/utahta/swagger-doc v0.0.1
 	github.com/vincent-petithory/dataurl v1.0.0
 	go.etcd.io/bbolt v1.3.6
-	golang.org/x/crypto v0.3.0
-	golang.org/x/net v0.3.0
+	golang.org/x/crypto v0.4.0
+	golang.org/x/net v0.4.0
 	gorm.io/driver/mysql v1.4.4
 	gorm.io/driver/postgres v1.4.5
 	gorm.io/gorm v1.24.2
