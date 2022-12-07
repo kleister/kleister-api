@@ -9,7 +9,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e
 	github.com/dchest/uniuri v1.2.0
-	github.com/go-chi/chi/v5 v5.0.7
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-gormigrate/gormigrate/v2 v2.0.2
 	github.com/go-openapi/errors v0.20.3
 	github.com/go-openapi/loads v0.21.2
