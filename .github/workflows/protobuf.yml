@@ -22,7 +22,7 @@ jobs:
 
       - name: Setup buf
         id: buf
-        uses: bufbuild/buf-setup-action@v1.9.0
+        uses: bufbuild/buf-setup-action@v1.11.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -41,7 +41,7 @@ jobs:
 
       - name: Buf publish
         id: publish
-        uses: bufbuild/buf-push-action@v1.0.1
+        uses: bufbuild/buf-push-action@v1.1.1
         if: github.event_name != 'pull_request'
         with:
           input: proto/
