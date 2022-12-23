@@ -1,0 +1,19 @@
+---
+version: v1
+name: buf.build/kleister/api
+
+deps: []
+
+build:
+  excludes:
+    - .direnv/
+
+lint:
+  use:
+    - DEFAULT
+
+breaking:
+  use:
+    - FILE
+
+...

@@ -4,14 +4,12 @@ import (
 	"time"
 )
 
-// Team represents a team model definition.
+// Team within Kleister.
 type Team struct {
-	ID        string `storm:"id" gorm:"primaryKey;length:36"`
-	Slug      string `storm:"unique" gorm:"unique;length:255"`
-	Name      string `storm:"unique" gorm:"unique;length:255"`
+	ID        string `gorm:"primaryKey;length:36"`
+	Slug      string `gorm:"unique;length:255"`
+	Name      string `gorm:"unique;length:255"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Users     []*TeamUser
-	Mods      []*TeamMod
-	Packs     []*TeamPack
+	Users     []*Member
 }

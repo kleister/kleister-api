@@ -1,0 +1,86 @@
+syntax = "proto3";
+package users.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service UsersService {
+	rpc List(ListRequest) returns (ListResponse);
+	rpc Create(CreateRequest) returns (CreateResponse);
+	rpc Update(UpdateRequest) returns (UpdateResponse);
+	rpc Show(ShowRequest) returns (ShowResponse);
+	rpc Delete(DeleteRequest) returns (DeleteResponse);
+}
+
+message ListRequest {}
+
+message ListResponse {
+	repeated User users = 1;
+}
+
+message CreateRequest {
+	CreateUser user = 1;
+}
+
+message CreateUser {
+	string slug = 1;
+	string username = 2;
+	string password = 3;
+	string email = 4;
+	string firstname = 5;
+	string lastname = 6;
+	bool admin = 7;
+	bool active = 8;
+}
+
+message CreateResponse {
+	User user = 1;
+}
+
+message UpdateRequest {
+	string id = 1;
+	UpdateUser user = 2;
+}
+
+message UpdateUser {
+	optional string slug = 1;
+	optional string username = 2;
+	optional string password = 3;
+	optional string email = 4;
+	optional string firstname = 5;
+	optional string lastname = 6;
+	optional bool admin = 7;
+	optional bool active = 8;
+}
+
+message UpdateResponse {
+	User user = 1;
+}
+
+message ShowRequest {
+	string id = 1;
+}
+
+message ShowResponse {
+	User user = 1;
+}
+
+message DeleteRequest {
+	string id = 1;
+}
+
+message DeleteResponse {
+	string message = 1;
+}
+
+message User {
+	string id = 1;
+	string slug = 2;
+	string username = 3;
+	string email = 4;
+	string firstname = 5;
+	string lastname = 6;
+	bool admin = 7;
+	bool active = 8;
+	google.protobuf.Timestamp created_at = 9;
+	google.protobuf.Timestamp updated_at = 10;
+}

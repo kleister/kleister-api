@@ -14,13 +14,13 @@ func Health(cfg *config.Config) *cli.Command {
 	return &cli.Command{
 		Name:   "health",
 		Usage:  "Perform health checks",
-		Flags:  healthFlags(cfg),
-		Before: healthBefore(cfg),
-		Action: healthAction(cfg),
+		Flags:  HealthFlags(cfg),
+		Action: HealthAction(cfg),
 	}
 }
 
-func healthFlags(cfg *config.Config) []cli.Flag {
+// HealthFlags defines health flags.
+func HealthFlags(cfg *config.Config) []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
 			Name:        "metrics-addr",
@@ -32,14 +32,8 @@ func healthFlags(cfg *config.Config) []cli.Flag {
 	}
 }
 
-func healthBefore(cfg *config.Config) cli.BeforeFunc {
-	return func(c *cli.Context) error {
-		setupLogger(cfg)
-		return setupConfig(cfg)
-	}
-}
-
-func healthAction(cfg *config.Config) cli.ActionFunc {
+// HealthAction defines health action.
+func HealthAction(cfg *config.Config) cli.ActionFunc {
 	return func(c *cli.Context) error {
 		resp, err := http.Get(
 			fmt.Sprintf(
@@ -51,7 +45,7 @@ func healthAction(cfg *config.Config) cli.ActionFunc {
 		if err != nil {
 			log.Error().
 				Err(err).
-				Msg("failed to request health check")
+				Msg("Failed to request health check")
 
 			return err
 		}
@@ -61,14 +55,14 @@ func healthAction(cfg *config.Config) cli.ActionFunc {
 		if resp.StatusCode != 200 {
 			log.Error().
 				Int("code", resp.StatusCode).
-				Msg("health seems to be in bad state")
+				Msg("Health seems to be in bad state")
 
 			return err
 		}
 
 		log.Debug().
 			Int("code", resp.StatusCode).
-			Msg("health got a good state")
+			Msg("Health got a good state")
 
 		return nil
 	}

@@ -16,7 +16,7 @@ endif
 
 GOBUILD ?= CGO_ENABLED=0 go build
 PACKAGES ?= $(shell go list ./...)
-SOURCES ?= $(shell find . -name "*.go" -type f)
+SOURCES ?= $(shell find . -name "*.go" -type f -not -iname mock.go)
 
 TAGS ?= netgo
 
@@ -57,7 +57,7 @@ sync:
 .PHONY: clean
 clean:
 	go clean -i ./...
-	rm -rf $(BIN) $(DIST) pkg/api/v1/models pkg/api/v1/restapi
+	rm -rf $(BIN) $(DIST)
 
 .PHONY: fmt
 fmt:
@@ -72,22 +72,41 @@ staticcheck: $(STATICCHECK)
 	$(STATICCHECK) -tags '$(TAGS)' $(PACKAGES)
 
 .PHONY: lint
-lint: $(GOLINT)
-	for PKG in $(PACKAGES); do $(GOLINT) -set_exit_status $$PKG || exit 1; done;
+lint: $(REVIVE)
+	for PKG in $(PACKAGES); do $(REVIVE) -config revive.toml -set_exit_status $$PKG || exit 1; done;
 
 .PHONY: generate
-generate: openapi
+generate:
+	go generate $(PACKAGES)
 
-.PHONY: openapi
-openapi: $(SWAGGER)
-	$(SWAGGER) generate server --target pkg/api/v1 --name Kleister --spec openapi/v1.yml --principal models.User --default-scheme https --exclude-main --regenerate-configureapi
+.PHONY: mocks
+mocks: \
+	pkg/upload/mock.go pkg/store/mock.go \
+	pkg/service/users/repository/mock.go \
+	pkg/service/teams/repository/mock.go \
+	pkg/service/members/repository/mock.go
+
+pkg/upload/mock.go: pkg/upload/upload.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package upload
+
+pkg/store/mock.go: pkg/store/store.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package store
+
+pkg/service/users/repository/mock.go: pkg/service/users/repository/repository.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package repository
+
+pkg/service/teams/repository/mock.go: pkg/service/teams/repository/repository.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package repository
+
+pkg/service/members/repository/mock.go: pkg/service/members/repository/repository.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package repository
 
 .PHONY: changelog
 changelog: $(CALENS)
 	$(CALENS) >| CHANGELOG.md
 
 .PHONY: test
-test:
+test: test
 	go test -coverprofile coverage.out $(PACKAGES)
 
 .PHONY: install
@@ -116,17 +135,7 @@ release-linux: $(DIST) \
 	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-5 \
 	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-6 \
 	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-7 \
-	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm64 \
-	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips \
-	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips64 \
-	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mipsle \
-	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips64le
-
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-386:
-	GOOS=linux GOARCH=386 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
-
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-amd64:
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm64
 
 $(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-5:
 	GOOS=linux GOARCH=arm GOARM=5 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
@@ -137,42 +146,24 @@ $(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-6:
 $(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm-7:
 	GOOS=linux GOARCH=arm GOARM=7 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
 
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-arm64:
-	GOOS=linux GOARCH=arm64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
-
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips:
-	GOOS=linux GOARCH=mips $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
-
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips64:
-	GOOS=linux GOARCH=mips64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
-
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mipsle:
-	GOOS=linux GOARCH=mipsle $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
-
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-mips64le:
-	GOOS=linux GOARCH=mips64le $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-linux-%:
+	GOOS=linux GOARCH=$* $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
 
 .PHONY: release-darwin
 release-darwin: $(DIST) \
 	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-darwin-amd64 \
 	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-darwin-arm64
 
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-darwin-amd64:
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
-
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-darwin-arm64:
-	GOOS=darwin GOARCH=arm64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-darwin-%:
+	GOOS=darwin GOARCH=$* $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
 
 .PHONY: release-windows
 release-windows: $(DIST) \
-	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-386.exe \
-	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-amd64.exe
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-amd64.exe \
+	$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-arm64.exe \
 
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-386.exe:
-	GOOS=windows GOARCH=386 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
-
-$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-amd64.exe:
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
+$(DIST)/$(EXECUTABLE)-$(OUTPUT)-windows-4.0-%.exe:
+	GOOS=windows GOARCH=$* $(GOBUILD) -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@ ./cmd/$(NAME)
 
 .PHONY: release-reduce
 release-reduce:

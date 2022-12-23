@@ -4,8 +4,12 @@ import (
 	"io"
 	"net/http"
 	"path"
+	"strings"
 	"time"
 
+	"github.com/bufbuild/connect-go"
+	grpchealth "github.com/bufbuild/connect-grpchealth-go"
+	grpcreflect "github.com/bufbuild/connect-grpcreflect-go"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/kleister/kleister-api/pkg/config"
@@ -13,40 +17,22 @@ import (
 	"github.com/kleister/kleister-api/pkg/middleware/header"
 	"github.com/kleister/kleister-api/pkg/middleware/prometheus"
 	"github.com/kleister/kleister-api/pkg/middleware/requestid"
-	"github.com/kleister/kleister-api/pkg/service/builds"
-	"github.com/kleister/kleister-api/pkg/service/forge"
-	"github.com/kleister/kleister-api/pkg/service/minecraft"
-	"github.com/kleister/kleister-api/pkg/service/mods"
-	"github.com/kleister/kleister-api/pkg/service/packs"
-	"github.com/kleister/kleister-api/pkg/service/teams"
-	"github.com/kleister/kleister-api/pkg/service/users"
-	"github.com/kleister/kleister-api/pkg/service/versions"
+	"github.com/kleister/kleister-api/pkg/service/members/v1/membersv1connect"
+	"github.com/kleister/kleister-api/pkg/service/teams/v1/teamsv1connect"
+	"github.com/kleister/kleister-api/pkg/service/users/v1/usersv1connect"
 	"github.com/kleister/kleister-api/pkg/upload"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
-	doc "github.com/utahta/swagger-doc"
-
-	apiv1 "github.com/kleister/kleister-api/pkg/api/v1"
-	restapiv1 "github.com/kleister/kleister-api/pkg/api/v1/restapi"
 )
 
 // Server initializes the routing of the server.
 func Server(
 	cfg *config.Config,
 	uploads upload.Upload,
-	usersService users.Service,
-	teamsService teams.Service,
-	packsService packs.Service,
-	buildsService builds.Service,
-	modsService mods.Service,
-	versionsService versions.Service,
-	minecraftService minecraft.Service,
-	forgeService forge.Service,
-) http.Handler {
+) *chi.Mux {
 	mux := chi.NewRouter()
-
-	mux.Use(requestid.Handler)
 	mux.Use(middleware.Timeout(60 * time.Second))
+	mux.Use(requestid.Handler)
 	mux.Use(middleware.RealIP)
 	mux.Use(header.Version)
 	mux.Use(header.Cache)
@@ -69,77 +55,97 @@ func Server(
 	}))
 
 	mux.Route(cfg.Server.Root, func(root chi.Router) {
-		root.Route("/api", func(base chi.Router) {
-			if cfg.Server.Pprof {
-				base.Mount("/debug", middleware.Profiler())
-			}
+		root.Handle("/storage/*", uploads.Handler(
+			path.Join(
+				cfg.Server.Root,
+				"storage",
+			),
+		))
 
-			base.Route("/v1", func(v1 chi.Router) {
-				if cfg.Server.Docs {
-					v1.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
-						w.Header().Set("Content-Type", "application/json")
-						w.WriteHeader(http.StatusOK)
-
-						io.WriteString(w, string(restapiv1.SwaggerJSON))
-					})
-
-					v1.Handle("/docs", doc.NewRedocHandler(
-						path.Join(
-							cfg.Server.Root,
-							"api",
-							"v1",
-							"swagger",
-						),
-						path.Join(
-							cfg.Server.Root,
-							"/api/v1/docs",
-						),
-					))
-				}
-
-				if api := apiv1.New(
-					cfg,
-					uploads,
-					usersService,
-					teamsService,
-					packsService,
-					buildsService,
-					modsService,
-					versionsService,
-					minecraftService,
-					forgeService,
-				); api != nil {
-					v1.Mount("/", middleware.NoCache(api.Handler))
-				}
-			})
-
-			base.Handle("/storage/*", uploads.Handler(
-				path.Join(
-					cfg.Server.Root,
-					"api",
-					"storage",
+		{
+			mount, handler := grpchealth.NewHandler(
+				grpchealth.NewStaticChecker(
+					usersv1connect.UsersServiceName,
+					teamsv1connect.TeamsServiceName,
+					membersv1connect.MembersServiceName,
 				),
-			))
-		})
+				connect.WithCompressMinBytes(1024),
+			)
+
+			root.Mount(
+				mount,
+				http.StripPrefix(
+					strings.TrimRight(
+						cfg.Server.Root,
+						"/",
+					),
+					handler,
+				),
+			)
+		}
+
+		{
+			mount, handler := grpcreflect.NewHandlerV1(
+				grpcreflect.NewStaticReflector(
+					usersv1connect.UsersServiceName,
+					teamsv1connect.TeamsServiceName,
+					membersv1connect.MembersServiceName,
+				),
+				connect.WithCompressMinBytes(1024),
+			)
+
+			root.Mount(
+				mount,
+				http.StripPrefix(
+					strings.TrimRight(
+						cfg.Server.Root,
+						"/",
+					),
+					handler,
+				),
+			)
+		}
+
+		{
+			mount, handler := grpcreflect.NewHandlerV1Alpha(
+				grpcreflect.NewStaticReflector(
+					usersv1connect.UsersServiceName,
+					teamsv1connect.TeamsServiceName,
+					membersv1connect.MembersServiceName,
+				),
+				connect.WithCompressMinBytes(1024),
+			)
+
+			root.Mount(
+				mount,
+				http.StripPrefix(
+					strings.TrimRight(
+						cfg.Server.Root,
+						"/",
+					),
+					handler,
+				),
+			)
+		}
 	})
 
 	return mux
 }
 
 // Metrics initializes the routing of metrics and health.
-func Metrics(cfg *config.Config, metrics *metrics.Metrics) http.Handler {
+func Metrics(
+	cfg *config.Config,
+	metricz *metrics.Metrics,
+) *chi.Mux {
 	mux := chi.NewRouter()
-
-	mux.Use(requestid.Handler)
 	mux.Use(middleware.Timeout(60 * time.Second))
-	mux.Use(middleware.RealIP)
-	mux.Use(header.Version)
-	mux.Use(header.Cache)
-	mux.Use(header.Secure)
-	mux.Use(header.Options)
 
 	mux.Route("/", func(root chi.Router) {
-		root.Get("/metrics", prometheus.Handler(metrics.Registry, cfg.Metrics.Token))
+		root.Get("/metrics", prometheus.Handler(metricz.Registry, cfg.Metrics.Token))
+
+		if cfg.Metrics.Pprof {
+			root.Mount("/debug", middleware.Profiler())
+		}
 
 		root.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/plain")

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	defaultMetricsAddr   = "0.0.0.0:8090"
+	defaultMetricsAddr   = "0.0.0.0:8000"
 	defaultServerAddress = "0.0.0.0:8080"
 )
 
@@ -21,10 +21,10 @@ func Run() error {
 		Name:     "kleister-api",
 		Version:  version.String,
 		Usage:    "Manage mod packs for minecraft",
-		Authors:  authorList(cfg),
-		Flags:    globalFlags(cfg),
-		Before:   globalBefore(cfg),
-		Commands: globalCommands(cfg),
+		Authors:  RootAuthors(cfg),
+		Flags:    RootFlags(cfg),
+		Before:   RootBefore(cfg),
+		Commands: RootCommands(cfg),
 	}
 
 	cli.HelpFlag = &cli.BoolFlag{
@@ -42,7 +42,8 @@ func Run() error {
 	return app.Run(os.Args)
 }
 
-func authorList(cfg *config.Config) []*cli.Author {
+// RootAuthors defines global authors.
+func RootAuthors(_ *config.Config) []*cli.Author {
 	return []*cli.Author{
 		{
 			Name:  "Thomas Boerger",
@@ -51,7 +52,8 @@ func authorList(cfg *config.Config) []*cli.Author {
 	}
 }
 
-func globalFlags(cfg *config.Config) []cli.Flag {
+// RootFlags defines the global flags.
+func RootFlags(cfg *config.Config) []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
 			Name:    "config-file",
@@ -83,15 +85,17 @@ func globalFlags(cfg *config.Config) []cli.Flag {
 	}
 }
 
-func globalBefore(cfg *config.Config) cli.BeforeFunc {
+// RootBefore defines global before.
+func RootBefore(cfg *config.Config) cli.BeforeFunc {
 	return func(c *cli.Context) error {
-		setupLogger(cfg)
-		return setupConfig(cfg)
+		return setup(cfg)
 	}
 }
 
-func globalCommands(cfg *config.Config) []*cli.Command {
+// RootCommands defines global commands.
+func RootCommands(cfg *config.Config) []*cli.Command {
 	return []*cli.Command{
+		Gen(cfg),
 		Server(cfg),
 		Health(cfg),
 	}

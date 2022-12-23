@@ -4,6 +4,8 @@ exclude_paths:
   - .bingo/**
   - changelog/**
 
+  - proto/README.md
+
   - CHANGELOG.md
 
 ...

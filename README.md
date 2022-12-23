@@ -1,6 +1,6 @@
 # Kleister: API server
 
-[![Build Status](https://github.com/kleister/kleister-api/actions/workflows/general.yml/badge.svg)](https://github.com/kleister/kleister-api/actions) [![Join the Matrix chat at https://matrix.to/#/#kleister:matrix.org](https://img.shields.io/badge/matrix-%23kleister-7bc9a4.svg)](https://matrix.to/#/#kleister:matrix.org) [![Go Reference](https://pkg.go.dev/badge/github.com/kleister/kleister-api.svg)](https://pkg.go.dev/github.com/kleister/kleister-api) [![Go Report Card](https://goreportcard.com/badge/github.com/kleister/kleister-api)](https://goreportcard.com/report/github.com/kleister/kleister-api) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c4d0c564f786486c93e37d62db312746)](https://www.codacy.com/gh/kleister/kleister-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kleister/kleister-api&amp;utm_campaign=Badge_Grade)
+[![General Workflow](https://github.com/kleister/kleister-api/actions/workflows/general.yml/badge.svg)](https://github.com/kleister/kleister-api/actions/workflows/general.yml) [![Join the Matrix chat at https://matrix.to/#/#kleister:matrix.org](https://img.shields.io/badge/matrix-%23kleister-7bc9a4.svg)](https://matrix.to/#/#kleister:matrix.org) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c4d0c564f786486c93e37d62db312746)](https://www.codacy.com/gh/kleister/kleister-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kleister/kleister-api&amp;utm_campaign=Badge_Grade) [![Go Reference](https://pkg.go.dev/badge/github.com/kleister/kleister-api.svg)](https://pkg.go.dev/github.com/kleister/kleister-api) [![GitHub Repo](https://img.shields.io/badge/github-repo-yellowgreen)](https://github.com/kleister/kleister-api)
 
 Kleister is a web UI to manage mod packs for the Minecraft, initially focused on
 the Technic Launcher and MCUpdater. Even if there is an upstream version
@@ -12,16 +12,17 @@ docker images works pretty cool.
 
 ## Install
 
-You can download prebuilt binaries from our [GitHub releases][releases], or you
-can use our Docker images published on [Docker Hub][dockerhub] or [Quay][quay].
-If you need further guidance how to install this take a look at our
-[documentation][docs].
+You can download prebuilt binaries from the [GitHub releases][releases] or from
+our [download site][downloads]. If you prefer to use containers you could use
+our images published on [Docker Hub][dockerhub] or [Quay][quay]. You are a Mac
+user? Just take a look at our [homebrew formula][homebrew]. If you need further
+guidance how to install this take a look at our [documentation][docs].
 
 ## Development
 
 Make sure you have a working Go environment, for further reference or a guide
 take a look at the [install instructions][golang]. This project requires
-Go >= v1.17, at least that's the version we are using.
+Go >= v1.18, at least that's the version we are using.
 
 ```console
 git clone https://github.com/kleister/kleister-api.git
@@ -56,6 +57,8 @@ Copyright (c) 2018 Thomas Boerger <thomas@webhippie.de>
 ```
 
 [releases]: https://github.com/kleister/kleister-api/releases
+[downloads]: https://dl.kleister.eu/api
+[homebrew]: https://github.com/kleister/homebrew-kleister
 [dockerhub]: https://hub.docker.com/r/kleister/kleister-api/tags/
 [quay]: https://quay.io/repository/kleister/kleister-api?tab=tags
 [docs]: https://kleister.eu/

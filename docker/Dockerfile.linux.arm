@@ -3,7 +3,7 @@ RUN apk add --no-cache ca-certificates mailcap
 
 FROM scratch
 
-EXPOSE 8080 8090
+EXPOSE 8000 8080
 VOLUME ["/var/lib/kleister"]
 ENTRYPOINT ["/usr/bin/kleister-api"]
 CMD ["server"]
@@ -11,7 +11,7 @@ CMD ["server"]
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/mime.types /etc/
 
-ENV KLEISTER_API_DB_DSN boltdb:///var/lib/kleister/database.db
+ENV KLEISTER_API_DB_DSN sqlite:///var/lib/kleister/database.sqlite3
 ENV KLEISTER_API_UPLOAD_DSN file:///var/lib/kleister/uploads
 
 COPY bin/kleister-api /usr/bin/kleister-api
