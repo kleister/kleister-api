@@ -8,7 +8,7 @@ name: changes
 
 jobs:
   changelog:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source
@@ -21,7 +21,7 @@ jobs:
         id: golang
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18.1
+          go-version: ^1.19.0
 
       - name: Run changelog
         id: changelog
@@ -34,12 +34,12 @@ jobs:
           author_name: GitHub Actions
           author_email: github@kleister.eu
           add: CHANGELOG.md
-          message: Automated changelog update
+          message: "docs: automated changelog update"
           push: true
           commit: --signoff
 
-  generate:
-    runs-on: ubuntu-20.04
+  mocks:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source
@@ -52,11 +52,11 @@ jobs:
         id: golang
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18.1
+          go-version: ^1.19.0
 
-      - name: Run generate
-        id: generate
-        run: make generate
+      - name: Run mocks
+        id: mocks
+        run: make mocks
 
       - name: Commit changes
         id: commit
@@ -65,8 +65,8 @@ jobs:
           author_name: GitHub Actions
           author_email: github@kleister.eu
           add: |
-            pkg/api/v1
-          message: Automated generate update
+            **/mock.go
+          message: "ci: automated mocks update"
           push: true
           commit: --signoff
 

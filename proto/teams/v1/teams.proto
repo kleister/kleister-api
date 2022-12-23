@@ -1,0 +1,69 @@
+syntax = "proto3";
+package teams.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service TeamsService {
+	rpc List(ListRequest) returns (ListResponse);
+	rpc Create(CreateRequest) returns (CreateResponse);
+	rpc Update(UpdateRequest) returns (UpdateResponse);
+	rpc Show(ShowRequest) returns (ShowResponse);
+	rpc Delete(DeleteRequest) returns (DeleteResponse);
+}
+
+message ListRequest {}
+
+message ListResponse {
+	repeated Team teams = 1;
+}
+
+message CreateRequest {
+	CreateTeam team = 1;
+}
+
+message CreateTeam {
+	string slug = 2;
+	string name = 3;
+}
+
+message CreateResponse {
+	Team team = 1;
+}
+
+message UpdateRequest {
+	string id = 1;
+	UpdateTeam team = 2;
+}
+
+message UpdateTeam {
+	optional string slug = 2;
+	optional string name = 3;
+}
+
+message UpdateResponse {
+	Team team = 1;
+}
+
+message ShowRequest {
+	string id = 1;
+}
+
+message ShowResponse {
+	Team team = 1;
+}
+
+message DeleteRequest {
+	string id = 1;
+}
+
+message DeleteResponse {
+	string message = 1;
+}
+
+message Team {
+	string id = 1;
+	string slug = 2;
+	string name = 3;
+	google.protobuf.Timestamp created_at = 4;
+	google.protobuf.Timestamp updated_at = 5;
+}

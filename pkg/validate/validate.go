@@ -18,5 +18,8 @@ type (
 )
 
 func (e Errors) Error() string {
+	for _, err := range e.Errors {
+		fmt.Println(err)
+	}
 	return fmt.Sprintf("there are %d validation errors", len(e.Errors))
 }

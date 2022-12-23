@@ -13,31 +13,39 @@ import (
 	"github.com/kleister/kleister-api/pkg/metrics"
 	"github.com/kleister/kleister-api/pkg/middleware/requestid"
 	"github.com/kleister/kleister-api/pkg/router"
-	"github.com/kleister/kleister-api/pkg/service/builds"
-	"github.com/kleister/kleister-api/pkg/service/forge"
-	"github.com/kleister/kleister-api/pkg/service/minecraft"
-	"github.com/kleister/kleister-api/pkg/service/mods"
-	"github.com/kleister/kleister-api/pkg/service/packs"
+	"github.com/kleister/kleister-api/pkg/service/members"
+	membersRepository "github.com/kleister/kleister-api/pkg/service/members/repository"
 	"github.com/kleister/kleister-api/pkg/service/teams"
+	teamsRepository "github.com/kleister/kleister-api/pkg/service/teams/repository"
 	"github.com/kleister/kleister-api/pkg/service/users"
-	"github.com/kleister/kleister-api/pkg/service/versions"
+	usersRepository "github.com/kleister/kleister-api/pkg/service/users/repository"
 	"github.com/oklog/run"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 // Server provides the sub-command to start the server.
 func Server(cfg *config.Config) *cli.Command {
 	return &cli.Command{
 		Name:   "server",
-		Usage:  "start integrated server",
-		Flags:  serverFlags(cfg),
-		Action: serverAction(cfg),
+		Usage:  "Start integrated server",
+		Flags:  ServerFlags(cfg),
+		Action: ServerAction(cfg),
 	}
 }
 
-func serverFlags(cfg *config.Config) []cli.Flag {
+// ServerFlags defines server flags.
+func ServerFlags(cfg *config.Config) []cli.Flag {
 	return []cli.Flag{
+		&cli.BoolFlag{
+			Name:        "debug-pprof",
+			Value:       false,
+			Usage:       "Enable pprof debugging",
+			EnvVars:     []string{"KLEISTER_API_DEBUG_PPROF"},
+			Destination: &cfg.Metrics.Pprof,
+		},
 		&cli.StringFlag{
 			Name:        "metrics-addr",
 			Value:       defaultMetricsAddr,
@@ -51,6 +59,7 @@ func serverFlags(cfg *config.Config) []cli.Flag {
 			Usage:       "Token to make metrics secure",
 			EnvVars:     []string{"KLEISTER_API_METRICS_TOKEN"},
 			Destination: &cfg.Metrics.Token,
+			FilePath:    "/etc/kleister/secrets/metrics-token",
 		},
 		&cli.StringFlag{
 			Name:        "server-addr",
@@ -58,20 +67,6 @@ func serverFlags(cfg *config.Config) []cli.Flag {
 			Usage:       "Address to bind the server",
 			EnvVars:     []string{"KLEISTER_API_SERVER_ADDR"},
 			Destination: &cfg.Server.Addr,
-		},
-		&cli.BoolFlag{
-			Name:        "server-pprof",
-			Value:       false,
-			Usage:       "Enable pprof debugging",
-			EnvVars:     []string{"KLEISTER_API_SERVER_PPROF"},
-			Destination: &cfg.Server.Pprof,
-		},
-		&cli.BoolFlag{
-			Name:        "server-docs",
-			Value:       true,
-			Usage:       "Enable swagger documentation",
-			EnvVars:     []string{"KLEISTER_API_SERVER_DOCS"},
-			Destination: &cfg.Server.Docs,
 		},
 		&cli.StringFlag{
 			Name:        "server-host",
@@ -88,11 +83,26 @@ func serverFlags(cfg *config.Config) []cli.Flag {
 			Destination: &cfg.Server.Root,
 		},
 		&cli.StringFlag{
-			Name:        "db-dsn",
-			Value:       "boltdb://storage/kleister.db",
+			Name:        "server-cert",
+			Value:       "",
+			Usage:       "Path to SSL cert",
+			EnvVars:     []string{"KLEISTER_API_SERVER_CERT"},
+			Destination: &cfg.Server.Cert,
+		},
+		&cli.StringFlag{
+			Name:        "server-key",
+			Value:       "",
+			Usage:       "Path to SSL key",
+			EnvVars:     []string{"KLEISTER_API_SERVER_KEY"},
+			Destination: &cfg.Server.Key,
+		},
+		&cli.StringFlag{
+			Name:        "database-dsn",
+			Value:       "sqlite3://storage/kleister.db",
 			Usage:       "Database dsn",
-			EnvVars:     []string{"KLEISTER_API_DB_DSN"},
+			EnvVars:     []string{"KLEISTER_API_DATABASE_DSN"},
 			Destination: &cfg.Database.DSN,
+			FilePath:    "/etc/kleister/secrets/database-dsn",
 		},
 		&cli.StringFlag{
 			Name:        "upload-dsn",
@@ -100,6 +110,7 @@ func serverFlags(cfg *config.Config) []cli.Flag {
 			Usage:       "Uploads dsn",
 			EnvVars:     []string{"KLEISTER_API_UPLOAD_DSN"},
 			Destination: &cfg.Upload.DSN,
+			FilePath:    "/etc/kleister/secrets/upload-dsn",
 		},
 		&cli.DurationFlag{
 			Name:        "session-expire",
@@ -114,6 +125,7 @@ func serverFlags(cfg *config.Config) []cli.Flag {
 			Usage:       "Session encryption secret",
 			EnvVars:     []string{"KLEISTER_API_SESSION_SECRET"},
 			Destination: &cfg.Session.Secret,
+			FilePath:    "/etc/kleister/secrets/session-secret",
 		},
 		&cli.BoolFlag{
 			Name:        "admin-create",
@@ -128,6 +140,7 @@ func serverFlags(cfg *config.Config) []cli.Flag {
 			Usage:       "Initial admin username",
 			EnvVars:     []string{"KLEISTER_API_ADMIN_USERNAME"},
 			Destination: &cfg.Admin.Username,
+			FilePath:    "/etc/kleister/secrets/admin-username",
 		},
 		&cli.StringFlag{
 			Name:        "admin-password",
@@ -135,6 +148,7 @@ func serverFlags(cfg *config.Config) []cli.Flag {
 			Usage:       "Initial admin password",
 			EnvVars:     []string{"KLEISTER_API_ADMIN_PASSWORD"},
 			Destination: &cfg.Admin.Password,
+			FilePath:    "/etc/kleister/secrets/admin-password",
 		},
 		&cli.StringFlag{
 			Name:        "admin-email",
@@ -142,51 +156,27 @@ func serverFlags(cfg *config.Config) []cli.Flag {
 			Usage:       "Initial admin email",
 			EnvVars:     []string{"KLEISTER_API_ADMIN_EMAIL"},
 			Destination: &cfg.Admin.Email,
-		},
-		&cli.BoolFlag{
-			Name:        "tracing-enabled",
-			Value:       false,
-			Usage:       "Enable open tracing",
-			EnvVars:     []string{"KLEISTER_API_TRACING_ENABLED"},
-			Destination: &cfg.Tracing.Enabled,
-		},
-		&cli.StringFlag{
-			Name:        "tracing-endpoint",
-			Value:       "",
-			Usage:       "Open tracing endpoint",
-			EnvVars:     []string{"KLEISTER_API_TRACING_ENDPOINT"},
-			Destination: &cfg.Tracing.Endpoint,
+			FilePath:    "/etc/kleister/secrets/admin-email",
 		},
 	}
 }
 
-func serverAction(cfg *config.Config) cli.ActionFunc {
+// ServerAction defines server action.
+func ServerAction(cfg *config.Config) cli.ActionFunc {
 	return func(c *cli.Context) error {
-		tracing, err := setupTracing(cfg)
-
-		if err != nil {
-			log.Fatal().
-				Err(err).
-				Msg("failed to setup tracing")
-		}
-
-		if tracing != nil {
-			defer tracing.Close()
-		}
-
 		uploads, err := setupUploads(cfg)
 
 		if err != nil {
 			log.Fatal().
 				Err(err).
-				Msg("failed to setup uploads")
+				Msg("Failed to setup uploads")
 
 			return err
 		}
 
 		log.Info().
 			Fields(uploads.Info()).
-			Msg("preparing uploads")
+			Msg("Preparing uploads")
 
 		if uploads != nil {
 			defer uploads.Close()
@@ -197,14 +187,14 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 		if err != nil {
 			log.Fatal().
 				Err(err).
-				Msg("failed to setup database")
+				Msg("Failed to setup database")
 
 			return err
 		}
 
 		log.Info().
 			Fields(storage.Info()).
-			Msg("preparing database")
+			Msg("Preparing database")
 
 		if storage != nil {
 			defer storage.Close()
@@ -216,12 +206,12 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 			func(err error, dur time.Duration) {
 				log.Warn().
 					Dur("retry", dur).
-					Msg("database open failed")
+					Msg("Database open failed")
 			},
 		); err != nil {
 			log.Fatal().
 				Err(err).
-				Msg("giving up to connect to db")
+				Msg("Giving up to connect to db")
 
 			return err
 		}
@@ -232,12 +222,12 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 			func(err error, dur time.Duration) {
 				log.Warn().
 					Dur("retry", dur).
-					Msg("database ping failed")
+					Msg("Database ping failed")
 			},
 		); err != nil {
 			log.Fatal().
 				Err(err).
-				Msg("giving up to ping the db")
+				Msg("Giving up to ping the db")
 
 			return err
 		}
@@ -245,7 +235,7 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 		if err := storage.Migrate(); err != nil {
 			log.Fatal().
 				Err(err).
-				Msg("failed to migrate database")
+				Msg("Failed to migrate database")
 		}
 
 		if cfg.Admin.Create {
@@ -261,138 +251,86 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 					Str("username", cfg.Admin.Username).
 					Str("password", cfg.Admin.Password).
 					Str("email", cfg.Admin.Email).
-					Msg("failed to create admin")
+					Msg("Failed to create admin")
 			} else {
 				log.Info().
 					Str("username", cfg.Admin.Username).
 					Str("password", cfg.Admin.Password).
 					Str("email", cfg.Admin.Email).
-					Msg("admin successfully stored")
+					Msg("Admin successfully stored")
 			}
 		}
 
-		metrics := metrics.New()
-
-		teamsService := teams.NewTracingService(
-			teams.NewMetricsService(
-				teams.NewLoggingService(
-					teams.NewService(
-						storage.Teams(),
-					),
-					requestid.Get,
-				),
-				metrics,
-			),
-			requestid.Get,
-		)
-
-		usersService := users.NewTracingService(
-			users.NewMetricsService(
-				users.NewLoggingService(
-					users.NewService(
-						storage.Users(),
-					),
-					requestid.Get,
-				),
-				metrics,
-			),
-			requestid.Get,
-		)
-
-		packsService := packs.NewTracingService(
-			packs.NewMetricsService(
-				packs.NewLoggingService(
-					packs.NewService(
-						storage.Packs(),
-					),
-					requestid.Get,
-				),
-				metrics,
-			),
-			requestid.Get,
-		)
-
-		buildsService := builds.NewTracingService(
-			builds.NewMetricsService(
-				builds.NewLoggingService(
-					builds.NewService(
-						storage.Builds(),
-					),
-					requestid.Get,
-				),
-				metrics,
-			),
-			requestid.Get,
-		)
-
-		modsService := mods.NewTracingService(
-			mods.NewMetricsService(
-				mods.NewLoggingService(
-					mods.NewService(
-						storage.Mods(),
-					),
-					requestid.Get,
-				),
-				metrics,
-			),
-			requestid.Get,
-		)
-
-		versionsService := versions.NewTracingService(
-			versions.NewMetricsService(
-				versions.NewLoggingService(
-					versions.NewService(
-						storage.Versions(),
-					),
-					requestid.Get,
-				),
-				metrics,
-			),
-			requestid.Get,
-		)
-
-		minecraftService := minecraft.NewTracingService(
-			minecraft.NewMetricsService(
-				minecraft.NewLoggingService(
-					minecraft.NewService(
-						storage.Minecraft(),
-					),
-					requestid.Get,
-				),
-				metrics,
-			),
-			requestid.Get,
-		)
-
-		forgeService := forge.NewTracingService(
-			forge.NewMetricsService(
-				forge.NewLoggingService(
-					forge.NewService(
-						storage.Forge(),
-					),
-					requestid.Get,
-				),
-				metrics,
-			),
-			requestid.Get,
-		)
-
-		var gr run.Group
+		metricz := metrics.New()
+		gr := run.Group{}
 
 		{
+			routing := router.Server(
+				cfg,
+				uploads,
+			)
+
+			usersRepo := usersRepository.NewMetricsRepository(
+				usersRepository.NewLoggingRepository(
+					usersRepository.NewGormRepository(
+						storage.Handle(),
+					),
+					requestid.Get,
+				),
+				metricz,
+			)
+
+			users.RegisterServer(
+				cfg,
+				uploads,
+				metricz,
+				usersRepo,
+				routing,
+			)
+
+			teamsRepo := teamsRepository.NewMetricsRepository(
+				teamsRepository.NewLoggingRepository(
+					teamsRepository.NewGormRepository(
+						storage.Handle(),
+					),
+					requestid.Get,
+				),
+				metricz,
+			)
+
+			teams.RegisterServer(
+				cfg,
+				uploads,
+				metricz,
+				teamsRepo,
+				routing,
+			)
+
+			membersRepo := membersRepository.NewMetricsRepository(
+				membersRepository.NewLoggingRepository(
+					membersRepository.NewGormRepository(
+						storage.Handle(),
+						teamsRepo,
+						usersRepo,
+					),
+					requestid.Get,
+				),
+				metricz,
+			)
+
+			members.RegisterServer(
+				cfg,
+				uploads,
+				metricz,
+				membersRepo,
+				routing,
+			)
+
 			server := &http.Server{
 				Addr: cfg.Server.Addr,
-				Handler: router.Server(
-					cfg,
-					uploads,
-					usersService,
-					teamsService,
-					packsService,
-					buildsService,
-					modsService,
-					versionsService,
-					minecraftService,
-					forgeService,
+				Handler: h2c.NewHandler(
+					routing,
+					&http2.Server{},
 				),
 				ReadTimeout:  5 * time.Second,
 				WriteTimeout: 10 * time.Second,
@@ -401,7 +339,14 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 			gr.Add(func() error {
 				log.Info().
 					Str("addr", cfg.Server.Addr).
-					Msg("starting http server")
+					Msg("Starting HTTP server")
+
+				if cfg.Server.Cert != "" && cfg.Server.Key != "" {
+					return server.ListenAndServeTLS(
+						cfg.Server.Cert,
+						cfg.Server.Key,
+					)
+				}
 
 				return server.ListenAndServe()
 			}, func(reason error) {
@@ -411,23 +356,28 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 				if err := server.Shutdown(ctx); err != nil {
 					log.Error().
 						Err(err).
-						Msg("failed to shutdown http gracefully")
+						Msg("Failed to shutdown HTTP gracefully")
 
 					return
 				}
 
 				log.Info().
 					Err(reason).
-					Msg("http shutdown gracefully")
+					Msg("HTTP shutdown gracefully")
 			})
 		}
 
 		{
+			routing := router.Metrics(
+				cfg,
+				metricz,
+			)
+
 			server := &http.Server{
 				Addr: cfg.Metrics.Addr,
-				Handler: router.Metrics(
-					cfg,
-					metrics,
+				Handler: h2c.NewHandler(
+					routing,
+					&http2.Server{},
 				),
 				ReadTimeout:  5 * time.Second,
 				WriteTimeout: 10 * time.Second,
@@ -436,7 +386,7 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 			gr.Add(func() error {
 				log.Info().
 					Str("addr", cfg.Metrics.Addr).
-					Msg("starting metrics server")
+					Msg("Starting metrics server")
 
 				return server.ListenAndServe()
 			}, func(reason error) {
@@ -446,14 +396,14 @@ func serverAction(cfg *config.Config) cli.ActionFunc {
 				if err := server.Shutdown(ctx); err != nil {
 					log.Error().
 						Err(err).
-						Msg("failed to shutdown metrics gracefully")
+						Msg("Failed to shutdown metrics gracefully")
 
 					return
 				}
 
 				log.Info().
 					Err(reason).
-					Msg("metrics shutdown gracefully")
+					Msg("Metrics shutdown gracefully")
 			})
 		}
 

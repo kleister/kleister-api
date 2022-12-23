@@ -10,7 +10,7 @@ name: docker
 
 jobs:
   docker:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -38,7 +38,7 @@ jobs:
         id: golang
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18.1
+          go-version: ^1.19.0
 
       - name: Run build
         id: build
@@ -106,7 +106,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
   manifest:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: docker
 
     steps:
@@ -161,7 +161,7 @@ jobs:
           ignore_missing: true
 
   readme:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: docker
 
     steps:

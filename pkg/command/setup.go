@@ -1,69 +1,28 @@
 package command
 
 import (
-	"io"
 	"net/url"
 	"os"
 	"strings"
 
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/store"
-	"github.com/kleister/kleister-api/pkg/store/boltdb"
-	"github.com/kleister/kleister-api/pkg/store/gormdb"
 	"github.com/kleister/kleister-api/pkg/upload"
-	"github.com/kleister/kleister-api/pkg/upload/file"
-	"github.com/kleister/kleister-api/pkg/upload/s3"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	"github.com/uber/jaeger-client-go"
-	tracecfg "github.com/uber/jaeger-client-go/config"
 )
 
-func setupConfig(cfg *config.Config) error {
-	if cfg.File != "" {
-		viper.SetConfigFile(cfg.File)
-	} else {
-		viper.SetConfigName("api")
-
-		viper.AddConfigPath("/etc/kleister")
-		viper.AddConfigPath("$HOME/.kleister")
-		viper.AddConfigPath("./config")
-	}
-
-	if err := viper.ReadInConfig(); err != nil {
-		switch err.(type) {
-		case viper.ConfigFileNotFoundError:
-			log.Info().
-				Msg("continue without config")
-		case viper.UnsupportedConfigError:
-			log.Fatal().
-				Err(err).
-				Msg("unsupported config type")
-
-			return err
-		default:
-			log.Fatal().
-				Err(err).
-				Msg("failed to read config")
-
-			return err
-		}
-	}
-
-	if err := viper.Unmarshal(&cfg); err != nil {
-		log.Fatal().
-			Err(err).
-			Msg("failed to parse config")
-
+func setup(cfg *config.Config) error {
+	if err := setupLogger(cfg); err != nil {
 		return err
 	}
 
-	return nil
+	return setupConfig(cfg)
 }
 
-func setupLogger(cfg *config.Config) {
+func setupLogger(cfg *config.Config) error {
 	switch strings.ToLower(cfg.Logs.Level) {
 	case "panic":
 		zerolog.SetGlobalLevel(zerolog.PanicLevel)
@@ -91,36 +50,50 @@ func setupLogger(cfg *config.Config) {
 			},
 		)
 	}
+
+	return nil
 }
 
-func setupTracing(cfg *config.Config) (io.Closer, error) {
-	switch {
-	case cfg.Tracing.Enabled:
-		closer, err := tracecfg.Configuration{
-			Sampler: &tracecfg.SamplerConfig{
-				Type:  jaeger.SamplerTypeConst,
-				Param: 1,
-			},
-			Reporter: &tracecfg.ReporterConfig{
-				LocalAgentHostPort: cfg.Tracing.Endpoint,
-			},
-		}.InitGlobalTracer("kleister-api")
+func setupConfig(cfg *config.Config) error {
+	if cfg.File != "" {
+		viper.SetConfigFile(cfg.File)
+	} else {
+		viper.SetConfigName("api")
 
-		if err != nil {
-			return nil, err
-		}
-
-		log.Info().
-			Str("addr", cfg.Tracing.Endpoint).
-			Msg("application tracing is enabled")
-
-		return closer, nil
-	default:
-		log.Info().
-			Msg("application tracing is disabled")
-
-		return nil, nil
+		viper.AddConfigPath("/etc/kleister")
+		viper.AddConfigPath("$HOME/.kleister")
+		viper.AddConfigPath("./config")
 	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		switch err.(type) {
+		case viper.ConfigFileNotFoundError:
+			log.Info().
+				Msg("Continue without config")
+		case viper.UnsupportedConfigError:
+			log.Fatal().
+				Err(err).
+				Msg("Unsupported config type")
+
+			return err
+		default:
+			log.Fatal().
+				Err(err).
+				Msg("Failed to read config")
+
+			return err
+		}
+	}
+
+	if err := viper.Unmarshal(&cfg); err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Failed to parse config")
+
+		return err
+	}
+
+	return nil
 }
 
 func setupUploads(cfg *config.Config) (upload.Upload, error) {
@@ -132,11 +105,11 @@ func setupUploads(cfg *config.Config) (upload.Upload, error) {
 
 	switch parsed.Scheme {
 	case "file":
-		return file.New(cfg.Upload)
+		return upload.NewFileUpload(cfg.Upload)
 	case "s3":
-		return s3.New(cfg.Upload)
+		return upload.NewS3Upload(cfg.Upload)
 	case "minio":
-		return s3.New(cfg.Upload)
+		return upload.NewS3Upload(cfg.Upload)
 	}
 
 	return nil, upload.ErrUnknownDriver
@@ -150,12 +123,12 @@ func setupStorage(cfg *config.Config) (store.Store, error) {
 	}
 
 	switch parsed.Scheme {
-	case "boltdb":
-		return boltdb.New(cfg.Database)
+	case "sqlite", "sqlite3":
+		return store.NewGormStore(cfg.Database)
 	case "mysql", "mariadb":
-		return gormdb.New(cfg.Database)
+		return store.NewGormStore(cfg.Database)
 	case "postgres", "postgresql":
-		return gormdb.New(cfg.Database)
+		return store.NewGormStore(cfg.Database)
 	}
 
 	return nil, store.ErrUnknownDriver
