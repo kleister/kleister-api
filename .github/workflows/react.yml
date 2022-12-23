@@ -26,6 +26,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: dessant/reaction-comments@v2
+      - uses: dessant/reaction-comments@v3
 
 ...
