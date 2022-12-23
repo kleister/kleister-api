@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/Machiel/slugify v1.0.1
-	github.com/aws/aws-sdk-go v1.44.166
+	github.com/aws/aws-sdk-go v1.44.167
 	github.com/bufbuild/connect-go v1.4.1
 	github.com/bufbuild/connect-grpchealth-go v1.0.0
 	github.com/bufbuild/connect-grpcreflect-go v1.0.0
@@ -15,6 +15,7 @@ require (
 	github.com/go-gormigrate/gormigrate/v2 v2.0.2
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/golang/mock v1.6.0
+	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
 	github.com/oklog/run v1.1.0
@@ -39,7 +40,6 @@ require (
 	github.com/glebarez/go-sqlite v1.20.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.13.0 // indirect
