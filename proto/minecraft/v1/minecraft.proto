@@ -1,0 +1,34 @@
+syntax = "proto3";
+package minecraft.v1;
+
+import "types/v1/build.proto";
+import "types/v1/minecraft.proto";
+
+service MinecraftsService {
+  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc Update(UpdateRequest) returns (UpdateResponse);
+
+  rpc ListBuilds(ListBuildsRequest) returns (ListBuildsResponse);
+}
+
+message SearchRequest {
+  string query = 1;
+}
+
+message SearchResponse {
+  repeated types.v1.Minecraft result = 1;
+}
+
+message UpdateRequest {}
+
+message UpdateResponse {
+  string message = 1;
+}
+
+message ListBuildsRequest {
+  string query = 1;
+}
+
+message ListBuildsResponse {
+  repeated types.v1.Build builds = 1;
+}

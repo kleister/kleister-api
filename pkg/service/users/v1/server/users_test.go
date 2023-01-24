@@ -12,6 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/model"
+	types "github.com/kleister/kleister-api/pkg/service/types/v1"
 	"github.com/kleister/kleister-api/pkg/service/users/repository"
 	users "github.com/kleister/kleister-api/pkg/service/users/v1"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -25,7 +26,7 @@ func TestList(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	want := []*users.User{
+	want := []*types.User{
 		{
 			Id:        "dd5c7e72-4d42-4b9a-af85-45f792711e85",
 			Slug:      "user1",
@@ -78,7 +79,7 @@ func TestList(t *testing.T) {
 		got.Msg.Users,
 		want,
 		cmpopts.IgnoreUnexported(
-			users.User{},
+			types.User{},
 			timestamppb.Timestamp{},
 		),
 	); diff != "" {

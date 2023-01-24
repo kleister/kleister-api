@@ -7,6 +7,7 @@ import (
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/service/teams/repository"
 	teams "github.com/kleister/kleister-api/pkg/service/teams/v1"
+	types "github.com/kleister/kleister-api/pkg/service/types/v1"
 	"github.com/kleister/kleister-api/pkg/validate"
 	"github.com/rs/zerolog/log"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -34,7 +35,7 @@ func (s *TeamsServer) List(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	payload := make([]*teams.Team, len(records))
+	payload := make([]*types.Team, len(records))
 	for id, record := range records {
 		payload[id] = convertTeam(record)
 	}
@@ -62,8 +63,8 @@ func (s *TeamsServer) Create(
 
 	record := &model.Team{}
 
-	if req.Msg.Team.Slug != "" {
-		record.Slug = req.Msg.Team.Slug
+	if req.Msg.Team.Slug != nil {
+		record.Slug = *req.Msg.Team.Slug
 	}
 
 	if req.Msg.Team.Name != "" {
@@ -221,8 +222,8 @@ func (s *TeamsServer) Delete(
 	}), nil
 }
 
-func convertTeam(record *model.Team) *teams.Team {
-	return &teams.Team{
+func convertTeam(record *model.Team) *types.Team {
+	return &types.Team{
 		Id:        record.ID,
 		Slug:      record.Slug,
 		Name:      record.Name,

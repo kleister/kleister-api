@@ -1,86 +1,168 @@
 syntax = "proto3";
 package users.v1;
 
-import "google/protobuf/timestamp.proto";
+import "types/v1/mod.proto";
+import "types/v1/pack.proto";
+import "types/v1/team.proto";
+import "types/v1/user.proto";
 
 service UsersService {
-	rpc List(ListRequest) returns (ListResponse);
-	rpc Create(CreateRequest) returns (CreateResponse);
-	rpc Update(UpdateRequest) returns (UpdateResponse);
-	rpc Show(ShowRequest) returns (ShowResponse);
-	rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc Update(UpdateRequest) returns (UpdateResponse);
+  rpc Show(ShowRequest) returns (ShowResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+
+  rpc ListTeams(ListTeamsRequest) returns (ListTeamsResponse);
+  rpc AttachTeam(AttachTeamRequest) returns (AttachTeamResponse);
+  rpc DropTeam(DropTeamRequest) returns (DropTeamResponse);
+
+  rpc ListPacks(ListPacksRequest) returns (ListPacksResponse);
+  rpc AttachPack(AttachPackRequest) returns (AttachPackResponse);
+  rpc DropPack(DropPackRequest) returns (DropPackResponse);
+
+  rpc ListMods(ListModsRequest) returns (ListModsResponse);
+  rpc AttachMod(AttachModRequest) returns (AttachModResponse);
+  rpc DropMod(DropModRequest) returns (DropModResponse);
 }
 
-message ListRequest {}
+message ListRequest {
+  string query = 1;
+}
 
 message ListResponse {
-	repeated User users = 1;
+  repeated types.v1.User users = 1;
 }
 
 message CreateRequest {
-	CreateUser user = 1;
+  CreateUser user = 1;
 }
 
 message CreateUser {
-	string slug = 1;
-	string username = 2;
-	string password = 3;
-	string email = 4;
-	string firstname = 5;
-	string lastname = 6;
-	bool admin = 7;
-	bool active = 8;
+  optional string slug = 1;
+  string username = 2;
+  string password = 3;
+  string email = 4;
+  optional string firstname = 5;
+  optional string lastname = 6;
+  bool admin = 7;
+  bool active = 8;
 }
 
 message CreateResponse {
-	User user = 1;
+  types.v1.User user = 1;
 }
 
 message UpdateRequest {
-	string id = 1;
-	UpdateUser user = 2;
+  string id = 1;
+  UpdateUser user = 2;
 }
 
 message UpdateUser {
-	optional string slug = 1;
-	optional string username = 2;
-	optional string password = 3;
-	optional string email = 4;
-	optional string firstname = 5;
-	optional string lastname = 6;
-	optional bool admin = 7;
-	optional bool active = 8;
+  optional string slug = 1;
+  optional string username = 2;
+  optional string password = 3;
+  optional string email = 4;
+  optional string firstname = 5;
+  optional string lastname = 6;
+  optional bool admin = 7;
+  optional bool active = 8;
 }
 
 message UpdateResponse {
-	User user = 1;
+  types.v1.User user = 1;
 }
 
 message ShowRequest {
-	string id = 1;
+  string id = 1;
 }
 
 message ShowResponse {
-	User user = 1;
+  types.v1.User user = 1;
 }
 
 message DeleteRequest {
-	string id = 1;
+  string id = 1;
 }
 
 message DeleteResponse {
-	string message = 1;
+  string message = 1;
 }
 
-message User {
-	string id = 1;
-	string slug = 2;
-	string username = 3;
-	string email = 4;
-	string firstname = 5;
-	string lastname = 6;
-	bool admin = 7;
-	bool active = 8;
-	google.protobuf.Timestamp created_at = 9;
-	google.protobuf.Timestamp updated_at = 10;
+message ListTeamsRequest {
+  string user = 1;
+}
+
+message ListTeamsResponse {
+  repeated types.v1.Team teams = 1;
+}
+
+message AttachTeamRequest {
+  string user = 1;
+  string team = 2;
+}
+
+message AttachTeamResponse {
+  string message = 1;
+}
+
+message DropTeamRequest {
+  string user = 1;
+  string team = 2;
+}
+
+message DropTeamResponse {
+  string message = 1;
+}
+
+message ListPacksRequest {
+  string user = 1;
+}
+
+message ListPacksResponse {
+  repeated types.v1.Pack packs = 1;
+}
+
+message AttachPackRequest {
+  string user = 1;
+  string pack = 2;
+}
+
+message AttachPackResponse {
+  string message = 1;
+}
+
+message DropPackRequest {
+  string user = 1;
+  string pack = 2;
+}
+
+message DropPackResponse {
+  string message = 1;
+}
+
+message ListModsRequest {
+  string user = 1;
+}
+
+message ListModsResponse {
+  repeated types.v1.Mod mods = 1;
+}
+
+message AttachModRequest {
+  string user = 1;
+  string mod = 2;
+}
+
+message AttachModResponse {
+  string message = 1;
+}
+
+message DropModRequest {
+  string user = 1;
+  string mod = 2;
+}
+
+message DropModResponse {
+  string message = 1;
 }

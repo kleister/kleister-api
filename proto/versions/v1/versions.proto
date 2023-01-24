@@ -1,0 +1,106 @@
+syntax = "proto3";
+package versions.v1;
+
+import "types/v1/build.proto";
+import "types/v1/version.proto";
+
+service VersionsService {
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc Update(UpdateRequest) returns (UpdateResponse);
+  rpc Show(ShowRequest) returns (ShowResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+
+  rpc ListBuilds(ListBuildsRequest) returns (ListBuildsResponse);
+  rpc AttachBuild(AttachBuildRequest) returns (AttachBuildResponse);
+  rpc DropBuild(DropBuildRequest) returns (DropBuildResponse);
+}
+
+message ListRequest {
+  string mod = 1;
+  string query = 2;
+}
+
+message ListResponse {
+  repeated types.v1.Version versions = 1;
+}
+
+message CreateRequest {
+  string mod = 1;
+  CreateVersion version = 2;
+}
+
+message CreateVersion {
+  optional string slug = 1;
+  string name = 2;
+  string file = 3;
+}
+
+message CreateResponse {
+  types.v1.Version version = 1;
+}
+
+message UpdateRequest {
+  string mod = 1;
+  string id = 2;
+  UpdateVersion version = 3;
+}
+
+message UpdateVersion {
+  optional string slug = 1;
+  optional string name = 2;
+  optional string file = 3;
+}
+
+message UpdateResponse {
+  types.v1.Version version = 1;
+}
+
+message ShowRequest {
+  string mod = 1;
+  string id = 2;
+}
+
+message ShowResponse {
+  types.v1.Version version = 1;
+}
+
+message DeleteRequest {
+  string mod = 1;
+  string id = 2;
+}
+
+message DeleteResponse {
+  string message = 1;
+}
+
+message ListBuildsRequest {
+  string mod = 1;
+  string version = 2;
+}
+
+message ListBuildsResponse {
+  repeated types.v1.Build builds = 1;
+}
+
+message AttachBuildRequest {
+  string mod = 1;
+  string version = 2;
+  string pack = 3;
+  string build = 4;
+}
+
+message AttachBuildResponse {
+  string message = 1;
+}
+
+message DropBuildRequest {
+  string mod = 1;
+  string version = 2;
+  string pack = 3;
+  string build = 4;
+}
+
+message DropBuildResponse {
+  string message = 1;
+}

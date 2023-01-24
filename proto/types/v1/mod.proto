@@ -1,0 +1,19 @@
+syntax = "proto3";
+package types.v1;
+
+import "google/protobuf/timestamp.proto";
+import "types/v1/version.proto";
+
+message Mod {
+  string id = 1;
+  string slug = 2;
+  string name = 3;
+  string side = 4;
+  string description = 5;
+  string author = 6;
+  string website = 7;
+  string donate = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  repeated types.v1.Version versions = 14;
+}

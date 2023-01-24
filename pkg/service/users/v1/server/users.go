@@ -5,6 +5,7 @@ import (
 
 	"github.com/bufbuild/connect-go"
 	"github.com/kleister/kleister-api/pkg/model"
+	types "github.com/kleister/kleister-api/pkg/service/types/v1"
 	"github.com/kleister/kleister-api/pkg/service/users/repository"
 	users "github.com/kleister/kleister-api/pkg/service/users/v1"
 	"github.com/kleister/kleister-api/pkg/validate"
@@ -34,7 +35,7 @@ func (s *UsersServer) List(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	payload := make([]*users.User, len(records))
+	payload := make([]*types.User, len(records))
 	for id, record := range records {
 		payload[id] = convertUser(record)
 	}
@@ -62,8 +63,8 @@ func (s *UsersServer) Create(
 
 	record := &model.User{}
 
-	if req.Msg.User.Slug != "" {
-		record.Slug = req.Msg.User.Slug
+	if req.Msg.User.Slug != nil {
+		record.Slug = *req.Msg.User.Slug
 	}
 
 	if req.Msg.User.Username != "" {
@@ -78,12 +79,12 @@ func (s *UsersServer) Create(
 		record.Email = req.Msg.User.Email
 	}
 
-	if req.Msg.User.Firstname != "" {
-		record.Firstname = req.Msg.User.Firstname
+	if req.Msg.User.Firstname != nil {
+		record.Firstname = *req.Msg.User.Firstname
 	}
 
-	if req.Msg.User.Lastname != "" {
-		record.Lastname = req.Msg.User.Lastname
+	if req.Msg.User.Lastname != nil {
+		record.Lastname = *req.Msg.User.Lastname
 	}
 
 	record.Admin = req.Msg.User.Admin
@@ -264,8 +265,8 @@ func (s *UsersServer) Delete(
 	}), nil
 }
 
-func convertUser(record *model.User) *users.User {
-	return &users.User{
+func convertUser(record *model.User) *types.User {
+	return &types.User{
 		Id:        record.ID,
 		Slug:      record.Slug,
 		Username:  record.Username,

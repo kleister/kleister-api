@@ -7,6 +7,7 @@ import (
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/service/members/repository"
 	members "github.com/kleister/kleister-api/pkg/service/members/v1"
+	types "github.com/kleister/kleister-api/pkg/service/types/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -43,7 +44,7 @@ func (s *MembersServer) List(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	payload := make([]*members.Member, len(records))
+	payload := make([]*types.Member, len(records))
 	for id, record := range records {
 		payload[id] = convertMemberUser(record)
 	}
@@ -139,8 +140,8 @@ func (s *MembersServer) Drop(
 	}), nil
 }
 
-func convertMemberUser(record *model.Member) *members.Member {
-	return &members.Member{
+func convertMemberUser(record *model.Member) *types.Member {
+	return &types.Member{
 		TeamId:    record.Team.ID,
 		TeamSlug:  record.Team.Slug,
 		TeamName:  record.Team.Name,

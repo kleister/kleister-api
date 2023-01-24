@@ -1,69 +1,156 @@
 syntax = "proto3";
 package teams.v1;
 
-import "google/protobuf/timestamp.proto";
+import "types/v1/mod.proto";
+import "types/v1/pack.proto";
+import "types/v1/team.proto";
+import "types/v1/user.proto";
 
 service TeamsService {
-	rpc List(ListRequest) returns (ListResponse);
-	rpc Create(CreateRequest) returns (CreateResponse);
-	rpc Update(UpdateRequest) returns (UpdateResponse);
-	rpc Show(ShowRequest) returns (ShowResponse);
-	rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc Update(UpdateRequest) returns (UpdateResponse);
+  rpc Show(ShowRequest) returns (ShowResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc AttachUser(AttachUserRequest) returns (AttachUserResponse);
+  rpc DropUser(DropUserRequest) returns (DropUserResponse);
+
+  rpc ListPacks(ListPacksRequest) returns (ListPacksResponse);
+  rpc AttachPack(AttachPackRequest) returns (AttachPackResponse);
+  rpc DropPack(DropPackRequest) returns (DropPackResponse);
+
+  rpc ListMods(ListModsRequest) returns (ListModsResponse);
+  rpc AttachMod(AttachModRequest) returns (AttachModResponse);
+  rpc DropMod(DropModRequest) returns (DropModResponse);
 }
 
-message ListRequest {}
+message ListRequest {
+  string query = 1;
+}
 
 message ListResponse {
-	repeated Team teams = 1;
+  repeated types.v1.Team teams = 1;
 }
 
 message CreateRequest {
-	CreateTeam team = 1;
+  CreateTeam team = 1;
 }
 
 message CreateTeam {
-	string slug = 2;
-	string name = 3;
+  optional string slug = 1;
+  string name = 2;
 }
 
 message CreateResponse {
-	Team team = 1;
+  types.v1.Team team = 1;
 }
 
 message UpdateRequest {
-	string id = 1;
-	UpdateTeam team = 2;
+  string id = 1;
+  UpdateTeam team = 2;
 }
 
 message UpdateTeam {
-	optional string slug = 2;
-	optional string name = 3;
+  optional string slug = 1;
+  optional string name = 2;
 }
 
 message UpdateResponse {
-	Team team = 1;
+  types.v1.Team team = 1;
 }
 
 message ShowRequest {
-	string id = 1;
+  string id = 1;
 }
 
 message ShowResponse {
-	Team team = 1;
+  types.v1.Team team = 1;
 }
 
 message DeleteRequest {
-	string id = 1;
+  string id = 1;
 }
 
 message DeleteResponse {
-	string message = 1;
+  string message = 1;
 }
 
-message Team {
-	string id = 1;
-	string slug = 2;
-	string name = 3;
-	google.protobuf.Timestamp created_at = 4;
-	google.protobuf.Timestamp updated_at = 5;
+message ListUsersRequest {
+  string team = 1;
+}
+
+message ListUsersResponse {
+  repeated types.v1.User users = 1;
+}
+
+message AttachUserRequest {
+  string team = 1;
+  string user = 2;
+}
+
+message AttachUserResponse {
+  string message = 1;
+}
+
+message DropUserRequest {
+  string team = 1;
+  string user = 2;
+}
+
+message DropUserResponse {
+  string message = 1;
+}
+
+message ListPacksRequest {
+  string team = 1;
+}
+
+message ListPacksResponse {
+  repeated types.v1.Pack packs = 1;
+}
+
+message AttachPackRequest {
+  string team = 1;
+  string pack = 2;
+}
+
+message AttachPackResponse {
+  string message = 1;
+}
+
+message DropPackRequest {
+  string team = 1;
+  string pack = 2;
+}
+
+message DropPackResponse {
+  string message = 1;
+}
+
+message ListModsRequest {
+  string team = 1;
+}
+
+message ListModsResponse {
+  repeated types.v1.Mod mods = 1;
+}
+
+message AttachModRequest {
+  string team = 1;
+  string mod = 2;
+}
+
+message AttachModResponse {
+  string message = 1;
+}
+
+message DropModRequest {
+  string team = 1;
+  string mod = 2;
+}
+
+message DropModResponse {
+  string message = 1;
 }

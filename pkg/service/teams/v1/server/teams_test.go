@@ -14,6 +14,7 @@ import (
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/service/teams/repository"
 	teams "github.com/kleister/kleister-api/pkg/service/teams/v1"
+	types "github.com/kleister/kleister-api/pkg/service/types/v1"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -25,7 +26,7 @@ func TestList(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	want := []*teams.Team{
+	want := []*types.Team{
 		{
 			Id:        "dd5c7e72-4d42-4b9a-af85-45f792711e85",
 			Slug:      "team-1",
@@ -68,7 +69,7 @@ func TestList(t *testing.T) {
 		got.Msg.Teams,
 		want,
 		cmpopts.IgnoreUnexported(
-			teams.Team{},
+			types.Team{},
 			timestamppb.Timestamp{},
 		),
 	); diff != "" {

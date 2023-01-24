@@ -1,0 +1,25 @@
+syntax = "proto3";
+package types.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message Version {
+  string id = 1;
+  string slug = 2;
+  string name = 3;
+  VersionFile file = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message VersionFile {
+  string id = 1;
+  string version_id = 2;
+  string slug = 3;
+  string content_type = 4;
+  string md5 = 5;
+  string path = 6;
+  string url = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}

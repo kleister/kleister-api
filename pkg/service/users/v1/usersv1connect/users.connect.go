@@ -32,6 +32,15 @@ type UsersServiceClient interface {
 	Update(context.Context, *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error)
 	Show(context.Context, *connect_go.Request[v1.ShowRequest]) (*connect_go.Response[v1.ShowResponse], error)
 	Delete(context.Context, *connect_go.Request[v1.DeleteRequest]) (*connect_go.Response[v1.DeleteResponse], error)
+	ListTeams(context.Context, *connect_go.Request[v1.ListTeamsRequest]) (*connect_go.Response[v1.ListTeamsResponse], error)
+	AttachTeam(context.Context, *connect_go.Request[v1.AttachTeamRequest]) (*connect_go.Response[v1.AttachTeamResponse], error)
+	DropTeam(context.Context, *connect_go.Request[v1.DropTeamRequest]) (*connect_go.Response[v1.DropTeamResponse], error)
+	ListPacks(context.Context, *connect_go.Request[v1.ListPacksRequest]) (*connect_go.Response[v1.ListPacksResponse], error)
+	AttachPack(context.Context, *connect_go.Request[v1.AttachPackRequest]) (*connect_go.Response[v1.AttachPackResponse], error)
+	DropPack(context.Context, *connect_go.Request[v1.DropPackRequest]) (*connect_go.Response[v1.DropPackResponse], error)
+	ListMods(context.Context, *connect_go.Request[v1.ListModsRequest]) (*connect_go.Response[v1.ListModsResponse], error)
+	AttachMod(context.Context, *connect_go.Request[v1.AttachModRequest]) (*connect_go.Response[v1.AttachModResponse], error)
+	DropMod(context.Context, *connect_go.Request[v1.DropModRequest]) (*connect_go.Response[v1.DropModResponse], error)
 }
 
 // NewUsersServiceClient constructs a client for the users.v1.UsersService service. By default, it
@@ -69,16 +78,70 @@ func NewUsersServiceClient(httpClient connect_go.HTTPClient, baseURL string, opt
 			baseURL+"/users.v1.UsersService/Delete",
 			opts...,
 		),
+		listTeams: connect_go.NewClient[v1.ListTeamsRequest, v1.ListTeamsResponse](
+			httpClient,
+			baseURL+"/users.v1.UsersService/ListTeams",
+			opts...,
+		),
+		attachTeam: connect_go.NewClient[v1.AttachTeamRequest, v1.AttachTeamResponse](
+			httpClient,
+			baseURL+"/users.v1.UsersService/AttachTeam",
+			opts...,
+		),
+		dropTeam: connect_go.NewClient[v1.DropTeamRequest, v1.DropTeamResponse](
+			httpClient,
+			baseURL+"/users.v1.UsersService/DropTeam",
+			opts...,
+		),
+		listPacks: connect_go.NewClient[v1.ListPacksRequest, v1.ListPacksResponse](
+			httpClient,
+			baseURL+"/users.v1.UsersService/ListPacks",
+			opts...,
+		),
+		attachPack: connect_go.NewClient[v1.AttachPackRequest, v1.AttachPackResponse](
+			httpClient,
+			baseURL+"/users.v1.UsersService/AttachPack",
+			opts...,
+		),
+		dropPack: connect_go.NewClient[v1.DropPackRequest, v1.DropPackResponse](
+			httpClient,
+			baseURL+"/users.v1.UsersService/DropPack",
+			opts...,
+		),
+		listMods: connect_go.NewClient[v1.ListModsRequest, v1.ListModsResponse](
+			httpClient,
+			baseURL+"/users.v1.UsersService/ListMods",
+			opts...,
+		),
+		attachMod: connect_go.NewClient[v1.AttachModRequest, v1.AttachModResponse](
+			httpClient,
+			baseURL+"/users.v1.UsersService/AttachMod",
+			opts...,
+		),
+		dropMod: connect_go.NewClient[v1.DropModRequest, v1.DropModResponse](
+			httpClient,
+			baseURL+"/users.v1.UsersService/DropMod",
+			opts...,
+		),
 	}
 }
 
 // usersServiceClient implements UsersServiceClient.
 type usersServiceClient struct {
-	list   *connect_go.Client[v1.ListRequest, v1.ListResponse]
-	create *connect_go.Client[v1.CreateRequest, v1.CreateResponse]
-	update *connect_go.Client[v1.UpdateRequest, v1.UpdateResponse]
-	show   *connect_go.Client[v1.ShowRequest, v1.ShowResponse]
-	delete *connect_go.Client[v1.DeleteRequest, v1.DeleteResponse]
+	list       *connect_go.Client[v1.ListRequest, v1.ListResponse]
+	create     *connect_go.Client[v1.CreateRequest, v1.CreateResponse]
+	update     *connect_go.Client[v1.UpdateRequest, v1.UpdateResponse]
+	show       *connect_go.Client[v1.ShowRequest, v1.ShowResponse]
+	delete     *connect_go.Client[v1.DeleteRequest, v1.DeleteResponse]
+	listTeams  *connect_go.Client[v1.ListTeamsRequest, v1.ListTeamsResponse]
+	attachTeam *connect_go.Client[v1.AttachTeamRequest, v1.AttachTeamResponse]
+	dropTeam   *connect_go.Client[v1.DropTeamRequest, v1.DropTeamResponse]
+	listPacks  *connect_go.Client[v1.ListPacksRequest, v1.ListPacksResponse]
+	attachPack *connect_go.Client[v1.AttachPackRequest, v1.AttachPackResponse]
+	dropPack   *connect_go.Client[v1.DropPackRequest, v1.DropPackResponse]
+	listMods   *connect_go.Client[v1.ListModsRequest, v1.ListModsResponse]
+	attachMod  *connect_go.Client[v1.AttachModRequest, v1.AttachModResponse]
+	dropMod    *connect_go.Client[v1.DropModRequest, v1.DropModResponse]
 }
 
 // List calls users.v1.UsersService.List.
@@ -106,6 +169,51 @@ func (c *usersServiceClient) Delete(ctx context.Context, req *connect_go.Request
 	return c.delete.CallUnary(ctx, req)
 }
 
+// ListTeams calls users.v1.UsersService.ListTeams.
+func (c *usersServiceClient) ListTeams(ctx context.Context, req *connect_go.Request[v1.ListTeamsRequest]) (*connect_go.Response[v1.ListTeamsResponse], error) {
+	return c.listTeams.CallUnary(ctx, req)
+}
+
+// AttachTeam calls users.v1.UsersService.AttachTeam.
+func (c *usersServiceClient) AttachTeam(ctx context.Context, req *connect_go.Request[v1.AttachTeamRequest]) (*connect_go.Response[v1.AttachTeamResponse], error) {
+	return c.attachTeam.CallUnary(ctx, req)
+}
+
+// DropTeam calls users.v1.UsersService.DropTeam.
+func (c *usersServiceClient) DropTeam(ctx context.Context, req *connect_go.Request[v1.DropTeamRequest]) (*connect_go.Response[v1.DropTeamResponse], error) {
+	return c.dropTeam.CallUnary(ctx, req)
+}
+
+// ListPacks calls users.v1.UsersService.ListPacks.
+func (c *usersServiceClient) ListPacks(ctx context.Context, req *connect_go.Request[v1.ListPacksRequest]) (*connect_go.Response[v1.ListPacksResponse], error) {
+	return c.listPacks.CallUnary(ctx, req)
+}
+
+// AttachPack calls users.v1.UsersService.AttachPack.
+func (c *usersServiceClient) AttachPack(ctx context.Context, req *connect_go.Request[v1.AttachPackRequest]) (*connect_go.Response[v1.AttachPackResponse], error) {
+	return c.attachPack.CallUnary(ctx, req)
+}
+
+// DropPack calls users.v1.UsersService.DropPack.
+func (c *usersServiceClient) DropPack(ctx context.Context, req *connect_go.Request[v1.DropPackRequest]) (*connect_go.Response[v1.DropPackResponse], error) {
+	return c.dropPack.CallUnary(ctx, req)
+}
+
+// ListMods calls users.v1.UsersService.ListMods.
+func (c *usersServiceClient) ListMods(ctx context.Context, req *connect_go.Request[v1.ListModsRequest]) (*connect_go.Response[v1.ListModsResponse], error) {
+	return c.listMods.CallUnary(ctx, req)
+}
+
+// AttachMod calls users.v1.UsersService.AttachMod.
+func (c *usersServiceClient) AttachMod(ctx context.Context, req *connect_go.Request[v1.AttachModRequest]) (*connect_go.Response[v1.AttachModResponse], error) {
+	return c.attachMod.CallUnary(ctx, req)
+}
+
+// DropMod calls users.v1.UsersService.DropMod.
+func (c *usersServiceClient) DropMod(ctx context.Context, req *connect_go.Request[v1.DropModRequest]) (*connect_go.Response[v1.DropModResponse], error) {
+	return c.dropMod.CallUnary(ctx, req)
+}
+
 // UsersServiceHandler is an implementation of the users.v1.UsersService service.
 type UsersServiceHandler interface {
 	List(context.Context, *connect_go.Request[v1.ListRequest]) (*connect_go.Response[v1.ListResponse], error)
@@ -113,6 +221,15 @@ type UsersServiceHandler interface {
 	Update(context.Context, *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error)
 	Show(context.Context, *connect_go.Request[v1.ShowRequest]) (*connect_go.Response[v1.ShowResponse], error)
 	Delete(context.Context, *connect_go.Request[v1.DeleteRequest]) (*connect_go.Response[v1.DeleteResponse], error)
+	ListTeams(context.Context, *connect_go.Request[v1.ListTeamsRequest]) (*connect_go.Response[v1.ListTeamsResponse], error)
+	AttachTeam(context.Context, *connect_go.Request[v1.AttachTeamRequest]) (*connect_go.Response[v1.AttachTeamResponse], error)
+	DropTeam(context.Context, *connect_go.Request[v1.DropTeamRequest]) (*connect_go.Response[v1.DropTeamResponse], error)
+	ListPacks(context.Context, *connect_go.Request[v1.ListPacksRequest]) (*connect_go.Response[v1.ListPacksResponse], error)
+	AttachPack(context.Context, *connect_go.Request[v1.AttachPackRequest]) (*connect_go.Response[v1.AttachPackResponse], error)
+	DropPack(context.Context, *connect_go.Request[v1.DropPackRequest]) (*connect_go.Response[v1.DropPackResponse], error)
+	ListMods(context.Context, *connect_go.Request[v1.ListModsRequest]) (*connect_go.Response[v1.ListModsResponse], error)
+	AttachMod(context.Context, *connect_go.Request[v1.AttachModRequest]) (*connect_go.Response[v1.AttachModResponse], error)
+	DropMod(context.Context, *connect_go.Request[v1.DropModRequest]) (*connect_go.Response[v1.DropModResponse], error)
 }
 
 // NewUsersServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -147,6 +264,51 @@ func NewUsersServiceHandler(svc UsersServiceHandler, opts ...connect_go.HandlerO
 		svc.Delete,
 		opts...,
 	))
+	mux.Handle("/users.v1.UsersService/ListTeams", connect_go.NewUnaryHandler(
+		"/users.v1.UsersService/ListTeams",
+		svc.ListTeams,
+		opts...,
+	))
+	mux.Handle("/users.v1.UsersService/AttachTeam", connect_go.NewUnaryHandler(
+		"/users.v1.UsersService/AttachTeam",
+		svc.AttachTeam,
+		opts...,
+	))
+	mux.Handle("/users.v1.UsersService/DropTeam", connect_go.NewUnaryHandler(
+		"/users.v1.UsersService/DropTeam",
+		svc.DropTeam,
+		opts...,
+	))
+	mux.Handle("/users.v1.UsersService/ListPacks", connect_go.NewUnaryHandler(
+		"/users.v1.UsersService/ListPacks",
+		svc.ListPacks,
+		opts...,
+	))
+	mux.Handle("/users.v1.UsersService/AttachPack", connect_go.NewUnaryHandler(
+		"/users.v1.UsersService/AttachPack",
+		svc.AttachPack,
+		opts...,
+	))
+	mux.Handle("/users.v1.UsersService/DropPack", connect_go.NewUnaryHandler(
+		"/users.v1.UsersService/DropPack",
+		svc.DropPack,
+		opts...,
+	))
+	mux.Handle("/users.v1.UsersService/ListMods", connect_go.NewUnaryHandler(
+		"/users.v1.UsersService/ListMods",
+		svc.ListMods,
+		opts...,
+	))
+	mux.Handle("/users.v1.UsersService/AttachMod", connect_go.NewUnaryHandler(
+		"/users.v1.UsersService/AttachMod",
+		svc.AttachMod,
+		opts...,
+	))
+	mux.Handle("/users.v1.UsersService/DropMod", connect_go.NewUnaryHandler(
+		"/users.v1.UsersService/DropMod",
+		svc.DropMod,
+		opts...,
+	))
 	return "/users.v1.UsersService/", mux
 }
 
@@ -171,4 +333,40 @@ func (UnimplementedUsersServiceHandler) Show(context.Context, *connect_go.Reques
 
 func (UnimplementedUsersServiceHandler) Delete(context.Context, *connect_go.Request[v1.DeleteRequest]) (*connect_go.Response[v1.DeleteResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("users.v1.UsersService.Delete is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) ListTeams(context.Context, *connect_go.Request[v1.ListTeamsRequest]) (*connect_go.Response[v1.ListTeamsResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("users.v1.UsersService.ListTeams is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) AttachTeam(context.Context, *connect_go.Request[v1.AttachTeamRequest]) (*connect_go.Response[v1.AttachTeamResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("users.v1.UsersService.AttachTeam is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) DropTeam(context.Context, *connect_go.Request[v1.DropTeamRequest]) (*connect_go.Response[v1.DropTeamResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("users.v1.UsersService.DropTeam is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) ListPacks(context.Context, *connect_go.Request[v1.ListPacksRequest]) (*connect_go.Response[v1.ListPacksResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("users.v1.UsersService.ListPacks is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) AttachPack(context.Context, *connect_go.Request[v1.AttachPackRequest]) (*connect_go.Response[v1.AttachPackResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("users.v1.UsersService.AttachPack is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) DropPack(context.Context, *connect_go.Request[v1.DropPackRequest]) (*connect_go.Response[v1.DropPackResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("users.v1.UsersService.DropPack is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) ListMods(context.Context, *connect_go.Request[v1.ListModsRequest]) (*connect_go.Response[v1.ListModsResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("users.v1.UsersService.ListMods is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) AttachMod(context.Context, *connect_go.Request[v1.AttachModRequest]) (*connect_go.Response[v1.AttachModResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("users.v1.UsersService.AttachMod is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) DropMod(context.Context, *connect_go.Request[v1.DropModRequest]) (*connect_go.Response[v1.DropModResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("users.v1.UsersService.DropMod is not implemented"))
 }
