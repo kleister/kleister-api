@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/Machiel/slugify v1.0.1
 	github.com/aws/aws-sdk-go v1.44.187
-	github.com/bufbuild/connect-go v1.4.1
+	github.com/bufbuild/connect-go v1.5.0
 	github.com/bufbuild/connect-grpchealth-go v1.0.0
 	github.com/bufbuild/connect-grpcreflect-go v1.0.0
 	github.com/cenkalti/backoff/v4 v4.2.0
@@ -21,7 +21,7 @@ require (
 	github.com/oklog/run v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.14.0
-	github.com/rs/zerolog v1.28.0
+	github.com/rs/zerolog v1.29.0
 	github.com/spf13/viper v1.15.0
 	github.com/urfave/cli/v2 v2.24.1
 	golang.org/x/net v0.5.0
