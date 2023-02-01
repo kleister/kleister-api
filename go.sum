@@ -100,6 +100,8 @@ github.com/aws/aws-sdk-go v1.44.190 h1:QC+Pf/Ooj7Waf2obOPZbIQOqr00hy4h54j3ZK9mvH
 github.com/aws/aws-sdk-go v1.44.190/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
 github.com/aws/aws-sdk-go v1.44.191 h1:GnbkalCx/AgobaorDMFCa248acmk+91+aHBQOk7ljzU=
 github.com/aws/aws-sdk-go v1.44.191/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
+github.com/aws/aws-sdk-go v1.44.192 h1:KL54vCxRd5v5XBGjnF3FelzXXwl+aWHDmDTihFmRNgM=
+github.com/aws/aws-sdk-go v1.44.192/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
@@ -108,6 +110,8 @@ github.com/bufbuild/connect-go v1.4.1 h1:6usL3JGjKhxQpvDlizP7u8VfjAr1JkckcAUbrdc
 github.com/bufbuild/connect-go v1.4.1/go.mod h1:9iNvh/NOsfhNBUH5CtvXeVUskQO1xsrEviH7ZArwZ3I=
 github.com/bufbuild/connect-go v1.5.0 h1:IfbgbzzaaZvF+OM3SfxO2EjtvNJarNAz2DIRuuNjAgc=
 github.com/bufbuild/connect-go v1.5.0/go.mod h1:9iNvh/NOsfhNBUH5CtvXeVUskQO1xsrEviH7ZArwZ3I=
+github.com/bufbuild/connect-go v1.5.1 h1:ORhrSiu63hWxtuMmC/V1mKySSRhEySsW5RkHJcyJXBk=
+github.com/bufbuild/connect-go v1.5.1/go.mod h1:9iNvh/NOsfhNBUH5CtvXeVUskQO1xsrEviH7ZArwZ3I=
 github.com/bufbuild/connect-grpchealth-go v1.0.0 h1:33v883tL86jLomQT6R2ZYVYaI2cRkuUXvU30WfbQ/ko=
 github.com/bufbuild/connect-grpchealth-go v1.0.0/go.mod h1:6OEb4J3rh5+Wdvt4/muOIfZo1lt9cPU8ggwpsjBaZ3Y=
 github.com/bufbuild/connect-grpcreflect-go v1.0.0 h1:zWsLFYqrT1O2sNJFYfTXI5WxbAyiY2dvevvnJHPtV5A=
