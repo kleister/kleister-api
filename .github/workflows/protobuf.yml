@@ -22,7 +22,7 @@ jobs:
 
       - name: Setup buf
         id: buf
-        uses: bufbuild/buf-setup-action@v1.13.1
+        uses: bufbuild/buf-setup-action@v1.14.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
