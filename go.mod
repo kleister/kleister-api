@@ -24,7 +24,7 @@ require (
 	github.com/rs/zerolog v1.29.0
 	github.com/spf13/viper v1.15.0
 	github.com/urfave/cli/v2 v2.24.3
-	golang.org/x/net v0.6.0
+	golang.org/x/net v0.7.0
 	google.golang.org/protobuf v1.28.1
 	gorm.io/driver/mysql v1.4.6
 	gorm.io/driver/postgres v1.4.7
