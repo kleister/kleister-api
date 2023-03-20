@@ -23,6 +23,7 @@
             gnumake
             go_1_19
             grpcurl
+            sqlite
           ];
 
           shellHook = ''
