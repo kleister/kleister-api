@@ -21,110 +21,110 @@ import (
 const _ = connect_go.IsAtLeastVersion0_1_0
 
 const (
-	// ForgesServiceName is the fully-qualified name of the ForgesService service.
-	ForgesServiceName = "forge.v1.ForgesService"
+	// ForgeServiceName is the fully-qualified name of the ForgeService service.
+	ForgeServiceName = "forge.v1.ForgeService"
 )
 
-// ForgesServiceClient is a client for the forge.v1.ForgesService service.
-type ForgesServiceClient interface {
+// ForgeServiceClient is a client for the forge.v1.ForgeService service.
+type ForgeServiceClient interface {
 	Search(context.Context, *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error)
 	Update(context.Context, *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error)
 	ListBuilds(context.Context, *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error)
 }
 
-// NewForgesServiceClient constructs a client for the forge.v1.ForgesService service. By default, it
+// NewForgeServiceClient constructs a client for the forge.v1.ForgeService service. By default, it
 // uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
 // uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
 // connect.WithGRPCWeb() options.
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewForgesServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) ForgesServiceClient {
+func NewForgeServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) ForgeServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
-	return &forgesServiceClient{
+	return &forgeServiceClient{
 		search: connect_go.NewClient[v1.SearchRequest, v1.SearchResponse](
 			httpClient,
-			baseURL+"/forge.v1.ForgesService/Search",
+			baseURL+"/forge.v1.ForgeService/Search",
 			opts...,
 		),
 		update: connect_go.NewClient[v1.UpdateRequest, v1.UpdateResponse](
 			httpClient,
-			baseURL+"/forge.v1.ForgesService/Update",
+			baseURL+"/forge.v1.ForgeService/Update",
 			opts...,
 		),
 		listBuilds: connect_go.NewClient[v1.ListBuildsRequest, v1.ListBuildsResponse](
 			httpClient,
-			baseURL+"/forge.v1.ForgesService/ListBuilds",
+			baseURL+"/forge.v1.ForgeService/ListBuilds",
 			opts...,
 		),
 	}
 }
 
-// forgesServiceClient implements ForgesServiceClient.
-type forgesServiceClient struct {
+// forgeServiceClient implements ForgeServiceClient.
+type forgeServiceClient struct {
 	search     *connect_go.Client[v1.SearchRequest, v1.SearchResponse]
 	update     *connect_go.Client[v1.UpdateRequest, v1.UpdateResponse]
 	listBuilds *connect_go.Client[v1.ListBuildsRequest, v1.ListBuildsResponse]
 }
 
-// Search calls forge.v1.ForgesService.Search.
-func (c *forgesServiceClient) Search(ctx context.Context, req *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error) {
+// Search calls forge.v1.ForgeService.Search.
+func (c *forgeServiceClient) Search(ctx context.Context, req *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error) {
 	return c.search.CallUnary(ctx, req)
 }
 
-// Update calls forge.v1.ForgesService.Update.
-func (c *forgesServiceClient) Update(ctx context.Context, req *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error) {
+// Update calls forge.v1.ForgeService.Update.
+func (c *forgeServiceClient) Update(ctx context.Context, req *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
-// ListBuilds calls forge.v1.ForgesService.ListBuilds.
-func (c *forgesServiceClient) ListBuilds(ctx context.Context, req *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error) {
+// ListBuilds calls forge.v1.ForgeService.ListBuilds.
+func (c *forgeServiceClient) ListBuilds(ctx context.Context, req *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error) {
 	return c.listBuilds.CallUnary(ctx, req)
 }
 
-// ForgesServiceHandler is an implementation of the forge.v1.ForgesService service.
-type ForgesServiceHandler interface {
+// ForgeServiceHandler is an implementation of the forge.v1.ForgeService service.
+type ForgeServiceHandler interface {
 	Search(context.Context, *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error)
 	Update(context.Context, *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error)
 	ListBuilds(context.Context, *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error)
 }
 
-// NewForgesServiceHandler builds an HTTP handler from the service implementation. It returns the
+// NewForgeServiceHandler builds an HTTP handler from the service implementation. It returns the
 // path on which to mount the handler and the handler itself.
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewForgesServiceHandler(svc ForgesServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
+func NewForgeServiceHandler(svc ForgeServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
 	mux := http.NewServeMux()
-	mux.Handle("/forge.v1.ForgesService/Search", connect_go.NewUnaryHandler(
-		"/forge.v1.ForgesService/Search",
+	mux.Handle("/forge.v1.ForgeService/Search", connect_go.NewUnaryHandler(
+		"/forge.v1.ForgeService/Search",
 		svc.Search,
 		opts...,
 	))
-	mux.Handle("/forge.v1.ForgesService/Update", connect_go.NewUnaryHandler(
-		"/forge.v1.ForgesService/Update",
+	mux.Handle("/forge.v1.ForgeService/Update", connect_go.NewUnaryHandler(
+		"/forge.v1.ForgeService/Update",
 		svc.Update,
 		opts...,
 	))
-	mux.Handle("/forge.v1.ForgesService/ListBuilds", connect_go.NewUnaryHandler(
-		"/forge.v1.ForgesService/ListBuilds",
+	mux.Handle("/forge.v1.ForgeService/ListBuilds", connect_go.NewUnaryHandler(
+		"/forge.v1.ForgeService/ListBuilds",
 		svc.ListBuilds,
 		opts...,
 	))
-	return "/forge.v1.ForgesService/", mux
+	return "/forge.v1.ForgeService/", mux
 }
 
-// UnimplementedForgesServiceHandler returns CodeUnimplemented from all methods.
-type UnimplementedForgesServiceHandler struct{}
+// UnimplementedForgeServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedForgeServiceHandler struct{}
 
-func (UnimplementedForgesServiceHandler) Search(context.Context, *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("forge.v1.ForgesService.Search is not implemented"))
+func (UnimplementedForgeServiceHandler) Search(context.Context, *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("forge.v1.ForgeService.Search is not implemented"))
 }
 
-func (UnimplementedForgesServiceHandler) Update(context.Context, *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("forge.v1.ForgesService.Update is not implemented"))
+func (UnimplementedForgeServiceHandler) Update(context.Context, *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("forge.v1.ForgeService.Update is not implemented"))
 }
 
-func (UnimplementedForgesServiceHandler) ListBuilds(context.Context, *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("forge.v1.ForgesService.ListBuilds is not implemented"))
+func (UnimplementedForgeServiceHandler) ListBuilds(context.Context, *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("forge.v1.ForgeService.ListBuilds is not implemented"))
 }

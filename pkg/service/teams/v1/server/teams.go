@@ -16,20 +16,13 @@ import (
 // List implements the TeamsServiceHandler interface.
 func (s *TeamsServer) List(
 	ctx context.Context,
-	_ *connect.Request[teams.ListRequest],
+	req *connect.Request[teams.ListRequest],
 ) (*connect.Response[teams.ListResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
 
-	records, err := s.repository.List(ctx)
+	records, err := s.repository.List(ctx, req.Msg.Query)
 
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -50,13 +43,6 @@ func (s *TeamsServer) Create(
 	ctx context.Context,
 	req *connect.Request[teams.CreateRequest],
 ) (*connect.Response[teams.CreateResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -100,13 +86,6 @@ func (s *TeamsServer) Update(
 	ctx context.Context,
 	req *connect.Request[teams.UpdateRequest],
 ) (*connect.Response[teams.UpdateResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -161,13 +140,6 @@ func (s *TeamsServer) Show(
 	ctx context.Context,
 	req *connect.Request[teams.ShowRequest],
 ) (*connect.Response[teams.ShowResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -195,13 +167,6 @@ func (s *TeamsServer) Delete(
 	ctx context.Context,
 	req *connect.Request[teams.DeleteRequest],
 ) (*connect.Response[teams.DeleteResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}

@@ -4,7 +4,7 @@ package forge.v1;
 import "types/v1/build.proto";
 import "types/v1/forge.proto";
 
-service ForgesService {
+service ForgeService {
   rpc Search(SearchRequest) returns (SearchResponse);
   rpc Update(UpdateRequest) returns (UpdateResponse);
 
@@ -26,7 +26,8 @@ message UpdateResponse {
 }
 
 message ListBuildsRequest {
-  string query = 1;
+  string forge = 1;
+  string query = 2;
 }
 
 message ListBuildsResponse {

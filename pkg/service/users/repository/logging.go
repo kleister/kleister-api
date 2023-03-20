@@ -29,14 +29,15 @@ func NewLoggingRepository(repository UsersRepository, requestID LoggingRequestID
 }
 
 // List implements the UsersRepository interface.
-func (r *LoggingRepository) List(ctx context.Context) ([]*model.User, error) {
+func (r *LoggingRepository) List(ctx context.Context, search string) ([]*model.User, error) {
 	start := time.Now()
-	records, err := r.upstream.List(ctx)
+	records, err := r.upstream.List(ctx, search)
 
 	logger := r.logger.With().
 		Str("request", r.requestID(ctx)).
 		Str("method", "list").
 		Dur("duration", time.Since(start)).
+		Str("search", search).
 		Logger()
 
 	if err != nil {
@@ -60,7 +61,7 @@ func (r *LoggingRepository) Create(ctx context.Context, user *model.User) (*mode
 		Str("request", r.requestID(ctx)).
 		Str("method", "create").
 		Dur("duration", time.Since(start)).
-		Str("name", r.extractIdentifier(record)).
+		Str("id", r.extractIdentifier(record)).
 		Logger()
 
 	if err != nil {
@@ -84,7 +85,7 @@ func (r *LoggingRepository) Update(ctx context.Context, user *model.User) (*mode
 		Str("request", r.requestID(ctx)).
 		Str("method", "update").
 		Dur("duration", time.Since(start)).
-		Str("name", r.extractIdentifier(record)).
+		Str("id", r.extractIdentifier(record)).
 		Logger()
 
 	if err != nil {
@@ -100,15 +101,15 @@ func (r *LoggingRepository) Update(ctx context.Context, user *model.User) (*mode
 }
 
 // Show implements the UsersRepository interface.
-func (r *LoggingRepository) Show(ctx context.Context, name string) (*model.User, error) {
+func (r *LoggingRepository) Show(ctx context.Context, id string) (*model.User, error) {
 	start := time.Now()
-	record, err := r.upstream.Show(ctx, name)
+	record, err := r.upstream.Show(ctx, id)
 
 	logger := r.logger.With().
 		Str("request", r.requestID(ctx)).
 		Str("method", "show").
 		Dur("duration", time.Since(start)).
-		Str("name", name).
+		Str("id", id).
 		Logger()
 
 	if err != nil {
@@ -124,15 +125,15 @@ func (r *LoggingRepository) Show(ctx context.Context, name string) (*model.User,
 }
 
 // Delete implements the UsersRepository interface.
-func (r *LoggingRepository) Delete(ctx context.Context, name string) error {
+func (r *LoggingRepository) Delete(ctx context.Context, id string) error {
 	start := time.Now()
-	err := r.upstream.Delete(ctx, name)
+	err := r.upstream.Delete(ctx, id)
 
 	logger := r.logger.With().
 		Str("request", r.requestID(ctx)).
 		Str("method", "delete").
 		Dur("duration", time.Since(start)).
-		Str("name", name).
+		Str("id", id).
 		Logger()
 
 	if err != nil {
@@ -148,15 +149,15 @@ func (r *LoggingRepository) Delete(ctx context.Context, name string) error {
 }
 
 // Exists implements the UsersRepository interface.
-func (r *LoggingRepository) Exists(ctx context.Context, name string) (bool, error) {
+func (r *LoggingRepository) Exists(ctx context.Context, id string) (bool, string, error) {
 	start := time.Now()
-	exists, err := r.upstream.Exists(ctx, name)
+	exists, realID, err := r.upstream.Exists(ctx, id)
 
 	logger := r.logger.With().
 		Str("request", r.requestID(ctx)).
 		Str("method", "exists").
 		Dur("duration", time.Since(start)).
-		Str("name", name).
+		Str("id", id).
 		Logger()
 
 	if err != nil {
@@ -168,7 +169,7 @@ func (r *LoggingRepository) Exists(ctx context.Context, name string) (bool, erro
 			Msg("")
 	}
 
-	return exists, err
+	return exists, realID, err
 }
 
 func (r *LoggingRepository) extractIdentifier(record *model.User) string {

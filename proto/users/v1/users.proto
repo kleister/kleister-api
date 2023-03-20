@@ -91,6 +91,7 @@ message DeleteResponse {
 
 message ListTeamsRequest {
   string user = 1;
+  string query = 2;
 }
 
 message ListTeamsResponse {
@@ -117,6 +118,7 @@ message DropTeamResponse {
 
 message ListPacksRequest {
   string user = 1;
+  string query = 2;
 }
 
 message ListPacksResponse {
@@ -143,6 +145,7 @@ message DropPackResponse {
 
 message ListModsRequest {
   string user = 1;
+  string query = 2;
 }
 
 message ListModsResponse {

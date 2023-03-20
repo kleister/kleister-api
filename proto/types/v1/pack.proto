@@ -9,16 +9,26 @@ message Pack {
   string slug = 2;
   string name = 3;
   string website = 4;
-  optional PackIcon icon = 5;
-  optional PackLogo logo = 6;
-  optional PackBg bg = 7;
-  optional types.v1.Build recommended = 8;
-  optional types.v1.Build latest = 9;
-  bool published = 10;
-  bool private = 11;
-  google.protobuf.Timestamp created_at = 12;
-  google.protobuf.Timestamp updated_at = 13;
-  repeated types.v1.Build builds = 14;
+  optional PackBack back = 5;
+  optional PackIcon icon = 6;
+  optional PackLogo logo = 7;
+  bool published = 8;
+  bool private = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  repeated types.v1.Build builds = 12;
+}
+
+message PackBack {
+  string id = 1;
+  string pack_id = 2;
+  string slug = 3;
+  string content_type = 4;
+  string md5 = 5;
+  string path = 6;
+  string url = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
 }
 
 message PackIcon {
@@ -34,18 +44,6 @@ message PackIcon {
 }
 
 message PackLogo {
-  string id = 1;
-  string pack_id = 2;
-  string slug = 3;
-  string content_type = 4;
-  string md5 = 5;
-  string path = 6;
-  string url = 7;
-  google.protobuf.Timestamp created_at = 8;
-  google.protobuf.Timestamp updated_at = 9;
-}
-
-message PackBg {
   string id = 1;
   string pack_id = 2;
   string slug = 3;

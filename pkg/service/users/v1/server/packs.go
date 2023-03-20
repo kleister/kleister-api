@@ -14,13 +14,6 @@ func (s *UsersServer) ListPacks(
 	ctx context.Context,
 	req *connect.Request[users.ListPacksRequest],
 ) (*connect.Response[users.ListPacksResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -50,13 +43,6 @@ func (s *UsersServer) AttachPack(
 	ctx context.Context,
 	req *connect.Request[users.AttachPackRequest],
 ) (*connect.Response[users.AttachPackResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -71,13 +57,6 @@ func (s *UsersServer) DropPack(
 	ctx context.Context,
 	req *connect.Request[users.DropPackRequest],
 ) (*connect.Response[users.DropPackResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}

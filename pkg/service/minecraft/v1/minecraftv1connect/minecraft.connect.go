@@ -21,110 +21,110 @@ import (
 const _ = connect_go.IsAtLeastVersion0_1_0
 
 const (
-	// MinecraftsServiceName is the fully-qualified name of the MinecraftsService service.
-	MinecraftsServiceName = "minecraft.v1.MinecraftsService"
+	// MinecraftServiceName is the fully-qualified name of the MinecraftService service.
+	MinecraftServiceName = "minecraft.v1.MinecraftService"
 )
 
-// MinecraftsServiceClient is a client for the minecraft.v1.MinecraftsService service.
-type MinecraftsServiceClient interface {
+// MinecraftServiceClient is a client for the minecraft.v1.MinecraftService service.
+type MinecraftServiceClient interface {
 	Search(context.Context, *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error)
 	Update(context.Context, *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error)
 	ListBuilds(context.Context, *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error)
 }
 
-// NewMinecraftsServiceClient constructs a client for the minecraft.v1.MinecraftsService service. By
+// NewMinecraftServiceClient constructs a client for the minecraft.v1.MinecraftService service. By
 // default, it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses,
 // and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the
 // connect.WithGRPC() or connect.WithGRPCWeb() options.
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewMinecraftsServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) MinecraftsServiceClient {
+func NewMinecraftServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) MinecraftServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
-	return &minecraftsServiceClient{
+	return &minecraftServiceClient{
 		search: connect_go.NewClient[v1.SearchRequest, v1.SearchResponse](
 			httpClient,
-			baseURL+"/minecraft.v1.MinecraftsService/Search",
+			baseURL+"/minecraft.v1.MinecraftService/Search",
 			opts...,
 		),
 		update: connect_go.NewClient[v1.UpdateRequest, v1.UpdateResponse](
 			httpClient,
-			baseURL+"/minecraft.v1.MinecraftsService/Update",
+			baseURL+"/minecraft.v1.MinecraftService/Update",
 			opts...,
 		),
 		listBuilds: connect_go.NewClient[v1.ListBuildsRequest, v1.ListBuildsResponse](
 			httpClient,
-			baseURL+"/minecraft.v1.MinecraftsService/ListBuilds",
+			baseURL+"/minecraft.v1.MinecraftService/ListBuilds",
 			opts...,
 		),
 	}
 }
 
-// minecraftsServiceClient implements MinecraftsServiceClient.
-type minecraftsServiceClient struct {
+// minecraftServiceClient implements MinecraftServiceClient.
+type minecraftServiceClient struct {
 	search     *connect_go.Client[v1.SearchRequest, v1.SearchResponse]
 	update     *connect_go.Client[v1.UpdateRequest, v1.UpdateResponse]
 	listBuilds *connect_go.Client[v1.ListBuildsRequest, v1.ListBuildsResponse]
 }
 
-// Search calls minecraft.v1.MinecraftsService.Search.
-func (c *minecraftsServiceClient) Search(ctx context.Context, req *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error) {
+// Search calls minecraft.v1.MinecraftService.Search.
+func (c *minecraftServiceClient) Search(ctx context.Context, req *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error) {
 	return c.search.CallUnary(ctx, req)
 }
 
-// Update calls minecraft.v1.MinecraftsService.Update.
-func (c *minecraftsServiceClient) Update(ctx context.Context, req *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error) {
+// Update calls minecraft.v1.MinecraftService.Update.
+func (c *minecraftServiceClient) Update(ctx context.Context, req *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
-// ListBuilds calls minecraft.v1.MinecraftsService.ListBuilds.
-func (c *minecraftsServiceClient) ListBuilds(ctx context.Context, req *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error) {
+// ListBuilds calls minecraft.v1.MinecraftService.ListBuilds.
+func (c *minecraftServiceClient) ListBuilds(ctx context.Context, req *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error) {
 	return c.listBuilds.CallUnary(ctx, req)
 }
 
-// MinecraftsServiceHandler is an implementation of the minecraft.v1.MinecraftsService service.
-type MinecraftsServiceHandler interface {
+// MinecraftServiceHandler is an implementation of the minecraft.v1.MinecraftService service.
+type MinecraftServiceHandler interface {
 	Search(context.Context, *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error)
 	Update(context.Context, *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error)
 	ListBuilds(context.Context, *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error)
 }
 
-// NewMinecraftsServiceHandler builds an HTTP handler from the service implementation. It returns
-// the path on which to mount the handler and the handler itself.
+// NewMinecraftServiceHandler builds an HTTP handler from the service implementation. It returns the
+// path on which to mount the handler and the handler itself.
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewMinecraftsServiceHandler(svc MinecraftsServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
+func NewMinecraftServiceHandler(svc MinecraftServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
 	mux := http.NewServeMux()
-	mux.Handle("/minecraft.v1.MinecraftsService/Search", connect_go.NewUnaryHandler(
-		"/minecraft.v1.MinecraftsService/Search",
+	mux.Handle("/minecraft.v1.MinecraftService/Search", connect_go.NewUnaryHandler(
+		"/minecraft.v1.MinecraftService/Search",
 		svc.Search,
 		opts...,
 	))
-	mux.Handle("/minecraft.v1.MinecraftsService/Update", connect_go.NewUnaryHandler(
-		"/minecraft.v1.MinecraftsService/Update",
+	mux.Handle("/minecraft.v1.MinecraftService/Update", connect_go.NewUnaryHandler(
+		"/minecraft.v1.MinecraftService/Update",
 		svc.Update,
 		opts...,
 	))
-	mux.Handle("/minecraft.v1.MinecraftsService/ListBuilds", connect_go.NewUnaryHandler(
-		"/minecraft.v1.MinecraftsService/ListBuilds",
+	mux.Handle("/minecraft.v1.MinecraftService/ListBuilds", connect_go.NewUnaryHandler(
+		"/minecraft.v1.MinecraftService/ListBuilds",
 		svc.ListBuilds,
 		opts...,
 	))
-	return "/minecraft.v1.MinecraftsService/", mux
+	return "/minecraft.v1.MinecraftService/", mux
 }
 
-// UnimplementedMinecraftsServiceHandler returns CodeUnimplemented from all methods.
-type UnimplementedMinecraftsServiceHandler struct{}
+// UnimplementedMinecraftServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedMinecraftServiceHandler struct{}
 
-func (UnimplementedMinecraftsServiceHandler) Search(context.Context, *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("minecraft.v1.MinecraftsService.Search is not implemented"))
+func (UnimplementedMinecraftServiceHandler) Search(context.Context, *connect_go.Request[v1.SearchRequest]) (*connect_go.Response[v1.SearchResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("minecraft.v1.MinecraftService.Search is not implemented"))
 }
 
-func (UnimplementedMinecraftsServiceHandler) Update(context.Context, *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("minecraft.v1.MinecraftsService.Update is not implemented"))
+func (UnimplementedMinecraftServiceHandler) Update(context.Context, *connect_go.Request[v1.UpdateRequest]) (*connect_go.Response[v1.UpdateResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("minecraft.v1.MinecraftService.Update is not implemented"))
 }
 
-func (UnimplementedMinecraftsServiceHandler) ListBuilds(context.Context, *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("minecraft.v1.MinecraftsService.ListBuilds is not implemented"))
+func (UnimplementedMinecraftServiceHandler) ListBuilds(context.Context, *connect_go.Request[v1.ListBuildsRequest]) (*connect_go.Response[v1.ListBuildsResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("minecraft.v1.MinecraftService.ListBuilds is not implemented"))
 }

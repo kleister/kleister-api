@@ -43,7 +43,7 @@
     - [UpdateRequest](#forge-v1-UpdateRequest)
     - [UpdateResponse](#forge-v1-UpdateResponse)
   
-    - [ForgesService](#forge-v1-ForgesService)
+    - [ForgeService](#forge-v1-ForgeService)
   
 - [types/v1/member.proto](#types_v1_member-proto)
     - [Member](#types-v1-Member)
@@ -71,7 +71,7 @@
     - [UpdateRequest](#minecraft-v1-UpdateRequest)
     - [UpdateResponse](#minecraft-v1-UpdateResponse)
   
-    - [MinecraftsService](#minecraft-v1-MinecraftsService)
+    - [MinecraftService](#minecraft-v1-MinecraftService)
   
 - [types/v1/mod.proto](#types_v1_mod-proto)
     - [Mod](#types-v1-Mod)
@@ -112,7 +112,7 @@
   
 - [types/v1/pack.proto](#types_v1_pack-proto)
     - [Pack](#types-v1-Pack)
-    - [PackBg](#types-v1-PackBg)
+    - [PackBack](#types-v1-PackBack)
     - [PackIcon](#types-v1-PackIcon)
     - [PackLogo](#types-v1-PackLogo)
   
@@ -550,6 +550,7 @@
 | ----- | ---- | ----- | ----------- |
 | pack | [string](#string) |  |  |
 | build | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -732,6 +733,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| forge | [string](#string) |  |  |
 | query | [string](#string) |  |  |
 
 
@@ -815,9 +817,9 @@
  
 
 
-<a name="forge-v1-ForgesService"></a>
+<a name="forge-v1-ForgeService"></a>
 
-### ForgesService
+### ForgeService
 
 
 | Method Name | Request Type | Response Type | Description |
@@ -1069,6 +1071,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| minecraft | [string](#string) |  |  |
 | query | [string](#string) |  |  |
 
 
@@ -1152,9 +1155,9 @@
  
 
 
-<a name="minecraft-v1-MinecraftsService"></a>
+<a name="minecraft-v1-MinecraftService"></a>
 
-### MinecraftsService
+### MinecraftService
 
 
 | Method Name | Request Type | Response Type | Description |
@@ -1534,6 +1537,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | mod | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -1564,6 +1568,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | mod | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -1715,11 +1720,9 @@
 | slug | [string](#string) |  |  |
 | name | [string](#string) |  |  |
 | website | [string](#string) |  |  |
+| back | [PackBack](#types-v1-PackBack) | optional |  |
 | icon | [PackIcon](#types-v1-PackIcon) | optional |  |
 | logo | [PackLogo](#types-v1-PackLogo) | optional |  |
-| bg | [PackBg](#types-v1-PackBg) | optional |  |
-| recommended | [Build](#types-v1-Build) | optional |  |
-| latest | [Build](#types-v1-Build) | optional |  |
 | published | [bool](#bool) |  |  |
 | private | [bool](#bool) |  |  |
 | created_at | [google.protobuf.Timestamp](#google-protobuf-Timestamp) |  |  |
@@ -1731,9 +1734,9 @@
 
 
 
-<a name="types-v1-PackBg"></a>
+<a name="types-v1-PackBack"></a>
 
-### PackBg
+### PackBack
 
 
 
@@ -2061,6 +2064,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | pack | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -2091,6 +2095,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | pack | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -2684,6 +2689,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | team | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -2714,6 +2720,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | team | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -2774,6 +2781,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | team | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -3188,6 +3196,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | user | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -3218,6 +3227,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | user | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -3278,6 +3288,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | user | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
@@ -3576,6 +3587,7 @@
 | ----- | ---- | ----- | ----------- |
 | mod | [string](#string) |  |  |
 | version | [string](#string) |  |  |
+| query | [string](#string) |  |  |
 
 
 
