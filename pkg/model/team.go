@@ -12,4 +12,6 @@ type Team struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Users     []*Member
+	Mods      []*TeamMod
+	Packs     []*TeamPack
 }

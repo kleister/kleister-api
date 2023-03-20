@@ -13,12 +13,26 @@ import (
 	"github.com/kleister/kleister-api/pkg/metrics"
 	"github.com/kleister/kleister-api/pkg/middleware/requestid"
 	"github.com/kleister/kleister-api/pkg/router"
+	"github.com/kleister/kleister-api/pkg/service/builds"
+	buildsRepository "github.com/kleister/kleister-api/pkg/service/builds/repository"
+	"github.com/kleister/kleister-api/pkg/service/forge"
+	forgeRepository "github.com/kleister/kleister-api/pkg/service/forge/repository"
 	"github.com/kleister/kleister-api/pkg/service/members"
 	membersRepository "github.com/kleister/kleister-api/pkg/service/members/repository"
+	"github.com/kleister/kleister-api/pkg/service/minecraft"
+	minecraftRepository "github.com/kleister/kleister-api/pkg/service/minecraft/repository"
+	"github.com/kleister/kleister-api/pkg/service/mods"
+	modsRepository "github.com/kleister/kleister-api/pkg/service/mods/repository"
+	"github.com/kleister/kleister-api/pkg/service/packs"
+	packsRepository "github.com/kleister/kleister-api/pkg/service/packs/repository"
+	"github.com/kleister/kleister-api/pkg/service/profile"
+	profileRepository "github.com/kleister/kleister-api/pkg/service/profile/repository"
 	"github.com/kleister/kleister-api/pkg/service/teams"
 	teamsRepository "github.com/kleister/kleister-api/pkg/service/teams/repository"
 	"github.com/kleister/kleister-api/pkg/service/users"
 	usersRepository "github.com/kleister/kleister-api/pkg/service/users/repository"
+	"github.com/kleister/kleister-api/pkg/service/versions"
+	versionsRepository "github.com/kleister/kleister-api/pkg/service/versions/repository"
 	"github.com/oklog/run"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -270,14 +284,11 @@ func ServerAction(cfg *config.Config) cli.ActionFunc {
 				uploads,
 			)
 
-			usersRepo := usersRepository.NewMetricsRepository(
-				usersRepository.NewLoggingRepository(
-					usersRepository.NewGormRepository(
-						storage.Handle(),
-					),
-					requestid.Get,
+			usersRepo := usersRepository.NewLoggingRepository(
+				usersRepository.NewGormRepository(
+					storage.Handle(),
 				),
-				metricz,
+				requestid.Get,
 			)
 
 			users.RegisterServer(
@@ -288,14 +299,11 @@ func ServerAction(cfg *config.Config) cli.ActionFunc {
 				routing,
 			)
 
-			teamsRepo := teamsRepository.NewMetricsRepository(
-				teamsRepository.NewLoggingRepository(
-					teamsRepository.NewGormRepository(
-						storage.Handle(),
-					),
-					requestid.Get,
+			teamsRepo := teamsRepository.NewLoggingRepository(
+				teamsRepository.NewGormRepository(
+					storage.Handle(),
 				),
-				metricz,
+				requestid.Get,
 			)
 
 			teams.RegisterServer(
@@ -306,16 +314,13 @@ func ServerAction(cfg *config.Config) cli.ActionFunc {
 				routing,
 			)
 
-			membersRepo := membersRepository.NewMetricsRepository(
-				membersRepository.NewLoggingRepository(
-					membersRepository.NewGormRepository(
-						storage.Handle(),
-						teamsRepo,
-						usersRepo,
-					),
-					requestid.Get,
+			membersRepo := membersRepository.NewLoggingRepository(
+				membersRepository.NewGormRepository(
+					storage.Handle(),
+					teamsRepo,
+					usersRepo,
 				),
-				metricz,
+				requestid.Get,
 			)
 
 			members.RegisterServer(
@@ -323,6 +328,113 @@ func ServerAction(cfg *config.Config) cli.ActionFunc {
 				uploads,
 				metricz,
 				membersRepo,
+				routing,
+			)
+
+			profileRepo := profileRepository.NewLoggingRepository(
+				profileRepository.NewGormRepository(
+					storage.Handle(),
+				),
+				requestid.Get,
+			)
+
+			profile.RegisterServer(
+				cfg,
+				uploads,
+				metricz,
+				profileRepo,
+				routing,
+			)
+
+			minecraftRepo := minecraftRepository.NewLoggingRepository(
+				minecraftRepository.NewGormRepository(
+					storage.Handle(),
+				),
+				requestid.Get,
+			)
+
+			minecraft.RegisterServer(
+				cfg,
+				uploads,
+				metricz,
+				minecraftRepo,
+				routing,
+			)
+
+			forgeRepo := forgeRepository.NewLoggingRepository(
+				forgeRepository.NewGormRepository(
+					storage.Handle(),
+				),
+				requestid.Get,
+			)
+
+			forge.RegisterServer(
+				cfg,
+				uploads,
+				metricz,
+				forgeRepo,
+				routing,
+			)
+
+			packsRepo := packsRepository.NewLoggingRepository(
+				packsRepository.NewGormRepository(
+					storage.Handle(),
+				),
+				requestid.Get,
+			)
+
+			packs.RegisterServer(
+				cfg,
+				uploads,
+				metricz,
+				packsRepo,
+				routing,
+			)
+
+			buildsRepo := buildsRepository.NewLoggingRepository(
+				buildsRepository.NewGormRepository(
+					storage.Handle(),
+				),
+				requestid.Get,
+			)
+
+			builds.RegisterServer(
+				cfg,
+				uploads,
+				metricz,
+				buildsRepo,
+				packsRepo,
+				routing,
+			)
+
+			modsRepo := modsRepository.NewLoggingRepository(
+				modsRepository.NewGormRepository(
+					storage.Handle(),
+				),
+				requestid.Get,
+			)
+
+			mods.RegisterServer(
+				cfg,
+				uploads,
+				metricz,
+				modsRepo,
+				routing,
+			)
+
+			versionsRepo := versionsRepository.NewLoggingRepository(
+				versionsRepository.NewGormRepository(
+					storage.Handle(),
+				),
+				requestid.Get,
+			)
+
+			versions.RegisterServer(
+				cfg,
+				uploads,
+				metricz,
+				versionsRepo,
+				modsRepo,
 				routing,
 			)
 

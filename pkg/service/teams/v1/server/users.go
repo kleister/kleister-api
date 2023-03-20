@@ -14,13 +14,6 @@ func (s *TeamsServer) ListUsers(
 	ctx context.Context,
 	req *connect.Request[teams.ListUsersRequest],
 ) (*connect.Response[teams.ListUsersResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -50,13 +43,6 @@ func (s *TeamsServer) AttachUser(
 	ctx context.Context,
 	req *connect.Request[teams.AttachUserRequest],
 ) (*connect.Response[teams.AttachUserResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -71,13 +57,6 @@ func (s *TeamsServer) DropUser(
 	ctx context.Context,
 	req *connect.Request[teams.DropUserRequest],
 ) (*connect.Response[teams.DropUserResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}

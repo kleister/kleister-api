@@ -14,13 +14,6 @@ func (s *TeamsServer) ListMods(
 	ctx context.Context,
 	req *connect.Request[teams.ListModsRequest],
 ) (*connect.Response[teams.ListModsResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -50,13 +43,6 @@ func (s *TeamsServer) AttachMod(
 	ctx context.Context,
 	req *connect.Request[teams.AttachModRequest],
 ) (*connect.Response[teams.AttachModResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -71,13 +57,6 @@ func (s *TeamsServer) DropMod(
 	ctx context.Context,
 	req *connect.Request[teams.DropModRequest],
 ) (*connect.Response[teams.DropModResponse], error) {
-	// if !current.Admin {
-	// 	return nil, connect.NewError(
-	// 		connect.CodePermissionDenied,
-	// 		fmt.Errorf("only admins can access this resource"),
-	// 	)
-	// }
-
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}

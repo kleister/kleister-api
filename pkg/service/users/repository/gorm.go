@@ -27,8 +27,10 @@ type GormRepository struct {
 }
 
 // List implements the UsersRepository interface.
-func (r *GormRepository) List(ctx context.Context) ([]*model.User, error) {
+func (r *GormRepository) List(ctx context.Context, _ string) ([]*model.User, error) {
 	records := make([]*model.User, 0)
+
+	// TODO: use search if given
 
 	if err := r.query(ctx).Find(
 		&records,
@@ -98,15 +100,15 @@ func (r *GormRepository) Update(ctx context.Context, user *model.User) (*model.U
 }
 
 // Show implements the UsersRepository interface.
-func (r *GormRepository) Show(ctx context.Context, name string) (*model.User, error) {
+func (r *GormRepository) Show(ctx context.Context, id string) (*model.User, error) {
 	record := &model.User{}
 
 	err := r.query(ctx).Where(
 		"id = ?",
-		name,
+		id,
 	).Or(
 		"slug = ?",
-		name,
+		id,
 	).First(
 		record,
 	).Error
@@ -119,16 +121,16 @@ func (r *GormRepository) Show(ctx context.Context, name string) (*model.User, er
 }
 
 // Delete implements the UsersRepository interface.
-func (r *GormRepository) Delete(ctx context.Context, name string) error {
+func (r *GormRepository) Delete(ctx context.Context, id string) error {
 	tx := r.handle.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	if err := tx.Where(
 		"id = ?",
-		name,
+		id,
 	).Or(
 		"slug = ?",
-		name,
+		id,
 	).Delete(
 		&model.User{},
 	).Error; err != nil {
@@ -139,26 +141,28 @@ func (r *GormRepository) Delete(ctx context.Context, name string) error {
 }
 
 // Exists implements the UsersRepository interface.
-func (r *GormRepository) Exists(ctx context.Context, name string) (bool, error) {
+func (r *GormRepository) Exists(ctx context.Context, id string) (bool, string, error) {
+	record := &model.User{}
+
 	res := r.query(ctx).Where(
 		"id = ?",
-		name,
+		id,
 	).Or(
 		"slug = ?",
-		name,
+		id,
 	).Find(
-		&model.User{},
+		record,
 	)
 
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-		return false, nil
+		return false, "", nil
 	}
 
 	if res.Error != nil {
-		return false, res.Error
+		return false, "", res.Error
 	}
 
-	return res.RowsAffected > 0, nil
+	return res.RowsAffected > 0, record.ID, nil
 }
 
 func (r *GormRepository) validate(ctx context.Context, record *model.User, existing bool) error {

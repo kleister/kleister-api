@@ -38,7 +38,7 @@ func TestList(t *testing.T) {
 
 	repo := repository.NewMockTeamsRepository(ctrl)
 	repo.EXPECT().
-		List(gomock.Any()).
+		List(gomock.Any(), "").
 		Return([]*model.Team{
 			{
 				ID:        "dd5c7e72-4d42-4b9a-af85-45f792711e85",
@@ -58,7 +58,11 @@ func TestList(t *testing.T) {
 
 	got, err := server.List(
 		noContext,
-		&connect.Request[teams.ListRequest]{},
+		&connect.Request[teams.ListRequest]{
+			Msg: &teams.ListRequest{
+				Query: "",
+			},
+		},
 	)
 
 	if err != nil {
@@ -85,7 +89,7 @@ func TestList_ErrGeneric(t *testing.T) {
 
 	repo := repository.NewMockTeamsRepository(ctrl)
 	repo.EXPECT().
-		List(gomock.Any()).
+		List(gomock.Any(), "").
 		Return(nil, want)
 
 	server := NewTeamsServer(
@@ -97,7 +101,11 @@ func TestList_ErrGeneric(t *testing.T) {
 
 	_, got := server.List(
 		noContext,
-		&connect.Request[teams.ListRequest]{},
+		&connect.Request[teams.ListRequest]{
+			Msg: &teams.ListRequest{
+				Query: "",
+			},
+		},
 	)
 
 	if got.(*connect.Error).Unwrap() != want {

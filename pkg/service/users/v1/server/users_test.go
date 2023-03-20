@@ -43,7 +43,7 @@ func TestList(t *testing.T) {
 
 	repo := repository.NewMockUsersRepository(ctrl)
 	repo.EXPECT().
-		List(gomock.Any()).
+		List(gomock.Any(), gomock.Any()).
 		Return([]*model.User{
 			{
 				ID:        "dd5c7e72-4d42-4b9a-af85-45f792711e85",
@@ -68,7 +68,11 @@ func TestList(t *testing.T) {
 
 	got, err := server.List(
 		noContext,
-		&connect.Request[users.ListRequest]{},
+		&connect.Request[users.ListRequest]{
+			Msg: &users.ListRequest{
+				Query: "",
+			},
+		},
 	)
 
 	if err != nil {
@@ -95,7 +99,7 @@ func TestList_ErrGeneric(t *testing.T) {
 
 	repo := repository.NewMockUsersRepository(ctrl)
 	repo.EXPECT().
-		List(gomock.Any()).
+		List(gomock.Any(), gomock.Any()).
 		Return(nil, want)
 
 	server := NewUsersServer(
@@ -107,7 +111,11 @@ func TestList_ErrGeneric(t *testing.T) {
 
 	_, got := server.List(
 		noContext,
-		&connect.Request[users.ListRequest]{},
+		&connect.Request[users.ListRequest]{
+			Msg: &users.ListRequest{
+				Query: "",
+			},
+		},
 	)
 
 	if got.(*connect.Error).Unwrap() != want {

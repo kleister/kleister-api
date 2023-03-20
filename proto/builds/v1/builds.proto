@@ -87,6 +87,7 @@ message DeleteResponse {
 message ListVersionsRequest {
   string pack = 1;
   string build = 2;
+  string query = 3;
 }
 
 message ListVersionsResponse {

@@ -23,10 +23,10 @@ var (
 
 // UsersRepository defines the required functions for the repository.
 type UsersRepository interface {
-	List(context.Context) ([]*model.User, error)
+	List(context.Context, string) ([]*model.User, error)
 	Create(context.Context, *model.User) (*model.User, error)
 	Update(context.Context, *model.User) (*model.User, error)
 	Show(context.Context, string) (*model.User, error)
 	Delete(context.Context, string) error
-	Exists(context.Context, string) (bool, error)
+	Exists(context.Context, string) (bool, string, error)
 }

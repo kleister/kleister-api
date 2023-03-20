@@ -23,10 +23,10 @@ var (
 
 // TeamsRepository defines the required functions for the repository.
 type TeamsRepository interface {
-	List(context.Context) ([]*model.Team, error)
+	List(context.Context, string) ([]*model.Team, error)
 	Create(context.Context, *model.Team) (*model.Team, error)
 	Update(context.Context, *model.Team) (*model.Team, error)
 	Show(context.Context, string) (*model.Team, error)
 	Delete(context.Context, string) error
-	Exists(context.Context, string) (bool, error)
+	Exists(context.Context, string) (bool, string, error)
 }

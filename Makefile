@@ -84,7 +84,14 @@ mocks: \
 	pkg/upload/mock.go pkg/store/mock.go \
 	pkg/service/users/repository/mock.go \
 	pkg/service/teams/repository/mock.go \
-	pkg/service/members/repository/mock.go
+	pkg/service/members/repository/mock.go \
+	pkg/service/profile/repository/mock.go \
+	pkg/service/forge/repository/mock.go \
+	pkg/service/minecraft/repository/mock.go \
+	pkg/service/mods/repository/mock.go \
+	pkg/service/versions/repository/mock.go \
+	pkg/service/packs/repository/mock.go \
+	pkg/service/builds/repository/mock.go
 
 pkg/upload/mock.go: pkg/upload/upload.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package upload
@@ -99,6 +106,27 @@ pkg/service/teams/repository/mock.go: pkg/service/teams/repository/repository.go
 	$(MOCKGEN) -source $< -destination $@ -package repository
 
 pkg/service/members/repository/mock.go: pkg/service/members/repository/repository.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package repository
+
+pkg/service/profile/repository/mock.go: pkg/service/profile/repository/repository.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package repository
+
+pkg/service/forge/repository/mock.go: pkg/service/forge/repository/repository.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package repository
+
+pkg/service/minecraft/repository/mock.go: pkg/service/minecraft/repository/repository.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package repository
+
+pkg/service/mods/repository/mock.go: pkg/service/mods/repository/repository.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package repository
+
+pkg/service/versions/repository/mock.go: pkg/service/versions/repository/repository.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package repository
+
+pkg/service/packs/repository/mock.go: pkg/service/packs/repository/repository.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package repository
+
+pkg/service/builds/repository/mock.go: pkg/service/builds/repository/repository.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package repository
 
 .PHONY: changelog
