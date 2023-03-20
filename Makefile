@@ -76,8 +76,12 @@ lint: $(REVIVE)
 	for PKG in $(PACKAGES); do $(REVIVE) -config revive.toml -set_exit_status $$PKG || exit 1; done;
 
 .PHONY: generate
-generate:
+generate: buf
 	go generate $(PACKAGES)
+
+.PHONY: buf
+buf: $(BUF)
+	$(BUF) generate
 
 .PHONY: mocks
 mocks: \
