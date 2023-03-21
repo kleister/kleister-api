@@ -95,7 +95,7 @@ jobs:
 
       - name: Build image
         id: publish
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
@@ -104,6 +104,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
+          provenance: false
 
   manifest:
     runs-on: ubuntu-latest
