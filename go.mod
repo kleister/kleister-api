@@ -10,7 +10,7 @@ require (
 	github.com/bufbuild/connect-grpcreflect-go v1.0.0
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/dchest/uniuri v1.2.0
-	github.com/glebarez/sqlite v1.7.0
+	github.com/glebarez/sqlite v1.8.0
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-gormigrate/gormigrate/v2 v2.0.2
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
@@ -27,9 +27,9 @@ require (
 	github.com/urfave/cli/v2 v2.25.1
 	golang.org/x/net v0.9.0
 	google.golang.org/protobuf v1.30.0
-	gorm.io/driver/mysql v1.4.7
+	gorm.io/driver/mysql v1.5.0
 	gorm.io/driver/postgres v1.5.0
-	gorm.io/gorm v1.24.7-0.20230324020705-b444011d094d
+	gorm.io/gorm v1.25.0
 )
 
 require (
@@ -40,7 +40,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/glebarez/go-sqlite v1.21.0 // indirect
+	github.com/glebarez/go-sqlite v1.21.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -77,5 +77,5 @@ require (
 	modernc.org/libc v1.22.3 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.5.0 // indirect
-	modernc.org/sqlite v1.21.0 // indirect
+	modernc.org/sqlite v1.21.1 // indirect
 )
