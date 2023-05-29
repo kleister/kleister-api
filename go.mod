@@ -12,7 +12,7 @@ require (
 	github.com/dchest/uniuri v1.2.0
 	github.com/glebarez/sqlite v1.8.0
 	github.com/go-chi/chi/v5 v5.0.8
-	github.com/go-gormigrate/gormigrate/v2 v2.0.2
+	github.com/go-gormigrate/gormigrate/v2 v2.0.3
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
@@ -24,7 +24,7 @@ require (
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.3
-	github.com/urfave/cli/v2 v2.25.4
+	github.com/urfave/cli/v2 v2.25.5
 	golang.org/x/net v0.10.0
 	google.golang.org/protobuf v1.30.0
 	gorm.io/driver/mysql v1.5.1
