@@ -149,6 +149,8 @@ github.com/bufbuild/connect-go v1.6.0 h1:OCEB8JuEuvcY5lEKZCQE95CUscqkDtLnQceNhDg
 github.com/bufbuild/connect-go v1.6.0/go.mod h1:GmMJYR6orFqD0Y6ZgX8pwQ8j9baizDrIQMm1/a6LnHk=
 github.com/bufbuild/connect-go v1.7.0 h1:MGp82v7SCza+3RhsVhV7aMikwxvI3ZfD72YiGt8FYJo=
 github.com/bufbuild/connect-go v1.7.0/go.mod h1:GmMJYR6orFqD0Y6ZgX8pwQ8j9baizDrIQMm1/a6LnHk=
+github.com/bufbuild/connect-go v1.8.0 h1:srluNkFkZBfSfg9Qb6DrO+5nMaxix//h2ctrHZhMGKc=
+github.com/bufbuild/connect-go v1.8.0/go.mod h1:GmMJYR6orFqD0Y6ZgX8pwQ8j9baizDrIQMm1/a6LnHk=
 github.com/bufbuild/connect-grpchealth-go v1.0.0 h1:33v883tL86jLomQT6R2ZYVYaI2cRkuUXvU30WfbQ/ko=
 github.com/bufbuild/connect-grpchealth-go v1.0.0/go.mod h1:6OEb4J3rh5+Wdvt4/muOIfZo1lt9cPU8ggwpsjBaZ3Y=
 github.com/bufbuild/connect-grpchealth-go v1.1.0 h1:Yri24hjiRwZQK87N6ybwXiv+Ozg8KtH2n/OLcvkNQds=
@@ -210,6 +212,8 @@ github.com/go-gormigrate/gormigrate/v2 v2.0.2 h1:YV4Lc5yMQX8ahVW0ENPq6sPhrhdkGuk
 github.com/go-gormigrate/gormigrate/v2 v2.0.2/go.mod h1:vld36QpBTfTzLealsHsmQQJK5lSwJt6wiORv+oFX8/I=
 github.com/go-gormigrate/gormigrate/v2 v2.0.3 h1:yx4u7OPDZ9e4zpD2ZTLc36T7h6wq/7UvkuJDdtCf9uk=
 github.com/go-gormigrate/gormigrate/v2 v2.0.3/go.mod h1:PVBC5iGv9iC4ia7ZNJblkHye5jUN/Q/UaNcRb+1EY2c=
+github.com/go-gormigrate/gormigrate/v2 v2.1.0 h1:4/1xr9CjOox714EJWbxkF00lrNmbWJToSZzhykKKcKY=
+github.com/go-gormigrate/gormigrate/v2 v2.1.0/go.mod h1:gpA97koYGyjqaiLDTmLE5W7nyYTmI26AYIf2a/earuo=
 github.com/go-ozzo/ozzo-validation/v4 v4.3.0 h1:byhDUpfEwjsVQb1vBunvIjh2BHQ9ead57VkAEY4V+Es=
 github.com/go-ozzo/ozzo-validation/v4 v4.3.0/go.mod h1:2NKgrcHl3z6cJs+3Oo940FPRiTzuqKbvfrL2RxCj6Ew=
 github.com/go-sql-driver/mysql v1.7.0 h1:ueSltNNllEqE3qcWBTD0iQd3IpL/6U+mJxLkazJ7YPc=
