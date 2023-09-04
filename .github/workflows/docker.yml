@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: Checkout source
         id: source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup golang
         id: golang
@@ -113,7 +113,7 @@ jobs:
     steps:
       - name: Checkout source
         id: source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Hub tags
         id: hubTags
@@ -168,7 +168,7 @@ jobs:
     steps:
       - name: Checkout source
         id: source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Hub readme
         id: hub

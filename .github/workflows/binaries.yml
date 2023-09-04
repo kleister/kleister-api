@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Checkout source
         id: source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configure aws
         id: aws
