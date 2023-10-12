@@ -28,7 +28,7 @@ jobs:
 
       - name: Run linting
         id: linting
-        uses: bufbuild/buf-lint-action@v1.0.3
+        uses: bufbuild/buf-lint-action@v1.1.0
         with:
           input: proto/
 
