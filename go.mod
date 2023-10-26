@@ -28,7 +28,7 @@ require (
 	golang.org/x/net v0.17.0
 	google.golang.org/protobuf v1.31.0
 	gorm.io/driver/mysql v1.5.2
-	gorm.io/driver/postgres v1.5.3
+	gorm.io/driver/postgres v1.5.4
 	gorm.io/gorm v1.25.5
 )
 
