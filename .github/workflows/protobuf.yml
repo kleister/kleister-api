@@ -41,7 +41,7 @@ jobs:
 
       - name: Buf publish
         id: publish
-        uses: bufbuild/buf-push-action@v1.1.1
+        uses: bufbuild/buf-push-action@v1.2.0
         if: github.event_name != 'pull_request'
         with:
           input: proto/
