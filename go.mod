@@ -27,9 +27,9 @@ require (
 	github.com/urfave/cli/v2 v2.27.1
 	golang.org/x/net v0.20.0
 	google.golang.org/protobuf v1.32.0
-	gorm.io/driver/mysql v1.5.2
+	gorm.io/driver/mysql v1.5.3
 	gorm.io/driver/postgres v1.5.4
-	gorm.io/gorm v1.25.6
+	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde
 )
 
 require (
