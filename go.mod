@@ -29,7 +29,7 @@ require (
 	google.golang.org/protobuf v1.32.0
 	gorm.io/driver/mysql v1.5.3
 	gorm.io/driver/postgres v1.5.4
-	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde
+	gorm.io/gorm 0123dd450942
 )
 
 require (
