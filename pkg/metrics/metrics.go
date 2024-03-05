@@ -1,21 +1,26 @@
 package metrics
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/kleister/kleister-api/pkg/version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
 )
 
-const (
-	namespace = "kleister_api"
+var (
+	// ErrInvalidToken is returned when the request token is invalid.
+	ErrInvalidToken = errors.New("invalid or missing token")
 )
 
 // Metrics simply defines the basic metrics including the registry.
 type Metrics struct {
 	Namespace string
+	Token     string
 	Registry  *prometheus.Registry
 }
 
@@ -31,19 +36,52 @@ func (m *Metrics) RegisterCounter(counter *prometheus.CounterVec) *prometheus.Co
 	return counter
 }
 
+// Handler initializes the prometheus middleware.
+func (m *Metrics) Handler() http.HandlerFunc {
+	h := promhttp.HandlerFor(
+		m.Registry,
+		promhttp.HandlerOpts{
+			ErrorLog: Logger{},
+		},
+	)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if m.Token == "" {
+			h.ServeHTTP(w, r)
+			return
+		}
+
+		header := r.Header.Get("Authorization")
+
+		if header == "" {
+			http.Error(w, ErrInvalidToken.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		if header != "Bearer "+m.Token {
+			http.Error(w, ErrInvalidToken.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		h.ServeHTTP(w, r)
+	}
+}
+
 // New simply initializes the metrics handling including the go metrics.
-func New() *Metrics {
+func New(opts ...Option) *Metrics {
+	options := newOptions(opts...)
 	registry := prometheus.NewRegistry()
 
 	registry.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{
-		Namespace: namespace,
+		Namespace: options.Namespace,
 	}))
 
 	registry.MustRegister(collectors.NewGoCollector())
-	registry.MustRegister(version.Collector(namespace))
+	registry.MustRegister(version.Collector(options.Namespace))
 
 	return &Metrics{
-		Namespace: namespace,
+		Namespace: options.Namespace,
+		Token:     options.Token,
 		Registry:  registry,
 	}
 }

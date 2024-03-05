@@ -1,0 +1,35 @@
+package config
+
+// AuthEndpoints defines the endpoints for external authentication.
+type AuthEndpoints struct {
+	Discovery string `mapstructure:"discovery"`
+	Auth      string `mapstructure:"auth"`
+	Token     string `mapstructure:"token"`
+	Profile   string `mapstructure:"profile"`
+	Email     string `mapstructure:"email"`
+}
+
+// AuthMappings defines the mappings for external authentication.
+type AuthMappings struct {
+	Login  string `mapstructure:"login"`
+	Name   string `mapstructure:"name"`
+	Email  string `mapstructure:"email"`
+	Avatar string `mapstructure:"avatar"`
+}
+
+// AuthProvider defines a single provider auth source.
+type AuthProvider struct {
+	Driver       string        `mapstructure:"driver"`
+	Name         string        `mapstructure:"name"`
+	Callback     string        `mapstructure:"callback"`
+	ClientID     string        `mapstructure:"client_id"`
+	ClientSecret string        `mapstructure:"client_secret"`
+	Scopes       []string      `mapstructure:"scopes"`
+	Endpoints    AuthEndpoints `mapstructure:"endpoints"`
+	Mappings     AuthMappings  `mapstructure:"mappings"`
+}
+
+// AuthConfig defines the configuration for auth sources.
+type AuthConfig struct {
+	Providers []AuthProvider `mapstructure:"providers"`
+}

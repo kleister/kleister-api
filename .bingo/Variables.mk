@@ -59,3 +59,9 @@ $(STATICCHECK): $(BINGO_DIR)/staticcheck.mod
 	@echo "(re)installing $(GOBIN)/staticcheck-v0.4.3"
 	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=staticcheck.mod -o=$(GOBIN)/staticcheck-v0.4.3 "honnef.co/go/tools/cmd/staticcheck"
 
+SWAGGER := $(GOBIN)/swagger-v0.30.5
+$(SWAGGER): $(BINGO_DIR)/swagger.mod
+	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
+	@echo "(re)installing $(GOBIN)/swagger-v0.30.5"
+	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=swagger.mod -o=$(GOBIN)/swagger-v0.30.5 "github.com/go-swagger/go-swagger/cmd/swagger"
+

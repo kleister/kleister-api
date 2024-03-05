@@ -3,67 +3,57 @@ package command
 import (
 	"fmt"
 	"net/http"
+	"os"
 
-	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-// Health provides the sub-command to perform a health check.
-func Health(cfg *config.Config) *cli.Command {
-	return &cli.Command{
-		Name:   "health",
-		Usage:  "Perform health checks",
-		Flags:  HealthFlags(cfg),
-		Action: HealthAction(cfg),
+var (
+	healthCmd = &cobra.Command{
+		Use:   "health",
+		Short: "Perform health checks",
+		Run:   healthAction,
+		Args:  cobra.NoArgs,
 	}
+)
+
+func init() {
+	rootCmd.AddCommand(healthCmd)
+
+	healthCmd.PersistentFlags().String("metrics-addr", defaultMetricsAddr, "Address to bind the metrics")
+	viper.SetDefault("metrics.addr", defaultMetricsAddr)
+	_ = viper.BindPFlag("metrics.addr", healthCmd.PersistentFlags().Lookup("metrics-addr"))
 }
 
-// HealthFlags defines health flags.
-func HealthFlags(cfg *config.Config) []cli.Flag {
-	return []cli.Flag{
-		&cli.StringFlag{
-			Name:        "metrics-addr",
-			Value:       defaultMetricsAddr,
-			Usage:       "Address to bind the metrics",
-			EnvVars:     []string{"KLEISTER_API_METRICS_ADDR"},
-			Destination: &cfg.Metrics.Addr,
-		},
+func healthAction(_ *cobra.Command, _ []string) {
+	resp, err := http.Get(
+		fmt.Sprintf(
+			"http://%s/healthz",
+			cfg.Metrics.Addr,
+		),
+	)
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("Failed to request health check")
+
+		os.Exit(1)
 	}
-}
 
-// HealthAction defines health action.
-func HealthAction(cfg *config.Config) cli.ActionFunc {
-	return func(c *cli.Context) error {
-		resp, err := http.Get(
-			fmt.Sprintf(
-				"http://%s/healthz",
-				cfg.Metrics.Addr,
-			),
-		)
+	defer resp.Body.Close()
 
-		if err != nil {
-			log.Error().
-				Err(err).
-				Msg("Failed to request health check")
-
-			return err
-		}
-
-		defer resp.Body.Close()
-
-		if resp.StatusCode != 200 {
-			log.Error().
-				Int("code", resp.StatusCode).
-				Msg("Health seems to be in bad state")
-
-			return err
-		}
-
-		log.Debug().
+	if resp.StatusCode != 200 {
+		log.Error().
 			Int("code", resp.StatusCode).
-			Msg("Health got a good state")
+			Msg("Health seems to be in bad state")
 
-		return nil
+		os.Exit(1)
 	}
+
+	log.Debug().
+		Int("code", resp.StatusCode).
+		Msg("Health got a good state")
 }

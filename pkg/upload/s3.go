@@ -2,9 +2,9 @@ package upload
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
-	"net/url"
-	"strconv"
+	"path"
 	"strings"
 	"time"
 
@@ -13,12 +13,17 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	s3client "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/kleister/kleister-api/pkg/config"
-	"github.com/pkg/errors"
 )
 
 // S3Upload implements the Upload interface.
 type S3Upload struct {
-	dsn    *url.URL
+	endpoint string
+	path     string
+	access   string
+	secret   string
+	bucket   string
+	region   string
+
 	client *s3client.S3
 }
 
@@ -26,28 +31,41 @@ type S3Upload struct {
 func (u *S3Upload) Info() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["driver"] = "s3"
-	result["bucket"] = u.bucket()
-	result["region"] = u.region()
-	result["pathstyle"] = u.pathstyle()
-	result["endpoint"] = u.endpoint()
+	result["endpoint"] = u.endpoint
+	result["path"] = u.path
+	result["bucket"] = u.bucket
+	result["region"] = u.region
 
 	return result
 }
 
 // Prepare simply prepares the upload handler.
 func (u *S3Upload) Prepare() (Upload, error) {
-	cfg := aws.NewConfig().
-		WithRegion(u.region()).
-		WithS3ForcePathStyle(u.pathstyle())
 
-	if u.endpoint() != "" {
-		cfg = cfg.WithEndpoint(u.endpoint())
+	cfg := aws.NewConfig().
+		WithRegion(u.region).
+		WithS3ForcePathStyle(true)
+
+	if u.endpoint != "" {
+		cfg = cfg.WithEndpoint(u.endpoint)
 	}
 
-	if u.accesskey() != "" && u.secretkey() != "" {
+	if u.access != "" && u.secret != "" {
+		access, err := config.Value(u.access)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse access key: %w", err)
+		}
+
+		secret, err := config.Value(u.secret)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse secret key: %w", err)
+		}
+
 		cfg = cfg.WithCredentials(credentials.NewStaticCredentials(
-			u.accesskey(),
-			u.secretkey(),
+			access,
+			secret,
 			"",
 		))
 	}
@@ -72,11 +90,11 @@ func (u *S3Upload) Close() error {
 }
 
 // Upload stores an attachment within the defined S3 bucket.
-func (u *S3Upload) Upload(path, ctype string, content []byte) error {
+func (u *S3Upload) Upload(key, ctype string, content []byte) error {
 	params := &s3client.PutObjectInput{
 		ACL:         aws.String("public-read"),
-		Bucket:      aws.String(u.bucket()),
-		Key:         aws.String(path),
+		Bucket:      aws.String(u.bucket),
+		Key:         aws.String(path.Join(u.path, key)),
 		ContentType: aws.String(ctype),
 		Body:        bytes.NewReader(content),
 	}
@@ -91,10 +109,10 @@ func (u *S3Upload) Upload(path, ctype string, content []byte) error {
 }
 
 // Delete removes an attachment from the defined S3 bucket.
-func (u *S3Upload) Delete(path string) error {
+func (u *S3Upload) Delete(key string) error {
 	params := &s3client.DeleteObjectInput{
-		Bucket: aws.String(u.bucket()),
-		Key:    aws.String(path),
+		Bucket: aws.String(u.bucket),
+		Key:    aws.String(path.Join(u.path, key)),
 	}
 
 	if _, err := u.client.DeleteObject(
@@ -110,8 +128,8 @@ func (u *S3Upload) Delete(path string) error {
 func (u *S3Upload) Handler(root string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req, _ := u.client.GetObjectRequest(&s3client.GetObjectInput{
-			Bucket: aws.String(u.bucket()),
-			Key:    aws.String(strings.TrimPrefix(r.URL.Path, root)),
+			Bucket: aws.String(u.bucket),
+			Key:    aws.String(path.Join(u.path, strings.TrimPrefix(r.URL.Path, root))),
 		})
 
 		url, err := req.Presign(5 * time.Minute)
@@ -128,66 +146,21 @@ func (u *S3Upload) Handler(root string) http.Handler {
 	})
 }
 
-func (u *S3Upload) accesskey() string {
-	if val := u.dsn.Query().Get("access_key"); val != "" {
-		return val
-	}
-
-	return ""
-}
-
-func (u *S3Upload) secretkey() string {
-	if val := u.dsn.Query().Get("secret_key"); val != "" {
-		return val
-	}
-
-	return ""
-}
-
-func (u *S3Upload) bucket() string {
-	if val := u.dsn.Query().Get("bucket"); val != "" {
-		return val
-	}
-
-	return ""
-}
-
-func (u *S3Upload) region() string {
-	if val := u.dsn.Query().Get("region"); val != "" {
-		return val
-	}
-
-	return ""
-}
-
-func (u *S3Upload) pathstyle() bool {
-	if val := u.dsn.Query().Get("path_style"); val != "" {
-		u, err := strconv.ParseBool(val)
-
-		if err != nil {
-			return false
-		}
-
-		return u
-	}
-
-	return false
-}
-
-func (u *S3Upload) endpoint() string {
-	return u.dsn.Host
-}
-
 // NewS3Upload initializes a new S3 handler.
 func NewS3Upload(cfg config.Upload) (Upload, error) {
-	parsed, err := url.Parse(cfg.DSN)
+	path := "/"
 
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse dsn")
+	if cfg.Path != "" {
+		path = cfg.Path
 	}
 
 	f := &S3Upload{
-		dsn: parsed,
+		endpoint: cfg.Endpoint,
+		path:     path,
+		access:   cfg.Access,
+		secret:   cfg.Secret,
+		bucket:   cfg.Bucket,
+		region:   cfg.Region,
 	}
 
 	return f.Prepare()

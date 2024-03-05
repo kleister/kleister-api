@@ -11,7 +11,9 @@ CMD ["server"]
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/mime.types /etc/
 
-ENV KLEISTER_API_DB_DSN sqlite:///var/lib/kleister/database.sqlite3
-ENV KLEISTER_API_UPLOAD_DSN file:///var/lib/kleister/uploads
+ENV KLEISTER_API_DATABASE_DRIVER sqlite3
+ENV KLEISTER_API_DATABASE_NAME /var/lib/kleister/database.sqlite3
+ENV KLEISTER_API_UPLOAD_DRIVER file
+ENV KLEISTER_API_UPLOAD_PATH /var/lib/kleister/uploads
 
 COPY bin/kleister-api /usr/bin/kleister-api

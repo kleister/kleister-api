@@ -34,6 +34,7 @@ branches:
       restrictions:
         apps:
           - renovate
+          - kleister
         users: []
         teams:
           - admins

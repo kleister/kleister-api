@@ -1,0 +1,19 @@
+---
+package: v1
+
+generate:
+  chi-server: true
+  strict-server: true
+  models: true
+  embedded-spec: true
+
+compatibility:
+  apply-chi-middleware-first-to-last: true
+
+output: gen.go
+
+output-options:
+  user-templates:
+    constants.tmpl: override/constants.tmpl
+
+...

@@ -2,18 +2,17 @@ package store
 
 import (
 	"fmt"
-	"net"
 	"net/url"
-	"path"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/alexedwards/scs/gormstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/glebarez/sqlite"
 	"github.com/go-gormigrate/gormigrate/v2"
-	"github.com/google/uuid"
-	"github.com/kleister/kleister-api/pkg/config"
-	"github.com/kleister/kleister-api/pkg/model"
+	"github.com/gopad/gopad-api/pkg/config"
+	"github.com/gopad/gopad-api/pkg/model"
 	"github.com/pkg/errors"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -33,6 +32,7 @@ type GormStore struct {
 	maxIdleConns    int
 	connMaxLifetime time.Duration
 	handle          *gorm.DB
+	session         *gormstore.GORMStore
 }
 
 // Handle returns a database handle.
@@ -68,16 +68,6 @@ func (s *GormStore) Admin(username, password, email string) error {
 	}()
 
 	if admin.ID == "" {
-		if admin.Slug == "" {
-			admin.Slug = Slugify(
-				tx.Model(&model.User{}),
-				admin.Username,
-				"",
-			)
-		}
-
-		admin.ID = uuid.New().String()
-
 		if err := tx.Create(admin).Error; err != nil {
 			tx.Rollback()
 			return err
@@ -87,14 +77,6 @@ func (s *GormStore) Admin(username, password, email string) error {
 			return err
 		}
 	} else {
-		if admin.Slug == "" {
-			admin.Slug = Slugify(
-				tx.Model(&model.User{}),
-				admin.Username,
-				admin.ID,
-			)
-		}
-
 		if err := tx.Save(admin).Error; err != nil {
 			tx.Rollback()
 			return err
@@ -124,10 +106,6 @@ func (s *GormStore) Info() map[string]interface{} {
 
 	if s.username != "" {
 		result["username"] = s.username
-	}
-
-	if s.password != "" {
-		result["password"] = s.password
 	}
 
 	return result
@@ -175,7 +153,15 @@ func (s *GormStore) Open() error {
 		return err
 	}
 
+	session, err := gormstore.New(handle)
+
+	if err != nil {
+		return err
+	}
+
 	s.handle = handle
+	s.session = session
+
 	return s.Prepare()
 }
 
@@ -210,6 +196,11 @@ func (s *GormStore) Migrate() error {
 	)
 
 	return migrate.Migrate()
+}
+
+// Session defines a db handler for sessions.
+func (s *GormStore) Session() scs.Store {
+	return s.session
 }
 
 func (s *GormStore) open() (gorm.Dialector, error) {
@@ -272,63 +263,66 @@ func (s *GormStore) open() (gorm.Dialector, error) {
 
 // NewGormStore initializes a new GORM
 func NewGormStore(cfg config.Database) (Store, error) {
-	parsed, err := url.Parse(cfg.DSN)
+	username, err := config.Value(cfg.Username)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse dsn")
+		return nil, fmt.Errorf("failed to parse username secret: %w", err)
+	}
+
+	password, err := config.Value(cfg.Password)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse password secret: %w", err)
 	}
 
 	client := &GormStore{
-		driver:   parsed.Scheme,
-		username: parsed.User.Username(),
-		meta:     parsed.Query(),
+		driver:   cfg.Driver,
+		database: cfg.Name,
+
+		username: username,
+		password: password,
+
+		meta: url.Values{},
 	}
 
-	if password, ok := parsed.User.Password(); ok {
-		client.password = password
-	}
-
-	if client.meta.Has("maxOpenConns") {
-		val, err := strconv.Atoi(
-			client.meta.Get("maxOpenConns"),
+	if val, ok := cfg.Options["maxOpenConns"]; ok {
+		cur, err := strconv.Atoi(
+			val,
 		)
 
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse maxOpenConns: %w", err)
 		}
 
-		client.maxOpenConns = val
-		client.meta.Del("maxOpenConns")
+		client.maxOpenConns = cur
 	} else {
 		client.maxOpenConns = 25
 	}
 
-	if client.meta.Has("maxIdleConns") {
-		val, err := strconv.Atoi(
-			client.meta.Get("maxIdleConns"),
+	if val, ok := cfg.Options["maxIdleConns"]; ok {
+		cur, err := strconv.Atoi(
+			val,
 		)
 
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse maxIdleConns: %w", err)
 		}
 
-		client.maxIdleConns = val
-		client.meta.Del("maxIdleConns")
+		client.maxIdleConns = cur
 	} else {
 		client.maxIdleConns = 25
 	}
 
-	if client.meta.Has("connMaxLifetime") {
-		val, err := time.ParseDuration(
-			client.meta.Get("connMaxLifetime"),
+	if val, ok := cfg.Options["connMaxLifetime"]; ok {
+		cur, err := time.ParseDuration(
+			val,
 		)
 
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse connMaxLifetime: %w", err)
 		}
 
-		client.connMaxLifetime = val
-		client.meta.Del("connMaxLifetime")
+		client.connMaxLifetime = cur
 	} else {
 		client.connMaxLifetime = 5 * time.Minute
 	}
@@ -336,55 +330,51 @@ func NewGormStore(cfg config.Database) (Store, error) {
 	switch client.driver {
 	case "sqlite", "sqlite3":
 		client.driver = "sqlite3"
-		client.database = path.Join(parsed.Host, parsed.Path)
 
 		client.meta.Add("_pragma", "journal_mode(WAL)")
 		client.meta.Add("_pragma", "busy_timeout(5000)")
 		client.meta.Add("_pragma", "foreign_keys(1)")
 	case "mysql", "mariadb":
 		client.driver = "mysql"
-		client.database = strings.TrimPrefix(parsed.Path, "/")
 
-		host, port, err := net.SplitHostPort(parsed.Host)
+		client.host = cfg.Address
+		client.port = "3306"
 
-		if err != nil && strings.Contains(err.Error(), "missing port in address") {
-			client.host = parsed.Host
-			client.port = "3306"
-		} else if err != nil {
-			return nil, err
-		} else {
-			client.host = host
-			client.port = port
+		if cfg.Port != "" {
+			client.port = cfg.Port
 		}
 
-		if val := client.meta.Get("charset"); val == "" {
+		if val, ok := cfg.Options["charset"]; ok {
+			client.meta.Set("charset", val)
+		} else {
 			client.meta.Set("charset", "utf8")
 		}
 
-		if val := client.meta.Get("parseTime"); val == "" {
+		if val, ok := cfg.Options["parseTime"]; ok {
+			client.meta.Set("parseTime", val)
+		} else {
 			client.meta.Set("parseTime", "True")
 		}
 
-		if val := client.meta.Get("loc"); val == "" {
+		if val, ok := cfg.Options["loc"]; ok {
+			client.meta.Set("loc", val)
+		} else {
 			client.meta.Set("loc", "Local")
 		}
+
 	case "postgres", "postgresql":
 		client.driver = "postgres"
-		client.database = strings.TrimPrefix(parsed.Path, "/")
 
-		host, port, err := net.SplitHostPort(parsed.Host)
+		client.host = cfg.Address
+		client.port = "5432"
 
-		if err != nil && strings.Contains(err.Error(), "missing port in address") {
-			client.host = parsed.Host
-			client.port = "5432"
-		} else if err != nil {
-			return nil, err
-		} else {
-			client.host = host
-			client.port = port
+		if cfg.Port != "" {
+			client.port = cfg.Port
 		}
 
-		if val := client.meta.Get("sslmode"); val == "" {
+		if val, ok := cfg.Options["sslmode"]; ok {
+			client.meta.Set("sslmode", val)
+		} else {
 			client.meta.Set("sslmode", "disable")
 		}
 	}

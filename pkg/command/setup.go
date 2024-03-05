@@ -1,29 +1,18 @@
 package command
 
 import (
-	"net/url"
 	"os"
 	"strings"
 
-	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/kleister/kleister-api/pkg/upload"
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
-func setup(cfg *config.Config) error {
-	if err := setupLogger(cfg); err != nil {
-		return err
-	}
-
-	return setupConfig(cfg)
-}
-
-func setupLogger(cfg *config.Config) error {
-	switch strings.ToLower(cfg.Logs.Level) {
+func setupLogger() error {
+	switch strings.ToLower(viper.GetString("log.level")) {
 	case "panic":
 		zerolog.SetGlobalLevel(zerolog.PanicLevel)
 	case "fatal":
@@ -42,11 +31,11 @@ func setupLogger(cfg *config.Config) error {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 
-	if cfg.Logs.Pretty {
+	if viper.GetBool("log.pretty") {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
 				Out:     os.Stderr,
-				NoColor: !cfg.Logs.Color,
+				NoColor: !viper.GetBool("log.color"),
 			},
 		)
 	}
@@ -54,9 +43,9 @@ func setupLogger(cfg *config.Config) error {
 	return nil
 }
 
-func setupConfig(cfg *config.Config) error {
-	if cfg.File != "" {
-		viper.SetConfigFile(cfg.File)
+func setupConfig() {
+	if viper.GetString("config.file") != "" {
+		viper.SetConfigFile(viper.GetString("config.file"))
 	} else {
 		viper.SetConfigName("api")
 
@@ -65,45 +54,43 @@ func setupConfig(cfg *config.Config) error {
 		viper.AddConfigPath("./config")
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
-		switch err.(type) {
-		case viper.ConfigFileNotFoundError:
-			log.Info().
-				Msg("Continue without config")
-		case viper.UnsupportedConfigError:
-			log.Fatal().
-				Err(err).
-				Msg("Unsupported config type")
+	viper.SetEnvPrefix("kleister_api")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 
-			return err
-		default:
-			log.Fatal().
-				Err(err).
-				Msg("Failed to read config")
-
-			return err
-		}
+	if err := readConfig(); err != nil {
+		log.Error().
+			Err(err).
+			Msg("Failed to read config file")
 	}
 
-	if err := viper.Unmarshal(&cfg); err != nil {
+	if err := viper.Unmarshal(cfg); err != nil {
 		log.Fatal().
 			Err(err).
 			Msg("Failed to parse config")
-
-		return err
 	}
-
-	return nil
 }
 
-func setupUploads(cfg *config.Config) (upload.Upload, error) {
-	parsed, err := url.Parse(cfg.Upload.DSN)
+func readConfig() error {
+	err := viper.ReadInConfig()
 
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse dsn")
+	if err == nil {
+		return nil
 	}
 
-	switch parsed.Scheme {
+	if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		return nil
+	}
+
+	if _, ok := err.(*os.PathError); ok {
+		return nil
+	}
+
+	return err
+}
+
+func setupUploads() (upload.Upload, error) {
+	switch cfg.Upload.Driver {
 	case "file":
 		return upload.NewFileUpload(cfg.Upload)
 	case "s3":
@@ -115,14 +102,8 @@ func setupUploads(cfg *config.Config) (upload.Upload, error) {
 	return nil, upload.ErrUnknownDriver
 }
 
-func setupStorage(cfg *config.Config) (store.Store, error) {
-	parsed, err := url.Parse(cfg.Database.DSN)
-
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse dsn")
-	}
-
-	switch parsed.Scheme {
+func setupStorage() (store.Store, error) {
+	switch cfg.Database.Driver {
 	case "sqlite", "sqlite3":
 		return store.NewGormStore(cfg.Database)
 	case "mysql", "mariadb":

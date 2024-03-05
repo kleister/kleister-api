@@ -1,0 +1,5715 @@
+---
+swagger: "2.0"
+
+info:
+  description: "API definition for Kleister, manage mod packs for Minecraft"
+  title: "Kleister OpenAPI"
+  version: "1.0.0-alpha1"
+  license:
+    name: "Apache-2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+consumes:
+  - "application/json"
+
+produces:
+  - "application/json"
+
+schemes:
+  - "http"
+  - "https"
+
+host: "try.kleister.eu"
+basePath: "/api/v1"
+
+securityDefinitions:
+  Cookie:
+    type: apiKey
+    in: header
+    name: Cookie
+  Header:
+    type: apiKey
+    in: header
+    name: X-API-Key
+  Basic:
+    type: basic
+
+security:
+  - Cookie: []
+  - Header: []
+  - Basic: []
+
+paths:
+  /auth/login:
+    post:
+      summary: "Authenticate an user by credentials"
+      operationId: "LoginUser"
+      tags:
+        - "auth"
+      parameters:
+        - in: "body"
+          name: "auth_login"
+          description: "The credentials to authenticate"
+          required: true
+          schema:
+            $ref: "#/definitions/auth_login"
+      security: []
+      responses:
+        200:
+          description: "A generated token with expire"
+          schema:
+            $ref: "#/definitions/auth_token"
+        401:
+          description: "Unauthorized if wrong credentials"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /auth/refresh:
+    get:
+      summary: "Refresh an auth token before it expires"
+      operationId: "RefreshAuth"
+      tags:
+        - "auth"
+      responses:
+        200:
+          description: "A refreshed token with expire"
+          schema:
+            $ref: "#/definitions/auth_token"
+        401:
+          description: "Unauthorized if failed to generate"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /auth/verify:
+    get:
+      summary: "Verify validity for an authentication token"
+      operationId: "VerifyAuth"
+      tags:
+        - "auth"
+      responses:
+        200:
+          description: "Meta data of the provided token"
+          schema:
+            $ref: "#/definitions/auth_verify"
+        401:
+          description: "Unauthorized if token is invalid"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /auth/logout:
+    get:
+      summary: "Logout an user authenticated by cookie"
+      operationId: "LogoutUser"
+      tags:
+        - "auth"
+      responses:
+        200:
+          description: "Successfully logout of the user"
+          schema:
+            $ref: "#/definitions/general_error"
+        401:
+          description: "User is not even authenticated"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /auth/{provider}/initialize:
+    get:
+      summary: "Initialize the external authentication"
+      operationId: "ExternalInitialize"
+      tags:
+        - "auth"
+      parameters:
+        - in: "path"
+          name: "provider"
+          description: "An identifier for the auth provider"
+          type: "string"
+          required: true
+      security: []
+      responses:
+        307:
+          description: "Redirect to external auth provider"
+        404:
+          description: "Provider identifier is unknown"
+          schema:
+            $ref: "#/definitions/general_error"
+        500:
+          description: "Failed to initialze the provider"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /auth/{provider}/callback:
+    get:
+      summary: "Callback for external authentication"
+      operationId: "ExternalCallback"
+      tags:
+        - "auth"
+      parameters:
+        - in: "path"
+          name: "provider"
+          description: "An identifier for the auth provider"
+          type: "string"
+          required: true
+      security: []
+      responses:
+        307:
+          description: "Redirect to root of the application"
+        404:
+          description: "Provider identifier is unknown"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Failed to initialize account"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /profile/token:
+    get:
+      summary: "Retrieve an unlimited auth token"
+      operationId: "TokenProfile"
+      tags:
+        - "profile"
+      responses:
+        200:
+          description: "The unlimited auth token"
+          schema:
+            $ref: "#/definitions/auth_token"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        500:
+          description: "Failed to generate a token"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /profile/self:
+    get:
+      summary: "Fetch profile details of the personal account"
+      operationId: "ShowProfile"
+      tags:
+        - "profile"
+      responses:
+        200:
+          description: "The current profile data"
+          schema:
+            $ref: "#/definitions/profile"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update profile details of the personal account"
+      operationId: "UpdateProfile"
+      tags:
+        - "profile"
+      parameters:
+        - in: "body"
+          name: "profile"
+          description: "The profile data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/profile"
+      responses:
+        200:
+          description: "The updated profile data"
+          schema:
+            $ref: "#/definitions/profile"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /minecraft:
+    get:
+      summary: "Fetch the available Minecraft versions"
+      operationId: "ListMinecrafts"
+      tags:
+        - "minecraft"
+      responses:
+        200:
+          description: "A collection of Minecraft versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/minecrafts"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update the available Minecraft versions"
+      operationId: "UpdateMinecraft"
+      tags:
+        - "minecraft"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        503:
+          description: "If remote source is not available"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /minecraft/{minecraft_id}:
+    get:
+      summary: "Search for available Minecraft versions"
+      operationId: "SearchMinecrafts"
+      tags:
+        - "minecraft"
+      parameters:
+        - in: "path"
+          name: "minecraft_id"
+          description: "A search token to search Minecraft versions"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of Minecraft versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/minecrafts"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /minecraft/{minecraft_id}/builds:
+    get:
+      summary: "Fetch the builds assigned to a Minecraft version"
+      operationId: "ListMinecraftBuilds"
+      tags:
+        - "minecraft"
+      parameters:
+        - in: "path"
+          name: "minecraft_id"
+          description: "A minecraft UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of assigned builds"
+          schema:
+            type: "object"
+            $ref: "#/definitions/minecraft_builds"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Minecraft or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Assign a build to a Minecraft version"
+      operationId: "AppendMinecraftToBuild"
+      tags:
+        - "minecraft"
+      parameters:
+        - in: "path"
+          name: "minecraft_id"
+          description: "A minecraft UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "minecraft_build"
+          description: "The build data to append"
+          required: true
+          schema:
+            $ref: "#/definitions/minecraft_build_params"
+            required:
+              - "build_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Minecraft or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is already assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        406:
+          description: "Failed to update build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Unlink a build from a Minecraft version"
+      operationId: "DeleteMinecraftFromBuild"
+      tags:
+        - "minecraft"
+      parameters:
+        - in: "path"
+          name: "minecraft_id"
+          description: "A minecraft UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "minecraft_build"
+          description: "The build data to unlink"
+          required: true
+          schema:
+            $ref: "#/definitions/minecraft_build_params"
+            required:
+              - "build_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Minecraft or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        406:
+          description: "Failed to update build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /forge:
+    get:
+      summary: "Fetch the available Forge versions"
+      operationId: "ListForges"
+      tags:
+        - "forge"
+      responses:
+        200:
+          description: "A collection of Forge versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/forges"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update the available Forge versions"
+      operationId: "UpdateForge"
+      tags:
+        - "forge"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        503:
+          description: "If remote source is not available"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /forge/{forge_id}:
+    get:
+      summary: "Search for available Forge versions"
+      operationId: "SearchForges"
+      tags:
+        - "forge"
+      parameters:
+        - in: "path"
+          name: "forge_id"
+          description: "A search token to search Forge versions"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of Forge versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/forges"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /forge/{forge_id}/builds:
+    get:
+      summary: "Fetch the builds assigned to a Forge version"
+      operationId: "ListForgeBuilds"
+      tags:
+        - "forge"
+      parameters:
+        - in: "path"
+          name: "forge_id"
+          description: "A forge UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of assigned builds"
+          schema:
+            type: "object"
+            $ref: "#/definitions/forge_builds"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Forge or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Assign a build to a Forge version"
+      operationId: "AppendForgeToBuild"
+      tags:
+        - "forge"
+      parameters:
+        - in: "path"
+          name: "forge_id"
+          description: "A forge UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "forge_build"
+          description: "The build data to append"
+          required: true
+          schema:
+            $ref: "#/definitions/forge_build_params"
+            required:
+              - "build_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Forge or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is already assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        406:
+          description: "Failed to update build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Unlink a build from a Forge version"
+      operationId: "DeleteForgeFromBuild"
+      tags:
+        - "forge"
+      parameters:
+        - in: "path"
+          name: "forge_id"
+          description: "A forge UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "forge_build"
+          description: "The build data to unlink"
+          required: true
+          schema:
+            $ref: "#/definitions/forge_build_params"
+            required:
+              - "build_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Forge or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        406:
+          description: "Failed to update build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /neoforge:
+    get:
+      summary: "Fetch the available Neoforge versions"
+      operationId: "ListNeoforges"
+      tags:
+        - "neoforge"
+      responses:
+        200:
+          description: "A collection of Neoforge versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/neoforges"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update the available Neoforge versions"
+      operationId: "UpdateNeoforge"
+      tags:
+        - "neoforge"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        503:
+          description: "If remote source is not available"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /neoforge/{neoforge_id}:
+    get:
+      summary: "Search for available Neoforge versions"
+      operationId: "SearchNeoforges"
+      tags:
+        - "neoforge"
+      parameters:
+        - in: "path"
+          name: "neoforge_id"
+          description: "A search token to search Neoforge versions"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of Neoforge versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/neoforges"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /neoforge/{neoforge_id}/builds:
+    get:
+      summary: "Fetch the builds assigned to a Neoforge version"
+      operationId: "ListNeoforgeBuilds"
+      tags:
+        - "neoforge"
+      parameters:
+        - in: "path"
+          name: "neoforge_id"
+          description: "A neoforge UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of assigned builds"
+          schema:
+            type: "object"
+            $ref: "#/definitions/neoforge_builds"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Neoforge or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Assign a build to a Neoforge version"
+      operationId: "AppendNeoforgeToBuild"
+      tags:
+        - "neoforge"
+      parameters:
+        - in: "path"
+          name: "neoforge_id"
+          description: "A neoforge UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "neoforge_build"
+          description: "The build data to append"
+          required: true
+          schema:
+            $ref: "#/definitions/neoforge_build_params"
+            required:
+              - "build_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Neoforge or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is already assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        406:
+          description: "Failed to update build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Unlink a build from a Neoforge version"
+      operationId: "DeleteNeoforgeFromBuild"
+      tags:
+        - "neoforge"
+      parameters:
+        - in: "path"
+          name: "neoforge_id"
+          description: "A neoforge UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "neoforge_build"
+          description: "The build data to unlink"
+          required: true
+          schema:
+            $ref: "#/definitions/neoforge_build_params"
+            required:
+              - "build_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Neoforge or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        406:
+          description: "Failed to update build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /quilt:
+    get:
+      summary: "Fetch the available quilt versions"
+      operationId: "ListQuilts"
+      tags:
+        - "quilt"
+      responses:
+        200:
+          description: "A collection of quilt versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/quilts"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update the available quilt versions"
+      operationId: "UpdateQuilt"
+      tags:
+        - "quilt"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        503:
+          description: "If remote source is not available"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /quilt/{quilt_id}:
+    get:
+      summary: "Search for available quilt versions"
+      operationId: "SearchQuilts"
+      tags:
+        - "quilt"
+      parameters:
+        - in: "path"
+          name: "quilt_id"
+          description: "A search token to search quilt versions"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of quilt versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/quilts"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /quilt/{quilt_id}/builds:
+    get:
+      summary: "Fetch the builds assigned to a Quilt version"
+      operationId: "ListQuiltBuilds"
+      tags:
+        - "quilt"
+      parameters:
+        - in: "path"
+          name: "quilt_id"
+          description: "A quilt UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of assigned builds"
+          schema:
+            type: "object"
+            $ref: "#/definitions/quilt_builds"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Quilt or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Assign a build to a Quilt version"
+      operationId: "AppendQuiltToBuild"
+      tags:
+        - "quilt"
+      parameters:
+        - in: "path"
+          name: "quilt_id"
+          description: "A quilt UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "quilt_build"
+          description: "The build data to append"
+          required: true
+          schema:
+            $ref: "#/definitions/quilt_build_params"
+            required:
+              - "build_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Quilt or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is already assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        406:
+          description: "Failed to update build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Unlink a build from a Quilt version"
+      operationId: "DeleteQuiltFromBuild"
+      tags:
+        - "quilt"
+      parameters:
+        - in: "path"
+          name: "quilt_id"
+          description: "A quilt UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "quilt_build"
+          description: "The build data to unlink"
+          required: true
+          schema:
+            $ref: "#/definitions/quilt_build_params"
+            required:
+              - "build_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Quilt or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        406:
+          description: "Failed to update build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /fabric:
+    get:
+      summary: "Fetch the available fabric versions"
+      operationId: "ListFabrics"
+      tags:
+        - "fabric"
+      responses:
+        200:
+          description: "A collection of fabric versions"
+          schema:
+            $ref: "#/definitions/fabrics"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update the available fabric versions"
+      operationId: "UpdateFabric"
+      tags:
+        - "fabric"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        503:
+          description: "If remote source is not available"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /fabric/{fabric_id}:
+    get:
+      summary: "Search for available fabric versions"
+      operationId: "SearchFabrics"
+      tags:
+        - "fabric"
+      parameters:
+        - in: "path"
+          name: "fabric_id"
+          description: "A search token to search fabric versions"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of fabric versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/fabrics"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /fabric/{fabric_id}/builds:
+    get:
+      summary: "Fetch the builds assigned to a Fabric version"
+      operationId: "ListFabricBuilds"
+      tags:
+        - "fabric"
+      parameters:
+        - in: "path"
+          name: "fabric_id"
+          description: "A fabric UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of assigned builds"
+          schema:
+            type: "object"
+            $ref: "#/definitions/fabric_builds"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Fabric or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Assign a build to a Fabric version"
+      operationId: "AppendFabricToBuild"
+      tags:
+        - "fabric"
+      parameters:
+        - in: "path"
+          name: "fabric_id"
+          description: "A fabric UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "fabric_build"
+          description: "The build data to append"
+          required: true
+          schema:
+            $ref: "#/definitions/fabric_build_params"
+            required:
+              - "build_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Fabric or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is already assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        406:
+          description: "Failed to update build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Unlink a build from a Fabric version"
+      operationId: "DeleteFabricFromBuild"
+      tags:
+        - "fabric"
+      parameters:
+        - in: "path"
+          name: "fabric_id"
+          description: "A fabric UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "fabric_build"
+          description: "The build data to unlink"
+          required: true
+          schema:
+            $ref: "#/definitions/fabric_build_params"
+            required:
+              - "build_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Fabric or build not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        406:
+          description: "Failed to update build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /packs:
+    get:
+      summary: "Fetch all available packs"
+      operationId: "ListPacks"
+      tags:
+        - "pack"
+      responses:
+        200:
+          description: "A collection of packs"
+          schema:
+            type: "object"
+            $ref: "#/definitions/packs"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Create a new pack"
+      operationId: "CreatePack"
+      tags:
+        - "pack"
+      parameters:
+        - in: "body"
+          name: "pack"
+          description: "The pack data to create"
+          required: true
+          schema:
+            $ref: "#/definitions/pack"
+            required:
+              - "name"
+      responses:
+        200:
+          description: "The created pack data"
+          schema:
+            $ref: "#/definitions/pack"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /packs/{pack_id}:
+    get:
+      summary: "Fetch a specific pack"
+      operationId: "ShowPack"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "The fetched pack details"
+          schema:
+            $ref: "#/definitions/pack"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update a specific pack"
+      operationId: "UpdatePack"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "pack"
+          description: "The pack data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/pack"
+      responses:
+        200:
+          description: "The updated pack details"
+          schema:
+            $ref: "#/definitions/pack"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Delete a specific pack"
+      operationId: "DeletePack"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        400:
+          description: "Failed to delete the pack"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /packs/{pack_id}/users:
+    get:
+      summary: "Fetch all users attached to pack"
+      operationId: "ListPackUsers"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of pack users"
+          schema:
+            type: "object"
+            $ref: "#/definitions/pack_users"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Attach a user to pack"
+      operationId: "AttachPackToUser"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "pack_user"
+          description: "The pack user data to attach"
+          required: true
+          schema:
+            $ref: "#/definitions/pack_user_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "User is already attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update user perms for pack"
+      operationId: "PermitPackUser"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "pack_user"
+          description: "The pack user data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/pack_user_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "User is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Remove a user from pack"
+      operationId: "DeletePackFromUser"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "pack_user"
+          description: "The pack user data to delete"
+          required: true
+          schema:
+            $ref: "#/definitions/pack_user_params"
+            required:
+              - "user_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "User is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /packs/{pack_id}/teams:
+    get:
+      summary: "Fetch all teams attached to pack"
+      operationId: "ListPackTeams"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of pack teams"
+          schema:
+            type: "object"
+            $ref: "#/definitions/pack_teams"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Attach a team to pack"
+      operationId: "AttachPackToTeam"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "pack_team"
+          description: "The pack team data to attach"
+          required: true
+          schema:
+            $ref: "#/definitions/pack_team_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack or team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Team is already attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update team perms for pack"
+      operationId: "PermitPackTeam"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "pack_team"
+          description: "The pack team data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/pack_team_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack or team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Team is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Remove a team from pack"
+      operationId: "DeletePackFromTeam"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "pack_team"
+          description: "The pack team data to delete"
+          required: true
+          schema:
+            $ref: "#/definitions/pack_team_params"
+            required:
+              - "team_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack or team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Team is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /packs/{pack_id}/builds:
+    get:
+      summary: "Fetch all available builds for a pack"
+      operationId: "ListBuilds"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of builds"
+          schema:
+            type: "object"
+            $ref: "#/definitions/builds"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Create a new build for a pack"
+      operationId: "CreateBuild"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "build"
+          description: "The build data to create"
+          required: true
+          schema:
+            $ref: "#/definitions/build"
+      responses:
+        200:
+          description: "The created build data"
+          schema:
+            $ref: "#/definitions/build"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /packs/{pack_id}/builds/{build_id}:
+    get:
+      summary: "Fetch a specific build for a pack"
+      operationId: "ShowBuild"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "build_id"
+          description: "A build UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "The fetched build details"
+          schema:
+            $ref: "#/definitions/build"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update a specific build for a pack"
+      operationId: "UpdateBuild"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "build_id"
+          description: "A build UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "build"
+          description: "The build data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/build"
+      responses:
+        200:
+          description: "The updated build details"
+          schema:
+            $ref: "#/definitions/build"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Delete a specific build for a pack"
+      operationId: "DeleteBuild"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "build_id"
+          description: "A build UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        400:
+          description: "Failed to delete the build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /packs/{pack_id}/builds/{build_id}/versions:
+    get:
+      summary: "Fetch all versions assigned to build"
+      operationId: "ListBuildVersions"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "build_id"
+          description: "A build UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of build versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/build_versions"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Assign a version to a build"
+      operationId: "AppendBuildToVersion"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "build_id"
+          description: "A build UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "build_version"
+          description: "The version data to append to build"
+          required: true
+          schema:
+            $ref: "#/definitions/build_version_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Version is already assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Unlink a version from a build"
+      operationId: "DeleteBuildFromVersion"
+      tags:
+        - "pack"
+      parameters:
+        - in: "path"
+          name: "pack_id"
+          description: "A pack UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "build_id"
+          description: "A build UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "build_version"
+          description: "The version data to unlink from build"
+          required: true
+          schema:
+            $ref: "#/definitions/build_version_params"
+            required:
+              - "version_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Build or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Version is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        400:
+          description: "Failed to unlink build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /mods:
+    get:
+      summary: "Fetch all available mods"
+      operationId: "ListMods"
+      tags:
+        - "mod"
+      responses:
+        200:
+          description: "A collection of mods"
+          schema:
+            type: "object"
+            $ref: "#/definitions/mods"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Create a new mod"
+      operationId: "CreateMod"
+      tags:
+        - "mod"
+      parameters:
+        - in: "body"
+          name: "mod"
+          description: "The mod data to create"
+          required: true
+          schema:
+            $ref: "#/definitions/mod"
+            required:
+              - "name"
+      responses:
+        200:
+          description: "The created mod data"
+          schema:
+            $ref: "#/definitions/mod"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /mods/{mod_id}:
+    get:
+      summary: "Fetch a specific mod"
+      operationId: "ShowMod"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "The fetched mod details"
+          schema:
+            $ref: "#/definitions/mod"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update a specific mod"
+      operationId: "UpdateMod"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "mod"
+          description: "The mod data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/mod"
+      responses:
+        200:
+          description: "The updated mod details"
+          schema:
+            $ref: "#/definitions/mod"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Delete a specific mod"
+      operationId: "DeleteMod"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        400:
+          description: "Failed to delete the mod"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /mods/{mod_id}/users:
+    get:
+      summary: "Fetch all users attached to mod"
+      operationId: "ListModUsers"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of mod users"
+          schema:
+            type: "object"
+            $ref: "#/definitions/mod_users"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Attach a user to mod"
+      operationId: "AttachModToUser"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "mod_user"
+          description: "The mod user data to attach"
+          required: true
+          schema:
+            $ref: "#/definitions/mod_user_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "User is already attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update user perms for mod"
+      operationId: "PermitModUser"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "mod_user"
+          description: "The mod user data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/mod_user_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "User is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Remove a user from mod"
+      operationId: "DeleteModFromUser"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "mod_user"
+          description: "The mod user data to delete"
+          required: true
+          schema:
+            $ref: "#/definitions/mod_user_params"
+            required:
+              - "user_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "User is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /mods/{mod_id}/teams:
+    get:
+      summary: "Fetch all teams attached to mod"
+      operationId: "ListModTeams"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of mod teams"
+          schema:
+            type: "object"
+            $ref: "#/definitions/mod_teams"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Attach a team to mod"
+      operationId: "AttachModToTeam"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "mod_team"
+          description: "The mod team data to attach"
+          required: true
+          schema:
+            $ref: "#/definitions/mod_team_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod or team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Team is already attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update team perms for mod"
+      operationId: "PermitModTeam"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "mod_team"
+          description: "The mod team data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/mod_team_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod or team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Team is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Remove a team from mod"
+      operationId: "DeleteModFromTeam"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "mod_team"
+          description: "The mod team data to delete"
+          required: true
+          schema:
+            $ref: "#/definitions/mod_team_params"
+            required:
+              - "team_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod or team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Team is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /mods/{mod_id}/versions:
+    get:
+      summary: "Fetch all available versions for a mod"
+      operationId: "ListVersions"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of versions"
+          schema:
+            type: "object"
+            $ref: "#/definitions/versions"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Create a new version for a mod"
+      operationId: "CreateVersion"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "version"
+          description: "The version data to create"
+          required: true
+          schema:
+            $ref: "#/definitions/version"
+      responses:
+        200:
+          description: "The created version data"
+          schema:
+            $ref: "#/definitions/version"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /mods/{mod_id}/versions/{version_id}:
+    get:
+      summary: "Fetch a specific version for a mod"
+      operationId: "ShowVersion"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "version_id"
+          description: "A version UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "The fetched version details"
+          schema:
+            $ref: "#/definitions/version"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Version or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update a specific version for a mod"
+      operationId: "UpdateVersion"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "version_id"
+          description: "A version UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "version"
+          description: "The version data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/version"
+      responses:
+        200:
+          description: "The updated version details"
+          schema:
+            $ref: "#/definitions/version"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Version or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Delete a specific version for a mod"
+      operationId: "DeleteVersion"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "version_id"
+          description: "A version UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Version or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        400:
+          description: "Failed to delete the version"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /mods/{mod_id}/versions/{version_id}/builds:
+    get:
+      summary: "Fetch all builds assigned to version"
+      operationId: "ListVersionBuilds"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "version_id"
+          description: "A version UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of version builds"
+          schema:
+            type: "object"
+            $ref: "#/definitions/version_builds"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Version or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Assign a build to a version"
+      operationId: "AppendVersionToBuild"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "version_id"
+          description: "A version UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "version_build"
+          description: "The build data to append to version"
+          required: true
+          schema:
+            $ref: "#/definitions/version_build_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Build, version or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is already assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Unlink a build from a version"
+      operationId: "DeleteVersionFromBuild"
+      tags:
+        - "mod"
+      parameters:
+        - in: "path"
+          name: "mod_id"
+          description: "A mod UUID or slug"
+          type: "string"
+          required: true
+        - in: "path"
+          name: "version_id"
+          description: "A version UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "version_build"
+          description: "The build data to unlink from version"
+          required: true
+          schema:
+            $ref: "#/definitions/version_build_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Version or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Build is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        400:
+          description: "Failed to unlink build"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /teams:
+    get:
+      summary: "Fetch all available teams"
+      operationId: "ListTeams"
+      tags:
+        - "team"
+      responses:
+        200:
+          description: "A collection of teams"
+          schema:
+            type: "object"
+            $ref: "#/definitions/teams"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Create a new team"
+      operationId: "CreateTeam"
+      tags:
+        - "team"
+      parameters:
+        - in: "body"
+          name: "team"
+          description: "The team data to create"
+          required: true
+          schema:
+            $ref: "#/definitions/team"
+            required:
+              - "name"
+      responses:
+        200:
+          description: "The created team data"
+          schema:
+            $ref: "#/definitions/team"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /teams/{team_id}:
+    get:
+      summary: "Fetch a specific team"
+      operationId: "ShowTeam"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "The fetched team details"
+          schema:
+            $ref: "#/definitions/team"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update a specific team"
+      operationId: "UpdateTeam"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "team"
+          description: "The team data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/team"
+      responses:
+        200:
+          description: "The updated team details"
+          schema:
+            $ref: "#/definitions/team"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Delete a specific team"
+      operationId: "DeleteTeam"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        400:
+          description: "Failed to delete the team"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /teams/{team_id}/users:
+    get:
+      summary: "Fetch all users attached to team"
+      operationId: "ListTeamUsers"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of members"
+          schema:
+            type: "object"
+            $ref: "#/definitions/team_users"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Attach a user to team"
+      operationId: "AttachTeamToUser"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "team_user"
+          description: "The team user data to attach"
+          required: true
+          schema:
+            $ref: "#/definitions/team_user_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "User is already attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update user perms for team"
+      operationId: "PermitTeamUser"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "team_user"
+          description: "The team user data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/team_user_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "User is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Remove a user from team"
+      operationId: "DeleteTeamFromUser"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "team_user"
+          description: "The team user data to delete"
+          required: true
+          schema:
+            $ref: "#/definitions/team_user_params"
+            required:
+              - "user_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "User is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /teams/{team_id}/packs:
+    get:
+      summary: "Fetch all packs attached to team"
+      operationId: "ListTeamPacks"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of team packs"
+          schema:
+            type: "object"
+            $ref: "#/definitions/team_packs"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Attach a pack to team"
+      operationId: "AttachTeamToPack"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "team_pack"
+          description: "The team pack data to attach"
+          required: true
+          schema:
+            $ref: "#/definitions/team_pack_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Pack is already attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update pack perms for team"
+      operationId: "PermitTeamPack"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "team_pack"
+          description: "The team pack data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/team_pack_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Pack is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Remove a pack from team"
+      operationId: "DeleteTeamFromPack"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "team_pack"
+          description: "The team pack data to delete"
+          required: true
+          schema:
+            $ref: "#/definitions/team_pack_params"
+            required:
+              - "pack_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Pack is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /teams/{team_id}/mods:
+    get:
+      summary: "Fetch all mods attached to team"
+      operationId: "ListTeamMods"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of team mods"
+          schema:
+            type: "object"
+            $ref: "#/definitions/team_mods"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Attach a mod to team"
+      operationId: "AttachTeamToMod"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "team_mod"
+          description: "The team mod data to attach"
+          required: true
+          schema:
+            $ref: "#/definitions/team_mod_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Mod is already attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update mod perms for team"
+      operationId: "PermitTeamMod"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "team_mod"
+          description: "The team mod data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/team_mod_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team or user not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Mod is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Remove a mod from team"
+      operationId: "DeleteTeamFromMod"
+      tags:
+        - "team"
+      parameters:
+        - in: "path"
+          name: "team_id"
+          description: "A team UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "team_mod"
+          description: "The team mod data to delete"
+          required: true
+          schema:
+            $ref: "#/definitions/team_mod_params"
+            required:
+              - "mod_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "Team or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Mod is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /users:
+    get:
+      summary: "Fetch all available users"
+      operationId: "ListUsers"
+      tags:
+        - "user"
+      responses:
+        200:
+          description: "A collection of users"
+          schema:
+            type: "object"
+            $ref: "#/definitions/users"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Create a new user"
+      operationId: "CreateUser"
+      tags:
+        - "user"
+      parameters:
+        - in: "body"
+          name: "user"
+          description: "The user data to create"
+          required: true
+          schema:
+            $ref: "#/definitions/user"
+            required:
+              - "username"
+      responses:
+        200:
+          description: "The created user data"
+          schema:
+            $ref: "#/definitions/user"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /users/{user_id}:
+    get:
+      summary: "Fetch a specific user"
+      operationId: "ShowUser"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "The fetched user details"
+          schema:
+            $ref: "#/definitions/user"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update a specific user"
+      operationId: "UpdateUser"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "user"
+          description: "The user data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/user"
+      responses:
+        200:
+          description: "The updated user details"
+          schema:
+            $ref: "#/definitions/user"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Delete a specific user"
+      operationId: "DeleteUser"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        400:
+          description: "Failed to delete the user"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /users/{user_id}/teams:
+    get:
+      summary: "Fetch all teams attached to user"
+      operationId: "ListUserTeams"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of user teams"
+          schema:
+            type: "object"
+            $ref: "#/definitions/user_teams"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Attach a team to user"
+      operationId: "AttachUserToTeam"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "user_team"
+          description: "The user team data to attach"
+          required: true
+          schema:
+            $ref: "#/definitions/user_team_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User or team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Team is already attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update team perms for user"
+      operationId: "PermitUserTeam"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "user_team"
+          description: "The user team data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/user_team_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User or team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Team is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Remove a team from user"
+      operationId: "DeleteUserFromTeam"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "user_team"
+          description: "The user team data to delete"
+          required: true
+          schema:
+            $ref: "#/definitions/user_team_params"
+            required:
+              - "team_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User or team not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Team is not attached"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /users/{user_id}/mods:
+    get:
+      summary: "Fetch all mods assigned to user"
+      operationId: "ListUserMods"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of user mods"
+          schema:
+            type: "object"
+            $ref: "#/definitions/user_mods"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Assign a mod to user"
+      operationId: "AttachUserToMod"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "user_mod"
+          description: "The user mod data to assign"
+          required: true
+          schema:
+            $ref: "#/definitions/user_mod_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Mod is already assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update mod perms for user"
+      operationId: "PermitUserMod"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "user_mod"
+          description: "The user mod data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/user_mod_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Mod is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Remove a mod from user"
+      operationId: "DeleteUserFromMod"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "user_mod"
+          description: "The user mod data to delete"
+          required: true
+          schema:
+            $ref: "#/definitions/user_mod_params"
+            required:
+              - "mod_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User or mod not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Mod is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+  /users/{user_id}/packs:
+    get:
+      summary: "Fetch all packs assigned to user"
+      operationId: "ListUserPacks"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "A collection of team packs"
+          schema:
+            type: "object"
+            $ref: "#/definitions/user_packs"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    post:
+      summary: "Assign a pack to user"
+      operationId: "AttachUserToPack"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "user_pack"
+          description: "The user pack data to assign"
+          required: true
+          schema:
+            $ref: "#/definitions/user_pack_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Pack is already assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    put:
+      summary: "Update pack perms for user"
+      operationId: "PermitUserPack"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "user_pack"
+          description: "The user pack data to update"
+          required: true
+          schema:
+            $ref: "#/definitions/user_pack_params"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Pack is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        422:
+          description: "Failed to validate request"
+          schema:
+            $ref: "#/definitions/validation_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+    delete:
+      summary: "Remove a pack from user"
+      operationId: "DeleteUserFromPack"
+      tags:
+        - "user"
+      parameters:
+        - in: "path"
+          name: "user_id"
+          description: "A user UUID or slug"
+          type: "string"
+          required: true
+        - in: "body"
+          name: "user_pack"
+          description: "The user pack data to delete"
+          required: true
+          schema:
+            $ref: "#/definitions/user_pack_params"
+            required:
+              - "pack_id"
+      responses:
+        200:
+          description: "Plain success message"
+          schema:
+            $ref: "#/definitions/general_error"
+        403:
+          description: "User is not authorized"
+          schema:
+            $ref: "#/definitions/general_error"
+        404:
+          description: "User or pack not found"
+          schema:
+            $ref: "#/definitions/general_error"
+        412:
+          description: "Pack is not assigned"
+          schema:
+            $ref: "#/definitions/general_error"
+        default:
+          description: "Some error unrelated to the handler"
+          schema:
+            $ref: "#/definitions/general_error"
+
+definitions:
+  auth_login:
+    type: "object"
+    required:
+      - "username"
+      - "password"
+    properties:
+      username:
+        type: "string"
+      password:
+        type: "string"
+        format: "password"
+
+  auth_verify:
+    type: "object"
+    required:
+      - "username"
+    properties:
+      username:
+        type: "string"
+        readOnly: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+
+  auth_token:
+    type: "object"
+    required:
+      - "token"
+    properties:
+      token:
+        type: "string"
+        readOnly: true
+      expires_at:
+        type: "string"
+        format: "date-time"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+
+  profile:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      email:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      username:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      password:
+        type: "string"
+        format: "password"
+        x-omitempty: true
+        x-nullable: true
+      fullname:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      avatar:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      admin:
+        type: "boolean"
+        readOnly: true
+      active:
+        type: "boolean"
+        readOnly: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      teams:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/member"
+      packs:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_pack"
+      mods:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_mod"
+
+  minecrafts:
+    type: "object"
+    properties:
+      versions:
+        type: "array"
+        items:
+          $ref: "#/definitions/minecraft"
+
+  minecraft_builds:
+    type: "object"
+    properties:
+      minecraft:
+        type: "object"
+        $ref: "#/definitions/minecraft"
+      builds:
+        type: "array"
+        items:
+          $ref: "#/definitions/build"
+
+  minecraft:
+    type: "object"
+    required:
+      - "name"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      name:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      type:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  forges:
+    type: "object"
+    properties:
+      versions:
+        type: "array"
+        items:
+          $ref: "#/definitions/forge"
+
+  forge_builds:
+    type: "object"
+    properties:
+      forge:
+        type: "object"
+        $ref: "#/definitions/forge"
+      builds:
+        type: "array"
+        items:
+          $ref: "#/definitions/build"
+
+  forge:
+    type: "object"
+    required:
+      - "name"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      name:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      minecraft:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  neoforges:
+    type: "object"
+    properties:
+      versions:
+        type: "array"
+        items:
+          $ref: "#/definitions/neoforge"
+
+  neoforge_builds:
+    type: "object"
+    properties:
+      neoforge:
+        type: "object"
+        $ref: "#/definitions/neoforge"
+      builds:
+        type: "array"
+        items:
+          $ref: "#/definitions/build"
+
+  neoforge:
+    type: "object"
+    required:
+      - "name"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      name:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      minecraft:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  quilts:
+    type: "object"
+    properties:
+      versions:
+        type: "array"
+        items:
+          $ref: "#/definitions/quilt"
+
+  quilt_builds:
+    type: "object"
+    properties:
+      quilt:
+        type: "object"
+        $ref: "#/definitions/quilt"
+      builds:
+        type: "array"
+        items:
+          $ref: "#/definitions/build"
+
+  quilt:
+    type: "object"
+    required:
+      - "name"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      name:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  fabrics:
+    type: "object"
+    properties:
+      versions:
+        type: "array"
+        items:
+          $ref: "#/definitions/fabric"
+
+  fabric_builds:
+    type: "object"
+    properties:
+      fabric:
+        type: "object"
+        $ref: "#/definitions/fabric"
+      builds:
+        type: "array"
+        items:
+          $ref: "#/definitions/build"
+
+  fabric:
+    type: "object"
+    required:
+      - "name"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      name:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  mods:
+    type: "object"
+    properties:
+      mods:
+        type: "array"
+        items:
+          $ref: "#/definitions/mod"
+
+  mod:
+    type: "object"
+    required:
+      - "name"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      name:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      side:
+        type: "string"
+        enum:
+          - "both"
+          - "server"
+          - "client"
+        x-omitempty: true
+        x-nullable: true
+      description:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      author:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      website:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      donate:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      public:
+        type: "boolean"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      versions:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/version"
+      users:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_mod"
+      teams:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_mod"
+
+  versions:
+    type: "object"
+    properties:
+      mod:
+        type: "object"
+        $ref: "#/definitions/mod"
+      versions:
+        type: "array"
+        items:
+          $ref: "#/definitions/version"
+
+  version:
+    type: "object"
+    required:
+      - "name"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      file:
+        type: "object"
+        $ref: "#/definitions/version_file"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      mod_id:
+        type: "string"
+        format: "uuid"
+      mod:
+        type: "object"
+        $ref: "#/definitions/mod"
+        readOnly: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      name:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      public:
+        type: "boolean"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      builds:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/build_version"
+
+  version_file:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      version_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      version:
+        type: "object"
+        $ref: "#/definitions/version"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      content_type:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      md5:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      path:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      url:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      upload:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  packs:
+    type: "object"
+    properties:
+      packs:
+        type: "array"
+        items:
+          $ref: "#/definitions/pack"
+
+  pack:
+    type: "object"
+    required:
+      - "name"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      icon:
+        type: "object"
+        $ref: "#/definitions/pack_icon"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      logo:
+        type: "object"
+        $ref: "#/definitions/pack_logo"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      back:
+        type: "object"
+        $ref: "#/definitions/pack_back"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      recommended_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      recommended:
+        type: "object"
+        $ref: "#/definitions/build"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      latest_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      latest:
+        type: "object"
+        $ref: "#/definitions/build"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      name:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      website:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      public:
+        type: "boolean"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      builds:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/build"
+      users:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_pack"
+      teams:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_pack"
+
+  pack_icon:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      pack_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      content_type:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      md5:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      path:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      url:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      upload:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  pack_logo:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      pack_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      content_type:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      md5:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      path:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      url:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      upload:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  pack_back:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      pack_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      content_type:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      md5:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      path:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      url:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      upload:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  builds:
+    type: "object"
+    properties:
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+      builds:
+        type: "array"
+        items:
+          $ref: "#/definitions/build"
+
+  build:
+    type: "object"
+    required:
+      - "name"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      pack_id:
+        type: "string"
+        format: "uuid"
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+      minecraft_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      minecraft:
+        type: "object"
+        $ref: "#/definitions/minecraft"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      forge_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      forge:
+        type: "object"
+        $ref: "#/definitions/forge"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      neoforge_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      neoforge:
+        type: "object"
+        $ref: "#/definitions/neoforge"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      quilt_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      quilt:
+        type: "object"
+        $ref: "#/definitions/quilt"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      fabric_id:
+        type: "string"
+        format: "uuid"
+        x-omitempty: true
+        x-nullable: true
+      fabric:
+        type: "object"
+        $ref: "#/definitions/fabric"
+        readOnly: true
+        x-omitempty: true
+        x-nullable: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      name:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      java:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      memory:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      public:
+        type: "boolean"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      versions:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/build_version"
+
+  teams:
+    type: "object"
+    properties:
+      teams:
+        type: "array"
+        items:
+          $ref: "#/definitions/team"
+
+  team:
+    type: "object"
+    required:
+      - "name"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      name:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      users:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/member"
+      packs:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_pack"
+      mods:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/team_mod"
+
+  team_users:
+    type: "object"
+    properties:
+      team:
+        type: "object"
+        $ref: "#/definitions/team"
+        readOnly: true
+      users:
+        type: "array"
+        items:
+          $ref: "#/definitions/member"
+
+  team_packs:
+    type: "object"
+    properties:
+      team:
+        type: "object"
+        $ref: "#/definitions/team"
+        readOnly: true
+      packs:
+        type: "array"
+        items:
+          $ref: "#/definitions/team_pack"
+
+  pack_teams:
+    type: "object"
+    properties:
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+      teams:
+        type: "array"
+        items:
+          $ref: "#/definitions/team_pack"
+
+  team_pack:
+    type: "object"
+    required:
+      - "team_id"
+      - "pack_id"
+      - "perm"
+    properties:
+      team_id:
+        type: "string"
+        format: "uuid"
+      team:
+        type: "object"
+        $ref: "#/definitions/team"
+        readOnly: true
+      pack_id:
+        type: "string"
+        format: "uuid"
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  team_mods:
+    type: "object"
+    properties:
+      team:
+        type: "object"
+        $ref: "#/definitions/team"
+        readOnly: true
+      mods:
+        type: "array"
+        items:
+          $ref: "#/definitions/team_mod"
+
+  mod_teams:
+    type: "object"
+    properties:
+      mod:
+        type: "object"
+        $ref: "#/definitions/mod"
+        readOnly: true
+      teams:
+        type: "array"
+        items:
+          $ref: "#/definitions/team_mod"
+
+  team_mod:
+    type: "object"
+    required:
+      - "team_id"
+      - "mod_id"
+      - "perm"
+    properties:
+      team_id:
+        type: "string"
+        format: "uuid"
+      team:
+        type: "object"
+        $ref: "#/definitions/team"
+        readOnly: true
+      mod_id:
+        type: "string"
+        format: "uuid"
+      mod:
+        type: "object"
+        $ref: "#/definitions/mod"
+        readOnly: true
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  users:
+    type: "object"
+    properties:
+      users:
+        type: "array"
+        items:
+          $ref: "#/definitions/user"
+
+  user:
+    type: "object"
+    required:
+      - "username"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      slug:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      email:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      username:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      password:
+        type: "string"
+        format: "password"
+        x-omitempty: true
+        x-nullable: true
+      fullname:
+        type: "string"
+        x-omitempty: true
+        x-nullable: true
+      admin:
+        type: "boolean"
+        x-omitempty: true
+        x-nullable: true
+      active:
+        type: "boolean"
+        x-omitempty: true
+        x-nullable: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      teams:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/member"
+      packs:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_pack"
+      mods:
+        type: "array"
+        x-omitempty: true
+        x-nullable: true
+        readOnly: true
+        items:
+          $ref: "#/definitions/user_mod"
+
+  user_teams:
+    type: "object"
+    properties:
+      user:
+        type: "object"
+        $ref: "#/definitions/user"
+        readOnly: true
+      teams:
+        type: "array"
+        items:
+          $ref: "#/definitions/member"
+
+  user_packs:
+    type: "object"
+    properties:
+      user:
+        type: "object"
+        $ref: "#/definitions/user"
+        readOnly: true
+      packs:
+        type: "array"
+        items:
+          $ref: "#/definitions/user_pack"
+
+  pack_users:
+    type: "object"
+    properties:
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+      users:
+        type: "array"
+        items:
+          $ref: "#/definitions/user_pack"
+
+  user_pack:
+    type: "object"
+    required:
+      - "user_id"
+      - "pack_id"
+      - "perm"
+    properties:
+      user_id:
+        type: "string"
+        format: "uuid"
+      user:
+        type: "object"
+        $ref: "#/definitions/user"
+        readOnly: true
+      pack_id:
+        type: "string"
+        format: "uuid"
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  user_mods:
+    type: "object"
+    properties:
+      user:
+        type: "object"
+        $ref: "#/definitions/user"
+        readOnly: true
+      mods:
+        type: "array"
+        items:
+          $ref: "#/definitions/user_mod"
+
+  mod_users:
+    type: "object"
+    properties:
+      mod:
+        type: "object"
+        $ref: "#/definitions/mod"
+        readOnly: true
+      users:
+        type: "array"
+        items:
+          $ref: "#/definitions/user_mod"
+
+  user_mod:
+    type: "object"
+    required:
+      - "user_id"
+      - "mod_id"
+      - "perm"
+    properties:
+      user_id:
+        type: "string"
+        format: "uuid"
+      user:
+        type: "object"
+        $ref: "#/definitions/user"
+        readOnly: true
+      mod_id:
+        type: "string"
+        format: "uuid"
+      mod:
+        type: "object"
+        $ref: "#/definitions/mod"
+        readOnly: true
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  member:
+    type: "object"
+    required:
+      - "team_id"
+      - "user_id"
+      - "perm"
+    properties:
+      team_id:
+        type: "string"
+        format: "uuid"
+      team:
+        type: "object"
+        $ref: "#/definitions/team"
+        readOnly: true
+      user_id:
+        type: "string"
+        format: "uuid"
+      user:
+        type: "object"
+        $ref: "#/definitions/user"
+        readOnly: true
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  build_versions:
+    type: "object"
+    properties:
+      pack:
+        type: "object"
+        $ref: "#/definitions/pack"
+        readOnly: true
+      build:
+        type: "object"
+        $ref: "#/definitions/build"
+        readOnly: true
+      versions:
+        type: "array"
+        items:
+          $ref: "#/definitions/build_version"
+
+  version_builds:
+    type: "object"
+    properties:
+      mod:
+        type: "object"
+        $ref: "#/definitions/mod"
+        readOnly: true
+      version:
+        type: "object"
+        $ref: "#/definitions/version"
+        readOnly: true
+      builds:
+        type: "array"
+        items:
+          $ref: "#/definitions/build_version"
+
+  build_version:
+    type: "object"
+    required:
+      - "build_id"
+      - "version_id"
+    properties:
+      build_id:
+        type: "string"
+        format: "uuid"
+      build:
+        type: "object"
+        $ref: "#/definitions/build"
+        readOnly: true
+      version_id:
+        type: "string"
+        format: "uuid"
+      version:
+        type: "object"
+        $ref: "#/definitions/version"
+        readOnly: true
+      created_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+      updated_at:
+        type: "string"
+        format: "date-time"
+        readOnly: true
+
+  mod_user_params:
+    type: "object"
+    required:
+      - "user"
+      - "perm"
+    properties:
+      user:
+        type: "string"
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+
+  mod_team_params:
+    type: "object"
+    required:
+      - "team"
+      - "perm"
+    properties:
+      team:
+        type: "string"
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+
+  pack_user_params:
+    type: "object"
+    required:
+      - "user"
+      - "perm"
+    properties:
+      user:
+        type: "string"
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+
+  pack_team_params:
+    type: "object"
+    required:
+      - "team"
+      - "perm"
+    properties:
+      team:
+        type: "string"
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+
+  team_user_params:
+    type: "object"
+    required:
+      - "user"
+      - "perm"
+    properties:
+      user:
+        type: "string"
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+
+  team_pack_params:
+    type: "object"
+    required:
+      - "pack"
+      - "perm"
+    properties:
+      pack:
+        type: "string"
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+
+  team_mod_params:
+    type: "object"
+    required:
+      - "mod"
+      - "perm"
+    properties:
+      mod:
+        type: "string"
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+
+  user_team_params:
+    type: "object"
+    required:
+      - "team"
+      - "perm"
+    properties:
+      team:
+        type: "string"
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+
+  user_mod_params:
+    type: "object"
+    required:
+      - "mod"
+      - "perm"
+    properties:
+      mod:
+        type: "string"
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+
+  user_pack_params:
+    type: "object"
+    required:
+      - "pack"
+      - "perm"
+    properties:
+      pack:
+        type: "string"
+      perm:
+        type: "string"
+        enum:
+          - "user"
+          - "admin"
+          - "owner"
+
+  minecraft_build_params:
+    type: "object"
+    required:
+      - "pack"
+      - "build"
+    properties:
+      pack:
+        type: "string"
+      build:
+        type: "string"
+
+  forge_build_params:
+    type: "object"
+    required:
+      - "pack"
+      - "build"
+    properties:
+      pack:
+        type: "string"
+      build:
+        type: "string"
+
+  neoforge_build_params:
+    type: "object"
+    required:
+      - "pack"
+      - "build"
+    properties:
+      pack:
+        type: "string"
+      build:
+        type: "string"
+
+  quilt_build_params:
+    type: "object"
+    required:
+      - "pack"
+      - "build"
+    properties:
+      pack:
+        type: "string"
+      build:
+        type: "string"
+
+  fabric_build_params:
+    type: "object"
+    required:
+      - "pack"
+      - "build"
+    properties:
+      pack:
+        type: "string"
+      build:
+        type: "string"
+
+  build_version_params:
+    type: "object"
+    required:
+      - "mod"
+      - "version"
+    properties:
+      mod:
+        type: "string"
+      version:
+        type: "string"
+
+  version_build_params:
+    type: "object"
+    required:
+      - "pack"
+      - "build"
+    properties:
+      pack:
+        type: "string"
+      build:
+        type: "string"
+
+  general_error:
+    description: General error for regular HTTP status codes
+    type: "object"
+    required:
+      - "status"
+      - "message"
+    properties:
+      status:
+        type: "integer"
+        x-omitempty: true
+      message:
+        type: "string"
+        x-omitempty: true
+
+  validation_error:
+    description: Validation error which shows failed fields
+    type: "object"
+    required:
+      - "status"
+      - "message"
+    properties:
+      status:
+        type: "integer"
+        x-omitempty: true
+      message:
+        type: "string"
+        x-omitempty: true
+      errors:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            field:
+              type: "string"
+            message:
+              type: "string"
+
+...

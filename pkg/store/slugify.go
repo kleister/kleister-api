@@ -9,11 +9,11 @@ import (
 )
 
 // Slugify generates a slug.
-func Slugify(tx *gorm.DB, value, id string) string {
+func Slugify(tx *gorm.DB, value, id string, force bool) string {
 	var slug string
 
 	for i := 0; true; i++ {
-		if i == 0 {
+		if i == 0 && !force {
 			slug = slugify.Slugify(value)
 		} else {
 			slug = slugify.Slugify(

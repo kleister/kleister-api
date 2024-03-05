@@ -1,0 +1,90 @@
+---
+providers:
+  - driver: github
+    name: github
+    callback: http://localhost:8080/api/v1/auth/github/callback
+    client_id: 3ec7df89ef3b8fb75b1a
+    client_secret: 84fd1b638ce48c920b62dae6ddf68a447b8cc163
+    scopes:
+      - read:user
+      - user:email
+
+  - driver: gitea
+    name: gitea
+    callback: http://localhost:8080/api/v1/auth/gitea/callback
+    client_id: your-client-id
+    client_secret: your-client-secret
+    scopes: []
+    endpoints:
+      auth: https://gitea.com/login/oauth/authorize
+      token: https://gitea.com/login/oauth/access_token
+      profile: https://gitea.com/api/v1/user
+
+  - driver: gitlab
+    name: gitlab
+    callback: http://localhost:8080/api/v1/auth/gitlab/callback
+    client_id: your-client-id
+    client_secret: your-client-secret
+    scopes: []
+    endpoints:
+      auth: https://gitlab.com/oauth/authorize
+      token: https://gitlab.com/oauth/token
+      profile: https://gitlab.com/api/v3/user
+
+  - driver: google
+    name: google
+    callback: http://localhost:8080/api/v1/auth/google/callback
+    client_id: your-client-id
+    client_secret: your-client-secret
+    scopes: []
+
+  - driver: microsoft
+    name: microsoft
+    callback: http://localhost:8080/api/v1/auth/microsoft/callback
+    client_id: your-client-id
+    client_secret: your-client-secret
+    scopes: []
+
+  - driver: oidc
+    name: keycloak
+    callback: http://localhost:8080/api/v1/auth/keycloak/callback
+    client_id: your-client-id
+    client_secret: your-client-secret
+    scopes: []
+    endpoints:
+      discovery: http://auth.cloudpunks.io/auth/realms/core/.well-known/openid-configuration
+    mappings:
+      login: preferred_username
+      name: name
+      email: email
+      avatar: picture
+
+  - driver: oidc
+    name: authentik
+    callback: http://localhost:8080/api/v1/auth/authentik/callback
+    client_id: your-client-id
+    client_secret: your-client-secret
+    scopes: []
+    endpoints:
+      discovery: https://auth.boerger.ws/application/o/grafana/.well-known/openid-configuration
+    mappings:
+      login: preferred_username
+      name: name
+      email: email
+      avatar: picture
+
+  # - driver: oidc
+  #   name: kanidm
+  #   callback: http://localhost:8080/api/v1/auth/kanidm/callback
+  #   client_id: your-client-id
+  #   client_secret: your-client-secret
+  #   scopes: []
+  #   endpoints:
+  #     discovery: https://kanidm.example.com/oauth2/openid/kleister/.well-known/openid-configuration
+  #   mappings:
+  #     login: preferred_username
+  #     name: name
+  #     email: email
+  #     avatar: picture
+
+...

@@ -8,419 +8,557 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/dchest/uniuri"
+	"github.com/kleister/kleister-api/pkg/authentication"
+	"github.com/kleister/kleister-api/pkg/authorization"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/metrics"
 	"github.com/kleister/kleister-api/pkg/middleware/requestid"
 	"github.com/kleister/kleister-api/pkg/router"
+	"github.com/kleister/kleister-api/pkg/secret"
+	"github.com/kleister/kleister-api/pkg/service/forge"
 	"github.com/kleister/kleister-api/pkg/service/members"
-	membersRepository "github.com/kleister/kleister-api/pkg/service/members/repository"
+	"github.com/kleister/kleister-api/pkg/service/minecraft"
 	"github.com/kleister/kleister-api/pkg/service/teams"
-	teamsRepository "github.com/kleister/kleister-api/pkg/service/teams/repository"
 	"github.com/kleister/kleister-api/pkg/service/users"
-	usersRepository "github.com/kleister/kleister-api/pkg/service/users/repository"
+	"github.com/kleister/kleister-api/pkg/session"
 	"github.com/oklog/run"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-// Server provides the sub-command to start the server.
-func Server(cfg *config.Config) *cli.Command {
-	return &cli.Command{
-		Name:   "server",
-		Usage:  "Start integrated server",
-		Flags:  ServerFlags(cfg),
-		Action: ServerAction(cfg),
+var (
+	serverCmd = &cobra.Command{
+		Use:   "server",
+		Short: "Start integrated server",
+		Run:   serverAction,
+		Args:  cobra.NoArgs,
 	}
+
+	defaultMetricsAddr         = "0.0.0.0:8000"
+	defaultMetricsToken        = ""
+	defaultServerAddr          = "0.0.0.0:8080"
+	defaultServerPprof         = false
+	defaultServerDocs          = true
+	defaultServerRoot          = "/"
+	defaultServerHost          = "http://localhost:8080"
+	defaultServerCert          = ""
+	defaultServerKey           = ""
+	defaultServerStrictCurves  = false
+	defaultServerStrictCiphers = false
+	defaultDatabaseDriver      = "sqlite3"
+	defaultDatabaseAddress     = ""
+	defaultDatabasePort        = ""
+	defaultDatabaseUsername    = ""
+	defaultDatabasePassword    = ""
+	defaultDatabaseName        = "storage/kleister.sqlite3"
+	defaultDatabaseOptions     = make(map[string]string, 0)
+	defaultUploadDriver        = "file"
+	defaultUploadEndpoint      = ""
+	defaultUploadPath          = "storage/uploads/"
+	defaultUploadAccess        = ""
+	defaultUploadSecret        = ""
+	defaultUploadBucket        = ""
+	defaultUploadRegion        = "us-east-1"
+	defaultUploadPerms         = "0755"
+	defaultSessionSecret       = secret.Generate(32)
+	defaultSessionExpire       = time.Hour * 24
+	defaultSessionSecure       = false
+	defaultAdminCreate         = true
+	defaultAdminUsername       = "admin"
+	defaultAdminPassword       = "admin"
+	defaultAdminEmail          = "admin@localhost"
+	defaultAuthConfig          = ""
+)
+
+func init() {
+	rootCmd.AddCommand(serverCmd)
+
+	serverCmd.PersistentFlags().String("metrics-addr", defaultMetricsAddr, "Address to bind the metrics")
+	viper.SetDefault("metrics.addr", defaultMetricsAddr)
+	_ = viper.BindPFlag("metrics.addr", serverCmd.PersistentFlags().Lookup("metrics-addr"))
+
+	serverCmd.PersistentFlags().String("metrics-token", defaultMetricsToken, "Token to make metrics secure")
+	viper.SetDefault("metrics.token", defaultMetricsToken)
+	_ = viper.BindPFlag("metrics.token", serverCmd.PersistentFlags().Lookup("metrics-token"))
+
+	serverCmd.PersistentFlags().String("server-addr", defaultServerAddr, "Address to bind the server")
+	viper.SetDefault("server.addr", defaultServerAddr)
+	_ = viper.BindPFlag("server.addr", serverCmd.PersistentFlags().Lookup("server-addr"))
+
+	serverCmd.PersistentFlags().Bool("server-pprof", defaultServerPprof, "Enable pprof debugging")
+	viper.SetDefault("server.pprof", defaultServerPprof)
+	_ = viper.BindPFlag("server.pprof", serverCmd.PersistentFlags().Lookup("server-pprof"))
+
+	serverCmd.PersistentFlags().Bool("server-docs", defaultServerDocs, "Enable OpenAPI documentation")
+	viper.SetDefault("server.docs", defaultServerDocs)
+	_ = viper.BindPFlag("server.docs", serverCmd.PersistentFlags().Lookup("server-docs"))
+
+	serverCmd.PersistentFlags().String("server-host", defaultServerHost, "External access to server")
+	viper.SetDefault("server.host", defaultServerHost)
+	_ = viper.BindPFlag("server.host", serverCmd.PersistentFlags().Lookup("server-host"))
+
+	serverCmd.PersistentFlags().String("server-root", defaultServerRoot, "Path to access the server")
+	viper.SetDefault("server.root", defaultServerRoot)
+	_ = viper.BindPFlag("server.root", serverCmd.PersistentFlags().Lookup("server-root"))
+
+	serverCmd.PersistentFlags().String("server-cert", defaultServerCert, "Path to cert for SSL encryption")
+	viper.SetDefault("server.cert", defaultServerCert)
+	_ = viper.BindPFlag("server.cert", serverCmd.PersistentFlags().Lookup("server-cert"))
+
+	serverCmd.PersistentFlags().String("server-key", defaultServerKey, "Path to key for SSL encryption")
+	viper.SetDefault("server.key", defaultServerKey)
+	_ = viper.BindPFlag("server.key", serverCmd.PersistentFlags().Lookup("server-key"))
+
+	serverCmd.PersistentFlags().Bool("strict-curves", defaultServerStrictCurves, "Use strict SSL curves")
+	viper.SetDefault("server.strictCurves", defaultServerStrictCurves)
+	_ = viper.BindPFlag("server.strictCurves", serverCmd.PersistentFlags().Lookup("strict-curves"))
+
+	serverCmd.PersistentFlags().Bool("strict-ciphers", defaultServerStrictCiphers, "Use strict SSL ciphers")
+	viper.SetDefault("server.strictCiphers", defaultServerStrictCiphers)
+	_ = viper.BindPFlag("server.strictCiphers", serverCmd.PersistentFlags().Lookup("strict-ciphers"))
+
+	serverCmd.PersistentFlags().String("database-driver", defaultDatabaseDriver, "Driver for the database")
+	viper.SetDefault("database.driver", defaultDatabaseDriver)
+	_ = viper.BindPFlag("database.driver", serverCmd.PersistentFlags().Lookup("database-driver"))
+
+	serverCmd.PersistentFlags().String("database-address", defaultDatabaseAddress, "Address for the database")
+	viper.SetDefault("database.address", defaultDatabaseAddress)
+	_ = viper.BindPFlag("database.address", serverCmd.PersistentFlags().Lookup("database-address"))
+
+	serverCmd.PersistentFlags().String("database-port", defaultDatabasePort, "Port for the database")
+	viper.SetDefault("database.port", defaultDatabasePort)
+	_ = viper.BindPFlag("database.port", serverCmd.PersistentFlags().Lookup("database-port"))
+
+	serverCmd.PersistentFlags().String("database-username", defaultDatabaseUsername, "Username for the database")
+	viper.SetDefault("database.username", defaultDatabaseUsername)
+	_ = viper.BindPFlag("database.username", serverCmd.PersistentFlags().Lookup("database-username"))
+
+	serverCmd.PersistentFlags().String("database-password", defaultDatabasePassword, "Password for the database")
+	viper.SetDefault("database.password", defaultDatabasePassword)
+	_ = viper.BindPFlag("database.password", serverCmd.PersistentFlags().Lookup("database-password"))
+
+	serverCmd.PersistentFlags().String("database-name", defaultDatabaseName, "Name of the database or path for local databases")
+	viper.SetDefault("database.name", defaultDatabaseName)
+	_ = viper.BindPFlag("database.name", serverCmd.PersistentFlags().Lookup("database-name"))
+
+	serverCmd.PersistentFlags().StringToString("database-options", defaultDatabaseOptions, "Options for the database connection")
+	viper.SetDefault("database.options", defaultDatabaseOptions)
+	_ = viper.BindPFlag("database.options", serverCmd.PersistentFlags().Lookup("database-options"))
+
+	serverCmd.PersistentFlags().String("upload-driver", defaultUploadDriver, "Driver for the uploads")
+	viper.SetDefault("upload.driver", defaultUploadDriver)
+	_ = viper.BindPFlag("upload.driver", serverCmd.PersistentFlags().Lookup("upload-driver"))
+
+	serverCmd.PersistentFlags().String("upload-endpoint", defaultUploadEndpoint, "Endpoint for uploads")
+	viper.SetDefault("upload.endpoint", defaultUploadEndpoint)
+	_ = viper.BindPFlag("upload.endpoint", serverCmd.PersistentFlags().Lookup("upload-endpoint"))
+
+	serverCmd.PersistentFlags().String("upload-path", defaultUploadPath, "Path to store uploads")
+	viper.SetDefault("upload.path", defaultUploadPath)
+	_ = viper.BindPFlag("upload.path", serverCmd.PersistentFlags().Lookup("upload-path"))
+
+	serverCmd.PersistentFlags().String("upload-access", defaultUploadAccess, "Access key for uploads")
+	viper.SetDefault("upload.access", defaultUploadAccess)
+	_ = viper.BindPFlag("upload.access", serverCmd.PersistentFlags().Lookup("upload-access"))
+
+	serverCmd.PersistentFlags().String("upload-secret", defaultUploadSecret, "Secret key for uploads")
+	viper.SetDefault("upload.secret", defaultUploadSecret)
+	_ = viper.BindPFlag("upload.secret", serverCmd.PersistentFlags().Lookup("upload-secret"))
+
+	serverCmd.PersistentFlags().String("upload-bucket", defaultUploadBucket, "Bucket to store uploads")
+	viper.SetDefault("upload.bucket", defaultUploadBucket)
+	_ = viper.BindPFlag("upload.bucket", serverCmd.PersistentFlags().Lookup("upload-bucket"))
+
+	serverCmd.PersistentFlags().String("upload-region", defaultUploadRegion, "Region to store uploads")
+	viper.SetDefault("upload.region", defaultUploadRegion)
+	_ = viper.BindPFlag("upload.region", serverCmd.PersistentFlags().Lookup("upload-region"))
+
+	serverCmd.PersistentFlags().String("upload-perms", defaultUploadPerms, "Chmod value for upload path")
+	viper.SetDefault("upload.perms", defaultUploadPerms)
+	_ = viper.BindPFlag("upload.perms", serverCmd.PersistentFlags().Lookup("upload-perms"))
+
+	serverCmd.PersistentFlags().String("session-secret", defaultSessionSecret, "Session encryption secret")
+	viper.SetDefault("session.secret", defaultSessionSecret)
+	_ = viper.BindPFlag("session.secret", serverCmd.PersistentFlags().Lookup("session-secret"))
+
+	serverCmd.PersistentFlags().Duration("session-expire", defaultSessionExpire, "Session expire duration")
+	viper.SetDefault("session.expire", defaultSessionExpire)
+	_ = viper.BindPFlag("session.expire", serverCmd.PersistentFlags().Lookup("session-expire"))
+
+	serverCmd.PersistentFlags().Bool("session-secure", defaultSessionSecure, "Enable secure cookie on HTTPS")
+	viper.SetDefault("session.secure", defaultSessionSecure)
+	_ = viper.BindPFlag("session.secure", serverCmd.PersistentFlags().Lookup("session-secure"))
+
+	serverCmd.PersistentFlags().Bool("admin-create", defaultAdminCreate, "Create an initial admin user")
+	viper.SetDefault("admin.create", defaultAdminCreate)
+	_ = viper.BindPFlag("admin.create", serverCmd.PersistentFlags().Lookup("admin-create"))
+
+	serverCmd.PersistentFlags().String("admin-username", defaultAdminUsername, "Initial admin username")
+	viper.SetDefault("admin.username", defaultAdminUsername)
+	_ = viper.BindPFlag("admin.username", serverCmd.PersistentFlags().Lookup("admin-username"))
+
+	serverCmd.PersistentFlags().String("admin-password", defaultAdminPassword, "Initial admin password")
+	viper.SetDefault("admin.password", defaultAdminPassword)
+	_ = viper.BindPFlag("admin.password", serverCmd.PersistentFlags().Lookup("admin-password"))
+
+	serverCmd.PersistentFlags().String("admin-email", defaultAdminEmail, "Initial admin email")
+	viper.SetDefault("admin.email", defaultAdminEmail)
+	_ = viper.BindPFlag("admin.email", serverCmd.PersistentFlags().Lookup("admin-email"))
+
+	serverCmd.PersistentFlags().String("auth-config", defaultAuthConfig, "Path to authentication config for OAuth2/OIDC")
+	viper.SetDefault("auth.config", defaultAuthConfig)
+	_ = viper.BindPFlag("auth.config", serverCmd.PersistentFlags().Lookup("auth-config"))
 }
 
-// ServerFlags defines server flags.
-func ServerFlags(cfg *config.Config) []cli.Flag {
-	return []cli.Flag{
-		&cli.BoolFlag{
-			Name:        "debug-pprof",
-			Value:       false,
-			Usage:       "Enable pprof debugging",
-			EnvVars:     []string{"KLEISTER_API_DEBUG_PPROF"},
-			Destination: &cfg.Metrics.Pprof,
-		},
-		&cli.StringFlag{
-			Name:        "metrics-addr",
-			Value:       defaultMetricsAddr,
-			Usage:       "Address to bind the metrics",
-			EnvVars:     []string{"KLEISTER_API_METRICS_ADDR"},
-			Destination: &cfg.Metrics.Addr,
-		},
-		&cli.StringFlag{
-			Name:        "metrics-token",
-			Value:       "",
-			Usage:       "Token to make metrics secure",
-			EnvVars:     []string{"KLEISTER_API_METRICS_TOKEN"},
-			Destination: &cfg.Metrics.Token,
-			FilePath:    "/etc/kleister/secrets/metrics-token",
-		},
-		&cli.StringFlag{
-			Name:        "server-addr",
-			Value:       defaultServerAddress,
-			Usage:       "Address to bind the server",
-			EnvVars:     []string{"KLEISTER_API_SERVER_ADDR"},
-			Destination: &cfg.Server.Addr,
-		},
-		&cli.StringFlag{
-			Name:        "server-host",
-			Value:       "http://localhost:8080",
-			Usage:       "External access to server",
-			EnvVars:     []string{"KLEISTER_API_SERVER_HOST"},
-			Destination: &cfg.Server.Host,
-		},
-		&cli.StringFlag{
-			Name:        "server-root",
-			Value:       "/",
-			Usage:       "Path to access the server",
-			EnvVars:     []string{"KLEISTER_API_SERVER_ROOT"},
-			Destination: &cfg.Server.Root,
-		},
-		&cli.StringFlag{
-			Name:        "server-cert",
-			Value:       "",
-			Usage:       "Path to SSL cert",
-			EnvVars:     []string{"KLEISTER_API_SERVER_CERT"},
-			Destination: &cfg.Server.Cert,
-		},
-		&cli.StringFlag{
-			Name:        "server-key",
-			Value:       "",
-			Usage:       "Path to SSL key",
-			EnvVars:     []string{"KLEISTER_API_SERVER_KEY"},
-			Destination: &cfg.Server.Key,
-		},
-		&cli.StringFlag{
-			Name:        "database-dsn",
-			Value:       "sqlite3://storage/kleister.db",
-			Usage:       "Database dsn",
-			EnvVars:     []string{"KLEISTER_API_DATABASE_DSN"},
-			Destination: &cfg.Database.DSN,
-			FilePath:    "/etc/kleister/secrets/database-dsn",
-		},
-		&cli.StringFlag{
-			Name:        "upload-dsn",
-			Value:       "file://storage/uploads/",
-			Usage:       "Uploads dsn",
-			EnvVars:     []string{"KLEISTER_API_UPLOAD_DSN"},
-			Destination: &cfg.Upload.DSN,
-			FilePath:    "/etc/kleister/secrets/upload-dsn",
-		},
-		&cli.DurationFlag{
-			Name:        "session-expire",
-			Value:       time.Hour * 24,
-			Usage:       "Session expire duration",
-			EnvVars:     []string{"KLEISTER_API_SESSION_EXPIRE"},
-			Destination: &cfg.Session.Expire,
-		},
-		&cli.StringFlag{
-			Name:        "session-secret",
-			Value:       uniuri.NewLen(32),
-			Usage:       "Session encryption secret",
-			EnvVars:     []string{"KLEISTER_API_SESSION_SECRET"},
-			Destination: &cfg.Session.Secret,
-			FilePath:    "/etc/kleister/secrets/session-secret",
-		},
-		&cli.BoolFlag{
-			Name:        "admin-create",
-			Value:       true,
-			Usage:       "Create an initial admin user",
-			EnvVars:     []string{"KLEISTER_API_ADMIN_CREATE"},
-			Destination: &cfg.Admin.Create,
-		},
-		&cli.StringFlag{
-			Name:        "admin-username",
-			Value:       "admin",
-			Usage:       "Initial admin username",
-			EnvVars:     []string{"KLEISTER_API_ADMIN_USERNAME"},
-			Destination: &cfg.Admin.Username,
-			FilePath:    "/etc/kleister/secrets/admin-username",
-		},
-		&cli.StringFlag{
-			Name:        "admin-password",
-			Value:       "admin",
-			Usage:       "Initial admin password",
-			EnvVars:     []string{"KLEISTER_API_ADMIN_PASSWORD"},
-			Destination: &cfg.Admin.Password,
-			FilePath:    "/etc/kleister/secrets/admin-password",
-		},
-		&cli.StringFlag{
-			Name:        "admin-email",
-			Value:       "",
-			Usage:       "Initial admin email",
-			EnvVars:     []string{"KLEISTER_API_ADMIN_EMAIL"},
-			Destination: &cfg.Admin.Email,
-			FilePath:    "/etc/kleister/secrets/admin-email",
-		},
-	}
-}
+func serverAction(_ *cobra.Command, _ []string) {
+	if err := providers.Register(
+		providers.WithConfig(cfg.Auth.Config),
+	); err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Failed to load providers")
 
-// ServerAction defines server action.
-func ServerAction(cfg *config.Config) cli.ActionFunc {
-	return func(c *cli.Context) error {
-		uploads, err := setupUploads(cfg)
+		os.Exit(1)
+	}
+
+	uploads, err := setupUploads()
+
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Failed to setup uploads")
+
+		os.Exit(1)
+	}
+
+	log.Info().
+		Fields(uploads.Info()).
+		Msg("Preparing uploads")
+
+	if uploads != nil {
+		defer uploads.Close()
+	}
+
+	storage, err := setupStorage()
+
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Failed to setup database")
+
+		os.Exit(1)
+	}
+
+	log.Info().
+		Fields(storage.Info()).
+		Msg("Preparing database")
+
+	if storage != nil {
+		defer storage.Close()
+	}
+
+	if err := backoff.RetryNotify(
+		storage.Open,
+		backoff.NewExponentialBackOff(),
+		func(_ error, dur time.Duration) {
+			log.Warn().
+				Dur("retry", dur).
+				Msg("Database open failed")
+		},
+	); err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Giving up to connect to db")
+
+		os.Exit(1)
+	}
+
+	if err := backoff.RetryNotify(
+		storage.Ping,
+		backoff.NewExponentialBackOff(),
+		func(_ error, dur time.Duration) {
+			log.Warn().
+				Dur("retry", dur).
+				Msg("Database ping failed")
+		},
+	); err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Giving up to ping the db")
+
+		os.Exit(1)
+	}
+
+	if err := storage.Migrate(); err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Failed to migrate database")
+	}
+
+	if cfg.Admin.Create {
+		username, err := config.Value(cfg.Admin.Username)
 
 		if err != nil {
 			log.Fatal().
 				Err(err).
-				Msg("Failed to setup uploads")
+				Msg("Failed to parse admin username secret")
 
-			return err
+			os.Exit(1)
 		}
 
-		log.Info().
-			Fields(uploads.Info()).
-			Msg("Preparing uploads")
-
-		if uploads != nil {
-			defer uploads.Close()
-		}
-
-		storage, err := setupStorage(cfg)
+		password, err := config.Value(cfg.Admin.Password)
 
 		if err != nil {
 			log.Fatal().
 				Err(err).
-				Msg("Failed to setup database")
+				Msg("Failed to parse admin password secret")
 
-			return err
+			os.Exit(1)
 		}
 
-		log.Info().
-			Fields(storage.Info()).
-			Msg("Preparing database")
+		email, err := config.Value(cfg.Admin.Email)
 
-		if storage != nil {
-			defer storage.Close()
+		if err != nil {
+			log.Fatal().
+				Err(err).
+				Msg("Failed to parse admin email secret")
+
+			os.Exit(1)
 		}
 
-		if err := backoff.RetryNotify(
-			storage.Open,
-			backoff.NewExponentialBackOff(),
-			func(err error, dur time.Duration) {
-				log.Warn().
-					Dur("retry", dur).
-					Msg("Database open failed")
-			},
+		if err := storage.Admin(
+			username,
+			password,
+			email,
 		); err != nil {
-			log.Fatal().
+			log.Warn().
 				Err(err).
-				Msg("Giving up to connect to db")
+				Str("username", username).
+				Str("email", email).
+				Msg("Failed to create admin")
+		} else {
+			log.Info().
+				Str("username", username).
+				Str("email", email).
+				Msg("Admin successfully stored")
+		}
+	}
 
-			return err
+	token, err := config.Value(cfg.Metrics.Token)
+
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Failed to parse metrics token secret")
+
+		os.Exit(1)
+	}
+
+	registry := metrics.New(
+		metrics.WithNamespace("gopad_api"),
+		metrics.WithToken(token),
+	)
+
+	sess := session.New(
+		session.WithStore(storage.Session()),
+		session.WithLifetime(cfg.Session.Expire),
+		session.WithPath(cfg.Server.Root),
+		session.WithSecure(cfg.Session.Secure),
+	)
+
+	gr := run.Group{}
+
+	{
+		minecraftService := minecraft.NewMetricsService(
+			minecraft.NewLoggingService(
+				minecraft.NewService(
+					minecraft.NewGormService(
+						storage.Handle(),
+					),
+				),
+			),
+			metricz,
+		)
+
+		forgeService := forge.NewMetricsService(
+			forge.NewLoggingService(
+				forge.NewService(
+					forge.NewGormService(
+						storage.Handle(),
+					),
+				),
+			),
+			metricz,
+		)
+
+		neoforgeService := neoforge.NewMetricsService(
+			neoforge.NewLoggingService(
+				neoforge.NewService(
+					neoforge.NewGormService(
+						storage.Handle(),
+					),
+				),
+			),
+			metricz,
+		)
+
+		quiltService := quilt.NewMetricsService(
+			quilt.NewLoggingService(
+				quilt.NewService(
+					quilt.NewGormService(
+						storage.Handle(),
+					),
+				),
+			),
+			metricz,
+		)
+
+		fabricService := fabric.NewMetricsService(
+			fabric.NewLoggingService(
+				fabric.NewService(
+					fabric.NewGormService(
+						storage.Handle(),
+					),
+				),
+			),
+			metricz,
+		)
+
+		teamsService := teams.NewMetricsService(
+			teams.NewLoggingService(
+				teams.NewService(
+					teams.NewGormService(
+						storage.Handle(),
+					),
+				),
+			),
+			metricz,
+		)
+
+		usersService := users.NewMetricsService(
+			users.NewLoggingService(
+				users.NewService(
+					users.NewGormService(
+						storage.Handle(),
+					),
+				),
+			),
+			metricz,
+		)
+
+		membersService := members.NewMetricsService(
+			members.NewLoggingService(
+				members.NewService(
+					members.NewGormService(
+						storage.Handle(),
+						teamsService,
+						usersService,
+					),
+				),
+			),
+			metricz,
+		)
+
+		server := &http.Server{
+			Addr: cfg.Server.Addr,
+			Handler: router.Server(
+				cfg,
+				registry,
+				sess,
+				uploads,
+				storage,
+				minecraftService,
+				forgeService,
+				neoforgeService,
+				quiltService,
+				fabricService,
+				teamsService,
+				usersService,
+				membersService,
+			),
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 10 * time.Second,
 		}
 
-		if err := backoff.RetryNotify(
-			storage.Ping,
-			backoff.NewExponentialBackOff(),
-			func(err error, dur time.Duration) {
-				log.Warn().
-					Dur("retry", dur).
-					Msg("Database ping failed")
-			},
-		); err != nil {
-			log.Fatal().
-				Err(err).
-				Msg("Giving up to ping the db")
+		gr.Add(func() error {
+			log.Info().
+				Str("addr", cfg.Server.Addr).
+				Msg("Starting application server")
 
-			return err
-		}
+			if cfg.Server.Cert != "" && cfg.Server.Key != "" {
+				return server.ListenAndServeTLS(
+					cfg.Server.Cert,
+					cfg.Server.Key,
+				)
+			}
 
-		if err := storage.Migrate(); err != nil {
-			log.Fatal().
-				Err(err).
-				Msg("Failed to migrate database")
-		}
+			return server.ListenAndServe()
+		}, func(reason error) {
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer cancel()
 
-		if cfg.Admin.Create {
-			err := storage.Admin(
-				cfg.Admin.Username,
-				cfg.Admin.Password,
-				cfg.Admin.Email,
-			)
-
-			if err != nil {
-				log.Warn().
+			if err := server.Shutdown(ctx); err != nil {
+				log.Error().
 					Err(err).
-					Str("username", cfg.Admin.Username).
-					Str("password", cfg.Admin.Password).
-					Str("email", cfg.Admin.Email).
-					Msg("Failed to create admin")
-			} else {
-				log.Info().
-					Str("username", cfg.Admin.Username).
-					Str("password", cfg.Admin.Password).
-					Str("email", cfg.Admin.Email).
-					Msg("Admin successfully stored")
-			}
-		}
+					Msg("Failed to shutdown application gracefully")
 
-		metricz := metrics.New()
-		gr := run.Group{}
-
-		{
-			routing := router.Server(
-				cfg,
-				uploads,
-			)
-
-			usersRepo := usersRepository.NewMetricsRepository(
-				usersRepository.NewLoggingRepository(
-					usersRepository.NewGormRepository(
-						storage.Handle(),
-					),
-					requestid.Get,
-				),
-				metricz,
-			)
-
-			users.RegisterServer(
-				cfg,
-				uploads,
-				metricz,
-				usersRepo,
-				routing,
-			)
-
-			teamsRepo := teamsRepository.NewMetricsRepository(
-				teamsRepository.NewLoggingRepository(
-					teamsRepository.NewGormRepository(
-						storage.Handle(),
-					),
-					requestid.Get,
-				),
-				metricz,
-			)
-
-			teams.RegisterServer(
-				cfg,
-				uploads,
-				metricz,
-				teamsRepo,
-				routing,
-			)
-
-			membersRepo := membersRepository.NewMetricsRepository(
-				membersRepository.NewLoggingRepository(
-					membersRepository.NewGormRepository(
-						storage.Handle(),
-						teamsRepo,
-						usersRepo,
-					),
-					requestid.Get,
-				),
-				metricz,
-			)
-
-			members.RegisterServer(
-				cfg,
-				uploads,
-				metricz,
-				membersRepo,
-				routing,
-			)
-
-			server := &http.Server{
-				Addr: cfg.Server.Addr,
-				Handler: h2c.NewHandler(
-					routing,
-					&http2.Server{},
-				),
-				ReadTimeout:  5 * time.Second,
-				WriteTimeout: 10 * time.Second,
+				return
 			}
 
-			gr.Add(func() error {
-				log.Info().
-					Str("addr", cfg.Server.Addr).
-					Msg("Starting HTTP server")
+			log.Info().
+				Err(reason).
+				Msg("Application shutdown gracefully")
+		})
+	}
 
-				if cfg.Server.Cert != "" && cfg.Server.Key != "" {
-					return server.ListenAndServeTLS(
-						cfg.Server.Cert,
-						cfg.Server.Key,
-					)
-				}
-
-				return server.ListenAndServe()
-			}, func(reason error) {
-				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-				defer cancel()
-
-				if err := server.Shutdown(ctx); err != nil {
-					log.Error().
-						Err(err).
-						Msg("Failed to shutdown HTTP gracefully")
-
-					return
-				}
-
-				log.Info().
-					Err(reason).
-					Msg("HTTP shutdown gracefully")
-			})
+	{
+		server := &http.Server{
+			Addr:         cfg.Metrics.Addr,
+			Handler:      router.Metrics(cfg, registry),
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 10 * time.Second,
 		}
 
-		{
-			routing := router.Metrics(
-				cfg,
-				metricz,
-			)
+		gr.Add(func() error {
+			log.Info().
+				Str("addr", cfg.Metrics.Addr).
+				Msg("Starting metrics server")
 
-			server := &http.Server{
-				Addr: cfg.Metrics.Addr,
-				Handler: h2c.NewHandler(
-					routing,
-					&http2.Server{},
-				),
-				ReadTimeout:  5 * time.Second,
-				WriteTimeout: 10 * time.Second,
+			return server.ListenAndServe()
+		}, func(reason error) {
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer cancel()
+
+			if err := server.Shutdown(ctx); err != nil {
+				log.Error().
+					Err(err).
+					Msg("Failed to shutdown metrics gracefully")
+
+				return
 			}
 
-			gr.Add(func() error {
-				log.Info().
-					Str("addr", cfg.Metrics.Addr).
-					Msg("Starting metrics server")
+			log.Info().
+				Err(reason).
+				Msg("Metrics shutdown gracefully")
+		})
+	}
 
-				return server.ListenAndServe()
-			}, func(reason error) {
-				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-				defer cancel()
+	{
+		stop := make(chan os.Signal, 1)
 
-				if err := server.Shutdown(ctx); err != nil {
-					log.Error().
-						Err(err).
-						Msg("Failed to shutdown metrics gracefully")
+		gr.Add(func() error {
+			signal.Notify(stop, os.Interrupt)
 
-					return
-				}
+			<-stop
 
-				log.Info().
-					Err(reason).
-					Msg("Metrics shutdown gracefully")
-			})
-		}
+			return nil
+		}, func(err error) {
+			close(stop)
+		})
+	}
 
-		{
-			stop := make(chan os.Signal, 1)
-
-			gr.Add(func() error {
-				signal.Notify(stop, os.Interrupt)
-
-				<-stop
-
-				return nil
-			}, func(err error) {
-				close(stop)
-			})
-		}
-
-		return gr.Run()
+	if err := gr.Run(); err != nil {
+		os.Exit(1)
 	}
 }
