@@ -2,6 +2,9 @@ package model
 
 import (
 	"time"
+
+	"github.com/dchest/uniuri"
+	"gorm.io/gorm"
 )
 
 // Team within Kleister.

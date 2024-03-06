@@ -11,8 +11,8 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/glebarez/sqlite"
 	"github.com/go-gormigrate/gormigrate/v2"
-	"github.com/gopad/gopad-api/pkg/config"
-	"github.com/gopad/gopad-api/pkg/model"
+	"github.com/kleister/kleister-api/pkg/config"
+	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/pkg/errors"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -68,6 +68,10 @@ func (s *GormStore) Admin(username, password, email string) error {
 	}()
 
 	if admin.ID == "" {
+		if admin.Fullname == "" {
+			admin.Fullname = "Admin"
+		}
+
 		if err := tx.Create(admin).Error; err != nil {
 			tx.Rollback()
 			return err
@@ -77,6 +81,10 @@ func (s *GormStore) Admin(username, password, email string) error {
 			return err
 		}
 	} else {
+		if admin.Fullname == "" {
+			admin.Fullname = "Admin"
+		}
+
 		if err := tx.Save(admin).Error; err != nil {
 			tx.Rollback()
 			return err

@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"github.com/dchest/uniuri"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )

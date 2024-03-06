@@ -16,8 +16,11 @@ type Minecraft struct {
 	UpdatedAt time.Time
 }
 
-// BeforeCreate defines the hook executed before every create.
-func (m *Minecraft) BeforeCreate(_ *gorm.DB) error {
-	m.ID = uuid.New().String()
+// BeforeSave defines the hook executed before every save.
+func (m *Minecraft) BeforeSave(_ *gorm.DB) error {
+	if m.ID == "" {
+		m.ID = uuid.New().String()
+	}
+
 	return nil
 }

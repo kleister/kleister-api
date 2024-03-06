@@ -6,8 +6,6 @@ import (
 	"fmt"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
-	"github.com/google/uuid"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/secret"
 	"github.com/kleister/kleister-api/pkg/store"
@@ -108,8 +106,6 @@ func (s *GormService) Create(ctx context.Context, user *model.User) (*model.User
 			"",
 		)
 	}
-
-	user.ID = uuid.New().String()
 
 	if err := s.validate(ctx, user, false); err != nil {
 		return nil, err
@@ -222,7 +218,6 @@ func (s *GormService) External(ctx context.Context, user *model.User) (*model.Us
 
 	record.Username = user.Username
 	record.Email = user.Email
-	record.Avatar = user.Avatar
 	record.Fullname = user.Fullname
 
 	if record.ID == "" {
@@ -234,7 +229,6 @@ func (s *GormService) External(ctx context.Context, user *model.User) (*model.Us
 			)
 		}
 
-		record.ID = uuid.New().String()
 		record.Password = secret.Generate(32)
 		record.Active = true
 
@@ -266,22 +260,8 @@ func (s *GormService) External(ctx context.Context, user *model.User) (*model.Us
 	return record, nil
 }
 
-func (s *GormService) validate(ctx context.Context, record *model.User, existing bool) error {
+func (s *GormService) validate(ctx context.Context, record *model.User, _ bool) error {
 	errs := validate.Errors{}
-
-	if existing {
-		if err := validation.Validate(
-			record.ID,
-			validation.Required,
-			is.UUIDv4,
-			validation.By(s.uniqueValueIsPresent(ctx, "id", record.ID)),
-		); err != nil {
-			errs.Errors = append(errs.Errors, validate.Error{
-				Field: "id",
-				Error: err,
-			})
-		}
-	}
 
 	if err := validation.Validate(
 		record.Slug,

@@ -8,16 +8,17 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/kleister/kleister-api/pkg/authentication"
-	"github.com/kleister/kleister-api/pkg/authorization"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/metrics"
-	"github.com/kleister/kleister-api/pkg/middleware/requestid"
+	"github.com/kleister/kleister-api/pkg/providers"
 	"github.com/kleister/kleister-api/pkg/router"
 	"github.com/kleister/kleister-api/pkg/secret"
+	"github.com/kleister/kleister-api/pkg/service/fabric"
 	"github.com/kleister/kleister-api/pkg/service/forge"
 	"github.com/kleister/kleister-api/pkg/service/members"
 	"github.com/kleister/kleister-api/pkg/service/minecraft"
+	"github.com/kleister/kleister-api/pkg/service/neoforge"
+	"github.com/kleister/kleister-api/pkg/service/quilt"
 	"github.com/kleister/kleister-api/pkg/service/teams"
 	"github.com/kleister/kleister-api/pkg/service/users"
 	"github.com/kleister/kleister-api/pkg/session"
@@ -378,7 +379,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 					),
 				),
 			),
-			metricz,
+			registry,
 		)
 
 		forgeService := forge.NewMetricsService(
@@ -389,7 +390,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 					),
 				),
 			),
-			metricz,
+			registry,
 		)
 
 		neoforgeService := neoforge.NewMetricsService(
@@ -400,7 +401,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 					),
 				),
 			),
-			metricz,
+			registry,
 		)
 
 		quiltService := quilt.NewMetricsService(
@@ -411,7 +412,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 					),
 				),
 			),
-			metricz,
+			registry,
 		)
 
 		fabricService := fabric.NewMetricsService(
@@ -422,7 +423,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 					),
 				),
 			),
-			metricz,
+			registry,
 		)
 
 		teamsService := teams.NewMetricsService(
@@ -433,7 +434,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 					),
 				),
 			),
-			metricz,
+			registry,
 		)
 
 		usersService := users.NewMetricsService(
@@ -444,7 +445,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 					),
 				),
 			),
-			metricz,
+			registry,
 		)
 
 		membersService := members.NewMetricsService(
@@ -457,7 +458,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 					),
 				),
 			),
-			metricz,
+			registry,
 		)
 
 		server := &http.Server{

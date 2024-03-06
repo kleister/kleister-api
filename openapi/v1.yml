@@ -270,7 +270,6 @@ paths:
         200:
           description: "A collection of Minecraft versions"
           schema:
-            type: "object"
             $ref: "#/definitions/minecrafts"
         403:
           description: "User is not authorized"
@@ -462,7 +461,6 @@ paths:
         200:
           description: "A collection of Forge versions"
           schema:
-            type: "object"
             $ref: "#/definitions/forges"
         403:
           description: "User is not authorized"
@@ -654,7 +652,6 @@ paths:
         200:
           description: "A collection of Neoforge versions"
           schema:
-            type: "object"
             $ref: "#/definitions/neoforges"
         403:
           description: "User is not authorized"
@@ -704,8 +701,9 @@ paths:
         200:
           description: "A collection of Neoforge versions"
           schema:
-            type: "object"
-            $ref: "#/definitions/neoforges"
+            type: "array"
+            items:
+              $ref: "#/definitions/neoforge"
         403:
           description: "User is not authorized"
           schema:
@@ -846,7 +844,6 @@ paths:
         200:
           description: "A collection of quilt versions"
           schema:
-            type: "object"
             $ref: "#/definitions/quilts"
         403:
           description: "User is not authorized"
@@ -896,8 +893,9 @@ paths:
         200:
           description: "A collection of quilt versions"
           schema:
-            type: "object"
-            $ref: "#/definitions/quilts"
+            type: "array"
+            items:
+              $ref: "#/definitions/quilt"
         403:
           description: "User is not authorized"
           schema:
@@ -1087,8 +1085,9 @@ paths:
         200:
           description: "A collection of fabric versions"
           schema:
-            type: "object"
-            $ref: "#/definitions/fabrics"
+            type: "array"
+            items:
+              $ref: "#/definitions/fabric"
         403:
           description: "User is not authorized"
           schema:
@@ -2811,7 +2810,6 @@ paths:
         200:
           description: "A collection of teams"
           schema:
-            type: "object"
             $ref: "#/definitions/teams"
         403:
           description: "User is not authorized"
@@ -3440,7 +3438,6 @@ paths:
         200:
           description: "A collection of users"
           schema:
-            type: "object"
             $ref: "#/definitions/users"
         403:
           description: "User is not authorized"
@@ -4188,6 +4185,14 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/build"
+
+  minecrafts:
+    type: "object"
+    properties:
+      versions:
+        type: "array"
+        items:
+          $ref: "#/definitions/minecraft"
 
   minecraft:
     type: "object"

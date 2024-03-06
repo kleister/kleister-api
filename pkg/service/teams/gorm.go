@@ -6,8 +6,6 @@ import (
 	"fmt"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
-	"github.com/google/uuid"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/kleister/kleister-api/pkg/validate"
@@ -74,8 +72,6 @@ func (s *GormService) Create(ctx context.Context, team *model.Team) (*model.Team
 			"",
 		)
 	}
-
-	team.ID = uuid.New().String()
 
 	if err := s.validate(ctx, team, false); err != nil {
 		return nil, err
@@ -167,22 +163,8 @@ func (s *GormService) Exists(ctx context.Context, name string) (bool, error) {
 	return res.RowsAffected > 0, nil
 }
 
-func (s *GormService) validate(ctx context.Context, record *model.Team, existing bool) error {
+func (s *GormService) validate(ctx context.Context, record *model.Team, _ bool) error {
 	errs := validate.Errors{}
-
-	if existing {
-		if err := validation.Validate(
-			record.ID,
-			validation.Required,
-			is.UUIDv4,
-			validation.By(s.uniqueValueIsPresent(ctx, "id", record.ID)),
-		); err != nil {
-			errs.Errors = append(errs.Errors, validate.Error{
-				Field: "id",
-				Error: err,
-			})
-		}
-	}
 
 	if err := validation.Validate(
 		record.Slug,
