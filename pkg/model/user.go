@@ -23,6 +23,8 @@ type User struct {
 	UpdatedAt time.Time
 	Auths     []*UserAuth
 	Teams     []*Member
+	Mods      []*UserMod
+	Packs     []*UserPack
 }
 
 // BeforeSave defines the hook executed before every save.

@@ -17,7 +17,9 @@ import (
 	"github.com/kleister/kleister-api/pkg/service/forge"
 	"github.com/kleister/kleister-api/pkg/service/members"
 	"github.com/kleister/kleister-api/pkg/service/minecraft"
+	"github.com/kleister/kleister-api/pkg/service/mods"
 	"github.com/kleister/kleister-api/pkg/service/neoforge"
+	"github.com/kleister/kleister-api/pkg/service/packs"
 	"github.com/kleister/kleister-api/pkg/service/quilt"
 	"github.com/kleister/kleister-api/pkg/service/teams"
 	"github.com/kleister/kleister-api/pkg/service/users"
@@ -69,6 +71,7 @@ var (
 	defaultAdminUsername       = "admin"
 	defaultAdminPassword       = "admin"
 	defaultAdminEmail          = "admin@localhost"
+	defaultAdminUsers          = []string{}
 	defaultAuthConfig          = ""
 )
 
@@ -206,6 +209,10 @@ func init() {
 	serverCmd.PersistentFlags().String("admin-email", defaultAdminEmail, "Initial admin email")
 	viper.SetDefault("admin.email", defaultAdminEmail)
 	_ = viper.BindPFlag("admin.email", serverCmd.PersistentFlags().Lookup("admin-email"))
+
+	serverCmd.PersistentFlags().StringSlice("admin-users", defaultAdminUsers, "List of admin usernames")
+	viper.SetDefault("admin.users", defaultAdminUsers)
+	_ = viper.BindPFlag("admin.users", serverCmd.PersistentFlags().Lookup("admin-users"))
 
 	serverCmd.PersistentFlags().String("auth-config", defaultAuthConfig, "Path to authentication config for OAuth2/OIDC")
 	viper.SetDefault("auth.config", defaultAuthConfig)
@@ -461,6 +468,28 @@ func serverAction(_ *cobra.Command, _ []string) {
 			registry,
 		)
 
+		modsService := mods.NewMetricsService(
+			mods.NewLoggingService(
+				mods.NewService(
+					mods.NewGormService(
+						storage.Handle(),
+					),
+				),
+			),
+			registry,
+		)
+
+		packsService := packs.NewMetricsService(
+			packs.NewLoggingService(
+				packs.NewService(
+					packs.NewGormService(
+						storage.Handle(),
+					),
+				),
+			),
+			registry,
+		)
+
 		server := &http.Server{
 			Addr: cfg.Server.Addr,
 			Handler: router.Server(
@@ -477,6 +506,8 @@ func serverAction(_ *cobra.Command, _ []string) {
 				teamsService,
 				usersService,
 				membersService,
+				modsService,
+				packsService,
 			),
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,

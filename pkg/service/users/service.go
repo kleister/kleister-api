@@ -31,7 +31,7 @@ type Service interface {
 	Update(context.Context, *model.User) (*model.User, error)
 	Delete(context.Context, string) error
 	Exists(context.Context, string) (bool, error)
-	External(context.Context, *model.User) (*model.User, error)
+	External(context.Context, string, string, string, bool) (*model.User, error)
 }
 
 type service struct {
@@ -81,6 +81,6 @@ func (s *service) Exists(ctx context.Context, name string) (bool, error) {
 }
 
 // External implements the Service interface.
-func (s *service) External(ctx context.Context, user *model.User) (*model.User, error) {
-	return s.users.External(ctx, user)
+func (s *service) External(ctx context.Context, username, email, fullname string, admin bool) (*model.User, error) {
+	return s.users.External(ctx, username, email, fullname, admin)
 }

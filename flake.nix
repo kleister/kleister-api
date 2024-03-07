@@ -141,6 +141,7 @@
                 # KLEISTER_API_SERVER_KEY = ".devenv/state/mkcert/localhost+1-key.pem";
 
                 KLEISTER_API_AUTH_CONFIG = "config/auth.yml";
+                KLEISTER_API_ADMIN_USERS = "tboerger";
               };
             };
           };

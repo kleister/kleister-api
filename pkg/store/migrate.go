@@ -258,7 +258,7 @@ var (
 					ID          string `gorm:"primaryKey;length:20"`
 					Slug        string `gorm:"unique;length:255"`
 					Name        string `gorm:"unique;length:255"`
-					Side        string `gorm:"index;length:20"`
+					Side        string `gorm:"index;length:36"`
 					Description string
 					Author      string
 					Website     string
@@ -275,7 +275,7 @@ var (
 		},
 
 		{
-			ID: "00014_create_user_mods_table",
+			ID: "0014_create_user_mods_table",
 			Migrate: func(tx *gorm.DB) error {
 				type UserMod struct {
 					UserID    string `gorm:"index:idx_id,unique;length:20"`
@@ -291,7 +291,7 @@ var (
 			},
 		},
 		{
-			ID: "00015_create_user_mods_users_constraint",
+			ID: "0015_create_user_mods_users_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type UserMod struct {
 					UserID string `gorm:"index:idx_id,unique;length:20"`
@@ -320,7 +320,7 @@ var (
 			},
 		},
 		{
-			ID: "00016_create_user_mods_mods_constraint",
+			ID: "0016_create_user_mods_mods_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type UserMod struct {
 					UserID string `gorm:"index:idx_id,unique;length:20"`
@@ -349,7 +349,7 @@ var (
 			},
 		},
 		{
-			ID: "00017_create_team_mods_table",
+			ID: "0017_create_team_mods_table",
 			Migrate: func(tx *gorm.DB) error {
 				type TeamMod struct {
 					TeamID    string `gorm:"index:idx_id,unique;length:20"`
@@ -365,7 +365,7 @@ var (
 			},
 		},
 		{
-			ID: "00018_create_team_mods_teams_constraint",
+			ID: "0018_create_team_mods_teams_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type TeamMod struct {
 					TeamID string `gorm:"index:idx_id,unique;length:20"`
@@ -394,7 +394,7 @@ var (
 			},
 		},
 		{
-			ID: "00019_create_team_mods_mods_constraint",
+			ID: "0019_create_team_mods_mods_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type TeamMod struct {
 					TeamID string `gorm:"index:idx_id,unique;length:20"`
@@ -423,7 +423,7 @@ var (
 			},
 		},
 		{
-			ID: "00020_create_versions_table",
+			ID: "0020_create_versions_table",
 			Migrate: func(tx *gorm.DB) error {
 				type Version struct {
 					ID        string `gorm:"primaryKey;length:20"`
@@ -441,7 +441,7 @@ var (
 			},
 		},
 		{
-			ID: "00021_create_versions_mods_constraint",
+			ID: "0021_create_versions_mods_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type Version struct {
 					ID    string `gorm:"primaryKey"`
@@ -469,7 +469,7 @@ var (
 			},
 		},
 		{
-			ID: "00022_create_version_files_table",
+			ID: "0022_create_version_files_table",
 			Migrate: func(tx *gorm.DB) error {
 				type VersionFile struct {
 					ID          string `gorm:"primaryKey;length:20"`
@@ -488,7 +488,7 @@ var (
 			},
 		},
 		{
-			ID: "00023_create_version_files_versions_constraint",
+			ID: "0023_create_version_files_versions_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type VersionFile struct {
 					ID        string `gorm:"primaryKey"`
@@ -517,7 +517,7 @@ var (
 			},
 		},
 		{
-			ID: "00024_create_packs_table",
+			ID: "0024_create_packs_table",
 			Migrate: func(tx *gorm.DB) error {
 				type Pack struct {
 					ID        string `gorm:"primaryKey;length:20"`
@@ -537,7 +537,7 @@ var (
 			},
 		},
 		{
-			ID: "00025_create_pack_backs_table",
+			ID: "0025_create_pack_backs_table",
 			Migrate: func(tx *gorm.DB) error {
 				type PackBack struct {
 					ID          string `gorm:"primaryKey;length:20"`
@@ -556,7 +556,7 @@ var (
 			},
 		},
 		{
-			ID: "00026_create_pack_backs_packs_constraint",
+			ID: "0026_create_pack_backs_packs_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type PackBack struct {
 					ID     string `gorm:"primaryKey"`
@@ -585,7 +585,7 @@ var (
 			},
 		},
 		{
-			ID: "00027_create_pack_icons_table",
+			ID: "0027_create_pack_icons_table",
 			Migrate: func(tx *gorm.DB) error {
 				type PackIcon struct {
 					ID          string `gorm:"primaryKey;length:20"`
@@ -604,7 +604,7 @@ var (
 			},
 		},
 		{
-			ID: "00028_create_pack_icons_packs_constraint",
+			ID: "0028_create_pack_icons_packs_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type PackIcon struct {
 					ID     string `gorm:"primaryKey"`
@@ -633,7 +633,7 @@ var (
 			},
 		},
 		{
-			ID: "00029_create_pack_logos_table",
+			ID: "0029_create_pack_logos_table",
 			Migrate: func(tx *gorm.DB) error {
 				type PackLogo struct {
 					ID          string `gorm:"primaryKey;length:20"`
@@ -652,7 +652,7 @@ var (
 			},
 		},
 		{
-			ID: "00030_create_pack_logos_packs_constraint",
+			ID: "0030_create_pack_logos_packs_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type PackLogo struct {
 					ID     string `gorm:"primaryKey"`
@@ -681,7 +681,7 @@ var (
 			},
 		},
 		{
-			ID: "00031_create_user_packs_table",
+			ID: "0031_create_user_packs_table",
 			Migrate: func(tx *gorm.DB) error {
 				type UserPack struct {
 					UserID    string `gorm:"index:idx_id,unique;length:20"`
@@ -697,7 +697,7 @@ var (
 			},
 		},
 		{
-			ID: "00032_create_user_packs_users_constraint",
+			ID: "0032_create_user_packs_users_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type UserPack struct {
 					UserID string `gorm:"index:idx_id,unique;length:20"`
@@ -726,7 +726,7 @@ var (
 			},
 		},
 		{
-			ID: "00033_create_user_packs_packs_constraint",
+			ID: "0033_create_user_packs_packs_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type UserPack struct {
 					UserID string `gorm:"index:idx_id,unique;length:20"`
@@ -755,7 +755,7 @@ var (
 			},
 		},
 		{
-			ID: "00034_create_team_packs_table",
+			ID: "0034_create_team_packs_table",
 			Migrate: func(tx *gorm.DB) error {
 				type TeamPack struct {
 					TeamID    string `gorm:"index:idx_id,unique;length:20"`
@@ -771,7 +771,7 @@ var (
 			},
 		},
 		{
-			ID: "00034_create_team_packs_teams_constraint",
+			ID: "0035_create_team_packs_teams_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type TeamPack struct {
 					TeamID string `gorm:"index:idx_id,unique;length:20"`
@@ -800,7 +800,7 @@ var (
 			},
 		},
 		{
-			ID: "00035_create_team_packs_packs_constraint",
+			ID: "0036_create_team_packs_packs_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type TeamPack struct {
 					TeamID string `gorm:"index:idx_id,unique;length:20"`
@@ -829,7 +829,7 @@ var (
 			},
 		},
 		{
-			ID: "00036_create_builds_table",
+			ID: "0037_create_builds_table",
 			Migrate: func(tx *gorm.DB) error {
 				type Build struct {
 					ID          string `gorm:"primaryKey;length:20"`
@@ -855,7 +855,65 @@ var (
 			},
 		},
 		{
-			ID: "00037_create_builds_minecrafts_constraint",
+			ID: "0038_create_packs_recommended_build_constraint",
+			Migrate: func(tx *gorm.DB) error {
+				type Build struct {
+					ID string `gorm:"primaryKey;length:20"`
+				}
+
+				type Pack struct {
+					ID            string `gorm:"primaryKey"`
+					RecommendedID string `gorm:"index;length:20"`
+					Recommended   *Build `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+				}
+
+				return tx.Migrator().CreateConstraint(&Pack{}, "Recommended")
+			},
+			Rollback: func(tx *gorm.DB) error {
+				type Build struct {
+					ID string `gorm:"primaryKey;length:20"`
+				}
+
+				type Pack struct {
+					ID            string `gorm:"primaryKey"`
+					RecommendedID string `gorm:"index;length:20"`
+					Recommended   *Build `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+				}
+
+				return tx.Migrator().DropConstraint(&Pack{}, "Recommended")
+			},
+		},
+		{
+			ID: "0039_create_packs_latest_build_constraint",
+			Migrate: func(tx *gorm.DB) error {
+				type Build struct {
+					ID string `gorm:"primaryKey;length:20"`
+				}
+
+				type Pack struct {
+					ID       string  `gorm:"primaryKey"`
+					LatestID *string `gorm:"index;length:20"`
+					Latest   *Build  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+				}
+
+				return tx.Migrator().CreateConstraint(&Pack{}, "Latest")
+			},
+			Rollback: func(tx *gorm.DB) error {
+				type Build struct {
+					ID string `gorm:"primaryKey;length:20"`
+				}
+
+				type Pack struct {
+					ID       string  `gorm:"primaryKey"`
+					LatestID *string `gorm:"index;length:20"`
+					Latest   *Build  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+				}
+
+				return tx.Migrator().DropConstraint(&Pack{}, "Latest")
+			},
+		},
+		{
+			ID: "0040_create_builds_minecrafts_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type Build struct {
 					ID          string `gorm:"primaryKey"`
@@ -884,7 +942,7 @@ var (
 			},
 		},
 		{
-			ID: "00038_create_builds_forges_constraint",
+			ID: "0041_create_builds_forges_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type Build struct {
 					ID      string `gorm:"primaryKey"`
@@ -913,7 +971,7 @@ var (
 			},
 		},
 		{
-			ID: "00039_create_builds_neoforges_constraint",
+			ID: "0042_create_builds_neoforges_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type Build struct {
 					ID         string `gorm:"primaryKey"`
@@ -942,7 +1000,7 @@ var (
 			},
 		},
 		{
-			ID: "00040_create_builds_quilts_constraint",
+			ID: "0043_create_builds_quilts_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type Build struct {
 					ID      string `gorm:"primaryKey"`
@@ -971,7 +1029,7 @@ var (
 			},
 		},
 		{
-			ID: "00041_create_builds_fabrics_constraint",
+			ID: "0044_create_builds_fabrics_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type Build struct {
 					ID       string `gorm:"primaryKey"`
@@ -1000,7 +1058,7 @@ var (
 			},
 		},
 		{
-			ID: "00042_create_build_versions_table",
+			ID: "0045_create_build_versions_table",
 			Migrate: func(tx *gorm.DB) error {
 				type BuildVersion struct {
 					BuildID   string `gorm:"index:idx_id,unique;length:20"`
@@ -1016,7 +1074,7 @@ var (
 			},
 		},
 		{
-			ID: "00043_create_build_versions_builds_constraint",
+			ID: "0046_create_build_versions_builds_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type BuildVersion struct {
 					BuildID   string `gorm:"index:idx_id,unique;length:20"`
@@ -1045,7 +1103,7 @@ var (
 			},
 		},
 		{
-			ID: "00044_create_build_versions_versions_constraint",
+			ID: "0047_create_build_versions_versions_constraint",
 			Migrate: func(tx *gorm.DB) error {
 				type BuildVersion struct {
 					BuildID   string `gorm:"index:idx_id,unique;length:20"`

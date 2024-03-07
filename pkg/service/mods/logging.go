@@ -1,4 +1,4 @@
-package users
+package mods
 
 import (
 	"context"
@@ -23,17 +23,12 @@ func NewLoggingService(s Service, requestID LoggingRequestID) Service {
 	return &loggingService{
 		service:   s,
 		requestID: requestID,
-		logger:    log.With().Str("service", "users").Logger(),
+		logger:    log.With().Str("service", "mods").Logger(),
 	}
 }
 
-// ByBasicAuth implements the Service interface for logging.
-func (s *loggingService) ByBasicAuth(ctx context.Context, username, password string) (*model.User, error) {
-	return s.service.ByBasicAuth(ctx, username, password)
-}
-
 // List implements the Service interface for logging.
-func (s *loggingService) List(ctx context.Context) ([]*model.User, error) {
+func (s *loggingService) List(ctx context.Context) ([]*model.Mod, error) {
 	start := time.Now()
 	records, err := s.service.List(ctx)
 
@@ -46,7 +41,7 @@ func (s *loggingService) List(ctx context.Context) ([]*model.User, error) {
 	if err != nil {
 		logger.Error().
 			Err(err).
-			Msg("Failed to find all users")
+			Msg("Failed to find all mods")
 	} else {
 		logger.Debug().
 			Msg("")
@@ -56,7 +51,7 @@ func (s *loggingService) List(ctx context.Context) ([]*model.User, error) {
 }
 
 // Show implements the Service interface for logging.
-func (s *loggingService) Show(ctx context.Context, name string) (*model.User, error) {
+func (s *loggingService) Show(ctx context.Context, name string) (*model.Mod, error) {
 	start := time.Now()
 	record, err := s.service.Show(ctx, name)
 
@@ -70,7 +65,7 @@ func (s *loggingService) Show(ctx context.Context, name string) (*model.User, er
 	if err != nil && err != ErrNotFound {
 		logger.Error().
 			Err(err).
-			Msg("Failed to find user by name")
+			Msg("Failed to find mod by name")
 	} else {
 		logger.Debug().
 			Msg("")
@@ -80,9 +75,9 @@ func (s *loggingService) Show(ctx context.Context, name string) (*model.User, er
 }
 
 // Create implements the Service interface for logging.
-func (s *loggingService) Create(ctx context.Context, user *model.User) (*model.User, error) {
+func (s *loggingService) Create(ctx context.Context, mod *model.Mod) (*model.Mod, error) {
 	start := time.Now()
-	record, err := s.service.Create(ctx, user)
+	record, err := s.service.Create(ctx, mod)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
@@ -94,7 +89,7 @@ func (s *loggingService) Create(ctx context.Context, user *model.User) (*model.U
 	if err != nil {
 		logger.Error().
 			Err(err).
-			Msg("Failed to create user")
+			Msg("Failed to create mod")
 	} else {
 		logger.Debug().
 			Msg("")
@@ -104,9 +99,9 @@ func (s *loggingService) Create(ctx context.Context, user *model.User) (*model.U
 }
 
 // Update implements the Service interface for logging.
-func (s *loggingService) Update(ctx context.Context, user *model.User) (*model.User, error) {
+func (s *loggingService) Update(ctx context.Context, mod *model.Mod) (*model.Mod, error) {
 	start := time.Now()
-	record, err := s.service.Update(ctx, user)
+	record, err := s.service.Update(ctx, mod)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
@@ -118,7 +113,7 @@ func (s *loggingService) Update(ctx context.Context, user *model.User) (*model.U
 	if err != nil && err != ErrNotFound {
 		logger.Error().
 			Err(err).
-			Msg("Failed to update user")
+			Msg("Failed to update mod")
 	} else {
 		logger.Debug().
 			Msg("")
@@ -142,7 +137,7 @@ func (s *loggingService) Delete(ctx context.Context, name string) error {
 	if err != nil && err != ErrNotFound {
 		logger.Error().
 			Err(err).
-			Msg("Failed to delete user")
+			Msg("Failed to delete mod")
 	} else {
 		logger.Debug().
 			Msg("")
@@ -156,18 +151,9 @@ func (s *loggingService) Exists(ctx context.Context, name string) (bool, error) 
 	return s.service.Exists(ctx, name)
 }
 
-// External implements the Service interface for database persistence.
-func (s *loggingService) External(ctx context.Context, username, email, fullname string, admin bool) (*model.User, error) {
-	return s.service.External(ctx, username, email, fullname, admin)
-}
-
-func (s *loggingService) extractIdentifier(record *model.User) string {
+func (s *loggingService) extractIdentifier(record *model.Mod) string {
 	if record == nil {
 		return ""
-	}
-
-	if record.Username != "" {
-		return record.Username
 	}
 
 	if record.Slug != "" {

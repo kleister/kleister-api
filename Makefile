@@ -73,7 +73,6 @@ lint: $(REVIVE)
 
 .PHONY: generate
 generate: openapi mocks
-	go generate $(PACKAGES)
 
 .PHONY: openapi
 openapi: $(SWAGGER)
@@ -82,15 +81,37 @@ openapi: $(SWAGGER)
 .PHONY: mocks
 mocks: \
 	pkg/upload/mock.go pkg/store/mock.go \
+	pkg/service/minecraft/mock.go \
+	pkg/service/forge/mock.go \
+	pkg/service/neoforge/mock.go \
+	pkg/service/quilt/mock.go \
+	pkg/service/fabric/mock.go \
 	pkg/service/teams/mock.go \
 	pkg/service/users/mock.go \
-	pkg/service/members/mock.go
+	pkg/service/members/mock.go \
+	pkg/service/mods/mock.go \
+	pkg/service/packs/mock.go
 
 pkg/upload/mock.go: pkg/upload/upload.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package upload
 
 pkg/store/mock.go: pkg/store/store.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package store
+
+pkg/service/minecraft/mock.go: pkg/service/minecraft/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package minecraft
+
+pkg/service/forge/mock.go: pkg/service/forge/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package forge
+
+pkg/service/neoforge/mock.go: pkg/service/neoforge/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package neoforge
+
+pkg/service/quilt/mock.go: pkg/service/quilt/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package quilt
+
+pkg/service/fabric/mock.go: pkg/service/fabric/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package fabric
 
 pkg/service/teams/mock.go: pkg/service/teams/service.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package teams
@@ -100,6 +121,12 @@ pkg/service/users/mock.go: pkg/service/users/service.go $(MOCKGEN)
 
 pkg/service/members/mock.go: pkg/service/members/service.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package members
+
+pkg/service/mods/mock.go: pkg/service/mods/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package mods
+
+pkg/service/packs/mock.go: pkg/service/packs/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package packs
 
 .PHONY: changelog
 changelog: $(CALENS)

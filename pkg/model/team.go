@@ -15,6 +15,8 @@ type Team struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Users     []*Member
+	Mods      []*TeamMod
+	Packs     []*TeamPack
 }
 
 // BeforeSave defines the hook executed before every save.

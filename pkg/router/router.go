@@ -19,7 +19,9 @@ import (
 	"github.com/kleister/kleister-api/pkg/service/forge"
 	"github.com/kleister/kleister-api/pkg/service/members"
 	"github.com/kleister/kleister-api/pkg/service/minecraft"
+	"github.com/kleister/kleister-api/pkg/service/mods"
 	"github.com/kleister/kleister-api/pkg/service/neoforge"
+	"github.com/kleister/kleister-api/pkg/service/packs"
 	"github.com/kleister/kleister-api/pkg/service/quilt"
 	"github.com/kleister/kleister-api/pkg/service/teams"
 	"github.com/kleister/kleister-api/pkg/service/users"
@@ -46,6 +48,8 @@ func Server(
 	teamsService teams.Service,
 	usersService users.Service,
 	membersService members.Service,
+	modsService mods.Service,
+	packsService packs.Service,
 ) *chi.Mux {
 	mux := chi.NewRouter()
 
@@ -160,6 +164,8 @@ func Server(
 						teamsService,
 						usersService,
 						membersService,
+						packsService,
+						modsService,
 					),
 					make([]v1.StrictMiddlewareFunc, 0),
 				),
