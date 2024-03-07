@@ -21,12 +21,14 @@ var (
 // Service handles all interactions with minecraft.
 type Service interface {
 	Search(context.Context, string) ([]*model.Minecraft, error)
+	Show(context.Context, string) (*model.Minecraft, error)
 	Update(context.Context) error
 }
 
 // Store defines the functions to persist records.
 type Store interface {
 	Search(context.Context, string) ([]*model.Minecraft, error)
+	Show(context.Context, string) (*model.Minecraft, error)
 	Sync(context.Context, version.Versions) error
 }
 
@@ -44,6 +46,11 @@ func NewService(minecraft Store) Service {
 // Search implements the Service interface.
 func (s *service) Search(ctx context.Context, search string) ([]*model.Minecraft, error) {
 	return s.minecraft.Search(ctx, search)
+}
+
+// Search implements the Service interface.
+func (s *service) Show(ctx context.Context, id string) (*model.Minecraft, error) {
+	return s.minecraft.Show(ctx, id)
 }
 
 // Update implements the Service interface.

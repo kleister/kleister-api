@@ -2,6 +2,7 @@ package quilt
 
 import (
 	"context"
+	"errors"
 
 	quiltClient "github.com/kleister/kleister-api/pkg/internal/quilt"
 	"github.com/kleister/kleister-api/pkg/model"
@@ -39,6 +40,27 @@ func (s *GormService) Search(ctx context.Context, search string) ([]*model.Quilt
 	}
 
 	return records, nil
+}
+
+// Show implements the Service interface for database persistence.
+func (s *GormService) Show(ctx context.Context, name string) (*model.Quilt, error) {
+	record := &model.Quilt{}
+
+	err := s.query(ctx).Where(
+		"id = ?",
+		name,
+	).Or(
+		"name = ?",
+		name,
+	).First(
+		record,
+	).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return record, ErrNotFound
+	}
+
+	return record, err
 }
 
 // Sync implements the Store interface for database persistence.

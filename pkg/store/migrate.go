@@ -428,8 +428,8 @@ var (
 				type Version struct {
 					ID        string `gorm:"primaryKey;length:20"`
 					ModID     string `gorm:"index;length:20"`
-					Slug      string `gorm:"length:255"`
 					Name      string `gorm:"length:255"`
+					Public    bool   `default:"true"`
 					CreatedAt time.Time
 					UpdatedAt time.Time
 				}
@@ -833,17 +833,17 @@ var (
 			Migrate: func(tx *gorm.DB) error {
 				type Build struct {
 					ID          string `gorm:"primaryKey;length:20"`
-					Slug        string `gorm:"unique;length:255"`
+					PackID      string `gorm:"index;length:20"`
 					Name        string `gorm:"unique;length:255"`
 					MinecraftID string `gorm:"index;length:20"`
 					ForgeID     string `gorm:"index;length:20"`
 					NeoforgeID  string `gorm:"index;length:20"`
 					QuiltID     string `gorm:"index;length:20"`
 					FabricID    string `gorm:"index;length:20"`
+					Java        string `gorm:"length:255"`
+					Memory      string `gorm:"length:255"`
+					Public      bool   `gorm:"default:true"`
 					Website     string
-					Recommended bool `gorm:"default:false"`
-					Published   bool `gorm:"default:true"`
-					Private     bool `gorm:"default:false"`
 					CreatedAt   time.Time
 					UpdatedAt   time.Time
 				}

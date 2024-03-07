@@ -2,6 +2,7 @@ package neoforge
 
 import (
 	"context"
+	"errors"
 
 	neoforgeClient "github.com/kleister/kleister-api/pkg/internal/neoforge"
 	"github.com/kleister/kleister-api/pkg/model"
@@ -39,6 +40,27 @@ func (s *GormService) Search(ctx context.Context, search string) ([]*model.Neofo
 	}
 
 	return records, nil
+}
+
+// Show implements the Service interface for database persistence.
+func (s *GormService) Show(ctx context.Context, name string) (*model.Neoforge, error) {
+	record := &model.Neoforge{}
+
+	err := s.query(ctx).Where(
+		"id = ?",
+		name,
+	).Or(
+		"name = ?",
+		name,
+	).First(
+		record,
+	).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return record, ErrNotFound
+	}
+
+	return record, err
 }
 
 // Sync implements the Store interface for database persistence.

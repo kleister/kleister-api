@@ -51,6 +51,21 @@ func (mr *MockServiceMockRecorder) Search(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockService)(nil).Search), arg0, arg1)
 }
 
+// Show mocks base method.
+func (m *MockService) Show(arg0 context.Context, arg1 string) (*model.Neoforge, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Show", arg0, arg1)
+	ret0, _ := ret[0].(*model.Neoforge)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Show indicates an expected call of Show.
+func (mr *MockServiceMockRecorder) Show(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Show", reflect.TypeOf((*MockService)(nil).Show), arg0, arg1)
+}
+
 // Update mocks base method.
 func (m *MockService) Update(arg0 context.Context) error {
 	m.ctrl.T.Helper()
@@ -101,6 +116,21 @@ func (m *MockStore) Search(arg0 context.Context, arg1 string) ([]*model.Neoforge
 func (mr *MockStoreMockRecorder) Search(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockStore)(nil).Search), arg0, arg1)
+}
+
+// Show mocks base method.
+func (m *MockStore) Show(arg0 context.Context, arg1 string) (*model.Neoforge, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Show", arg0, arg1)
+	ret0, _ := ret[0].(*model.Neoforge)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Show indicates an expected call of Show.
+func (mr *MockStoreMockRecorder) Show(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Show", reflect.TypeOf((*MockStore)(nil).Show), arg0, arg1)
 }
 
 // Sync mocks base method.

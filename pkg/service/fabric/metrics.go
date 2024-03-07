@@ -2,6 +2,7 @@ package fabric
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/kleister/kleister-api/pkg/metrics"
@@ -71,6 +72,22 @@ func (s *metricsService) Search(ctx context.Context, search string) ([]*model.Fa
 	}
 
 	return records, err
+}
+
+// Show implements the Service interface for metrics.
+func (s *metricsService) Show(ctx context.Context, id string) (*model.Fabric, error) {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("show").Add(1)
+		s.requestLatency.WithLabelValues("show").Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	record, err := s.service.Show(ctx, id)
+
+	if err != nil && !errors.Is(err, ErrNotFound) {
+		s.errorsCount.WithLabelValues("show").Add(1)
+	}
+
+	return record, err
 }
 
 // Update implements the Service interface for metrics.

@@ -4,6 +4,6 @@
 .pre-commit-config.yaml
 coverage.out
 
-/storage
 /bin
 /dist
+/storage

@@ -2,6 +2,7 @@ package forge
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kleister/go-forge/version"
 	"github.com/kleister/kleister-api/pkg/model"
@@ -42,6 +43,27 @@ func (s *GormService) Search(ctx context.Context, search string) ([]*model.Forge
 	}
 
 	return records, nil
+}
+
+// Show implements the Service interface for database persistence.
+func (s *GormService) Show(ctx context.Context, name string) (*model.Forge, error) {
+	record := &model.Forge{}
+
+	err := s.query(ctx).Where(
+		"id = ?",
+		name,
+	).Or(
+		"name = ?",
+		name,
+	).First(
+		record,
+	).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return record, ErrNotFound
+	}
+
+	return record, err
 }
 
 // Sync implements the Store interface for database persistence.

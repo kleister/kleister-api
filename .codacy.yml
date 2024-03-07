@@ -2,10 +2,8 @@
 exclude_paths:
   - .github/**
   - .bingo/**
+
   - changelog/**
-
-  - proto/README.md
-
   - CHANGELOG.md
 
 ...

@@ -10,7 +10,7 @@ import (
 
 // User within Kleister.
 type User struct {
-	ID        string `storm:"id" gorm:"primaryKey;length:20"`
+	ID        string `gorm:"primaryKey;length:20"`
 	Username  string `gorm:"unique;length:255"`
 	Password  string `gorm:"-"`
 	Hashword  string `gorm:"lenght:255"`

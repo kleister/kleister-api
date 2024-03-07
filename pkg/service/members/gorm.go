@@ -132,8 +132,6 @@ func (s *GormService) Permit(ctx context.Context, teamID, userID, perm string) e
 	).Begin()
 	defer tx.Rollback()
 
-	fmt.Println(perm)
-
 	record := &model.Member{}
 	record.Perm = perm
 

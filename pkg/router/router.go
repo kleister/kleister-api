@@ -15,6 +15,8 @@ import (
 	"github.com/kleister/kleister-api/pkg/middleware/header"
 	"github.com/kleister/kleister-api/pkg/middleware/requestid"
 	"github.com/kleister/kleister-api/pkg/respond"
+	buildVersions "github.com/kleister/kleister-api/pkg/service/build_versions"
+	"github.com/kleister/kleister-api/pkg/service/builds"
 	"github.com/kleister/kleister-api/pkg/service/fabric"
 	"github.com/kleister/kleister-api/pkg/service/forge"
 	"github.com/kleister/kleister-api/pkg/service/members"
@@ -23,10 +25,14 @@ import (
 	"github.com/kleister/kleister-api/pkg/service/neoforge"
 	"github.com/kleister/kleister-api/pkg/service/packs"
 	"github.com/kleister/kleister-api/pkg/service/quilt"
+	teamMods "github.com/kleister/kleister-api/pkg/service/team_mods"
+	teamPacks "github.com/kleister/kleister-api/pkg/service/team_packs"
 	"github.com/kleister/kleister-api/pkg/service/teams"
+	userMods "github.com/kleister/kleister-api/pkg/service/user_mods"
+	userPacks "github.com/kleister/kleister-api/pkg/service/user_packs"
 	"github.com/kleister/kleister-api/pkg/service/users"
+	"github.com/kleister/kleister-api/pkg/service/versions"
 	"github.com/kleister/kleister-api/pkg/session"
-	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/kleister/kleister-api/pkg/upload"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
@@ -49,7 +55,14 @@ func Server(
 	usersService users.Service,
 	membersService members.Service,
 	modsService mods.Service,
+	userModsService userMods.Service,
+	teamModsService teamMods.Service,
+	versionsService versions.Service,
 	packsService packs.Service,
+	userPacksService userPacks.Service,
+	teamPacksService teamPacks.Service,
+	buildsService builds.Service,
+	buildVersionsService buildVersions.Service,
 ) *chi.Mux {
 	mux := chi.NewRouter()
 
@@ -164,8 +177,15 @@ func Server(
 						teamsService,
 						usersService,
 						membersService,
-						packsService,
 						modsService,
+						userModsService,
+						teamModsService,
+						versionsService,
+						packsService,
+						userPacksService,
+						teamPacksService,
+						buildsService,
+						buildVersionsService,
 					),
 					make([]v1.StrictMiddlewareFunc, 0),
 				),

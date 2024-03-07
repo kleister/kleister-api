@@ -21,12 +21,14 @@ var (
 // Service handles all interactions with forge.
 type Service interface {
 	Search(context.Context, string) ([]*model.Forge, error)
+	Show(context.Context, string) (*model.Forge, error)
 	Update(context.Context) error
 }
 
 // Store defines the functions to persist records.
 type Store interface {
 	Search(context.Context, string) ([]*model.Forge, error)
+	Show(context.Context, string) (*model.Forge, error)
 	Sync(context.Context, version.Versions) error
 }
 
@@ -44,6 +46,11 @@ func NewService(forge Store) Service {
 // Search implements the Service interface.
 func (s *service) Search(ctx context.Context, search string) ([]*model.Forge, error) {
 	return s.forge.Search(ctx, search)
+}
+
+// Search implements the Service interface.
+func (s *service) Show(ctx context.Context, id string) (*model.Forge, error) {
+	return s.forge.Show(ctx, id)
 }
 
 // Update implements the Service interface.

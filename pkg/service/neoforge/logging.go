@@ -50,6 +50,30 @@ func (s *loggingService) Search(ctx context.Context, search string) ([]*model.Ne
 	return records, err
 }
 
+// Show implements the Service interface for logging.
+func (s *loggingService) Show(ctx context.Context, name string) (*model.Neoforge, error) {
+	start := time.Now()
+	record, err := s.service.Show(ctx, name)
+
+	logger := s.logger.With().
+		Str("request", s.requestID(ctx)).
+		Str("method", "show").
+		Dur("duration", time.Since(start)).
+		Str("name", name).
+		Logger()
+
+	if err != nil && err != ErrNotFound {
+		logger.Error().
+			Err(err).
+			Msg("Failed to find neoforge by name")
+	} else {
+		logger.Debug().
+			Msg("")
+	}
+
+	return record, err
+}
+
 // Update implements the Service interface for logging.
 func (s *loggingService) Update(ctx context.Context) error {
 	start := time.Now()

@@ -201,19 +201,23 @@ func (s *GormService) uniqueValueIsPresent(ctx context.Context, key, id string) 
 	return func(value interface{}) error {
 		val, _ := value.(string)
 
-		res := s.handle.WithContext(
+		q := s.handle.WithContext(
 			ctx,
 		).Where(
 			fmt.Sprintf("%s = ?", key),
 			val,
-		).Not(
-			"id = ?",
-			id,
-		).Find(
-			&model.Team{},
 		)
 
-		if res.RowsAffected != 0 {
+		if id != "" {
+			q = q.Not(
+				"id = ?",
+				id,
+			)
+		}
+
+		if q.Find(
+			&model.Team{},
+		).RowsAffected != 0 {
 			return errors.New("is already taken")
 		}
 

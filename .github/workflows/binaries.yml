@@ -29,7 +29,7 @@ jobs:
         id: golang
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.19.0
+          go-version: ^1.21.7
 
       - name: Run release
         id: release

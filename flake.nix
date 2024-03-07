@@ -110,6 +110,9 @@
                 KLEISTER_API_LOG_LEVEL = "debug";
                 KLEISTER_API_SERVER_PPROF = "true";
 
+                # KLEISTER_API_SERVER_CERT = ".devenv/state/mkcert/localhost+1.pem";
+                # KLEISTER_API_SERVER_KEY = ".devenv/state/mkcert/localhost+1-key.pem";
+
                 KLEISTER_API_DATABASE_DRIVER = "sqlite3";
                 KLEISTER_API_DATABASE_NAME = "storage/kleister.sqlite3";
 
@@ -136,9 +139,6 @@
                 # KLEISTER_API_UPLOAD_REGION = "us-east-1";
                 # KLEISTER_API_UPLOAD_ACCESS = "9VKV3OI56N1077Y9IALV";
                 # KLEISTER_API_UPLOAD_SECRET = "bwcRkW5w6uF6BWBqotsnMbwZSIDKQopy9DSo90ab";
-
-                # KLEISTER_API_SERVER_CERT = ".devenv/state/mkcert/localhost+1.pem";
-                # KLEISTER_API_SERVER_KEY = ".devenv/state/mkcert/localhost+1-key.pem";
 
                 KLEISTER_API_AUTH_CONFIG = "config/auth.yml";
                 KLEISTER_API_ADMIN_USERS = "tboerger";

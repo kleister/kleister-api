@@ -21,12 +21,14 @@ var (
 // Service handles all interactions with quilt.
 type Service interface {
 	Search(context.Context, string) ([]*model.Quilt, error)
+	Show(context.Context, string) (*model.Quilt, error)
 	Update(context.Context) error
 }
 
 // Store defines the functions to persist records.
 type Store interface {
 	Search(context.Context, string) ([]*model.Quilt, error)
+	Show(context.Context, string) (*model.Quilt, error)
 	Sync(context.Context, quiltClient.Versions) error
 }
 
@@ -44,6 +46,11 @@ func NewService(quilt Store) Service {
 // Search implements the Service interface.
 func (s *service) Search(ctx context.Context, search string) ([]*model.Quilt, error) {
 	return s.quilt.Search(ctx, search)
+}
+
+// Search implements the Service interface.
+func (s *service) Show(ctx context.Context, id string) (*model.Quilt, error) {
+	return s.quilt.Show(ctx, id)
 }
 
 // Update implements the Service interface.

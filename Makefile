@@ -86,11 +86,18 @@ mocks: \
 	pkg/service/neoforge/mock.go \
 	pkg/service/quilt/mock.go \
 	pkg/service/fabric/mock.go \
-	pkg/service/teams/mock.go \
-	pkg/service/users/mock.go \
 	pkg/service/members/mock.go \
+	pkg/service/teams/mock.go \
+	pkg/service/team_mods/mock.go \
+	pkg/service/team_packs/mock.go \
+	pkg/service/users/mock.go \
+	pkg/service/user_mods/mock.go \
+	pkg/service/user_packs/mock.go \
 	pkg/service/mods/mock.go \
-	pkg/service/packs/mock.go
+	pkg/service/versions/mock.go \
+	pkg/service/packs/mock.go \
+	pkg/service/builds/mock.go \
+	pkg/service/build_versions/mock.go
 
 pkg/upload/mock.go: pkg/upload/upload.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package upload
@@ -113,20 +120,41 @@ pkg/service/quilt/mock.go: pkg/service/quilt/service.go $(MOCKGEN)
 pkg/service/fabric/mock.go: pkg/service/fabric/service.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package fabric
 
+pkg/service/members/mock.go: pkg/service/members/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package members
+
 pkg/service/teams/mock.go: pkg/service/teams/service.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package teams
+
+pkg/service/team_mods/mock.go: pkg/service/team_mods/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package teamMods
+
+pkg/service/team_packs/mock.go: pkg/service/team_packs/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package teamPacks
 
 pkg/service/users/mock.go: pkg/service/users/service.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package users
 
-pkg/service/members/mock.go: pkg/service/members/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package members
+pkg/service/user_mods/mock.go: pkg/service/user_mods/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package userMods
+
+pkg/service/user_packs/mock.go: pkg/service/user_packs/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package userPacks
 
 pkg/service/mods/mock.go: pkg/service/mods/service.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package mods
 
+pkg/service/versions/mock.go: pkg/service/versions/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package versions
+
 pkg/service/packs/mock.go: pkg/service/packs/service.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package packs
+
+pkg/service/builds/mock.go: pkg/service/builds/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package builds
+
+pkg/service/build_versions/mock.go: pkg/service/build_versions/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package buildVersions
 
 .PHONY: changelog
 changelog: $(CALENS)

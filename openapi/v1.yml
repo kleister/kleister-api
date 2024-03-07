@@ -405,7 +405,7 @@ paths:
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/definitions/validation_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -601,7 +601,7 @@ paths:
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/definitions/validation_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -797,7 +797,7 @@ paths:
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/definitions/validation_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -993,7 +993,7 @@ paths:
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/definitions/validation_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:
@@ -1188,7 +1188,7 @@ paths:
         422:
           description: "Failed to validate request"
           schema:
-            $ref: "#/definitions/validation_error"
+            $ref: "#/definitions/general_error"
         default:
           description: "Some error unrelated to the handler"
           schema:

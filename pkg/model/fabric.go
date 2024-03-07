@@ -9,10 +9,11 @@ import (
 
 // Fabric within Kleister.
 type Fabric struct {
-	ID        string `storm:"id" gorm:"primaryKey;length:20"`
-	Name      string `storm:"unique" gorm:"unique;length:255"`
+	ID        string `gorm:"primaryKey;length:20"`
+	Name      string `gorm:"unique;length:255"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Builds    []*Build
 }
 
 // BeforeCreate defines the hook executed before every create.

@@ -13,6 +13,8 @@ import (
 	"github.com/kleister/kleister-api/pkg/providers"
 	"github.com/kleister/kleister-api/pkg/router"
 	"github.com/kleister/kleister-api/pkg/secret"
+	buildVersions "github.com/kleister/kleister-api/pkg/service/build_versions"
+	"github.com/kleister/kleister-api/pkg/service/builds"
 	"github.com/kleister/kleister-api/pkg/service/fabric"
 	"github.com/kleister/kleister-api/pkg/service/forge"
 	"github.com/kleister/kleister-api/pkg/service/members"
@@ -21,8 +23,13 @@ import (
 	"github.com/kleister/kleister-api/pkg/service/neoforge"
 	"github.com/kleister/kleister-api/pkg/service/packs"
 	"github.com/kleister/kleister-api/pkg/service/quilt"
+	teamMods "github.com/kleister/kleister-api/pkg/service/team_mods"
+	teamPacks "github.com/kleister/kleister-api/pkg/service/team_packs"
 	"github.com/kleister/kleister-api/pkg/service/teams"
+	userMods "github.com/kleister/kleister-api/pkg/service/user_mods"
+	userPacks "github.com/kleister/kleister-api/pkg/service/user_packs"
 	"github.com/kleister/kleister-api/pkg/service/users"
+	"github.com/kleister/kleister-api/pkg/service/versions"
 	"github.com/kleister/kleister-api/pkg/session"
 	"github.com/oklog/run"
 	"github.com/rs/zerolog/log"
@@ -479,11 +486,103 @@ func serverAction(_ *cobra.Command, _ []string) {
 			registry,
 		)
 
+		userModsService := userMods.NewMetricsService(
+			userMods.NewLoggingService(
+				userMods.NewService(
+					userMods.NewGormService(
+						storage.Handle(),
+						usersService,
+						modsService,
+					),
+				),
+				requestid.Get,
+			),
+			metricz,
+		)
+
+		teamModsService := teamMods.NewMetricsService(
+			teamMods.NewLoggingService(
+				teamMods.NewService(
+					teamMods.NewGormService(
+						storage.Handle(),
+						teamsService,
+						modsService,
+					),
+				),
+				requestid.Get,
+			),
+			metricz,
+		)
+
+		versionsService := versions.NewMetricsService(
+			versions.NewLoggingService(
+				versions.NewService(
+					versions.NewGormService(
+						storage.Handle(),
+					),
+				),
+				requestid.Get,
+			),
+			metricz,
+		)
+
 		packsService := packs.NewMetricsService(
 			packs.NewLoggingService(
 				packs.NewService(
 					packs.NewGormService(
 						storage.Handle(),
+					),
+				),
+			),
+			registry,
+		)
+
+		userPacksService := userPacks.NewMetricsService(
+			userPacks.NewLoggingService(
+				userPacks.NewService(
+					userPacks.NewGormService(
+						storage.Handle(),
+						usersService,
+						packsService,
+					),
+				),
+			),
+			registry,
+		)
+
+		teamPacksService := teamPacks.NewMetricsService(
+			teamPacks.NewLoggingService(
+				teamPacks.NewService(
+					teamPacks.NewGormService(
+						storage.Handle(),
+						teamsService,
+						packsService,
+					),
+				),
+			),
+			registry,
+		)
+
+		buildsService := builds.NewMetricsService(
+			builds.NewLoggingService(
+				builds.NewService(
+					builds.NewGormService(
+						storage.Handle(),
+					),
+				),
+			),
+			registry,
+		)
+
+		buildVersionsService := buildVersions.NewMetricsService(
+			buildVersions.NewLoggingService(
+				buildVersions.NewService(
+					buildVersions.NewGormService(
+						storage.Handle(),
+						packsService,
+						buildsService,
+						modsService,
+						versionsService,
 					),
 				),
 			),
@@ -508,6 +607,10 @@ func serverAction(_ *cobra.Command, _ []string) {
 				membersService,
 				modsService,
 				packsService,
+				userPacksService,
+				teamPacksService,
+				buildsService,
+				buildVersionsService,
 			),
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,

@@ -21,12 +21,14 @@ var (
 // Service handles all interactions with neoforge.
 type Service interface {
 	Search(context.Context, string) ([]*model.Neoforge, error)
+	Show(context.Context, string) (*model.Neoforge, error)
 	Update(context.Context) error
 }
 
 // Store defines the functions to persist records.
 type Store interface {
 	Search(context.Context, string) ([]*model.Neoforge, error)
+	Show(context.Context, string) (*model.Neoforge, error)
 	Sync(context.Context, neoforgeClient.Versions) error
 }
 
@@ -44,6 +46,11 @@ func NewService(neoforge Store) Service {
 // Search implements the Service interface.
 func (s *service) Search(ctx context.Context, search string) ([]*model.Neoforge, error) {
 	return s.neoforge.Search(ctx, search)
+}
+
+// Search implements the Service interface.
+func (s *service) Show(ctx context.Context, id string) (*model.Neoforge, error) {
+	return s.neoforge.Show(ctx, id)
 }
 
 // Update implements the Service interface.
