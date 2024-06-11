@@ -87,7 +87,7 @@ func (a *API) CreateMod(ctx context.Context, request CreateModRequestObject) (Cr
 	}
 
 	if request.Body.Side != nil {
-		record.Side = string(ModSide(FromPtr(request.Body.Side)))
+		record.Side = FromPtr(request.Body.Side)
 	}
 
 	if request.Body.Description != nil {
@@ -179,7 +179,7 @@ func (a *API) UpdateMod(ctx context.Context, request UpdateModRequestObject) (Up
 	}
 
 	if request.Body.Side != nil {
-		record.Side = string(ModSide(FromPtr(request.Body.Side)))
+		record.Side = FromPtr(request.Body.Side)
 	}
 
 	if request.Body.Description != nil {
@@ -763,7 +763,7 @@ func (a *API) convertMod(record *model.Mod) Mod {
 		Id:          ToPtr(record.ID),
 		Slug:        ToPtr(record.Slug),
 		Name:        ToPtr(record.Name),
-		Side:        ToPtr(ModSide(record.Side)),
+		Side:        ToPtr(record.Side),
 		Description: ToPtr(record.Description),
 		Author:      ToPtr(record.Author),
 		Website:     ToPtr(record.Website),

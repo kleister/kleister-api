@@ -7278,10 +7278,6 @@ components:
           x-nullable: true
         side:
           type: "string"
-          enum:
-            - "both"
-            - "server"
-            - "client"
           x-omitempty: true
           x-nullable: true
         description:
