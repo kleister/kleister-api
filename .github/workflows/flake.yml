@@ -36,7 +36,7 @@ jobs:
 
       - name: Update flake
         id: flake
-        uses: DeterminateSystems/update-flake-lock@v21
+        uses: DeterminateSystems/update-flake-lock@v22
         with:
           commit-msg: "chore(flake): updated lockfile"
           pr-title: "chore: automated flake update"
