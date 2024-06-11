@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/secret"
-	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/kleister/kleister-api/pkg/validate"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -16,23 +17,103 @@ import (
 
 // GormService defines the service to store content within a database based on Gorm.
 type GormService struct {
-	handle *gorm.DB
+	handle    *gorm.DB
+	config    *config.Config
+	principal *model.User
 }
 
 // NewGormService initializes the service to store content within a database based on Gorm.
-func NewGormService(handle *gorm.DB) *GormService {
+func NewGormService(
+	handle *gorm.DB,
+	cfg *config.Config,
+) *GormService {
 	return &GormService{
 		handle: handle,
+		config: cfg,
 	}
 }
 
-// ByBasicAuth implements the Service interface for database persistence.
-func (s *GormService) ByBasicAuth(ctx context.Context, username, password string) (*model.User, error) {
+// WithPrincipal implements the Service interface for database persistence.
+func (s *GormService) WithPrincipal(principal *model.User) Service {
+	s.principal = principal
+	return s
+}
+
+// External implements the Service interface for database persistence.
+func (s *GormService) External(ctx context.Context, provider, ref, username, email, fullname string) (*model.User, error) {
+	tx := s.handle.WithContext(
+		ctx,
+	).Begin()
+	defer tx.Rollback()
+
+	record := &model.UserAuth{}
+
+	if err := tx.Where(
+		&model.UserAuth{
+			Provider: provider,
+			Ref:      ref,
+		},
+	).Preload(
+		"User",
+	).First(
+		record,
+	).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+
+	if record.Provider == "" {
+		record.Provider = provider
+	}
+
+	if record.Ref == "" {
+		record.Ref = ref
+	}
+
+	if record.User == nil {
+		record.User = &model.User{}
+	}
+
+	record.User.Email = email
+	record.User.Fullname = fullname
+
+	if record.User.ID == "" {
+		record.User.Username = username
+		record.User.Password = secret.Generate(32)
+		record.User.Active = true
+		record.User.Admin = s.checkAdmin(email) || s.checkAdmin(username)
+
+		if err := tx.Create(record).Error; err != nil {
+			return nil, err
+		}
+
+		if err := tx.Commit().Error; err != nil {
+			return nil, err
+		}
+	} else {
+		record.User.Admin = s.checkAdmin(email) || s.checkAdmin(username)
+
+		if err := tx.Save(record).Error; err != nil {
+			return nil, err
+		}
+
+		if err := tx.Commit().Error; err != nil {
+			return nil, err
+		}
+	}
+
+	return record.User, nil
+}
+
+// AuthByID implements the Service interface for database persistence.
+func (s *GormService) AuthByID(ctx context.Context, userID string) (*model.User, error) {
+	return s.Show(ctx, userID)
+}
+
+// AuthByCreds implements the Service interface.
+func (s *GormService) AuthByCreds(ctx context.Context, username, password string) (*model.User, error) {
 	record := &model.User{}
 
-	if err := s.handle.WithContext(
-		ctx,
-	).Where(
+	err := s.query(ctx).Where(
 		"username = ?",
 		username,
 	).Or(
@@ -40,46 +121,107 @@ func (s *GormService) ByBasicAuth(ctx context.Context, username, password string
 		username,
 	).First(
 		record,
-	).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, ErrNotFound
+	).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return record, ErrNotFound
 		}
 
-		return nil, err
+		return record, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword(
 		[]byte(record.Hashword),
 		[]byte(password),
 	); err != nil {
-		return nil, ErrWrongAuth
+		return nil, ErrWrongCredentials
 	}
 
 	return record, nil
 }
 
 // List implements the Service interface for database persistence.
-func (s *GormService) List(ctx context.Context) ([]*model.User, error) {
+func (s *GormService) List(ctx context.Context, params model.ListParams) ([]*model.User, int64, error) {
+	counter := int64(0)
 	records := make([]*model.User, 0)
+	q := s.query(ctx)
 
-	if err := s.query(ctx).Find(
-		&records,
-	).Error; err != nil {
-		return nil, err
+	if val, ok := s.validSort(params.Sort); ok {
+		q = q.Order(strings.Join(
+			[]string{
+				val,
+				sortOrder(params.Order),
+			},
+			" ",
+		))
 	}
 
-	return records, nil
+	// if params.Search != "" {
+	// 	opts := queryparser.Options{
+	// 		CutFn: searchCut,
+	// 		Allowed: []string{
+	// 			"username",
+	// 			"email",
+	// 			"fullname",
+	// 		},
+	// 	}
+
+	// 	parser := queryparser.New(
+	// 		params.Search,
+	// 		opts,
+	// 	).Parse()
+
+	// 	for _, name := range opts.Allowed {
+	// 		if parser.Has(name) {
+
+	// 			q = q.Where(
+	// 				fmt.Sprintf(
+	// 					"%s LIKE ?",
+	// 					name,
+	// 				),
+	// 				strings.ReplaceAll(
+	// 					parser.GetOne(name),
+	// 					"*",
+	// 					"%",
+	// 				),
+	// 			)
+	// 		}
+	// 	}
+	// }
+
+	if err := q.Count(
+		&counter,
+	).Error; err != nil {
+		return nil, counter, err
+	}
+
+	if params.Limit > 0 {
+		q = q.Limit(params.Limit)
+	}
+
+	if params.Offset > 0 {
+		q = q.Offset(params.Offset)
+	}
+
+	if err := q.Find(
+		&records,
+	).Error; err != nil {
+		return nil, counter, err
+	}
+
+	return records, counter, nil
 }
 
 // Show implements the Service interface for database persistence.
 func (s *GormService) Show(ctx context.Context, name string) (*model.User, error) {
 	record := &model.User{}
 
-	err := s.query(ctx).Where(
+	err := s.query(ctx).Debug().Where(
 		"id = ?",
 		name,
 	).Or(
-		"slug = ?",
+		"username = ?",
 		name,
 	).First(
 		record,
@@ -93,63 +235,39 @@ func (s *GormService) Show(ctx context.Context, name string) (*model.User, error
 }
 
 // Create implements the Service interface for database persistence.
-func (s *GormService) Create(ctx context.Context, user *model.User) (*model.User, error) {
+func (s *GormService) Create(ctx context.Context, record *model.User) error {
 	tx := s.handle.WithContext(
 		ctx,
 	).Begin()
 	defer tx.Rollback()
 
-	if user.Slug == "" {
-		user.Slug = store.Slugify(
-			tx.Model(&model.User{}),
-			user.Username,
-			"",
-		)
+	if err := s.validate(ctx, record, false); err != nil {
+		return err
 	}
 
-	if err := s.validate(ctx, user, false); err != nil {
-		return nil, err
+	if err := tx.Create(record).Error; err != nil {
+		return err
 	}
 
-	if err := tx.Create(user).Error; err != nil {
-		return nil, err
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return nil, err
-	}
-
-	return user, nil
+	return tx.Commit().Error
 }
 
 // Update implements the Service interface for database persistence.
-func (s *GormService) Update(ctx context.Context, user *model.User) (*model.User, error) {
+func (s *GormService) Update(ctx context.Context, record *model.User) error {
 	tx := s.handle.WithContext(
 		ctx,
 	).Begin()
 	defer tx.Rollback()
 
-	if user.Slug == "" {
-		user.Slug = store.Slugify(
-			tx.Model(&model.User{}),
-			user.Username,
-			user.ID,
-		)
+	if err := s.validate(ctx, record, true); err != nil {
+		return err
 	}
 
-	if err := s.validate(ctx, user, true); err != nil {
-		return nil, err
+	if err := tx.Save(record).Error; err != nil {
+		return err
 	}
 
-	if err := tx.Save(user).Error; err != nil {
-		return nil, err
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return nil, err
-	}
-
-	return user, nil
+	return tx.Commit().Error
 }
 
 // Delete implements the Service interface for database persistence.
@@ -163,7 +281,7 @@ func (s *GormService) Delete(ctx context.Context, name string) error {
 		"id = ?",
 		name,
 	).Or(
-		"slug = ?",
+		"username = ?",
 		name,
 	).Delete(
 		&model.User{},
@@ -180,7 +298,7 @@ func (s *GormService) Exists(ctx context.Context, name string) (bool, error) {
 		"id = ?",
 		name,
 	).Or(
-		"slug = ?",
+		"username = ?",
 		name,
 	).Find(
 		&model.User{},
@@ -197,84 +315,32 @@ func (s *GormService) Exists(ctx context.Context, name string) (bool, error) {
 	return res.RowsAffected > 0, nil
 }
 
-// External implements the Service interface for database persistence.
-func (s *GormService) External(ctx context.Context, username, email, fullname string, admin bool) (*model.User, error) {
-	tx := s.handle.WithContext(
+// Column implements the Service interface for database persistence.
+func (s *GormService) Column(ctx context.Context, name, col string, val any) error {
+	if err := s.handle.WithContext(
 		ctx,
-	).Begin()
-	defer tx.Rollback()
+	).Table(
+		"users",
+	).Where(
+		"id = ? OR name = ?",
+		name,
+		name,
+	).Update(
+		col,
+		val,
+	).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrNotFound
+		}
 
-	record := &model.User{}
-
-	if err := tx.Where(
-		&model.User{
-			Username: username,
-		},
-	).First(
-		record,
-	).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
+		return err
 	}
 
-	record.Username = username
-	record.Email = email
-	record.Fullname = fullname
-
-	if record.ID == "" {
-		if record.Slug == "" {
-			record.Slug = store.Slugify(
-				tx.Model(&model.User{}),
-				record.Username,
-				"",
-			)
-		}
-
-		record.Password = secret.Generate(32)
-		record.Active = true
-		record.Admin = admin
-
-		if err := tx.Create(record).Error; err != nil {
-			return nil, err
-		}
-
-		if err := tx.Commit().Error; err != nil {
-			return nil, err
-		}
-	} else {
-		if record.Slug == "" {
-			record.Slug = store.Slugify(
-				tx.Model(&model.User{}),
-				record.Username,
-				record.ID,
-			)
-		}
-
-		if err := tx.Save(record).Error; err != nil {
-			return nil, err
-		}
-
-		if err := tx.Commit().Error; err != nil {
-			return nil, err
-		}
-	}
-
-	return record, nil
+	return nil
 }
 
 func (s *GormService) validate(ctx context.Context, record *model.User, _ bool) error {
 	errs := validate.Errors{}
-
-	if err := validation.Validate(
-		record.Slug,
-		validation.Required,
-		validation.Length(3, 255),
-		validation.By(s.uniqueValueIsPresent(ctx, "slug", record.ID)),
-	); err != nil {
-		errs.Errors = append(errs.Errors, validate.Error{
-			Field: "slug",
-			Error: err,
-		})
-	}
 
 	if err := validation.Validate(
 		record.Username,
@@ -326,13 +392,45 @@ func (s *GormService) uniqueValueIsPresent(ctx context.Context, key, id string) 
 func (s *GormService) query(ctx context.Context) *gorm.DB {
 	return s.handle.WithContext(
 		ctx,
-	).Order(
-		"username ASC",
 	).Model(
 		&model.User{},
+	).Preload(
+		"Auths",
 	).Preload(
 		"Teams",
 	).Preload(
 		"Teams.Team",
 	)
+}
+
+func (s *GormService) validSort(val string) (string, bool) {
+	if val == "" {
+		return "username", true
+	}
+
+	val = strings.ToLower(val)
+
+	for _, name := range []string{
+		"username",
+		"email",
+		"fullname",
+		"admin",
+		"active",
+	} {
+		if val == name {
+			return val, true
+		}
+	}
+
+	return "username", true
+}
+
+func (s *GormService) checkAdmin(val string) bool {
+	for _, admin := range s.config.Admin.Users {
+		if val == admin {
+			return true
+		}
+	}
+
+	return false
 }

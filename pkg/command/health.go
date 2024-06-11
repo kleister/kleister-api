@@ -55,5 +55,5 @@ func healthAction(_ *cobra.Command, _ []string) {
 
 	log.Debug().
 		Int("code", resp.StatusCode).
-		Msg("Health got a good state")
+		Msg("Health check seems to be fine")
 }

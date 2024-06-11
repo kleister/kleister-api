@@ -1,1 +1,1 @@
-package buildVersions
+package buildversions

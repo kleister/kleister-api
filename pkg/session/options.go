@@ -13,6 +13,7 @@ type Option func(o *Options)
 type Options struct {
 	Store    scs.Store
 	Lifetime time.Duration
+	Name     string
 	Path     string
 	Secure   bool
 }
@@ -39,6 +40,13 @@ func WithStore(v scs.Store) Option {
 func WithLifetime(v time.Duration) Option {
 	return func(o *Options) {
 		o.Lifetime = v
+	}
+}
+
+// WithName provides a function to set the secure option.
+func WithName(v string) Option {
+	return func(o *Options) {
+		o.Name = v
 	}
 }
 

@@ -6,11 +6,11 @@ import (
 
 // TeamMod within Kleister.
 type TeamMod struct {
-	TeamID    string `gorm:"index:idx_id,unique;length:20"`
+	TeamID    string `gorm:"primaryKey;autoIncrement:false;length:20"`
 	Team      *Team
-	ModID     string `gorm:"index:idx_id,unique;length:20"`
+	ModID     string `gorm:"primaryKey;autoIncrement:false;length:20"`
 	Mod       *Mod
-	Perm      string
+	Perm      string `gorm:"length:64"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

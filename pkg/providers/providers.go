@@ -3,7 +3,7 @@ package providers
 import (
 	"fmt"
 
-	"github.com/gopad/gopad-api/pkg/config"
+	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/azureadv2"
 	"github.com/markbates/goth/providers/gitea"
@@ -11,6 +11,7 @@ import (
 	"github.com/markbates/goth/providers/gitlab"
 	"github.com/markbates/goth/providers/google"
 	"github.com/markbates/goth/providers/openidConnect"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
@@ -133,6 +134,12 @@ func Register(opts ...Option) error {
 }
 
 func githubProvider(cfg config.AuthProvider) (*github.Provider, error) {
+	log.Info().
+		Str("service", "provider").
+		Str("provider", "github").
+		Str("name", cfg.Name).
+		Msg("Registering auth provider")
+
 	authEndpoint := "https://github.com/login/oauth/authorize"
 	if cfg.Endpoints.Auth != "" {
 		authEndpoint = cfg.Endpoints.Auth
@@ -179,6 +186,12 @@ func githubProvider(cfg config.AuthProvider) (*github.Provider, error) {
 }
 
 func giteaProvider(cfg config.AuthProvider) (*gitea.Provider, error) {
+	log.Info().
+		Str("service", "provider").
+		Str("provider", "gitea").
+		Str("name", cfg.Name).
+		Msg("Registering auth provider")
+
 	authEndpoint := "https://gitea.com/login/oauth/authorize"
 	if cfg.Endpoints.Auth != "" {
 		authEndpoint = cfg.Endpoints.Auth
@@ -219,6 +232,12 @@ func giteaProvider(cfg config.AuthProvider) (*gitea.Provider, error) {
 }
 
 func gitlabProvider(cfg config.AuthProvider) (*gitlab.Provider, error) {
+	log.Info().
+		Str("service", "provider").
+		Str("provider", "gitlab").
+		Str("name", cfg.Name).
+		Msg("Registering auth provider")
+
 	authEndpoint := "https://gitlab.com/oauth/authorize"
 	if cfg.Endpoints.Auth != "" {
 		authEndpoint = cfg.Endpoints.Auth
@@ -259,6 +278,12 @@ func gitlabProvider(cfg config.AuthProvider) (*gitlab.Provider, error) {
 }
 
 func googleProvider(cfg config.AuthProvider) (*google.Provider, error) {
+	log.Info().
+		Str("service", "provider").
+		Str("provider", "google").
+		Str("name", cfg.Name).
+		Msg("Registering auth provider")
+
 	clientID, err := config.Value(cfg.ClientID)
 	if err != nil {
 		return nil, err
@@ -281,6 +306,12 @@ func googleProvider(cfg config.AuthProvider) (*google.Provider, error) {
 }
 
 func azureadProvider(cfg config.AuthProvider) (*azureadv2.Provider, error) {
+	log.Info().
+		Str("service", "provider").
+		Str("provider", "azuread").
+		Str("name", cfg.Name).
+		Msg("Registering auth provider")
+
 	clientID, err := config.Value(cfg.ClientID)
 	if err != nil {
 		return nil, err
@@ -315,6 +346,12 @@ func azureadProvider(cfg config.AuthProvider) (*azureadv2.Provider, error) {
 }
 
 func oidcProvider(cfg config.AuthProvider) (*openidConnect.Provider, error) {
+	log.Info().
+		Str("service", "provider").
+		Str("provider", "oidc").
+		Str("name", cfg.Name).
+		Msg("Registering auth provider")
+
 	if cfg.Endpoints.Discovery == "" {
 		return nil, ErrMissingDiscoveryEndpoint
 	}
@@ -360,11 +397,6 @@ func oidcProvider(cfg config.AuthProvider) (*openidConnect.Provider, error) {
 		}
 	}
 
-	if cfg.Mappings.Avatar != "" {
-		provider.AvatarURLClaims = []string{
-			cfg.Mappings.Avatar,
-		}
-	}
-
+	provider.SetName(cfg.Name)
 	return provider, nil
 }

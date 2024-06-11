@@ -1,7 +1,6 @@
 .direnv/
 .devenv/
 
-.pre-commit-config.yaml
 coverage.out
 
 /bin

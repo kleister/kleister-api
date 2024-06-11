@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"github.com/dchest/uniuri"
@@ -10,8 +11,8 @@ import (
 // Version within Kleister.
 type Version struct {
 	ID        string `gorm:"primaryKey;length:20"`
-	Mod       *Mod
 	ModID     string `gorm:"index;length:20"`
+	Mod       *Mod
 	Name      string `gorm:"unique;length:255"`
 	File      *VersionFile
 	Public    bool `gorm:"default:true"`
@@ -23,7 +24,7 @@ type Version struct {
 // BeforeSave defines the hook executed before every save.
 func (m *Version) BeforeSave(_ *gorm.DB) error {
 	if m.ID == "" {
-		m.ID = uniuri.NewLen(uniuri.UUIDLen)
+		m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
 	}
 
 	return nil

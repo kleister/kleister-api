@@ -1,4 +1,4 @@
-package buildVersions
+package buildversions
 
 import (
 	"context"
@@ -15,41 +15,47 @@ var (
 	ErrNotFound = errors.New("build or version not found")
 
 	// ErrAlreadyAssigned defines the error if a member is already assigned.
-	ErrAlreadyAssigned = errors.New("build version already exists")
+	ErrAlreadyAssigned = errors.New("is already attached")
 
 	// ErrNotAssigned defines the error if a member is not assigned.
-	ErrNotAssigned = errors.New("build version is not defined")
+	ErrNotAssigned = errors.New("is not attached")
 )
 
-// Service handles all interactions with buildVersions.
+// Service handles all interactions with buildversions.
 type Service interface {
-	List(context.Context, string, string, string, string) ([]*model.BuildVersion, error)
-	Attach(context.Context, string, string, string, string) error
-	Drop(context.Context, string, string, string, string) error
+	List(context.Context, model.BuildVersionParams) ([]*model.BuildVersion, int64, error)
+	Attach(context.Context, model.BuildVersionParams) error
+	Drop(context.Context, model.BuildVersionParams) error
+	WithPrincipal(*model.User) Service
 }
 
 type service struct {
-	buildVersions Service
+	buildversions Service
 }
 
-// NewService returns a Service that handles all interactions with buildVersions.
-func NewService(buildVersions Service) Service {
+// NewService returns a Service that handles all interactions with buildversions.
+func NewService(buildversions Service) Service {
 	return &service{
-		buildVersions: buildVersions,
+		buildversions: buildversions,
 	}
 }
 
+// WithPrincipal implements the Service interface.
+func (s *service) WithPrincipal(principal *model.User) Service {
+	return s.buildversions.WithPrincipal(principal)
+}
+
 // List implements the Service interface.
-func (s *service) List(ctx context.Context, packID, buildID, modID, versionID string) ([]*model.BuildVersion, error) {
-	return s.buildVersions.List(ctx, packID, buildID, modID, versionID)
+func (s *service) List(ctx context.Context, params model.BuildVersionParams) ([]*model.BuildVersion, int64, error) {
+	return s.buildversions.List(ctx, params)
 }
 
 // Attach implements the Service interface.
-func (s *service) Attach(ctx context.Context, packID, buildID, modID, versionID string) error {
-	return s.buildVersions.Attach(ctx, packID, buildID, modID, versionID)
+func (s *service) Attach(ctx context.Context, params model.BuildVersionParams) error {
+	return s.buildversions.Attach(ctx, params)
 }
 
 // Drop implements the Service interface.
-func (s *service) Drop(ctx context.Context, packID, buildID, modID, versionID string) error {
-	return s.buildVersions.Drop(ctx, packID, buildID, modID, versionID)
+func (s *service) Drop(ctx context.Context, params model.BuildVersionParams) error {
+	return s.buildversions.Drop(ctx, params)
 }

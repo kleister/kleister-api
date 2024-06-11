@@ -1,4 +1,4 @@
-package teamPacks
+package teampacks
 
 import (
 	"context"
@@ -21,41 +21,47 @@ var (
 	ErrNotAssigned = errors.New("team pack is not defined")
 )
 
-// Service handles all interactions with teamPacks.
+// Service handles all interactions with teampacks.
 type Service interface {
-	List(context.Context, string, string) ([]*model.TeamPack, error)
-	Attach(context.Context, string, string, string) error
-	Permit(context.Context, string, string, string) error
-	Drop(context.Context, string, string) error
+	List(context.Context, model.TeamPackParams) ([]*model.TeamPack, int64, error)
+	Attach(context.Context, model.TeamPackParams) error
+	Permit(context.Context, model.TeamPackParams) error
+	Drop(context.Context, model.TeamPackParams) error
+	WithPrincipal(*model.User) Service
 }
 
 type service struct {
-	teamPacks Service
+	teampacks Service
 }
 
-// NewService returns a Service that handles all interactions with teamPacks.
-func NewService(teamPacks Service) Service {
+// NewService returns a Service that handles all interactions with teampacks.
+func NewService(teampacks Service) Service {
 	return &service{
-		teamPacks: teamPacks,
+		teampacks: teampacks,
 	}
 }
 
+// WithPrincipal implements the Service interface.
+func (s *service) WithPrincipal(principal *model.User) Service {
+	return s.teampacks.WithPrincipal(principal)
+}
+
 // List implements the Service interface.
-func (s *service) List(ctx context.Context, teamID, packID string) ([]*model.TeamPack, error) {
-	return s.teamPacks.List(ctx, teamID, packID)
+func (s *service) List(ctx context.Context, params model.TeamPackParams) ([]*model.TeamPack, int64, error) {
+	return s.teampacks.List(ctx, params)
 }
 
 // Attach implements the Service interface.
-func (s *service) Attach(ctx context.Context, teamID, packID, perm string) error {
-	return s.teamPacks.Attach(ctx, teamID, packID, perm)
+func (s *service) Attach(ctx context.Context, params model.TeamPackParams) error {
+	return s.teampacks.Attach(ctx, params)
 }
 
 // Permit implements the Service interface.
-func (s *service) Permit(ctx context.Context, teamID, packID, perm string) error {
-	return s.teamPacks.Permit(ctx, teamID, packID, perm)
+func (s *service) Permit(ctx context.Context, params model.TeamPackParams) error {
+	return s.teampacks.Permit(ctx, params)
 }
 
 // Drop implements the Service interface.
-func (s *service) Drop(ctx context.Context, teamID, packID string) error {
-	return s.teamPacks.Drop(ctx, teamID, packID)
+func (s *service) Drop(ctx context.Context, params model.TeamPackParams) error {
+	return s.teampacks.Drop(ctx, params)
 }

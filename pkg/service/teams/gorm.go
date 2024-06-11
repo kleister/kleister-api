@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/kleister/kleister-api/pkg/validate"
@@ -14,27 +16,97 @@ import (
 
 // GormService defines the service to store content within a database based on Gorm.
 type GormService struct {
-	handle *gorm.DB
+	handle    *gorm.DB
+	config    *config.Config
+	principal *model.User
 }
 
 // NewGormService initializes the service to store content within a database based on Gorm.
-func NewGormService(handle *gorm.DB) *GormService {
+func NewGormService(
+	handle *gorm.DB,
+	cfg *config.Config,
+) *GormService {
 	return &GormService{
 		handle: handle,
+		config: cfg,
 	}
 }
 
-// List implements the Service interface for database persistence.
-func (s *GormService) List(ctx context.Context) ([]*model.Team, error) {
-	records := make([]*model.Team, 0)
+// WithPrincipal implements the Service interface for database persistence.
+func (s *GormService) WithPrincipal(principal *model.User) Service {
+	s.principal = principal
+	return s
+}
 
-	if err := s.query(ctx).Find(
-		&records,
-	).Error; err != nil {
-		return nil, err
+// List implements the Service interface for database persistence.
+func (s *GormService) List(ctx context.Context, params model.ListParams) ([]*model.Team, int64, error) {
+	counter := int64(0)
+	records := make([]*model.Team, 0)
+	q := s.query(ctx)
+
+	if val, ok := s.validSort(params.Sort); ok {
+		q = q.Order(strings.Join(
+			[]string{
+				val,
+				sortOrder(params.Order),
+			},
+			" ",
+		))
 	}
 
-	return records, nil
+	// if params.Search != "" {
+	// 	opts := queryparser.Options{
+	// 		CutFn: searchCut,
+	// 		Allowed: []string{
+	// 			"slug",
+	// 			"name",
+	// 		},
+	// 	}
+
+	// 	parser := queryparser.New(
+	// 		params.Search,
+	// 		opts,
+	// 	).Parse()
+
+	// 	for _, name := range opts.Allowed {
+	// 		if parser.Has(name) {
+
+	// 			q = q.Where(
+	// 				fmt.Sprintf(
+	// 					"%s LIKE ?",
+	// 					name,
+	// 				),
+	// 				strings.ReplaceAll(
+	// 					parser.GetOne(name),
+	// 					"*",
+	// 					"%",
+	// 				),
+	// 			)
+	// 		}
+	// 	}
+	// }
+
+	if err := q.Count(
+		&counter,
+	).Error; err != nil {
+		return nil, counter, err
+	}
+
+	if params.Limit > 0 {
+		q = q.Limit(params.Limit)
+	}
+
+	if params.Offset > 0 {
+		q = q.Offset(params.Offset)
+	}
+
+	if err := q.Find(
+		&records,
+	).Error; err != nil {
+		return nil, counter, err
+	}
+
+	return records, counter, nil
 }
 
 // Show implements the Service interface for database persistence.
@@ -59,63 +131,65 @@ func (s *GormService) Show(ctx context.Context, name string) (*model.Team, error
 }
 
 // Create implements the Service interface for database persistence.
-func (s *GormService) Create(ctx context.Context, team *model.Team) (*model.Team, error) {
+func (s *GormService) Create(ctx context.Context, record *model.Team) error {
 	tx := s.handle.WithContext(
 		ctx,
 	).Begin()
 	defer tx.Rollback()
 
-	if team.Slug == "" {
-		team.Slug = store.Slugify(
+	if record.Slug == "" {
+		record.Slug = store.Slugify(
 			tx.Model(&model.Team{}),
-			team.Name,
+			record.Name,
 			"",
+			false,
 		)
 	}
 
-	if err := s.validate(ctx, team, false); err != nil {
-		return nil, err
+	if err := s.validate(ctx, record, false); err != nil {
+		return err
 	}
 
-	if err := tx.Create(team).Error; err != nil {
-		return nil, err
+	if err := tx.Create(record).Error; err != nil {
+		return err
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return nil, err
+	if err := tx.Create(&model.UserTeam{
+		TeamID: record.ID,
+		UserID: s.principal.ID,
+		Perm:   "owner",
+	}).Error; err != nil {
+		return err
 	}
 
-	return team, nil
+	return tx.Commit().Error
 }
 
 // Update implements the Service interface for database persistence.
-func (s *GormService) Update(ctx context.Context, team *model.Team) (*model.Team, error) {
+func (s *GormService) Update(ctx context.Context, record *model.Team) error {
 	tx := s.handle.WithContext(
 		ctx,
 	).Begin()
 	defer tx.Rollback()
 
-	if team.Slug == "" {
-		team.Slug = store.Slugify(
+	if record.Slug == "" {
+		record.Slug = store.Slugify(
 			tx.Model(&model.Team{}),
-			team.Name,
-			team.ID,
+			record.Name,
+			"",
+			false,
 		)
 	}
 
-	if err := s.validate(ctx, team, true); err != nil {
-		return nil, err
+	if err := s.validate(ctx, record, true); err != nil {
+		return err
 	}
 
-	if err := tx.Save(team).Error; err != nil {
-		return nil, err
+	if err := tx.Save(record).Error; err != nil {
+		return err
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return nil, err
-	}
-
-	return team, nil
+	return tx.Commit().Error
 }
 
 // Delete implements the Service interface for database persistence.
@@ -163,6 +237,30 @@ func (s *GormService) Exists(ctx context.Context, name string) (bool, error) {
 	return res.RowsAffected > 0, nil
 }
 
+// Column implements the Service interface for database persistence.
+func (s *GormService) Column(ctx context.Context, name, col string, val any) error {
+	if err := s.handle.WithContext(
+		ctx,
+	).Table(
+		"builds",
+	).Where(
+		"id = ? OR name = ?",
+		name,
+		name,
+	).Update(
+		col,
+		val,
+	).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrNotFound
+		}
+
+		return err
+	}
+
+	return nil
+}
+
 func (s *GormService) validate(ctx context.Context, record *model.Team, _ bool) error {
 	errs := validate.Errors{}
 
@@ -182,7 +280,6 @@ func (s *GormService) validate(ctx context.Context, record *model.Team, _ bool) 
 		record.Name,
 		validation.Required,
 		validation.Length(3, 255),
-		validation.By(s.uniqueValueIsPresent(ctx, "name", record.ID)),
 	); err != nil {
 		errs.Errors = append(errs.Errors, validate.Error{
 			Field: "name",
@@ -228,8 +325,6 @@ func (s *GormService) uniqueValueIsPresent(ctx context.Context, key, id string) 
 func (s *GormService) query(ctx context.Context) *gorm.DB {
 	return s.handle.WithContext(
 		ctx,
-	).Order(
-		"name ASC",
 	).Model(
 		&model.Team{},
 	).Preload(
@@ -237,4 +332,23 @@ func (s *GormService) query(ctx context.Context) *gorm.DB {
 	).Preload(
 		"Users.User",
 	)
+}
+
+func (s *GormService) validSort(val string) (string, bool) {
+	if val == "" {
+		return "name", true
+	}
+
+	val = strings.ToLower(val)
+
+	for _, name := range []string{
+		"slug",
+		"name",
+	} {
+		if val == name {
+			return val, true
+		}
+	}
+
+	return "name", true
 }

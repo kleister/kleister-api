@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"github.com/dchest/uniuri"
@@ -12,7 +13,7 @@ type Mod struct {
 	ID          string `gorm:"primaryKey;length:20"`
 	Slug        string `gorm:"unique;length:255"`
 	Name        string `gorm:"unique;length:255"`
-	Side        string `gorm:"index;length:36"`
+	Side        string `gorm:"index;length:64"`
 	Description string
 	Author      string
 	Website     string
@@ -28,7 +29,7 @@ type Mod struct {
 // BeforeSave defines the hook executed before every save.
 func (m *Mod) BeforeSave(_ *gorm.DB) error {
 	if m.ID == "" {
-		m.ID = uniuri.NewLen(uniuri.UUIDLen)
+		m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
 	}
 
 	return nil

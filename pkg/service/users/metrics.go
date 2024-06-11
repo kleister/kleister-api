@@ -58,36 +58,41 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 	}
 }
 
-// ByBasicAuth implements the Service interface for metrics.
-func (s *metricsService) ByBasicAuth(ctx context.Context, username, password string) (*model.User, error) {
-	defer func(start time.Time) {
-		s.requestCount.WithLabelValues("byBasicAuth").Add(1)
-		s.requestLatency.WithLabelValues("byBasicAuth").Observe(time.Since(start).Seconds())
-	}(time.Now())
+// External implements the Service interface for metrics.
+func (s *metricsService) WithPrincipal(principal *model.User) Service {
+	s.service.WithPrincipal(principal)
+	return s
+}
 
-	record, err := s.service.ByBasicAuth(ctx, username, password)
+// External implements the Service interface for metrics.
+func (s *metricsService) External(ctx context.Context, provider, ref, username, email, fullname string) (*model.User, error) {
+	return s.service.External(ctx, provider, ref, username, email, fullname)
+}
 
-	if err != nil {
-		s.errorsCount.WithLabelValues("byBasicAuth").Add(1)
-	}
+// AuthByID implements the Service interface for metrics.
+func (s *metricsService) AuthByID(ctx context.Context, userID string) (*model.User, error) {
+	return s.service.AuthByID(ctx, userID)
+}
 
-	return record, err
+// AuthByCreds implements the Service interface.
+func (s *metricsService) AuthByCreds(ctx context.Context, username, password string) (*model.User, error) {
+	return s.service.AuthByCreds(ctx, username, password)
 }
 
 // List implements the Service interface for metrics.
-func (s *metricsService) List(ctx context.Context) ([]*model.User, error) {
+func (s *metricsService) List(ctx context.Context, params model.ListParams) ([]*model.User, int64, error) {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("list").Add(1)
 		s.requestLatency.WithLabelValues("list").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	records, err := s.service.List(ctx)
+	records, counter, err := s.service.List(ctx, params)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("list").Add(1)
 	}
 
-	return records, err
+	return records, counter, err
 }
 
 // Show implements the Service interface for metrics.
@@ -107,35 +112,35 @@ func (s *metricsService) Show(ctx context.Context, id string) (*model.User, erro
 }
 
 // Create implements the Service interface for metrics.
-func (s *metricsService) Create(ctx context.Context, user *model.User) (*model.User, error) {
+func (s *metricsService) Create(ctx context.Context, user *model.User) error {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("create").Add(1)
 		s.requestLatency.WithLabelValues("create").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	record, err := s.service.Create(ctx, user)
+	err := s.service.Create(ctx, user)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("create").Add(1)
 	}
 
-	return record, err
+	return err
 }
 
 // Update implements the Service interface for metrics.
-func (s *metricsService) Update(ctx context.Context, user *model.User) (*model.User, error) {
+func (s *metricsService) Update(ctx context.Context, user *model.User) error {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("update").Add(1)
 		s.requestLatency.WithLabelValues("update").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	record, err := s.service.Update(ctx, user)
+	err := s.service.Update(ctx, user)
 
 	if err != nil && !errors.Is(err, ErrNotFound) {
 		s.errorsCount.WithLabelValues("update").Add(1)
 	}
 
-	return record, err
+	return err
 }
 
 // Delete implements the Service interface for metrics.
@@ -154,12 +159,12 @@ func (s *metricsService) Delete(ctx context.Context, name string) error {
 	return err
 }
 
-// Exists implements the Service interface for logging.
+// Exists implements the Service interface for metrics.
 func (s *metricsService) Exists(ctx context.Context, name string) (bool, error) {
 	return s.service.Exists(ctx, name)
 }
 
-// External implements the Service interface for database persistence.
-func (s *metricsService) External(ctx context.Context, username, email, fullname string, admin bool) (*model.User, error) {
-	return s.service.External(ctx, username, email, fullname, admin)
+// Column implements the Service interface for metrics.
+func (s *metricsService) Column(ctx context.Context, name, col string, val any) error {
+	return s.service.Column(ctx, name, col, val)
 }

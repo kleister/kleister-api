@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/kleister/kleister-api/pkg/upload"
 	"github.com/rs/zerolog"
@@ -48,10 +49,9 @@ func setupConfig() {
 		viper.SetConfigFile(viper.GetString("config.file"))
 	} else {
 		viper.SetConfigName("api")
-
 		viper.AddConfigPath("/etc/kleister")
 		viper.AddConfigPath("$HOME/.kleister")
-		viper.AddConfigPath("./config")
+		viper.AddConfigPath(".")
 	}
 
 	viper.SetEnvPrefix("kleister_api")
@@ -65,9 +65,9 @@ func setupConfig() {
 	}
 
 	if err := viper.Unmarshal(cfg); err != nil {
-		log.Fatal().
+		log.Error().
 			Err(err).
-			Msg("Failed to parse config")
+			Msg("Failed to parse config file")
 	}
 }
 
@@ -89,7 +89,7 @@ func readConfig() error {
 	return err
 }
 
-func setupUploads() (upload.Upload, error) {
+func setupUploads(cfg *config.Config) (upload.Upload, error) {
 	switch cfg.Upload.Driver {
 	case "file":
 		return upload.NewFileUpload(cfg.Upload)
@@ -102,7 +102,7 @@ func setupUploads() (upload.Upload, error) {
 	return nil, upload.ErrUnknownDriver
 }
 
-func setupStorage() (store.Store, error) {
+func setupStorage(cfg *config.Config) (store.Store, error) {
 	switch cfg.Database.Driver {
 	case "sqlite", "sqlite3":
 		return store.NewGormStore(cfg.Database)

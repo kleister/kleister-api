@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	fabricClient "github.com/kleister/kleister-api/pkg/internal/fabric"
-	"github.com/kleister/kleister-api/pkg/middleware/requestid"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/rs/zerolog/log"
 )
@@ -16,61 +15,88 @@ var (
 
 	// ErrSyncUnavailable defines the error of the versions definition is unavailable.
 	ErrSyncUnavailable = errors.New("fabric version service is unavailable")
+
+	// ErrAlreadyAssigned defines the error if a build is already assigned.
+	ErrAlreadyAssigned = errors.New("is already attached")
+
+	// ErrNotAssigned defines the error if a build is not assigned.
+	ErrNotAssigned = errors.New("is not attached")
 )
 
 // Service handles all interactions with fabric.
 type Service interface {
-	Search(context.Context, string) ([]*model.Fabric, error)
-	Show(context.Context, string) (*model.Fabric, error)
-	Update(context.Context) error
-}
-
-// Store defines the functions to persist records.
-type Store interface {
-	Search(context.Context, string) ([]*model.Fabric, error)
+	List(context.Context, model.ListParams) ([]*model.Fabric, int64, error)
 	Show(context.Context, string) (*model.Fabric, error)
 	Sync(context.Context, fabricClient.Versions) error
+	ListBuilds(context.Context, model.FabricBuildParams) ([]*model.Build, int64, error)
+	AttachBuild(context.Context, model.FabricBuildParams) error
+	DropBuild(context.Context, model.FabricBuildParams) error
+	WithPrincipal(*model.User) Service
 }
 
 type service struct {
-	fabric Store
+	fabric Service
 }
 
 // NewService returns a Service that handles all interactions with fabric.
-func NewService(fabric Store) Service {
+func NewService(fabric Service) Service {
 	return &service{
 		fabric: fabric,
 	}
 }
 
-// Search implements the Service interface.
-func (s *service) Search(ctx context.Context, search string) ([]*model.Fabric, error) {
-	return s.fabric.Search(ctx, search)
+// WithPrincipal implements the Service interface.
+func (s *service) WithPrincipal(principal *model.User) Service {
+	return s.fabric.WithPrincipal(principal)
 }
 
-// Search implements the Service interface.
+// List implements the Service interface.
+func (s *service) List(ctx context.Context, params model.ListParams) ([]*model.Fabric, int64, error) {
+	return s.fabric.List(ctx, params)
+}
+
+// Show implements the Service interface.
 func (s *service) Show(ctx context.Context, id string) (*model.Fabric, error) {
 	return s.fabric.Show(ctx, id)
 }
 
-// Update implements the Service interface.
-func (s *service) Update(ctx context.Context) error {
+// Sync implements the Service interface.
+func (s *service) Sync(ctx context.Context, versions fabricClient.Versions) error {
+	return s.fabric.Sync(ctx, versions)
+}
+
+// ListBuilds implements the Service interface.
+func (s *service) ListBuilds(ctx context.Context, params model.FabricBuildParams) ([]*model.Build, int64, error) {
+	return s.fabric.ListBuilds(ctx, params)
+}
+
+// AttachBuild implements the Service interface.
+func (s *service) AttachBuild(ctx context.Context, params model.FabricBuildParams) error {
+	return s.fabric.AttachBuild(ctx, params)
+}
+
+// DropBuild implements the Service interface.
+func (s *service) DropBuild(ctx context.Context, params model.FabricBuildParams) error {
+	return s.fabric.DropBuild(ctx, params)
+}
+
+// FetchRemote is just a wrapper to get a syncable list of versions.
+func FetchRemote() (fabricClient.Versions, error) {
 	result, err := fabricClient.FromDefault()
 
 	if err != nil {
-		log.Debug().
-			Str("service", "fabric").
-			Str("request", requestid.Get(ctx)).
-			Str("method", "update").
+		log.Error().
 			Err(err).
-			Msg("failed to sync versions")
+			Str("service", "fabric").
+			Str("method", "fetch").
+			Msg("Failed to sync versions")
 
-		return ErrSyncUnavailable
+		return nil, ErrSyncUnavailable
 	}
 
 	fabricClient.ByVersion(
 		result.Versions,
 	).Sort()
 
-	return s.fabric.Sync(ctx, result.Versions)
+	return result.Versions, nil
 }

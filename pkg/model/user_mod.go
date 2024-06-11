@@ -6,11 +6,11 @@ import (
 
 // UserMod within Kleister.
 type UserMod struct {
-	UserID    string `gorm:"index:idx_id,unique;length:20"`
+	UserID    string `gorm:"primaryKey;autoIncrement:false;length:20"`
 	User      *User
-	ModID     string `gorm:"index:idx_id,unique;length:20"`
+	ModID     string `gorm:"primaryKey;autoIncrement:false;length:20"`
 	Mod       *Mod
-	Perm      string
+	Perm      string `gorm:"length:64"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

@@ -1,0 +1,19 @@
+{{- if gt (len .SecuritySchemeProviderNames) 0 }}
+
+// contextKey provides a type for use with context.WithValue.
+type contextKey string
+
+const (
+{{range $ProviderName := .SecuritySchemeProviderNames}}
+    {{- $ProviderName | sanitizeGoIdentity | ucFirst}}Scopes contextKey = "{{$ProviderName}}.Scopes"
+{{end}}
+)
+{{end}}
+{{range $Enum := .EnumDefinitions}}
+// Defines values for {{$Enum.TypeName}}.
+const (
+{{range $name, $value := $Enum.GetValues}}
+  {{$name}} {{$Enum.TypeName}} = {{$Enum.ValueWrapper}}{{$value}}{{$Enum.ValueWrapper -}}
+{{end}}
+)
+{{end}}

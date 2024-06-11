@@ -35,13 +35,26 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
 }
 
+// Column mocks base method.
+func (m *MockService) Column(arg0 context.Context, arg1, arg2 string, arg3 any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Column", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Column indicates an expected call of Column.
+func (mr *MockServiceMockRecorder) Column(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Column", reflect.TypeOf((*MockService)(nil).Column), arg0, arg1, arg2, arg3)
+}
+
 // Create mocks base method.
-func (m *MockService) Create(arg0 context.Context, arg1 *model.Team) (*model.Team, error) {
+func (m *MockService) Create(arg0 context.Context, arg1 *model.Team) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0, arg1)
-	ret0, _ := ret[0].(*model.Team)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Create indicates an expected call of Create.
@@ -80,18 +93,19 @@ func (mr *MockServiceMockRecorder) Exists(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // List mocks base method.
-func (m *MockService) List(arg0 context.Context) ([]*model.Team, error) {
+func (m *MockService) List(arg0 context.Context, arg1 model.ListParams) ([]*model.Team, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", arg0)
+	ret := m.ctrl.Call(m, "List", arg0, arg1)
 	ret0, _ := ret[0].([]*model.Team)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // List indicates an expected call of List.
-func (mr *MockServiceMockRecorder) List(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockService)(nil).List), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockService)(nil).List), arg0, arg1)
 }
 
 // Show mocks base method.
@@ -110,16 +124,29 @@ func (mr *MockServiceMockRecorder) Show(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockService) Update(arg0 context.Context, arg1 *model.Team) (*model.Team, error) {
+func (m *MockService) Update(arg0 context.Context, arg1 *model.Team) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0, arg1)
-	ret0, _ := ret[0].(*model.Team)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Update indicates an expected call of Update.
 func (mr *MockServiceMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockService)(nil).Update), arg0, arg1)
+}
+
+// WithPrincipal mocks base method.
+func (m *MockService) WithPrincipal(arg0 *model.User) Service {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithPrincipal", arg0)
+	ret0, _ := ret[0].(Service)
+	return ret0
+}
+
+// WithPrincipal indicates an expected call of WithPrincipal.
+func (mr *MockServiceMockRecorder) WithPrincipal(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithPrincipal", reflect.TypeOf((*MockService)(nil).WithPrincipal), arg0)
 }

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"github.com/dchest/uniuri"
@@ -21,7 +22,7 @@ type UserAuth struct {
 // BeforeSave defines the hook executed before every save.
 func (m *UserAuth) BeforeSave(_ *gorm.DB) error {
 	if m.ID == "" {
-		m.ID = uniuri.NewLen(uniuri.UUIDLen)
+		m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
 	}
 
 	return nil

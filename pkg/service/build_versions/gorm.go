@@ -1,9 +1,11 @@
-package buildVersions
+package buildversions
 
 import (
 	"context"
 	"errors"
+	"strings"
 
+	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/model"
 	buildsService "github.com/kleister/kleister-api/pkg/service/builds"
 	modsService "github.com/kleister/kleister-api/pkg/service/mods"
@@ -14,16 +16,19 @@ import (
 
 // GormService defines the service to store content within a database based on Gorm.
 type GormService struct {
-	handle   *gorm.DB
-	packs    packsService.Service
-	builds   buildsService.Service
-	mods     modsService.Service
-	versions versionsService.Service
+	handle    *gorm.DB
+	config    *config.Config
+	principal *model.User
+	packs     packsService.Service
+	builds    buildsService.Service
+	mods      modsService.Service
+	versions  versionsService.Service
 }
 
 // NewGormService initializes the service to store content within a database based on Gorm.
 func NewGormService(
 	handle *gorm.DB,
+	cfg *config.Config,
 	packs packsService.Service,
 	builds buildsService.Service,
 	mods modsService.Service,
@@ -31,6 +36,7 @@ func NewGormService(
 ) *GormService {
 	return &GormService{
 		handle:   handle,
+		config:   cfg,
 		packs:    packs,
 		builds:   builds,
 		mods:     mods,
@@ -38,74 +44,143 @@ func NewGormService(
 	}
 }
 
+// WithPrincipal implements the Service interface for database persistence.
+func (s *GormService) WithPrincipal(principal *model.User) Service {
+	s.principal = principal
+	return s
+}
+
 // List implements the Service interface for database persistence.
-func (s *GormService) List(ctx context.Context, packID, buildID, modID, versionID string) ([]*model.BuildVersion, error) {
+func (s *GormService) List(ctx context.Context, params model.BuildVersionParams) ([]*model.BuildVersion, int64, error) {
+	counter := int64(0)
+	records := make([]*model.BuildVersion, 0)
 	q := s.query(ctx)
 
 	switch {
-	case buildID != "" && versionID == "":
-		pack, err := s.packID(ctx, packID)
+	case params.BuildID != "" && params.VersionID == "":
+		pack, err := s.packID(ctx, params.PackID)
 		if err != nil {
-			return nil, err
+			return nil, counter, err
 		}
 
-		build, err := s.buildID(ctx, pack, buildID)
+		build, err := s.buildID(ctx, pack, params.BuildID)
 		if err != nil {
-			return nil, err
+			return nil, counter, err
 		}
 
 		q = q.Where(
 			"build_id = ?",
 			build,
 		)
-	case versionID != "" && buildID == "":
-		mod, err := s.modID(ctx, modID)
+
+		if val, ok := s.validBuildSort(params.Sort); ok {
+			q = q.Order(strings.Join(
+				[]string{
+					val,
+					sortOrder(params.Order),
+				},
+				" ",
+			))
+		}
+	case params.VersionID != "" && params.BuildID == "":
+		mod, err := s.modID(ctx, params.ModID)
 		if err != nil {
-			return nil, err
+			return nil, counter, err
 		}
 
-		version, err := s.versionID(ctx, mod, versionID)
+		version, err := s.versionID(ctx, mod, params.VersionID)
 		if err != nil {
-			return nil, err
+			return nil, counter, err
 		}
 
 		q = q.Where(
 			"version_id = ?",
 			version,
 		)
+
+		if val, ok := s.validVersionSort(params.Sort); ok {
+			q = q.Order(strings.Join(
+				[]string{
+					val,
+					sortOrder(params.Order),
+				},
+				" ",
+			))
+		}
 	default:
-		return nil, ErrInvalidListParams
+		return nil, counter, ErrInvalidListParams
 	}
 
-	records := make([]*model.BuildVersion, 0)
+	// if params.Search != "" {
+	// 	opts := queryparser.Options{
+	// 		CutFn: searchCut,
+	// 		Allowed: []string{},
+	// 	}
+
+	// 	parser := queryparser.New(
+	// 		params.Search,
+	// 		opts,
+	// 	).Parse()
+
+	// 	for _, name := range opts.Allowed {
+	// 		if parser.Has(name) {
+
+	// 			q = q.Where(
+	// 				fmt.Sprintf(
+	// 					"%s LIKE ?",
+	// 					name,
+	// 				),
+	// 				strings.ReplaceAll(
+	// 					parser.GetOne(name),
+	// 					"*",
+	// 					"%",
+	// 				),
+	// 			)
+	// 		}
+	// 	}
+	// }
+
+	if err := q.Count(
+		&counter,
+	).Error; err != nil {
+		return nil, counter, err
+	}
+
+	if params.Limit > 0 {
+		q = q.Limit(params.Limit)
+	}
+
+	if params.Offset > 0 {
+		q = q.Offset(params.Offset)
+	}
 
 	if err := q.Find(
 		&records,
 	).Error; err != nil {
-		return nil, err
+		return nil, counter, err
 	}
 
-	return records, nil
+	return records, counter, nil
 }
 
 // Attach implements the Service interface for database persistence.
-func (s *GormService) Attach(ctx context.Context, packID, buildID, modID, versionID string) error {
-	pack, err := s.packID(ctx, packID)
+func (s *GormService) Attach(ctx context.Context, params model.BuildVersionParams) error {
+	pack, err := s.packID(ctx, params.PackID)
 	if err != nil {
 		return err
 	}
 
-	build, err := s.buildID(ctx, pack, buildID)
+	build, err := s.buildID(ctx, pack, params.BuildID)
 	if err != nil {
 		return err
 	}
 
-	mod, err := s.modID(ctx, modID)
+	mod, err := s.modID(ctx, params.ModID)
 	if err != nil {
 		return err
 	}
 
-	version, err := s.versionID(ctx, mod, versionID)
+	version, err := s.versionID(ctx, mod, params.VersionID)
 	if err != nil {
 		return err
 	}
@@ -132,23 +207,23 @@ func (s *GormService) Attach(ctx context.Context, packID, buildID, modID, versio
 }
 
 // Drop implements the Service interface for database persistence.
-func (s *GormService) Drop(ctx context.Context, packID, buildID, modID, versionID string) error {
-	pack, err := s.packID(ctx, packID)
+func (s *GormService) Drop(ctx context.Context, params model.BuildVersionParams) error {
+	pack, err := s.packID(ctx, params.PackID)
 	if err != nil {
 		return err
 	}
 
-	build, err := s.buildID(ctx, pack, buildID)
+	build, err := s.buildID(ctx, pack, params.BuildID)
 	if err != nil {
 		return err
 	}
 
-	mod, err := s.modID(ctx, modID)
+	mod, err := s.modID(ctx, params.ModID)
 	if err != nil {
 		return err
 	}
 
-	version, err := s.versionID(ctx, mod, versionID)
+	version, err := s.versionID(ctx, mod, params.VersionID)
 	if err != nil {
 		return err
 	}
@@ -190,7 +265,10 @@ func (s *GormService) packID(ctx context.Context, id string) (string, error) {
 }
 
 func (s *GormService) buildID(ctx context.Context, packID, id string) (string, error) {
-	record, err := s.builds.Show(ctx, packID, id)
+	record, err := s.builds.Show(ctx, model.BuildParams{
+		PackID:  packID,
+		BuildID: id,
+	})
 
 	if err != nil {
 		if errors.Is(err, buildsService.ErrNotFound) {
@@ -218,7 +296,10 @@ func (s *GormService) modID(ctx context.Context, id string) (string, error) {
 }
 
 func (s *GormService) versionID(ctx context.Context, modID, id string) (string, error) {
-	record, err := s.versions.Show(ctx, modID, id)
+	record, err := s.versions.Show(ctx, model.VersionParams{
+		ModID:     modID,
+		VersionID: id,
+	})
 
 	if err != nil {
 		if errors.Is(err, versionsService.ErrNotFound) {
@@ -266,11 +347,49 @@ func (s *GormService) query(ctx context.Context) *gorm.DB {
 		&model.BuildVersion{},
 	).Preload(
 		"Build",
-	).Preload(
-		"Build.Pack",
+	).Joins(
+		"Build",
 	).Preload(
 		"Version",
-	).Preload(
-		"Version.Mod",
+	).Joins(
+		"Version",
 	)
+}
+
+func (s *GormService) validBuildSort(val string) (string, bool) {
+	if val == "" {
+		return "Build.name", true
+	}
+
+	val = strings.ToLower(val)
+
+	for key, name := range map[string]string{
+		"slug": "Build.slug",
+		"name": "Build.name",
+	} {
+		if val == key {
+			return name, true
+		}
+	}
+
+	return "Build.name", true
+}
+
+func (s *GormService) validVersionSort(val string) (string, bool) {
+	if val == "" {
+		return "Version.name", true
+	}
+
+	val = strings.ToLower(val)
+
+	for key, name := range map[string]string{
+		"slug": "Version.slug",
+		"name": "Version.name",
+	} {
+		if val == key {
+			return name, true
+		}
+	}
+
+	return "Version.name", true
 }

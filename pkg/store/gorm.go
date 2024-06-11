@@ -60,6 +60,10 @@ func (s *GormStore) Admin(username, password, email string) error {
 	admin.Active = true
 	admin.Admin = true
 
+	if admin.Fullname == "" {
+		admin.Fullname = "Admin"
+	}
+
 	tx := s.handle.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -68,10 +72,6 @@ func (s *GormStore) Admin(username, password, email string) error {
 	}()
 
 	if admin.ID == "" {
-		if admin.Fullname == "" {
-			admin.Fullname = "Admin"
-		}
-
 		if err := tx.Create(admin).Error; err != nil {
 			tx.Rollback()
 			return err
@@ -81,10 +81,6 @@ func (s *GormStore) Admin(username, password, email string) error {
 			return err
 		}
 	} else {
-		if admin.Fullname == "" {
-			admin.Fullname = "Admin"
-		}
-
 		if err := tx.Save(admin).Error; err != nil {
 			tx.Rollback()
 			return err

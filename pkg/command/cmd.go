@@ -10,12 +10,12 @@ import (
 var (
 	rootCmd = &cobra.Command{
 		Use:           "kleister-api",
-		Short:         "Manage mod packs for minecraft",
+		Short:         "Etherpad for markdown with go",
 		Version:       version.String,
 		SilenceErrors: false,
 		SilenceUsage:  true,
 
-		PersistentPreRunE: func(ccmd *cobra.Command, args []string) error {
+		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 			return setupLogger()
 		},
 
@@ -31,10 +31,10 @@ func init() {
 	cfg = config.Load()
 	cobra.OnInitialize(setupConfig)
 
-	rootCmd.PersistentFlags().BoolP("help", "h", false, "Show the help")
-	rootCmd.PersistentFlags().BoolP("version", "v", false, "Print the version")
+	rootCmd.PersistentFlags().BoolP("help", "h", false, "Show the help, so what you see now")
+	rootCmd.PersistentFlags().BoolP("version", "v", false, "Print the current version of that tool")
 
-	rootCmd.PersistentFlags().String("config-file", "", "Path to config file")
+	rootCmd.PersistentFlags().String("config-file", "", "Path to optional config file")
 	_ = viper.BindPFlag("config.file", rootCmd.PersistentFlags().Lookup("config-file"))
 
 	rootCmd.PersistentFlags().String("log-level", "info", "Set logging level")

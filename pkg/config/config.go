@@ -62,6 +62,7 @@ type Upload struct {
 
 // Session defines the session handle configuration.
 type Session struct {
+	Name   string        `mapstructure:"name"`
 	Secret string        `mapstructure:"secret"`
 	Expire time.Duration `mapstructure:"expire"`
 	Secure bool          `mapstructure:"secure"`

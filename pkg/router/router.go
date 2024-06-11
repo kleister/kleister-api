@@ -1,42 +1,50 @@
 package router
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"path"
+	"strings"
 	"time"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	apiv1 "github.com/kleister/kleister-api/pkg/api/v1"
-	restapiv1 "github.com/kleister/kleister-api/pkg/api/v1/restapi"
+	oamw "github.com/go-openapi/runtime/middleware"
+	v1 "github.com/kleister/kleister-api/pkg/api/v1"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/metrics"
+	"github.com/kleister/kleister-api/pkg/middleware/current"
 	"github.com/kleister/kleister-api/pkg/middleware/header"
-	"github.com/kleister/kleister-api/pkg/middleware/requestid"
+	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/respond"
-	buildVersions "github.com/kleister/kleister-api/pkg/service/build_versions"
+	buildversions "github.com/kleister/kleister-api/pkg/service/build_versions"
 	"github.com/kleister/kleister-api/pkg/service/builds"
 	"github.com/kleister/kleister-api/pkg/service/fabric"
 	"github.com/kleister/kleister-api/pkg/service/forge"
-	"github.com/kleister/kleister-api/pkg/service/members"
 	"github.com/kleister/kleister-api/pkg/service/minecraft"
 	"github.com/kleister/kleister-api/pkg/service/mods"
 	"github.com/kleister/kleister-api/pkg/service/neoforge"
 	"github.com/kleister/kleister-api/pkg/service/packs"
 	"github.com/kleister/kleister-api/pkg/service/quilt"
-	teamMods "github.com/kleister/kleister-api/pkg/service/team_mods"
-	teamPacks "github.com/kleister/kleister-api/pkg/service/team_packs"
+	teammods "github.com/kleister/kleister-api/pkg/service/team_mods"
+	teampacks "github.com/kleister/kleister-api/pkg/service/team_packs"
 	"github.com/kleister/kleister-api/pkg/service/teams"
-	userMods "github.com/kleister/kleister-api/pkg/service/user_mods"
-	userPacks "github.com/kleister/kleister-api/pkg/service/user_packs"
+	usermods "github.com/kleister/kleister-api/pkg/service/user_mods"
+	userpacks "github.com/kleister/kleister-api/pkg/service/user_packs"
+	userteams "github.com/kleister/kleister-api/pkg/service/user_teams"
 	"github.com/kleister/kleister-api/pkg/service/users"
 	"github.com/kleister/kleister-api/pkg/service/versions"
 	"github.com/kleister/kleister-api/pkg/session"
+	"github.com/kleister/kleister-api/pkg/store"
+	"github.com/kleister/kleister-api/pkg/token"
 	"github.com/kleister/kleister-api/pkg/upload"
+	cgmw "github.com/oapi-codegen/nethttp-middleware"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
-	doc "github.com/utahta/swagger-doc"
 )
 
 // Server initializes the routing of the server.
@@ -53,16 +61,16 @@ func Server(
 	fabricService fabric.Service,
 	teamsService teams.Service,
 	usersService users.Service,
-	membersService members.Service,
+	userteamsService userteams.Service,
 	modsService mods.Service,
-	userModsService userMods.Service,
-	teamModsService teamMods.Service,
+	usermodsService usermods.Service,
+	teammodsService teammods.Service,
 	versionsService versions.Service,
 	packsService packs.Service,
-	userPacksService userPacks.Service,
-	teamPacksService teamPacks.Service,
+	userpacksService userpacks.Service,
+	teampacksService teampacks.Service,
 	buildsService builds.Service,
-	buildVersionsService buildVersions.Service,
+	buildversionsService buildversions.Service,
 ) *chi.Mux {
 	mux := chi.NewRouter()
 
@@ -87,6 +95,7 @@ func Server(
 	mux.Use(header.Secure)
 	mux.Use(header.Options)
 	mux.Use(sess.Middleware)
+	mux.Use(current.Middleware)
 
 	mux.Route(cfg.Server.Root, func(root chi.Router) {
 		root.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -94,21 +103,17 @@ func Server(
 			respond.JSON(
 				w,
 				r,
-				[]string{
-					sessionz.Get(
+				map[string]string{
+					"user": sess.Get(
 						r.Context(),
 						"user",
-					),
-					sessionz.Get(
-						r.Context(),
-						"github",
 					),
 				},
 			)
 
 		})
 
-		root.Route("/api/v1", func(r chi.Router) {
+		root.Route("/api/v1", func(rapi chi.Router) {
 			swagger, err := v1.GetSwagger()
 
 			if err != nil {
@@ -128,7 +133,7 @@ func Server(
 				},
 			}
 
-			r.Get("/swagger", func(w http.ResponseWriter, _ *http.Request) {
+			rapi.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
 				respond.JSON(
 					w,
 					r,
@@ -136,7 +141,7 @@ func Server(
 				)
 			})
 
-			r.Handle("/docs", oamw.SwaggerUI(oamw.SwaggerUIOpts{
+			rapi.Handle("/docs", oamw.SwaggerUI(oamw.SwaggerUIOpts{
 				Path: path.Join(
 					cfg.Server.Root,
 					"api",
@@ -151,12 +156,179 @@ func Server(
 				),
 			}, nil))
 
-			r.With(cgmw.OapiRequestValidatorWithOptions(
+			rapi.With(cgmw.OapiRequestValidatorWithOptions(
 				swagger,
 				&cgmw.Options{
 					SilenceServersWarning: true,
 					Options: openapi3filter.Options{
-						AuthenticationFunc: func(_ context.Context, _ *openapi3filter.AuthenticationInput) error {
+						AuthenticationFunc: func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+							authenticating := &model.User{}
+							scheme := input.SecuritySchemeName
+							operation := input.RequestValidationInput.Route.Operation.OperationID
+
+							logger := log.With().
+								Str("scheme", scheme).
+								Str("operation", operation).
+								Logger()
+
+							switch scheme {
+							case "Cookie":
+								userID := sess.Get(
+									input.RequestValidationInput.Request.Context(),
+									"user",
+								)
+
+								if userID == "" {
+									return fmt.Errorf("no session cookie present")
+								}
+
+								user, err := usersService.AuthByID(
+									ctx,
+									userID,
+								)
+
+								if err != nil {
+									logger.Error().
+										Err(err).
+										Str("user", userID).
+										Msg("failed to find user")
+
+									return fmt.Errorf("failed to find user")
+								}
+
+								logger.Trace().
+									Str("user", userID).
+									Msg("authentication")
+
+								authenticating = user
+
+							case "Header":
+								header := input.RequestValidationInput.Request.Header.Get(
+									input.SecurityScheme.Name,
+								)
+
+								if header == "" {
+									return fmt.Errorf("missing authorization header")
+								}
+
+								t, err := token.Parse(
+									strings.TrimSpace(
+										header,
+									),
+									cfg.Session.Secret,
+								)
+
+								if err != nil {
+									return fmt.Errorf("failed to parse auth token")
+								}
+
+								user, err := usersService.AuthByID(
+									ctx,
+									t.Text,
+								)
+
+								if err != nil {
+									logger.Error().
+										Err(err).
+										Str("user", t.Text).
+										Msg("failed to find user")
+
+									return fmt.Errorf("failed to find user")
+								}
+
+								logger.Trace().
+									Str("user", t.Text).
+									Msg("authentication")
+
+								authenticating = user
+
+							case "Bearer":
+								header := input.RequestValidationInput.Request.Header.Get(
+									"Authorization",
+								)
+
+								if header == "" {
+									return fmt.Errorf("missing authorization header")
+								}
+
+								t, err := token.Parse(
+									strings.TrimSpace(
+										strings.Replace(
+											header,
+											"Bearer",
+											"",
+											1,
+										),
+									),
+									cfg.Session.Secret,
+								)
+
+								if err != nil {
+									return fmt.Errorf("failed to parse auth token")
+								}
+
+								user, err := usersService.AuthByID(
+									ctx,
+									t.Text,
+								)
+
+								if err != nil {
+									logger.Error().
+										Err(err).
+										Str("user", t.Text).
+										Msg("failed to find user")
+
+									return fmt.Errorf("failed to find user")
+								}
+
+								logger.Trace().
+									Str("user", t.Text).
+									Msg("authentication")
+
+								authenticating = user
+
+							case "Basic":
+								username, password, ok := input.RequestValidationInput.Request.BasicAuth()
+
+								if !ok {
+									return fmt.Errorf("missing basic credentials")
+								}
+
+								user, err := usersService.AuthByCreds(
+									ctx,
+									username,
+									password,
+								)
+
+								if err != nil {
+									logger.Error().
+										Err(err).
+										Str("user", username).
+										Msg("wrong credentials")
+
+									return fmt.Errorf("wrong credentials")
+								}
+
+								logger.Trace().
+									Str("user", username).
+									Msg("authentication")
+
+								authenticating = user
+
+							default:
+								return fmt.Errorf("unknown security scheme: %s", scheme)
+							}
+
+							log.Trace().
+								Str("username", authenticating.Username).
+								Str("operation", operation).
+								Msg("authenticated")
+
+							current.SetUser(
+								input.RequestValidationInput.Request.Context(),
+								authenticating,
+							)
+
 							return nil
 						},
 					},
@@ -176,22 +348,22 @@ func Server(
 						fabricService,
 						teamsService,
 						usersService,
-						membersService,
+						userteamsService,
 						modsService,
-						userModsService,
-						teamModsService,
+						usermodsService,
+						teammodsService,
 						versionsService,
 						packsService,
-						userPacksService,
-						teamPacksService,
+						userpacksService,
+						teampacksService,
 						buildsService,
-						buildVersionsService,
+						buildversionsService,
 					),
 					make([]v1.StrictMiddlewareFunc, 0),
 				),
 			))
 
-			r.Handle("/storage/*", uploads.Handler(
+			rapi.Handle("/storage/*", uploads.Handler(
 				path.Join(
 					cfg.Server.Root,
 					"api",
@@ -222,7 +394,7 @@ func Metrics(
 	mux.Route("/", func(root chi.Router) {
 		root.Get("/metrics", registry.Handler())
 
-		if cfg.Server.Pprof {
+		if cfg.Metrics.Pprof {
 			root.Mount("/debug", middleware.Profiler())
 		}
 

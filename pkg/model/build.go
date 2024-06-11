@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"github.com/dchest/uniuri"
@@ -10,7 +11,7 @@ import (
 // Build within Kleister.
 type Build struct {
 	ID          string `gorm:"primaryKey;length:20"`
-	PackID      string `gorm:"index:idx_id;length:20"`
+	PackID      string `gorm:"index;length:20"`
 	Pack        *Pack
 	Name        string  `gorm:"length:255"`
 	MinecraftID *string `gorm:"index:idx_id;length:20"`
@@ -25,6 +26,8 @@ type Build struct {
 	Fabric      *Fabric
 	Java        string `gorm:"length:255"`
 	Memory      string `gorm:"length:255"`
+	Latest      bool   `gorm:"default:false"`
+	Recommended bool   `gorm:"default:false"`
 	Public      bool   `gorm:"default:true"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
@@ -34,7 +37,7 @@ type Build struct {
 // BeforeSave defines the hook executed before every save.
 func (m *Build) BeforeSave(_ *gorm.DB) error {
 	if m.ID == "" {
-		m.ID = uniuri.NewLen(uniuri.UUIDLen)
+		m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
 	}
 
 	return nil

@@ -58,92 +58,98 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 	}
 }
 
+// External implements the Service interface for metrics.
+func (s *metricsService) WithPrincipal(principal *model.User) Service {
+	s.service.WithPrincipal(principal)
+	return s
+}
+
 // List implements the Service interface for metrics.
-func (s *metricsService) List(ctx context.Context, packID string) ([]*model.Build, error) {
+func (s *metricsService) List(ctx context.Context, params model.BuildParams) ([]*model.Build, int64, error) {
 	defer func(start time.Time) {
-		s.requestCount.WithLabelValues("list", packID).Add(1)
-		s.requestLatency.WithLabelValues("list", packID).Observe(time.Since(start).Seconds())
+		s.requestCount.WithLabelValues("list", params.PackID).Add(1)
+		s.requestLatency.WithLabelValues("list", params.PackID).Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	records, err := s.service.List(ctx, packID)
+	records, counter, err := s.service.List(ctx, params)
 
 	if err != nil {
-		s.errorsCount.WithLabelValues("list", packID).Add(1)
+		s.errorsCount.WithLabelValues("list", params.PackID).Add(1)
 	}
 
-	return records, err
+	return records, counter, err
 }
 
 // Show implements the Service interface for metrics.
-func (s *metricsService) Show(ctx context.Context, packID, id string) (*model.Build, error) {
+func (s *metricsService) Show(ctx context.Context, params model.BuildParams) (*model.Build, error) {
 	defer func(start time.Time) {
-		s.requestCount.WithLabelValues("show", packID).Add(1)
-		s.requestLatency.WithLabelValues("show", packID).Observe(time.Since(start).Seconds())
+		s.requestCount.WithLabelValues("show", params.PackID).Add(1)
+		s.requestLatency.WithLabelValues("show", params.PackID).Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	record, err := s.service.Show(ctx, packID, id)
+	record, err := s.service.Show(ctx, params)
 
 	if err != nil && !errors.Is(err, ErrNotFound) {
-		s.errorsCount.WithLabelValues("show", packID).Add(1)
+		s.errorsCount.WithLabelValues("show", params.PackID).Add(1)
 	}
 
 	return record, err
 }
 
 // Create implements the Service interface for metrics.
-func (s *metricsService) Create(ctx context.Context, packID string, build *model.Build) (*model.Build, error) {
+func (s *metricsService) Create(ctx context.Context, params model.BuildParams, build *model.Build) error {
 	defer func(start time.Time) {
-		s.requestCount.WithLabelValues("create", packID).Add(1)
-		s.requestLatency.WithLabelValues("create", packID).Observe(time.Since(start).Seconds())
+		s.requestCount.WithLabelValues("create", params.PackID).Add(1)
+		s.requestLatency.WithLabelValues("create", params.PackID).Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	record, err := s.service.Create(ctx, packID, build)
+	err := s.service.Create(ctx, params, build)
 
 	if err != nil {
-		s.errorsCount.WithLabelValues("create", packID).Add(1)
-	}
-
-	return record, err
-}
-
-// Update implements the Service interface for metrics.
-func (s *metricsService) Update(ctx context.Context, packID string, build *model.Build) (*model.Build, error) {
-	defer func(start time.Time) {
-		s.requestCount.WithLabelValues("update", packID).Add(1)
-		s.requestLatency.WithLabelValues("update", packID).Observe(time.Since(start).Seconds())
-	}(time.Now())
-
-	record, err := s.service.Update(ctx, packID, build)
-
-	if err != nil && !errors.Is(err, ErrNotFound) {
-		s.errorsCount.WithLabelValues("update", packID).Add(1)
-	}
-
-	return record, err
-}
-
-// Delete implements the Service interface for metrics.
-func (s *metricsService) Delete(ctx context.Context, packID, name string) error {
-	defer func(start time.Time) {
-		s.requestCount.WithLabelValues("delete", packID).Add(1)
-		s.requestLatency.WithLabelValues("delete", packID).Observe(time.Since(start).Seconds())
-	}(time.Now())
-
-	err := s.service.Delete(ctx, packID, name)
-
-	if err != nil {
-		s.errorsCount.WithLabelValues("delete", packID).Add(1)
+		s.errorsCount.WithLabelValues("create", params.PackID).Add(1)
 	}
 
 	return err
 }
 
-// Exists implements the Service interface for logging.
-func (s *metricsService) Exists(ctx context.Context, packID, name string) (bool, error) {
-	return s.service.Exists(ctx, packID, name)
+// Update implements the Service interface for metrics.
+func (s *metricsService) Update(ctx context.Context, params model.BuildParams, build *model.Build) error {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("update", params.PackID).Add(1)
+		s.requestLatency.WithLabelValues("update", params.PackID).Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	err := s.service.Update(ctx, params, build)
+
+	if err != nil && !errors.Is(err, ErrNotFound) {
+		s.errorsCount.WithLabelValues("update", params.PackID).Add(1)
+	}
+
+	return err
 }
 
-// Column implements the Service interface.
-func (s *metricsService) Column(ctx context.Context, packID, id, col string, val any) error {
-	return s.service.Column(ctx, packID, id, col, val)
+// Delete implements the Service interface for metrics.
+func (s *metricsService) Delete(ctx context.Context, params model.BuildParams) error {
+	defer func(start time.Time) {
+		s.requestCount.WithLabelValues("delete", params.PackID).Add(1)
+		s.requestLatency.WithLabelValues("delete", params.PackID).Observe(time.Since(start).Seconds())
+	}(time.Now())
+
+	err := s.service.Delete(ctx, params)
+
+	if err != nil {
+		s.errorsCount.WithLabelValues("delete", params.PackID).Add(1)
+	}
+
+	return err
+}
+
+// Exists implements the Service interface for metrics.
+func (s *metricsService) Exists(ctx context.Context, params model.BuildParams) (bool, error) {
+	return s.service.Exists(ctx, params)
+}
+
+// Column implements the Service interface for metrics.
+func (s *metricsService) Column(ctx context.Context, params model.BuildParams, col string, val any) error {
+	return s.service.Column(ctx, params, col, val)
 }

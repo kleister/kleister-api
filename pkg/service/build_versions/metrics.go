@@ -1,4 +1,4 @@
-package buildVersions
+package buildversions
 
 import (
 	"context"
@@ -26,7 +26,7 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 					Namespace: m.Namespace,
 					Subsystem: "build_versions_service",
 					Name:      "request_latency_microseconds",
-					Help:      "Histogram of latencies for requests to the buildVersions service.",
+					Help:      "Histogram of latencies for requests to the buildversions service.",
 					Buckets:   []float64{0.001, 0.01, 0.1, 0.5, 1.0, 2.0, 5.0, 10.0},
 				},
 				[]string{"method"},
@@ -38,7 +38,7 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 					Namespace: m.Namespace,
 					Subsystem: "build_versions_service",
 					Name:      "errors_count",
-					Help:      "Total number of errors within the buildVersions service.",
+					Help:      "Total number of errors within the buildversions service.",
 				},
 				[]string{"method"},
 			),
@@ -49,7 +49,7 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 					Namespace: m.Namespace,
 					Subsystem: "build_versions_service",
 					Name:      "request_count",
-					Help:      "Total number of requests to the buildVersions service.",
+					Help:      "Total number of requests to the buildversions service.",
 				},
 				[]string{"method"},
 			),
@@ -57,30 +57,36 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 	}
 }
 
+// External implements the Service interface for metrics.
+func (s *metricsService) WithPrincipal(principal *model.User) Service {
+	s.service.WithPrincipal(principal)
+	return s
+}
+
 // List implements the Service interface for metrics.
-func (s *metricsService) List(ctx context.Context, packID, buildID, modID, versionID string) ([]*model.BuildVersion, error) {
+func (s *metricsService) List(ctx context.Context, params model.BuildVersionParams) ([]*model.BuildVersion, int64, error) {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("list").Add(1)
 		s.requestLatency.WithLabelValues("list").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	records, err := s.service.List(ctx, packID, buildID, modID, versionID)
+	records, counter, err := s.service.List(ctx, params)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("list").Add(1)
 	}
 
-	return records, err
+	return records, counter, err
 }
 
 // Attach implements the Service interface for metrics.
-func (s *metricsService) Attach(ctx context.Context, packID, buildID, modID, versionID string) error {
+func (s *metricsService) Attach(ctx context.Context, params model.BuildVersionParams) error {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("attach").Add(1)
 		s.requestLatency.WithLabelValues("attach").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	err := s.service.Attach(ctx, packID, buildID, modID, versionID)
+	err := s.service.Attach(ctx, params)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("attach").Add(1)
@@ -90,13 +96,13 @@ func (s *metricsService) Attach(ctx context.Context, packID, buildID, modID, ver
 }
 
 // Drop implements the Service interface for metrics.
-func (s *metricsService) Drop(ctx context.Context, packID, buildID, modID, versionID string) error {
+func (s *metricsService) Drop(ctx context.Context, params model.BuildVersionParams) error {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("drop").Add(1)
 		s.requestLatency.WithLabelValues("drop").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	err := s.service.Drop(ctx, packID, buildID, modID, versionID)
+	err := s.service.Drop(ctx, params)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("drop").Add(1)

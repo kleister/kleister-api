@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"github.com/dchest/uniuri"
@@ -22,7 +23,7 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Auths     []*UserAuth
-	Teams     []*Member
+	Teams     []*UserTeam
 	Mods      []*UserMod
 	Packs     []*UserPack
 }
@@ -30,7 +31,7 @@ type User struct {
 // BeforeSave defines the hook executed before every save.
 func (m *User) BeforeSave(_ *gorm.DB) error {
 	if m.ID == "" {
-		m.ID = uniuri.NewLen(uniuri.UUIDLen)
+		m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
 	}
 
 	if m.Password != "" {

@@ -1,1 +1,1 @@
-package userMods
+package usermods

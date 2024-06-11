@@ -14,12 +14,14 @@ var (
 
 // Service handles all interactions with versions.
 type Service interface {
-	List(context.Context, string) ([]*model.Version, error)
-	Show(context.Context, string, string) (*model.Version, error)
-	Create(context.Context, string, *model.Version) (*model.Version, error)
-	Update(context.Context, string, *model.Version) (*model.Version, error)
-	Delete(context.Context, string, string) error
-	Exists(context.Context, string, string) (bool, error)
+	List(context.Context, model.VersionParams) ([]*model.Version, int64, error)
+	Show(context.Context, model.VersionParams) (*model.Version, error)
+	Create(context.Context, model.VersionParams, *model.Version) error
+	Update(context.Context, model.VersionParams, *model.Version) error
+	Delete(context.Context, model.VersionParams) error
+	Exists(context.Context, model.VersionParams) (bool, error)
+	Column(context.Context, model.VersionParams, string, any) error
+	WithPrincipal(*model.User) Service
 }
 
 type service struct {
@@ -33,32 +35,42 @@ func NewService(versions Service) Service {
 	}
 }
 
+// WithPrincipal implements the Service interface.
+func (s *service) WithPrincipal(principal *model.User) Service {
+	return s.versions.WithPrincipal(principal)
+}
+
 // List implements the Service interface.
-func (s *service) List(ctx context.Context, modID string) ([]*model.Version, error) {
-	return s.versions.List(ctx, modID)
+func (s *service) List(ctx context.Context, params model.VersionParams) ([]*model.Version, int64, error) {
+	return s.versions.List(ctx, params)
 }
 
 // Show implements the Service interface.
-func (s *service) Show(ctx context.Context, modID, id string) (*model.Version, error) {
-	return s.versions.Show(ctx, modID, id)
+func (s *service) Show(ctx context.Context, params model.VersionParams) (*model.Version, error) {
+	return s.versions.Show(ctx, params)
 }
 
 // Create implements the Service interface.
-func (s *service) Create(ctx context.Context, modID string, version *model.Version) (*model.Version, error) {
-	return s.versions.Create(ctx, modID, version)
+func (s *service) Create(ctx context.Context, params model.VersionParams, version *model.Version) error {
+	return s.versions.Create(ctx, params, version)
 }
 
 // Update implements the Service interface.
-func (s *service) Update(ctx context.Context, modID string, version *model.Version) (*model.Version, error) {
-	return s.versions.Update(ctx, modID, version)
+func (s *service) Update(ctx context.Context, params model.VersionParams, version *model.Version) error {
+	return s.versions.Update(ctx, params, version)
 }
 
 // Delete implements the Service interface.
-func (s *service) Delete(ctx context.Context, modID, name string) error {
-	return s.versions.Delete(ctx, modID, name)
+func (s *service) Delete(ctx context.Context, params model.VersionParams) error {
+	return s.versions.Delete(ctx, params)
 }
 
 // Exists implements the Service interface.
-func (s *service) Exists(ctx context.Context, modID, name string) (bool, error) {
-	return s.versions.Exists(ctx, modID, name)
+func (s *service) Exists(ctx context.Context, params model.VersionParams) (bool, error) {
+	return s.versions.Exists(ctx, params)
+}
+
+// Column implements the Service interface.
+func (s *service) Column(ctx context.Context, params model.VersionParams, col string, val any) error {
+	return s.versions.Column(ctx, params, col, val)
 }

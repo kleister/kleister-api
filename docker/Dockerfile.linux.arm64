@@ -1,19 +1,17 @@
-FROM arm64v8/alpine:3.20 AS build
-RUN apk add --no-cache ca-certificates mailcap
+FROM arm64v8/alpine:3.20
 
-FROM scratch
+RUN apk add --no-cache ca-certificates mailcap && \
+    addgroup -g 1337 kleister && \
+    adduser -D -u 1337 -h /var/lib/kleister -G kleister kleister
 
 EXPOSE 8000 8080
 VOLUME ["/var/lib/kleister"]
 ENTRYPOINT ["/usr/bin/kleister-api"]
 CMD ["server"]
 
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=build /etc/mime.types /etc/
-
-ENV KLEISTER_API_DATABASE_DRIVER sqlite3
-ENV KLEISTER_API_DATABASE_NAME /var/lib/kleister/database.sqlite3
-ENV KLEISTER_API_UPLOAD_DRIVER file
-ENV KLEISTER_API_UPLOAD_PATH /var/lib/kleister/uploads
+ENV KLEISTER_API_DATABASE_DSN sqlite:///var/lib/kleister/database.sqlite3
+ENV KLEISTER_API_UPLOAD_DSN file:///var/lib/kleister/uploads
 
 COPY bin/kleister-api /usr/bin/kleister-api
+WORKDIR /var/lib/kleister
+USER kleister

@@ -11,10 +11,9 @@ type AuthEndpoints struct {
 
 // AuthMappings defines the mappings for external authentication.
 type AuthMappings struct {
-	Login  string `mapstructure:"login"`
-	Name   string `mapstructure:"name"`
-	Email  string `mapstructure:"email"`
-	Avatar string `mapstructure:"avatar"`
+	Login string `mapstructure:"login"`
+	Name  string `mapstructure:"name"`
+	Email string `mapstructure:"email"`
 }
 
 // AuthProvider defines a single provider auth source.

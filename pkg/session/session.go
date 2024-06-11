@@ -9,11 +9,6 @@ import (
 	"github.com/alexedwards/scs/v2"
 )
 
-const (
-	// CookieName defines the name of the stored cookie.
-	CookieName = "kleister"
-)
-
 // Session is a simple wrapper around a session manager.
 type Session struct {
 	Manager *scs.SessionManager
@@ -26,7 +21,7 @@ func New(opts ...Option) *Session {
 	manager := scs.New()
 	manager.Store = options.Store
 	manager.Lifetime = options.Lifetime
-	manager.Cookie.Name = CookieName
+	manager.Cookie.Name = options.Name
 	manager.Cookie.Path = options.Path
 	manager.Cookie.Secure = options.Secure
 
@@ -48,6 +43,11 @@ func (s *Session) Put(ctx context.Context, key, val string) {
 // Get simply gets a value from the session cookie.
 func (s *Session) Get(ctx context.Context, key string) string {
 	return s.Manager.GetString(ctx, key)
+}
+
+// Pop simply pops a value from the session cookie.
+func (s *Session) Pop(ctx context.Context, key string) string {
+	return s.Manager.PopString(ctx, key)
 }
 
 // Destroy simply wipes the whole session, used for logout.

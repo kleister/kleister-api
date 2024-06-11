@@ -35,28 +35,56 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
 }
 
-// ByBasicAuth mocks base method.
-func (m *MockService) ByBasicAuth(arg0 context.Context, arg1, arg2 string) (*model.User, error) {
+// AuthByCreds mocks base method.
+func (m *MockService) AuthByCreds(arg0 context.Context, arg1, arg2 string) (*model.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ByBasicAuth", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "AuthByCreds", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ByBasicAuth indicates an expected call of ByBasicAuth.
-func (mr *MockServiceMockRecorder) ByBasicAuth(arg0, arg1, arg2 interface{}) *gomock.Call {
+// AuthByCreds indicates an expected call of AuthByCreds.
+func (mr *MockServiceMockRecorder) AuthByCreds(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByBasicAuth", reflect.TypeOf((*MockService)(nil).ByBasicAuth), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthByCreds", reflect.TypeOf((*MockService)(nil).AuthByCreds), arg0, arg1, arg2)
+}
+
+// AuthByID mocks base method.
+func (m *MockService) AuthByID(arg0 context.Context, arg1 string) (*model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AuthByID", arg0, arg1)
+	ret0, _ := ret[0].(*model.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthByID indicates an expected call of AuthByID.
+func (mr *MockServiceMockRecorder) AuthByID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthByID", reflect.TypeOf((*MockService)(nil).AuthByID), arg0, arg1)
+}
+
+// Column mocks base method.
+func (m *MockService) Column(arg0 context.Context, arg1, arg2 string, arg3 any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Column", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Column indicates an expected call of Column.
+func (mr *MockServiceMockRecorder) Column(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Column", reflect.TypeOf((*MockService)(nil).Column), arg0, arg1, arg2, arg3)
 }
 
 // Create mocks base method.
-func (m *MockService) Create(arg0 context.Context, arg1 *model.User) (*model.User, error) {
+func (m *MockService) Create(arg0 context.Context, arg1 *model.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0, arg1)
-	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Create indicates an expected call of Create.
@@ -95,33 +123,34 @@ func (mr *MockServiceMockRecorder) Exists(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // External mocks base method.
-func (m *MockService) External(arg0 context.Context, arg1, arg2, arg3 string, arg4 bool) (*model.User, error) {
+func (m *MockService) External(arg0 context.Context, arg1, arg2, arg3, arg4, arg5 string) (*model.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "External", arg0, arg1, arg2, arg3, arg4)
+	ret := m.ctrl.Call(m, "External", arg0, arg1, arg2, arg3, arg4, arg5)
 	ret0, _ := ret[0].(*model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // External indicates an expected call of External.
-func (mr *MockServiceMockRecorder) External(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) External(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "External", reflect.TypeOf((*MockService)(nil).External), arg0, arg1, arg2, arg3, arg4)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "External", reflect.TypeOf((*MockService)(nil).External), arg0, arg1, arg2, arg3, arg4, arg5)
 }
 
 // List mocks base method.
-func (m *MockService) List(arg0 context.Context) ([]*model.User, error) {
+func (m *MockService) List(arg0 context.Context, arg1 model.ListParams) ([]*model.User, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", arg0)
+	ret := m.ctrl.Call(m, "List", arg0, arg1)
 	ret0, _ := ret[0].([]*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // List indicates an expected call of List.
-func (mr *MockServiceMockRecorder) List(arg0 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockService)(nil).List), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockService)(nil).List), arg0, arg1)
 }
 
 // Show mocks base method.
@@ -140,16 +169,29 @@ func (mr *MockServiceMockRecorder) Show(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockService) Update(arg0 context.Context, arg1 *model.User) (*model.User, error) {
+func (m *MockService) Update(arg0 context.Context, arg1 *model.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0, arg1)
-	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Update indicates an expected call of Update.
 func (mr *MockServiceMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockService)(nil).Update), arg0, arg1)
+}
+
+// WithPrincipal mocks base method.
+func (m *MockService) WithPrincipal(arg0 *model.User) Service {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithPrincipal", arg0)
+	ret0, _ := ret[0].(Service)
+	return ret0
+}
+
+// WithPrincipal indicates an expected call of WithPrincipal.
+func (mr *MockServiceMockRecorder) WithPrincipal(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithPrincipal", reflect.TypeOf((*MockService)(nil).WithPrincipal), arg0)
 }

@@ -5,9 +5,6 @@ name: openapi
   push:
     branches:
       - master
-  pull_request:
-    branches:
-      - master
 
 jobs:
   openapi:
@@ -15,11 +12,9 @@ jobs:
 
     steps:
       - name: Checkout source
-        id: source
         uses: actions/checkout@v4
 
       - name: Configure aws
-        id: aws
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -27,19 +22,16 @@ jobs:
           aws-region: eu-central-1
 
       - name: Setup ruby
-        id: ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: head
 
       - name: Copy spec
-        id: spec
         run: |
-          mkdir dist && cp openapi/v1.yml dist/$(ruby -ryaml -e "puts YAML::load(open('openapi/v1.yml').read)['info']['version']").yml
+          mkdir dist
+          cp openapi/v1.yml dist/$(ruby -ryaml -e "puts YAML::load(open('openapi/v1.yml').read)['info']['version']").yml
 
       - name: Upload spec
-        id: upload
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           aws s3 sync dist/ s3://dl.kleister.eu/openapi/
 

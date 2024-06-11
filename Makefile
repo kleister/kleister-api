@@ -16,7 +16,7 @@ endif
 
 GOBUILD ?= CGO_ENABLED=0 go build
 PACKAGES ?= $(shell go list ./...)
-SOURCES ?= $(shell find . -name "*.go" -type f -not -iname mock.go -not -path ./.devenv/\*)
+SOURCES ?= $(shell find . -name "*.go" -type f -not -iname mock.go -not -path ./.devenv/\* -not -path ./.direnv/\*)
 
 TAGS ?= netgo
 
@@ -50,6 +50,10 @@ GCFLAGS += all=-N -l
 .PHONY: all
 all: build
 
+.PHONY: sync
+sync:
+	go mod download
+
 .PHONY: clean
 clean:
 	go clean -i ./...
@@ -63,6 +67,10 @@ fmt:
 vet:
 	go vet $(PACKAGES)
 
+.PHONY: golangci
+golangci: $(GOLANGCI_LINT)
+	$(GOLANGCI_LINT) run ./...
+
 .PHONY: staticcheck
 staticcheck: $(STATICCHECK)
 	$(STATICCHECK) -tags '$(TAGS)' $(PACKAGES)
@@ -73,37 +81,74 @@ lint: $(REVIVE)
 
 .PHONY: generate
 generate: openapi mocks
+	go generate $(PACKAGES)
 
 .PHONY: openapi
-openapi: $(SWAGGER)
-	$(SWAGGER) generate server --target pkg/api/v1 --name Kleister --spec openapi/v1.yml --principal models.User --default-scheme https --exclude-main --regenerate-configureapi
+openapi: $(OAPI_CODEGEN)
+	$(OAPI_CODEGEN) --config=pkg/api/v1/config.yml openapi/v1.yml
 
 .PHONY: mocks
 mocks: \
 	pkg/upload/mock.go pkg/store/mock.go \
+	pkg/service/build_versions/mock.go \
+	pkg/service/builds/mock.go \
+	pkg/service/mods/mock.go \
+	pkg/service/packs/mock.go \
+	pkg/service/team_mods/mock.go \
+	pkg/service/team_packs/mock.go \
+	pkg/service/teams/mock.go \
+	pkg/service/user_mods/mock.go \
+	pkg/service/user_packs/mock.go \
+	pkg/service/user_teams/mock.go \
+	pkg/service/users/mock.go \
+	pkg/service/versions/mock.go \
 	pkg/service/minecraft/mock.go \
 	pkg/service/forge/mock.go \
 	pkg/service/neoforge/mock.go \
 	pkg/service/quilt/mock.go \
-	pkg/service/fabric/mock.go \
-	pkg/service/members/mock.go \
-	pkg/service/teams/mock.go \
-	pkg/service/team_mods/mock.go \
-	pkg/service/team_packs/mock.go \
-	pkg/service/users/mock.go \
-	pkg/service/user_mods/mock.go \
-	pkg/service/user_packs/mock.go \
-	pkg/service/mods/mock.go \
-	pkg/service/versions/mock.go \
-	pkg/service/packs/mock.go \
-	pkg/service/builds/mock.go \
-	pkg/service/build_versions/mock.go
+	pkg/service/fabric/mock.go
 
 pkg/upload/mock.go: pkg/upload/upload.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package upload
 
 pkg/store/mock.go: pkg/store/store.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package store
+
+pkg/service/build_versions/mock.go: pkg/service/build_versions/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package buildversions
+
+pkg/service/builds/mock.go: pkg/service/builds/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package builds
+
+pkg/service/mods/mock.go: pkg/service/mods/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package mods
+
+pkg/service/packs/mock.go: pkg/service/packs/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package packs
+
+pkg/service/team_mods/mock.go: pkg/service/team_mods/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package teammods
+
+pkg/service/team_packs/mock.go: pkg/service/team_packs/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package teampacks
+
+pkg/service/teams/mock.go: pkg/service/teams/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package teams
+
+pkg/service/user_mods/mock.go: pkg/service/user_mods/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package usermods
+
+pkg/service/user_packs/mock.go: pkg/service/user_packs/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package userpacks
+
+pkg/service/user_teams/mock.go: pkg/service/user_teams/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package userteams
+
+pkg/service/users/mock.go: pkg/service/users/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package users
+
+pkg/service/versions/mock.go: pkg/service/versions/service.go $(MOCKGEN)
+	$(MOCKGEN) -source $< -destination $@ -package versions
 
 pkg/service/minecraft/mock.go: pkg/service/minecraft/service.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package minecraft
@@ -119,46 +164,6 @@ pkg/service/quilt/mock.go: pkg/service/quilt/service.go $(MOCKGEN)
 
 pkg/service/fabric/mock.go: pkg/service/fabric/service.go $(MOCKGEN)
 	$(MOCKGEN) -source $< -destination $@ -package fabric
-
-pkg/service/members/mock.go: pkg/service/members/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package members
-
-pkg/service/teams/mock.go: pkg/service/teams/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package teams
-
-pkg/service/team_mods/mock.go: pkg/service/team_mods/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package teamMods
-
-pkg/service/team_packs/mock.go: pkg/service/team_packs/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package teamPacks
-
-pkg/service/users/mock.go: pkg/service/users/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package users
-
-pkg/service/user_mods/mock.go: pkg/service/user_mods/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package userMods
-
-pkg/service/user_packs/mock.go: pkg/service/user_packs/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package userPacks
-
-pkg/service/mods/mock.go: pkg/service/mods/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package mods
-
-pkg/service/versions/mock.go: pkg/service/versions/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package versions
-
-pkg/service/packs/mock.go: pkg/service/packs/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package packs
-
-pkg/service/builds/mock.go: pkg/service/builds/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package builds
-
-pkg/service/build_versions/mock.go: pkg/service/build_versions/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package buildVersions
-
-.PHONY: changelog
-changelog: $(CALENS)
-	$(CALENS) >| CHANGELOG.md
 
 .PHONY: test
 test: test

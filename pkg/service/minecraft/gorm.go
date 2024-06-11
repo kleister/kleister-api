@@ -3,46 +3,69 @@ package minecraft
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/kleister/go-minecraft/version"
+	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/model"
 	"gorm.io/gorm"
 )
 
 // GormService defines the service to store content within a database based on Gorm.
 type GormService struct {
-	handle *gorm.DB
+	handle    *gorm.DB
+	config    *config.Config
+	principal *model.User
 }
 
 // NewGormService initializes the service to store content within a database based on Gorm.
-func NewGormService(handle *gorm.DB) *GormService {
+func NewGormService(
+	handle *gorm.DB,
+	cfg *config.Config,
+) *GormService {
 	return &GormService{
 		handle: handle,
+		config: cfg,
 	}
 }
 
-// Search implements the Store interface for database persistence.
-func (s *GormService) Search(ctx context.Context, search string) ([]*model.Minecraft, error) {
+// WithPrincipal implements the Service interface for database persistence.
+func (s *GormService) WithPrincipal(principal *model.User) Service {
+	s.principal = principal
+	return s
+}
+
+// List implements the Service interface for database persistence.
+func (s *GormService) List(ctx context.Context, params model.ListParams) ([]*model.Minecraft, int64, error) {
 	records := make([]*model.Minecraft, 0)
 	q := s.query(ctx)
 
-	if search != "" {
+	if params.Search != "" {
+		term := strings.Join(
+			[]string{
+				"%",
+				params.Search,
+				"%",
+			},
+			"",
+		)
+
 		q = q.Or(
 			"name LIKE ?",
-			"%"+search+"%",
+			term,
 		).Or(
 			"type LIKE ?",
-			"%"+search+"%",
+			term,
 		)
 	}
 
 	if err := q.Find(
 		&records,
 	).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return records, nil
+	return records, int64(len(records)), nil
 }
 
 // Show implements the Service interface for database persistence.
@@ -92,6 +115,246 @@ func (s *GormService) Sync(ctx context.Context, versions version.Versions) error
 	return tx.Commit().Error
 }
 
+// ListBuilds implements the Service interface for database persistence.
+func (s *GormService) ListBuilds(ctx context.Context, params model.MinecraftBuildParams) ([]*model.Build, int64, error) {
+	parent, err := s.Show(ctx, params.MinecraftID)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	counter := int64(0)
+	records := make([]*model.Build, 0)
+
+	q := s.handle.WithContext(
+		ctx,
+	).Model(
+		&model.Build{},
+	).Joins(
+		"Pack",
+	).Preload(
+		"Pack",
+	).Where(
+		"minecraft_id = ?",
+		parent.ID,
+	)
+
+	if val, ok := s.validBuildSort(params.Sort); ok {
+		q = q.Order(strings.Join(
+			[]string{
+				val,
+				sortOrder(params.Order),
+			},
+			" ",
+		))
+	}
+
+	// if params.Search != "" {
+	// 	opts := queryparser.Options{
+	// 		CutFn: searchCut,
+	// 		Allowed: []string{
+	// 			"slug",
+	// 			"name",
+	// 		},
+	// 	}
+
+	// 	parser := queryparser.New(
+	// 		params.Search,
+	// 		opts,
+	// 	).Parse()
+
+	// 	for _, name := range opts.Allowed {
+	// 		if parser.Has(name) {
+
+	// 			q = q.Where(
+	// 				fmt.Sprintf(
+	// 					"%s LIKE ?",
+	// 					name,
+	// 				),
+	// 				strings.ReplaceAll(
+	// 					parser.GetOne(name),
+	// 					"*",
+	// 					"%",
+	// 				),
+	// 			)
+	// 		}
+	// 	}
+	// }
+
+	if err := q.Count(
+		&counter,
+	).Error; err != nil {
+		return nil, counter, err
+	}
+
+	if params.Limit > 0 {
+		q = q.Limit(params.Limit)
+	}
+
+	if params.Offset > 0 {
+		q = q.Offset(params.Offset)
+	}
+
+	if err := q.Find(
+		&records,
+	).Error; err != nil {
+		return nil, counter, err
+	}
+
+	return records, counter, nil
+}
+
+// AttachBuild implements the Service interface for database persistence.
+func (s *GormService) AttachBuild(ctx context.Context, params model.MinecraftBuildParams) error {
+	parent, err := s.Show(ctx, params.MinecraftID)
+
+	if err != nil {
+		return err
+	}
+
+	pack, err := s.packID(ctx, params.PackID)
+	if err != nil {
+		return err
+	}
+
+	build, current, err := s.buildID(ctx, pack, params.BuildID)
+	if err != nil {
+		return err
+	}
+
+	if current == parent.ID {
+		return ErrAlreadyAssigned
+	}
+
+	if err := s.handle.WithContext(
+		ctx,
+	).Table(
+		"builds",
+	).Where(
+		"id = ?",
+		build,
+	).Update(
+		"minecraft_id",
+		parent.ID,
+	).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrNotFound
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+// DropBuild implements the Service interface for database persistence.
+func (s *GormService) DropBuild(ctx context.Context, params model.MinecraftBuildParams) error {
+	parent, err := s.Show(ctx, params.MinecraftID)
+
+	if err != nil {
+		return err
+	}
+
+	pack, err := s.packID(ctx, params.PackID)
+	if err != nil {
+		return err
+	}
+
+	build, current, err := s.buildID(ctx, pack, params.BuildID)
+	if err != nil {
+		return err
+	}
+
+	if current != parent.ID {
+		return ErrNotAssigned
+	}
+
+	if err := s.handle.WithContext(
+		ctx,
+	).Table(
+		"builds",
+	).Where(
+		"id = ?",
+		build,
+	).Update(
+		"minecraft_id",
+		gorm.Expr("NULL"),
+	).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrNotFound
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (s *GormService) packID(ctx context.Context, id string) (string, error) {
+	var (
+		result string
+	)
+
+	if err := s.handle.WithContext(
+		ctx,
+	).Table(
+		"packs",
+	).Select(
+		"id",
+	).Where(
+		"id = ?",
+		id,
+	).Or(
+		"slug = ?",
+		id,
+	).First(
+		&result,
+	).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", ErrNotFound
+		}
+
+		return "", err
+	}
+
+	return result, nil
+}
+
+func (s *GormService) buildID(ctx context.Context, packID, id string) (string, string, error) {
+	type idAndMinecraft struct {
+		ID          string
+		MinecraftID string
+	}
+
+	result := idAndMinecraft{}
+
+	if err := s.handle.WithContext(
+		ctx,
+	).Table(
+		"builds",
+	).Select(
+		"id",
+		"minecraft_id",
+	).Where(
+		"pack_id = ?",
+		packID,
+	).Where(
+		"id = ? OR name = ?",
+		id,
+		id,
+	).First(
+		&result,
+	).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", "", ErrNotFound
+		}
+
+		return "", "", err
+	}
+
+	return result.ID, result.MinecraftID, nil
+}
+
 func (s *GormService) query(ctx context.Context) *gorm.DB {
 	return s.handle.WithContext(
 		ctx,
@@ -100,4 +363,25 @@ func (s *GormService) query(ctx context.Context) *gorm.DB {
 	).Model(
 		&model.Minecraft{},
 	)
+}
+
+func (s *GormService) validBuildSort(val string) (string, bool) {
+	if val == "" {
+		return "Build.name", true
+	}
+
+	val = strings.ToLower(val)
+
+	for key, name := range map[string]string{
+		"build_name":   "Build.name",
+		"build_public": "Build.public",
+		"pack_slug":    "Pack.slug",
+		"pack_name":    "Pack.name",
+	} {
+		if val == key {
+			return name, true
+		}
+	}
+
+	return "Build.name", true
 }

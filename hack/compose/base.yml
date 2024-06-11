@@ -6,7 +6,7 @@ services:
     environment:
       - KLEISTER_API_LOG_LEVEL=debug
       - KLEISTER_API_SERVER_HOST=${KLEISTER_API_SERVER_HOST:-http://localhost:8080}
-      - KLEISTER_API_SESSION_SECRET=tdUhYbpq3ONpyHa5e2td7CmG
+      - KLEISTER_API_SESSION_SECRET=TxHrYxMAg01rBeEWrHn1BjOP
       - KLEISTER_API_ADMIN_EMAIL=admin@webhippie.de
     ports:
       - ${KLEISTER_API_SERVER_PORT:-8080}:8080

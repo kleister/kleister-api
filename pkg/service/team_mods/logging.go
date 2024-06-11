@@ -1,4 +1,4 @@
-package teamMods
+package teammods
 
 import (
 	"context"
@@ -6,38 +6,40 @@ import (
 
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 )
 
-// LoggingRequestID returns the request ID as string for logging
-type LoggingRequestID func(context.Context) string
-
 type loggingService struct {
-	service   Service
-	requestID LoggingRequestID
-	logger    zerolog.Logger
+	service Service
+	logger  zerolog.Logger
 }
 
 // NewLoggingService wraps the Service and provides logging for its methods.
-func NewLoggingService(s Service, requestID LoggingRequestID) Service {
+func NewLoggingService(s Service) Service {
 	return &loggingService{
-		service:   s,
-		requestID: requestID,
-		logger:    log.With().Str("service", "teamMods").Logger(),
+		service: s,
+		logger:  log.With().Str("service", "teammods").Logger(),
 	}
 }
 
+// External implements the Service interface for logging.
+func (s *loggingService) WithPrincipal(principal *model.User) Service {
+	s.service.WithPrincipal(principal)
+	return s
+}
+
 // List implements the Service interface for logging.
-func (s *loggingService) List(ctx context.Context, teamID, modID string) ([]*model.TeamMod, error) {
+func (s *loggingService) List(ctx context.Context, params model.TeamModParams) ([]*model.TeamMod, int64, error) {
 	start := time.Now()
-	records, err := s.service.List(ctx, teamID, modID)
+	records, counter, err := s.service.List(ctx, params)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
 		Str("method", "list").
 		Dur("duration", time.Since(start)).
-		Str("team", teamID).
-		Str("mod", modID).
+		Str("team", params.TeamID).
+		Str("mod", params.ModID).
 		Logger()
 
 	if err != nil {
@@ -49,21 +51,21 @@ func (s *loggingService) List(ctx context.Context, teamID, modID string) ([]*mod
 			Msg("")
 	}
 
-	return records, err
+	return records, counter, err
 }
 
 // Attach implements the Service interface for logging.
-func (s *loggingService) Attach(ctx context.Context, teamID, modID, perm string) error {
+func (s *loggingService) Attach(ctx context.Context, params model.TeamModParams) error {
 	start := time.Now()
-	err := s.service.Attach(ctx, teamID, modID, perm)
+	err := s.service.Attach(ctx, params)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
 		Str("method", "attach").
 		Dur("duration", time.Since(start)).
-		Str("team", teamID).
-		Str("mod", modID).
-		Str("perm", perm).
+		Str("team", params.TeamID).
+		Str("mod", params.ModID).
+		Str("perm", params.Perm).
 		Logger()
 
 	if err != nil {
@@ -79,17 +81,17 @@ func (s *loggingService) Attach(ctx context.Context, teamID, modID, perm string)
 }
 
 // Permit implements the Service interface for logging.
-func (s *loggingService) Permit(ctx context.Context, teamID, modID, perm string) error {
+func (s *loggingService) Permit(ctx context.Context, params model.TeamModParams) error {
 	start := time.Now()
-	err := s.service.Permit(ctx, teamID, modID, perm)
+	err := s.service.Permit(ctx, params)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
 		Str("method", "permit").
 		Dur("duration", time.Since(start)).
-		Str("team", teamID).
-		Str("mod", modID).
-		Str("perm", perm).
+		Str("team", params.TeamID).
+		Str("mod", params.ModID).
+		Str("perm", params.Perm).
 		Logger()
 
 	if err != nil {
@@ -105,16 +107,16 @@ func (s *loggingService) Permit(ctx context.Context, teamID, modID, perm string)
 }
 
 // Drop implements the Service interface for logging.
-func (s *loggingService) Drop(ctx context.Context, teamID, modID string) error {
+func (s *loggingService) Drop(ctx context.Context, params model.TeamModParams) error {
 	start := time.Now()
-	err := s.service.Drop(ctx, teamID, modID)
+	err := s.service.Drop(ctx, params)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
 		Str("method", "drop").
 		Dur("duration", time.Since(start)).
-		Str("team", teamID).
-		Str("mod", modID).
+		Str("team", params.TeamID).
+		Str("mod", params.ModID).
 		Logger()
 
 	if err != nil {
@@ -127,4 +129,14 @@ func (s *loggingService) Drop(ctx context.Context, teamID, modID string) error {
 	}
 
 	return err
+}
+
+func (s *loggingService) requestID(ctx context.Context) string {
+	id, ok := hlog.IDFromCtx(ctx)
+
+	if ok {
+		return id.String()
+	}
+
+	return ""
 }

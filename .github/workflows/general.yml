@@ -15,37 +15,35 @@ jobs:
 
     steps:
       - name: Checkout source
-        id: source
         uses: actions/checkout@v4
 
       - name: Setup golang
-        id: golang
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.21.7
+          go-version: ^1.22.0
+
+      - name: Run generate
+        run: make generate
 
       - name: Run vet
-        id: vet
         run: make vet
 
+      - name: Server golangci
+        run: make golangci
+
       - name: Run staticcheck
-        id: staticcheck
         run: make staticcheck
 
       - name: Run lint
-        id: lint
         run: make lint
 
       - name: Run build
-        id: build
         run: make build
 
       - name: Run test
-        id: test
         run: make test
 
       - name: Coverage report
-        id: codacy
         if: github.ref == 'refs/heads/master'
         uses: codacy/codacy-coverage-reporter-action@v1
         with:

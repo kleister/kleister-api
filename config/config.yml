@@ -1,0 +1,58 @@
+---
+server:
+  addr: 0.0.0.0:8080
+  host: http://localhost:8080
+  root: "/"
+  cert: ~
+  key: ~
+  docs: true
+
+metrics:
+  addr: 0.0.0.0:8000
+  token: ~
+  pprof: false
+
+logs:
+  level: info
+  pretty: true
+  color: true
+
+auth:
+  config: ~
+
+database:
+  driver: sqlite3
+  address: ~
+  port: ~
+  username: ~
+  password: ~
+  name: storage/kleister.sqlite3
+  options: {}
+
+upload:
+  driver: file
+  endpoint: ~
+  path: storage/uploads/
+  access: ~
+  secret: ~
+  bucket: ~
+  region: us-east-1
+  perms: "0755"
+
+session:
+  name: kleister
+  secret: TxHrYxMAg01rBeEWrHn1BjOP
+  expire: 24h0m0s
+  secure: false
+
+admin:
+  create: true
+  username: admin
+  password: p455w0rd
+  email: admin@localhost
+  users:
+  - username1
+  - username2
+  - username3
+
+...

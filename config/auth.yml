@@ -3,8 +3,8 @@ providers:
   - driver: github
     name: github
     callback: http://localhost:8080/api/v1/auth/github/callback
-    client_id: 3ec7df89ef3b8fb75b1a
-    client_secret: 84fd1b638ce48c920b62dae6ddf68a447b8cc163
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
     scopes:
       - read:user
       - user:email
@@ -12,8 +12,8 @@ providers:
   - driver: gitea
     name: gitea
     callback: http://localhost:8080/api/v1/auth/gitea/callback
-    client_id: your-client-id
-    client_secret: your-client-secret
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
     scopes: []
     endpoints:
       auth: https://gitea.com/login/oauth/authorize
@@ -23,8 +23,8 @@ providers:
   - driver: gitlab
     name: gitlab
     callback: http://localhost:8080/api/v1/auth/gitlab/callback
-    client_id: your-client-id
-    client_secret: your-client-secret
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
     scopes: []
     endpoints:
       auth: https://gitlab.com/oauth/authorize
@@ -34,57 +34,54 @@ providers:
   - driver: google
     name: google
     callback: http://localhost:8080/api/v1/auth/google/callback
-    client_id: your-client-id
-    client_secret: your-client-secret
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
     scopes: []
 
-  - driver: microsoft
-    name: microsoft
-    callback: http://localhost:8080/api/v1/auth/microsoft/callback
-    client_id: your-client-id
-    client_secret: your-client-secret
+  - driver: azuread
+    name: azuread
+    callback: http://localhost:8080/api/v1/auth/azuread/callback
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
     scopes: []
 
   - driver: oidc
     name: keycloak
     callback: http://localhost:8080/api/v1/auth/keycloak/callback
-    client_id: your-client-id
-    client_secret: your-client-secret
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
     scopes: []
     endpoints:
-      discovery: http://auth.cloudpunks.io/auth/realms/core/.well-known/openid-configuration
+      discovery: http://keycloak.example.com/auth/realms/example/.well-known/openid-configuration
     mappings:
       login: preferred_username
       name: name
       email: email
-      avatar: picture
 
   - driver: oidc
     name: authentik
     callback: http://localhost:8080/api/v1/auth/authentik/callback
-    client_id: your-client-id
-    client_secret: your-client-secret
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
     scopes: []
     endpoints:
-      discovery: https://auth.boerger.ws/application/o/grafana/.well-known/openid-configuration
+      discovery: https://authentik.example.com/application/o/kleister/.well-known/openid-configuration
     mappings:
       login: preferred_username
       name: name
       email: email
-      avatar: picture
 
-  # - driver: oidc
-  #   name: kanidm
-  #   callback: http://localhost:8080/api/v1/auth/kanidm/callback
-  #   client_id: your-client-id
-  #   client_secret: your-client-secret
-  #   scopes: []
-  #   endpoints:
-  #     discovery: https://kanidm.example.com/oauth2/openid/kleister/.well-known/openid-configuration
-  #   mappings:
-  #     login: preferred_username
-  #     name: name
-  #     email: email
-  #     avatar: picture
+  - driver: oidc
+    name: kanidm
+    callback: http://localhost:8080/api/v1/auth/kanidm/callback
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
+    scopes: []
+    endpoints:
+      discovery: https://kanidm.example.com/oauth2/openid/kleister/.well-known/openid-configuration
+    mappings:
+      login: preferred_username
+      name: name
+      email: email
 
 ...

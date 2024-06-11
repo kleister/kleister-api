@@ -1,1 +1,1 @@
-package teamMods
+package teammods

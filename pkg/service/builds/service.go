@@ -14,13 +14,14 @@ var (
 
 // Service handles all interactions with builds.
 type Service interface {
-	List(context.Context, string) ([]*model.Build, error)
-	Show(context.Context, string, string) (*model.Build, error)
-	Create(context.Context, string, *model.Build) (*model.Build, error)
-	Update(context.Context, string, *model.Build) (*model.Build, error)
-	Delete(context.Context, string, string) error
-	Exists(context.Context, string, string) (bool, error)
-	Column(context.Context, string, string, string, any) error
+	List(context.Context, model.BuildParams) ([]*model.Build, int64, error)
+	Show(context.Context, model.BuildParams) (*model.Build, error)
+	Create(context.Context, model.BuildParams, *model.Build) error
+	Update(context.Context, model.BuildParams, *model.Build) error
+	Delete(context.Context, model.BuildParams) error
+	Exists(context.Context, model.BuildParams) (bool, error)
+	Column(context.Context, model.BuildParams, string, any) error
+	WithPrincipal(*model.User) Service
 }
 
 type service struct {
@@ -34,37 +35,42 @@ func NewService(builds Service) Service {
 	}
 }
 
+// WithPrincipal implements the Service interface.
+func (s *service) WithPrincipal(principal *model.User) Service {
+	return s.builds.WithPrincipal(principal)
+}
+
 // List implements the Service interface.
-func (s *service) List(ctx context.Context, packID string) ([]*model.Build, error) {
-	return s.builds.List(ctx, packID)
+func (s *service) List(ctx context.Context, params model.BuildParams) ([]*model.Build, int64, error) {
+	return s.builds.List(ctx, params)
 }
 
 // Show implements the Service interface.
-func (s *service) Show(ctx context.Context, packID, id string) (*model.Build, error) {
-	return s.builds.Show(ctx, packID, id)
+func (s *service) Show(ctx context.Context, params model.BuildParams) (*model.Build, error) {
+	return s.builds.Show(ctx, params)
 }
 
 // Create implements the Service interface.
-func (s *service) Create(ctx context.Context, packID string, build *model.Build) (*model.Build, error) {
-	return s.builds.Create(ctx, packID, build)
+func (s *service) Create(ctx context.Context, params model.BuildParams, build *model.Build) error {
+	return s.builds.Create(ctx, params, build)
 }
 
 // Update implements the Service interface.
-func (s *service) Update(ctx context.Context, packID string, build *model.Build) (*model.Build, error) {
-	return s.builds.Update(ctx, packID, build)
+func (s *service) Update(ctx context.Context, params model.BuildParams, build *model.Build) error {
+	return s.builds.Update(ctx, params, build)
 }
 
 // Delete implements the Service interface.
-func (s *service) Delete(ctx context.Context, packID, name string) error {
-	return s.builds.Delete(ctx, packID, name)
+func (s *service) Delete(ctx context.Context, params model.BuildParams) error {
+	return s.builds.Delete(ctx, params)
 }
 
 // Exists implements the Service interface.
-func (s *service) Exists(ctx context.Context, packID, name string) (bool, error) {
-	return s.builds.Exists(ctx, packID, name)
+func (s *service) Exists(ctx context.Context, params model.BuildParams) (bool, error) {
+	return s.builds.Exists(ctx, params)
 }
 
 // Column implements the Service interface.
-func (s *service) Column(ctx context.Context, packID, id, col string, val any) error {
-	return s.builds.Column(ctx, packID, id, col, val)
+func (s *service) Column(ctx context.Context, params model.BuildParams, col string, val any) error {
+	return s.builds.Column(ctx, params, col, val)
 }

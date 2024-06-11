@@ -1,4 +1,4 @@
-package teamMods
+package teammods
 
 import (
 	"context"
@@ -21,41 +21,47 @@ var (
 	ErrNotAssigned = errors.New("team mod is not defined")
 )
 
-// Service handles all interactions with teamMods.
+// Service handles all interactions with teammods.
 type Service interface {
-	List(context.Context, string, string) ([]*model.TeamMod, error)
-	Attach(context.Context, string, string, string) error
-	Permit(context.Context, string, string, string) error
-	Drop(context.Context, string, string) error
+	List(context.Context, model.TeamModParams) ([]*model.TeamMod, int64, error)
+	Attach(context.Context, model.TeamModParams) error
+	Permit(context.Context, model.TeamModParams) error
+	Drop(context.Context, model.TeamModParams) error
+	WithPrincipal(*model.User) Service
 }
 
 type service struct {
-	teamMods Service
+	teammods Service
 }
 
-// NewService returns a Service that handles all interactions with teamMods.
-func NewService(teamMods Service) Service {
+// NewService returns a Service that handles all interactions with teammods.
+func NewService(teammods Service) Service {
 	return &service{
-		teamMods: teamMods,
+		teammods: teammods,
 	}
 }
 
+// WithPrincipal implements the Service interface.
+func (s *service) WithPrincipal(principal *model.User) Service {
+	return s.teammods.WithPrincipal(principal)
+}
+
 // List implements the Service interface.
-func (s *service) List(ctx context.Context, teamID, modID string) ([]*model.TeamMod, error) {
-	return s.teamMods.List(ctx, teamID, modID)
+func (s *service) List(ctx context.Context, params model.TeamModParams) ([]*model.TeamMod, int64, error) {
+	return s.teammods.List(ctx, params)
 }
 
 // Attach implements the Service interface.
-func (s *service) Attach(ctx context.Context, teamID, modID, perm string) error {
-	return s.teamMods.Attach(ctx, teamID, modID, perm)
+func (s *service) Attach(ctx context.Context, params model.TeamModParams) error {
+	return s.teammods.Attach(ctx, params)
 }
 
 // Permit implements the Service interface.
-func (s *service) Permit(ctx context.Context, teamID, modID, perm string) error {
-	return s.teamMods.Permit(ctx, teamID, modID, perm)
+func (s *service) Permit(ctx context.Context, params model.TeamModParams) error {
+	return s.teammods.Permit(ctx, params)
 }
 
 // Drop implements the Service interface.
-func (s *service) Drop(ctx context.Context, teamID, modID string) error {
-	return s.teamMods.Drop(ctx, teamID, modID)
+func (s *service) Drop(ctx context.Context, params model.TeamModParams) error {
+	return s.teammods.Drop(ctx, params)
 }

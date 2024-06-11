@@ -1,4 +1,4 @@
-package userMods
+package usermods
 
 import (
 	"context"
@@ -26,7 +26,7 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 					Namespace: m.Namespace,
 					Subsystem: "user_mods_service",
 					Name:      "request_latency_microseconds",
-					Help:      "Histogram of latencies for requests to the userMods service.",
+					Help:      "Histogram of latencies for requests to the usermods service.",
 					Buckets:   []float64{0.001, 0.01, 0.1, 0.5, 1.0, 2.0, 5.0, 10.0},
 				},
 				[]string{"method"},
@@ -38,7 +38,7 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 					Namespace: m.Namespace,
 					Subsystem: "user_mods_service",
 					Name:      "errors_count",
-					Help:      "Total number of errors within the userMods service.",
+					Help:      "Total number of errors within the usermods service.",
 				},
 				[]string{"method"},
 			),
@@ -49,7 +49,7 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 					Namespace: m.Namespace,
 					Subsystem: "user_mods_service",
 					Name:      "request_count",
-					Help:      "Total number of requests to the userMods service.",
+					Help:      "Total number of requests to the usermods service.",
 				},
 				[]string{"method"},
 			),
@@ -57,30 +57,36 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 	}
 }
 
+// External implements the Service interface for metrics.
+func (s *metricsService) WithPrincipal(principal *model.User) Service {
+	s.service.WithPrincipal(principal)
+	return s
+}
+
 // List implements the Service interface for metrics.
-func (s *metricsService) List(ctx context.Context, userID, modID string) ([]*model.UserMod, error) {
+func (s *metricsService) List(ctx context.Context, params model.UserModParams) ([]*model.UserMod, int64, error) {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("list").Add(1)
 		s.requestLatency.WithLabelValues("list").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	records, err := s.service.List(ctx, userID, modID)
+	records, counter, err := s.service.List(ctx, params)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("list").Add(1)
 	}
 
-	return records, err
+	return records, counter, err
 }
 
 // Attach implements the Service interface for metrics.
-func (s *metricsService) Attach(ctx context.Context, userID, modID, perm string) error {
+func (s *metricsService) Attach(ctx context.Context, params model.UserModParams) error {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("attach").Add(1)
 		s.requestLatency.WithLabelValues("attach").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	err := s.service.Attach(ctx, userID, modID, perm)
+	err := s.service.Attach(ctx, params)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("attach").Add(1)
@@ -90,13 +96,13 @@ func (s *metricsService) Attach(ctx context.Context, userID, modID, perm string)
 }
 
 // Permit implements the Service interface for metrics.
-func (s *metricsService) Permit(ctx context.Context, userID, modID, perm string) error {
+func (s *metricsService) Permit(ctx context.Context, params model.UserModParams) error {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("permit").Add(1)
 		s.requestLatency.WithLabelValues("permit").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	err := s.service.Permit(ctx, userID, modID, perm)
+	err := s.service.Permit(ctx, params)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("permit").Add(1)
@@ -106,13 +112,13 @@ func (s *metricsService) Permit(ctx context.Context, userID, modID, perm string)
 }
 
 // Drop implements the Service interface for metrics.
-func (s *metricsService) Drop(ctx context.Context, userID, modID string) error {
+func (s *metricsService) Drop(ctx context.Context, params model.UserModParams) error {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("drop").Add(1)
 		s.requestLatency.WithLabelValues("drop").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	err := s.service.Drop(ctx, userID, modID)
+	err := s.service.Drop(ctx, params)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("drop").Add(1)

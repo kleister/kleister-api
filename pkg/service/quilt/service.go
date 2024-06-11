@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	quiltClient "github.com/kleister/kleister-api/pkg/internal/quilt"
-	"github.com/kleister/kleister-api/pkg/middleware/requestid"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/rs/zerolog/log"
 )
@@ -16,61 +15,88 @@ var (
 
 	// ErrSyncUnavailable defines the error of the versions definition is unavailable.
 	ErrSyncUnavailable = errors.New("quilt version service is unavailable")
+
+	// ErrAlreadyAssigned defines the error if a build is already assigned.
+	ErrAlreadyAssigned = errors.New("is already attached")
+
+	// ErrNotAssigned defines the error if a build is not assigned.
+	ErrNotAssigned = errors.New("is not attached")
 )
 
 // Service handles all interactions with quilt.
 type Service interface {
-	Search(context.Context, string) ([]*model.Quilt, error)
-	Show(context.Context, string) (*model.Quilt, error)
-	Update(context.Context) error
-}
-
-// Store defines the functions to persist records.
-type Store interface {
-	Search(context.Context, string) ([]*model.Quilt, error)
+	List(context.Context, model.ListParams) ([]*model.Quilt, int64, error)
 	Show(context.Context, string) (*model.Quilt, error)
 	Sync(context.Context, quiltClient.Versions) error
+	ListBuilds(context.Context, model.QuiltBuildParams) ([]*model.Build, int64, error)
+	AttachBuild(context.Context, model.QuiltBuildParams) error
+	DropBuild(context.Context, model.QuiltBuildParams) error
+	WithPrincipal(*model.User) Service
 }
 
 type service struct {
-	quilt Store
+	quilt Service
 }
 
 // NewService returns a Service that handles all interactions with quilt.
-func NewService(quilt Store) Service {
+func NewService(quilt Service) Service {
 	return &service{
 		quilt: quilt,
 	}
 }
 
-// Search implements the Service interface.
-func (s *service) Search(ctx context.Context, search string) ([]*model.Quilt, error) {
-	return s.quilt.Search(ctx, search)
+// WithPrincipal implements the Service interface.
+func (s *service) WithPrincipal(principal *model.User) Service {
+	return s.quilt.WithPrincipal(principal)
 }
 
-// Search implements the Service interface.
+// List implements the Service interface.
+func (s *service) List(ctx context.Context, params model.ListParams) ([]*model.Quilt, int64, error) {
+	return s.quilt.List(ctx, params)
+}
+
+// Show implements the Service interface.
 func (s *service) Show(ctx context.Context, id string) (*model.Quilt, error) {
 	return s.quilt.Show(ctx, id)
 }
 
-// Update implements the Service interface.
-func (s *service) Update(ctx context.Context) error {
+// Sync implements the Service interface.
+func (s *service) Sync(ctx context.Context, versions quiltClient.Versions) error {
+	return s.quilt.Sync(ctx, versions)
+}
+
+// ListBuilds implements the Service interface.
+func (s *service) ListBuilds(ctx context.Context, params model.QuiltBuildParams) ([]*model.Build, int64, error) {
+	return s.quilt.ListBuilds(ctx, params)
+}
+
+// AttachBuild implements the Service interface.
+func (s *service) AttachBuild(ctx context.Context, params model.QuiltBuildParams) error {
+	return s.quilt.AttachBuild(ctx, params)
+}
+
+// DropBuild implements the Service interface.
+func (s *service) DropBuild(ctx context.Context, params model.QuiltBuildParams) error {
+	return s.quilt.DropBuild(ctx, params)
+}
+
+// FetchRemote is just a wrapper to get a syncable list of versions.
+func FetchRemote() (quiltClient.Versions, error) {
 	result, err := quiltClient.FromDefault()
 
 	if err != nil {
-		log.Debug().
-			Str("service", "quilt").
-			Str("request", requestid.Get(ctx)).
-			Str("method", "update").
+		log.Error().
 			Err(err).
-			Msg("failed to sync versions")
+			Str("service", "quilt").
+			Str("method", "fetch").
+			Msg("Failed to sync versions")
 
-		return ErrSyncUnavailable
+		return nil, ErrSyncUnavailable
 	}
 
 	quiltClient.ByVersion(
 		result.Versions,
 	).Sort()
 
-	return s.quilt.Sync(ctx, result.Versions)
+	return result.Versions, nil
 }

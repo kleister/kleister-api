@@ -1,11 +1,13 @@
-package teamMods
+package teammods
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/model"
 	modsService "github.com/kleister/kleister-api/pkg/service/mods"
 	teamsService "github.com/kleister/kleister-api/pkg/service/teams"
@@ -15,72 +17,145 @@ import (
 
 // GormService defines the service to store content within a database based on Gorm.
 type GormService struct {
-	handle *gorm.DB
-	teams  teamsService.Service
-	mods   modsService.Service
+	handle    *gorm.DB
+	config    *config.Config
+	principal *model.User
+	teams     teamsService.Service
+	mods      modsService.Service
 }
 
 // NewGormService initializes the service to store content within a database based on Gorm.
 func NewGormService(
 	handle *gorm.DB,
+	cfg *config.Config,
 	teams teamsService.Service,
 	mods modsService.Service,
 ) *GormService {
 	return &GormService{
 		handle: handle,
+		config: cfg,
 		teams:  teams,
 		mods:   mods,
 	}
 }
 
+// WithPrincipal implements the Service interface for database persistence.
+func (s *GormService) WithPrincipal(principal *model.User) Service {
+	s.principal = principal
+	return s
+}
+
 // List implements the Service interface for database persistence.
-func (s *GormService) List(ctx context.Context, teamID, modID string) ([]*model.TeamMod, error) {
-	q := s.query(ctx)
+func (s *GormService) List(ctx context.Context, params model.TeamModParams) ([]*model.TeamMod, int64, error) {
+	counter := int64(0)
+	records := make([]*model.TeamMod, 0)
+	q := s.query(ctx).Debug()
 
 	switch {
-	case teamID != "" && modID == "":
-		team, err := s.teamID(ctx, teamID)
+	case params.TeamID != "" && params.ModID == "":
+		team, err := s.teamID(ctx, params.TeamID)
 		if err != nil {
-			return nil, err
+			return nil, counter, err
 		}
 
 		q = q.Where(
 			"team_id = ?",
 			team,
 		)
-	case modID != "" && teamID == "":
-		mod, err := s.modID(ctx, modID)
+
+		if val, ok := s.validModSort(params.Sort); ok {
+			q = q.Order(strings.Join(
+				[]string{
+					val,
+					sortOrder(params.Order),
+				},
+				" ",
+			))
+		}
+	case params.ModID != "" && params.TeamID == "":
+		mod, err := s.modID(ctx, params.ModID)
 		if err != nil {
-			return nil, err
+			return nil, counter, err
 		}
 
 		q = q.Where(
 			"mod_id = ?",
 			mod,
 		)
+
+		if val, ok := s.validTeamSort(params.Sort); ok {
+			q = q.Order(strings.Join(
+				[]string{
+					val,
+					sortOrder(params.Order),
+				},
+				" ",
+			))
+		}
 	default:
-		return nil, ErrInvalidListParams
+		return nil, counter, ErrInvalidListParams
 	}
 
-	records := make([]*model.TeamMod, 0)
+	// if params.Search != "" {
+	// 	opts := queryparser.Options{
+	// 		CutFn: searchCut,
+	// 		Allowed: []string{},
+	// 	}
+
+	// 	parser := queryparser.New(
+	// 		params.Search,
+	// 		opts,
+	// 	).Parse()
+
+	// 	for _, name := range opts.Allowed {
+	// 		if parser.Has(name) {
+
+	// 			q = q.Where(
+	// 				fmt.Sprintf(
+	// 					"%s LIKE ?",
+	// 					name,
+	// 				),
+	// 				strings.ReplaceAll(
+	// 					parser.GetOne(name),
+	// 					"*",
+	// 					"%",
+	// 				),
+	// 			)
+	// 		}
+	// 	}
+	// }
+
+	if err := q.Count(
+		&counter,
+	).Error; err != nil {
+		return nil, counter, err
+	}
+
+	if params.Limit > 0 {
+		q = q.Limit(params.Limit)
+	}
+
+	if params.Offset > 0 {
+		q = q.Offset(params.Offset)
+	}
 
 	if err := q.Find(
 		&records,
 	).Error; err != nil {
-		return nil, err
+		return nil, counter, err
 	}
 
-	return records, nil
+	return records, counter, nil
 }
 
 // Attach implements the Service interface for database persistence.
-func (s *GormService) Attach(ctx context.Context, teamID, modID, perm string) error {
-	team, err := s.teamID(ctx, teamID)
+func (s *GormService) Attach(ctx context.Context, params model.TeamModParams) error {
+	team, err := s.teamID(ctx, params.TeamID)
 	if err != nil {
 		return err
 	}
 
-	mod, err := s.modID(ctx, modID)
+	mod, err := s.modID(ctx, params.ModID)
 	if err != nil {
 		return err
 	}
@@ -97,7 +172,7 @@ func (s *GormService) Attach(ctx context.Context, teamID, modID, perm string) er
 	record := &model.TeamMod{
 		TeamID: team,
 		ModID:  mod,
-		Perm:   perm,
+		Perm:   params.Perm,
 	}
 
 	if err := s.validatePerm(record.Perm); err != nil {
@@ -112,13 +187,13 @@ func (s *GormService) Attach(ctx context.Context, teamID, modID, perm string) er
 }
 
 // Permit implements the Service interface for database persistence.
-func (s *GormService) Permit(ctx context.Context, teamID, modID, perm string) error {
-	team, err := s.teamID(ctx, teamID)
+func (s *GormService) Permit(ctx context.Context, params model.TeamModParams) error {
+	team, err := s.teamID(ctx, params.TeamID)
 	if err != nil {
 		return err
 	}
 
-	mod, err := s.modID(ctx, modID)
+	mod, err := s.modID(ctx, params.ModID)
 	if err != nil {
 		return err
 	}
@@ -133,7 +208,7 @@ func (s *GormService) Permit(ctx context.Context, teamID, modID, perm string) er
 	defer tx.Rollback()
 
 	record := &model.TeamMod{}
-	record.Perm = perm
+	record.Perm = params.Perm
 
 	if err := s.validatePerm(record.Perm); err != nil {
 		return err
@@ -155,13 +230,13 @@ func (s *GormService) Permit(ctx context.Context, teamID, modID, perm string) er
 }
 
 // Drop implements the Service interface for database persistence.
-func (s *GormService) Drop(ctx context.Context, teamID, modID string) error {
-	team, err := s.teamID(ctx, teamID)
+func (s *GormService) Drop(ctx context.Context, params model.TeamModParams) error {
+	team, err := s.teamID(ctx, params.TeamID)
 	if err != nil {
 		return err
 	}
 
-	mod, err := s.modID(ctx, modID)
+	mod, err := s.modID(ctx, params.ModID)
 	if err != nil {
 		return err
 	}
@@ -220,7 +295,7 @@ func (s *GormService) isAssigned(ctx context.Context, teamID, modID string) bool
 	res := s.handle.WithContext(
 		ctx,
 	).Where(
-		"team_id = ? AND user_id = ?",
+		"team_id = ? AND mod_id = ?",
 		teamID,
 		modID,
 	).Find(
@@ -234,7 +309,7 @@ func (s *GormService) isUnassigned(ctx context.Context, teamID, modID string) bo
 	res := s.handle.WithContext(
 		ctx,
 	).Where(
-		"team_id = ? AND user_id = ?",
+		"team_id = ? AND mod_id = ?",
 		teamID,
 		modID,
 	).Find(
@@ -251,7 +326,11 @@ func (s *GormService) query(ctx context.Context) *gorm.DB {
 		&model.TeamMod{},
 	).Preload(
 		"Team",
+	).Joins(
+		"Team",
 	).Preload(
+		"Mod",
+	).Joins(
 		"Mod",
 	)
 }
@@ -272,4 +351,42 @@ func (s *GormService) validatePerm(perm string) error {
 	}
 
 	return nil
+}
+
+func (s *GormService) validTeamSort(val string) (string, bool) {
+	if val == "" {
+		return "Team.name", true
+	}
+
+	val = strings.ToLower(val)
+
+	for key, name := range map[string]string{
+		"slug": "Team.slug",
+		"name": "Team.name",
+	} {
+		if val == key {
+			return name, true
+		}
+	}
+
+	return "Team.name", true
+}
+
+func (s *GormService) validModSort(val string) (string, bool) {
+	if val == "" {
+		return "Mod.name", true
+	}
+
+	val = strings.ToLower(val)
+
+	for key, name := range map[string]string{
+		"slug": "Mod.slug",
+		"name": "Mod.name",
+	} {
+		if val == key {
+			return name, true
+		}
+	}
+
+	return "Mod.name", true
 }

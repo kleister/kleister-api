@@ -6,39 +6,51 @@ import (
 
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 )
 
-// LoggingRequestID returns the request ID as string for logging
-type LoggingRequestID func(context.Context) string
-
 type loggingService struct {
-	service   Service
-	requestID LoggingRequestID
-	logger    zerolog.Logger
+	service Service
+	logger  zerolog.Logger
 }
 
 // NewLoggingService wraps the Service and provides logging for its methods.
-func NewLoggingService(s Service, requestID LoggingRequestID) Service {
+func NewLoggingService(s Service) Service {
 	return &loggingService{
-		service:   s,
-		requestID: requestID,
-		logger:    log.With().Str("service", "users").Logger(),
+		service: s,
+		logger:  log.With().Str("service", "users").Logger(),
 	}
 }
 
-// ByBasicAuth implements the Service interface for logging.
-func (s *loggingService) ByBasicAuth(ctx context.Context, username, password string) (*model.User, error) {
-	return s.service.ByBasicAuth(ctx, username, password)
+// External implements the Service interface for logging.
+func (s *loggingService) WithPrincipal(principal *model.User) Service {
+	s.service.WithPrincipal(principal)
+	return s
+}
+
+// External implements the Service interface for logging.
+func (s *loggingService) External(ctx context.Context, provider, ref, username, email, fullname string) (*model.User, error) {
+	return s.service.External(ctx, provider, ref, username, email, fullname)
+}
+
+// AuthByID implements the Service interface for logging.
+func (s *loggingService) AuthByID(ctx context.Context, userID string) (*model.User, error) {
+	return s.service.AuthByID(ctx, userID)
+}
+
+// AuthByCreds implements the Service interface.
+func (s *loggingService) AuthByCreds(ctx context.Context, username, password string) (*model.User, error) {
+	return s.service.AuthByCreds(ctx, username, password)
 }
 
 // List implements the Service interface for logging.
-func (s *loggingService) List(ctx context.Context) ([]*model.User, error) {
+func (s *loggingService) List(ctx context.Context, params model.ListParams) ([]*model.User, int64, error) {
 	start := time.Now()
-	records, err := s.service.List(ctx)
+	records, counter, err := s.service.List(ctx, params)
 
 	logger := s.logger.With().
-		Str("request", s.requestID(ctx)).
+		Str("request_id", s.requestID(ctx)).
 		Str("method", "list").
 		Dur("duration", time.Since(start)).
 		Logger()
@@ -52,7 +64,7 @@ func (s *loggingService) List(ctx context.Context) ([]*model.User, error) {
 			Msg("")
 	}
 
-	return records, err
+	return records, counter, err
 }
 
 // Show implements the Service interface for logging.
@@ -61,10 +73,10 @@ func (s *loggingService) Show(ctx context.Context, name string) (*model.User, er
 	record, err := s.service.Show(ctx, name)
 
 	logger := s.logger.With().
-		Str("request", s.requestID(ctx)).
+		Str("request_id", s.requestID(ctx)).
 		Str("method", "show").
 		Dur("duration", time.Since(start)).
-		Str("name", name).
+		Str("id", name).
 		Logger()
 
 	if err != nil && err != ErrNotFound {
@@ -80,15 +92,15 @@ func (s *loggingService) Show(ctx context.Context, name string) (*model.User, er
 }
 
 // Create implements the Service interface for logging.
-func (s *loggingService) Create(ctx context.Context, user *model.User) (*model.User, error) {
+func (s *loggingService) Create(ctx context.Context, user *model.User) error {
 	start := time.Now()
-	record, err := s.service.Create(ctx, user)
+	err := s.service.Create(ctx, user)
 
 	logger := s.logger.With().
-		Str("request", s.requestID(ctx)).
+		Str("request_id", s.requestID(ctx)).
 		Str("method", "create").
 		Dur("duration", time.Since(start)).
-		Str("name", s.extractIdentifier(record)).
+		Str("id", user.ID).
 		Logger()
 
 	if err != nil {
@@ -100,19 +112,19 @@ func (s *loggingService) Create(ctx context.Context, user *model.User) (*model.U
 			Msg("")
 	}
 
-	return record, err
+	return err
 }
 
 // Update implements the Service interface for logging.
-func (s *loggingService) Update(ctx context.Context, user *model.User) (*model.User, error) {
+func (s *loggingService) Update(ctx context.Context, user *model.User) error {
 	start := time.Now()
-	record, err := s.service.Update(ctx, user)
+	err := s.service.Update(ctx, user)
 
 	logger := s.logger.With().
-		Str("request", s.requestID(ctx)).
+		Str("request_id", s.requestID(ctx)).
 		Str("method", "update").
 		Dur("duration", time.Since(start)).
-		Str("name", s.extractIdentifier(record)).
+		Str("id", user.ID).
 		Logger()
 
 	if err != nil && err != ErrNotFound {
@@ -124,7 +136,7 @@ func (s *loggingService) Update(ctx context.Context, user *model.User) (*model.U
 			Msg("")
 	}
 
-	return record, err
+	return err
 }
 
 // Delete implements the Service interface for logging.
@@ -133,10 +145,10 @@ func (s *loggingService) Delete(ctx context.Context, name string) error {
 	err := s.service.Delete(ctx, name)
 
 	logger := s.logger.With().
-		Str("request", s.requestID(ctx)).
+		Str("request_id", s.requestID(ctx)).
 		Str("method", "delete").
 		Dur("duration", time.Since(start)).
-		Str("name", name).
+		Str("id", name).
 		Logger()
 
 	if err != nil && err != ErrNotFound {
@@ -156,26 +168,16 @@ func (s *loggingService) Exists(ctx context.Context, name string) (bool, error) 
 	return s.service.Exists(ctx, name)
 }
 
-// External implements the Service interface for database persistence.
-func (s *loggingService) External(ctx context.Context, username, email, fullname string, admin bool) (*model.User, error) {
-	return s.service.External(ctx, username, email, fullname, admin)
+// Column implements the Service interface for logging.
+func (s *loggingService) Column(ctx context.Context, name, col string, val any) error {
+	return s.service.Column(ctx, name, col, val)
 }
 
-func (s *loggingService) extractIdentifier(record *model.User) string {
-	if record == nil {
-		return ""
-	}
+func (s *loggingService) requestID(ctx context.Context) string {
+	id, ok := hlog.IDFromCtx(ctx)
 
-	if record.Username != "" {
-		return record.Username
-	}
-
-	if record.Slug != "" {
-		return record.Slug
-	}
-
-	if record.ID != "" {
-		return record.ID
+	if ok {
+		return id.String()
 	}
 
 	return ""

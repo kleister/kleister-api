@@ -1,13 +1,29 @@
 package command
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"fmt"
+	"math/big"
+	"net"
+	"os"
+	"time"
+
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
 	genCmd = &cobra.Command{
 		Use:   "gen",
 		Short: "Generate required stuff",
+		Args:  cobra.NoArgs,
 	}
 
 	genCertCmd = &cobra.Command{
@@ -16,327 +32,266 @@ var (
 		Run:   genCertAction,
 		Args:  cobra.NoArgs,
 	}
+
+	defaultCertGenCertHosts  = []string{"kleister-api"}
+	defaultCertGenCertOrg    = "Kleister"
+	defaultCertGenCertName   = "API"
+	defaultCertGenEcdsaCurve = ""
+	defaultCertGenRSABits    = 4096
+	defaultCertGenValidFor   = 365 * 24 * time.Hour
+	defaultCertGenOutputCert = "server.crt"
+	defaultCertGenOutputKey  = "server.key"
 )
 
 func init() {
 	rootCmd.AddCommand(genCmd)
 	genCmd.AddCommand(genCertCmd)
 
-	// serverCmd.PersistentFlags().String("metrics-addr", defaultMetricsAddr, "Address to bind the metrics")
-	// viper.SetDefault("metrics.addr", defaultMetricsAddr)
-	// viper.BindPFlag("metrics.addr", serverCmd.PersistentFlags().Lookup("metrics-addr"))
+	genCertCmd.Flags().StringSlice("cert-hosts", defaultCertGenCertHosts, "List of cert hosts")
+	viper.SetDefault("cert.hosts", defaultCertGenCertHosts)
+	_ = viper.BindPFlag("cert.hosts", genCertCmd.Flags().Lookup("cert-hosts"))
 
-	// serverCmd.PersistentFlags().String("metrics-token", "", "Token to make metrics secure")
-	// viper.SetDefault("metrics.token", "")
-	// viper.BindPFlag("metrics.token", serverCmd.PersistentFlags().Lookup("metrics-token"))
+	genCertCmd.Flags().String("cert-org", defaultCertGenCertOrg, "Org for certificate")
+	viper.SetDefault("cert.org", defaultCertGenCertOrg)
+	_ = viper.BindPFlag("cert.org", genCertCmd.Flags().Lookup("cert-org"))
 
-	// serverCmd.PersistentFlags().String("server-addr", defaultServerAddr, "Address to bind the server")
-	// viper.SetDefault("server.addr", defaultServerAddr)
-	// viper.BindPFlag("server.addr", serverCmd.PersistentFlags().Lookup("server-addr"))
+	genCertCmd.Flags().String("cert-name", defaultCertGenCertName, "Name for certificate")
+	viper.SetDefault("cert.name", defaultCertGenCertName)
+	_ = viper.BindPFlag("cert.name", genCertCmd.Flags().Lookup("cert-name"))
 
-	// serverCmd.PersistentFlags().Bool("server-pprof", defaultServerPprof, "Enable pprof debugging")
-	// viper.SetDefault("server.pprof", defaultServerPprof)
-	// viper.BindPFlag("server.pprof", serverCmd.PersistentFlags().Lookup("server-pprof"))
+	genCertCmd.Flags().String("ecdsa-curve", defaultCertGenEcdsaCurve, "ECDSA curve to use")
+	viper.SetDefault("ecdsa.curve", defaultCertGenEcdsaCurve)
+	_ = viper.BindPFlag("ecdsa.curve", genCertCmd.Flags().Lookup("ecdsa-curve"))
 
-	// serverCmd.PersistentFlags().String("server-root", defaultServerRoot, "Root path of the server")
-	// viper.SetDefault("server.root", defaultServerRoot)
-	// viper.BindPFlag("server.root", serverCmd.PersistentFlags().Lookup("server-root"))
+	genCertCmd.Flags().Int("rsa-bits", defaultCertGenRSABits, "Size of RSA to gen")
+	viper.SetDefault("rsa.bits", defaultCertGenRSABits)
+	_ = viper.BindPFlag("rsa.bits", genCertCmd.Flags().Lookup("rsa-bits"))
 
-	// serverCmd.PersistentFlags().String("server-host", defaultServerHost, "External access to server")
-	// viper.SetDefault("server.host", defaultServerHost)
-	// viper.BindPFlag("server.host", serverCmd.PersistentFlags().Lookup("server-host"))
+	genCertCmd.Flags().Duration("valid-for", defaultCertGenValidFor, "Duration for the cert")
+	viper.SetDefault("valid.for", defaultCertGenValidFor)
+	_ = viper.BindPFlag("valid.for", genCertCmd.Flags().Lookup("valid-for"))
 
-	// serverCmd.PersistentFlags().String("server-cert", defaultServerCert, "Path to cert for SSL encryption")
-	// viper.SetDefault("server.cert", defaultServerCert)
-	// viper.BindPFlag("server.cert", serverCmd.PersistentFlags().Lookup("server-cert"))
+	genCertCmd.Flags().String("output-cert", defaultCertGenOutputCert, "Path to SSL cert")
+	viper.SetDefault("output.cert", defaultCertGenOutputCert)
+	_ = viper.BindPFlag("output.cert", genCertCmd.Flags().Lookup("output-cert"))
 
-	// serverCmd.PersistentFlags().String("server-key", defaultServerKey, "Path to key for SSL encryption")
-	// viper.SetDefault("server.key", defaultServerKey)
-	// viper.BindPFlag("server.key", serverCmd.PersistentFlags().Lookup("server-key"))
-
-	// serverCmd.PersistentFlags().Bool("strict-curves", defaultServerStrictCurves, "Use strict SSL curves")
-	// viper.SetDefault("server.strict_curves", defaultServerStrictCurves)
-	// viper.BindPFlag("server.strict_curves", serverCmd.PersistentFlags().Lookup("strict-curves"))
-
-	// serverCmd.PersistentFlags().Bool("strict-ciphers", defaultServerStrictCiphers, "Use strict SSL ciphers")
-	// viper.SetDefault("server.strict_ciphers", defaultServerStrictCiphers)
-	// viper.BindPFlag("server.strict_ciphers", serverCmd.PersistentFlags().Lookup("strict-ciphers"))
-
-	// serverCmd.PersistentFlags().String("templates-path", defaultServerTemplates, "Path for overriding templates")
-	// viper.SetDefault("server.templates", defaultServerTemplates)
-	// viper.BindPFlag("server.templates", serverCmd.PersistentFlags().Lookup("templates-path"))
-
-	// serverCmd.PersistentFlags().String("errors-path", defaultServerErrors, "Path for overriding errors")
-	// viper.SetDefault("server.errors", defaultServerErrors)
-	// viper.BindPFlag("server.errors", serverCmd.PersistentFlags().Lookup("errors-path"))
+	genCertCmd.Flags().String("output-key", defaultCertGenOutputKey, "Path to SSL key")
+	viper.SetDefault("output.key", defaultCertGenOutputKey)
+	_ = viper.BindPFlag("output.key", genCertCmd.Flags().Lookup("output-key"))
 }
-
-// func GenCertFlags(_ *config.Config) []cli.Flag {
-// 	return []cli.Flag{
-// 		&cli.StringSliceFlag{
-// 			Name:    "cert-host",
-// 			Value:   cli.NewStringSlice("kleister-api"),
-// 			Usage:   "List of cert hosts",
-// 			EnvVars: []string{"KLEISTER_API_CERT_HOSTS"},
-// 		},
-// 		&cli.StringFlag{
-// 			Name:    "cert-org",
-// 			Value:   "Kleister",
-// 			Usage:   "Org for certificate",
-// 			EnvVars: []string{"KLEISTER_API_ECDSA_CURVE"},
-// 		},
-// 		&cli.StringFlag{
-// 			Name:    "cert-name",
-// 			Value:   "API",
-// 			Usage:   "Name for certificate",
-// 			EnvVars: []string{"KLEISTER_API_ECDSA_CURVE"},
-// 		},
-// 		&cli.StringFlag{
-// 			Name:    "ecdsa-curve",
-// 			Value:   "",
-// 			Usage:   "ECDSA curve to use",
-// 			EnvVars: []string{"KLEISTER_API_ECDSA_CURVE"},
-// 		},
-// 		&cli.IntFlag{
-// 			Name:    "rsa-bits",
-// 			Value:   4096,
-// 			Usage:   "Size of RSA to gen",
-// 			EnvVars: []string{"KLEISTER_API_ECDSA_CURVE"},
-// 		},
-// 		&cli.DurationFlag{
-// 			Name:    "valid-for",
-// 			Value:   365 * 24 * time.Hour,
-// 			Usage:   "Duration for the cert",
-// 			EnvVars: []string{"KLEISTER_API_VALID_FOR"},
-// 		},
-// 		&cli.StringFlag{
-// 			Name:    "server-cert",
-// 			Value:   "server.crt",
-// 			Usage:   "Path to SSL cert",
-// 			EnvVars: []string{"KLEISTER_API_SERVER_CERT"},
-// 		},
-// 		&cli.StringFlag{
-// 			Name:    "server-key",
-// 			Value:   "server.key",
-// 			Usage:   "Path to SSL key",
-// 			EnvVars: []string{"KLEISTER_API_SERVER_KEY"},
-// 		},
-// 	}
-// }
 
 func genCertAction(_ *cobra.Command, _ []string) {
-	// priv, err := parseEcdsaCurve(c)
+	priv, err := parseEcdsaCurve()
 
-	// if err != nil {
-	// 	log.Error().
-	// 		Err(err).
-	// 		Msg("failed to gen private key")
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("Failed to gen private key")
 
-	// 	return err
-	// }
+		os.Exit(1)
+	}
 
-	// notBefore := time.Now()
-	// notAfter := notBefore.Add(c.Duration("valid-for"))
+	notBefore := time.Now()
+	notAfter := notBefore.Add(viper.GetDuration("valid.for"))
 
-	// serialNumber, err := buildSerialNumber()
+	serialNumber, err := buildSerialNumber()
 
-	// if err != nil {
-	// 	log.Error().
-	// 		Err(err).
-	// 		Msg("failed to gen serial number")
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("Failed to gen serial number")
 
-	// 	return err
-	// }
+		os.Exit(1)
+	}
 
-	// template := x509.Certificate{
-	// 	SerialNumber: serialNumber,
-	// 	Subject: pkix.Name{
-	// 		Organization: []string{c.String("cert-org")},
-	// 		CommonName:   c.String("cert-name"),
-	// 	},
-	// 	NotBefore:             notBefore,
-	// 	NotAfter:              notAfter,
-	// 	KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
-	// 	ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-	// 	BasicConstraintsValid: true,
-	// 	IsCA:                  true,
-	// }
+	template := x509.Certificate{
+		SerialNumber: serialNumber,
+		Subject: pkix.Name{
+			Organization: []string{viper.GetString("cert.org")},
+			CommonName:   viper.GetString("cert.name"),
+		},
+		NotBefore:             notBefore,
+		NotAfter:              notAfter,
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+	}
 
-	// for _, host := range c.StringSlice("cert-host") {
-	// 	if ip := net.ParseIP(host); ip != nil {
-	// 		template.IPAddresses = append(
-	// 			template.IPAddresses,
-	// 			ip,
-	// 		)
-	// 	} else {
-	// 		template.DNSNames = append(
-	// 			template.DNSNames,
-	// 			host,
-	// 		)
-	// 	}
-	// }
+	for _, host := range viper.GetStringSlice("cert.host") {
+		if ip := net.ParseIP(host); ip != nil {
+			template.IPAddresses = append(
+				template.IPAddresses,
+				ip,
+			)
+		} else {
+			template.DNSNames = append(
+				template.DNSNames,
+				host,
+			)
+		}
+	}
 
-	// der, err := x509.CreateCertificate(
-	// 	rand.Reader,
-	// 	&template,
-	// 	&template,
-	// 	extractPublicKey(priv),
-	// 	priv,
-	// )
+	der, err := x509.CreateCertificate(
+		rand.Reader,
+		&template,
+		&template,
+		extractPublicKey(priv),
+		priv,
+	)
 
-	// if err != nil {
-	// 	log.Error().
-	// 		Err(err).
-	// 		Msg("failed to create certificate")
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("Failed to create certificate")
 
-	// 	return err
-	// }
+		os.Exit(1)
+	}
 
-	// crt, err := os.OpenFile(
-	// 	c.String("server-cert"),
-	// 	os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
-	// 	0o600,
-	// )
+	crt, err := os.OpenFile(
+		viper.GetString("output.cert"),
+		os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
+		0o600,
+	)
 
-	// if err != nil {
-	// 	log.Error().
-	// 		Err(err).
-	// 		Str("cert", c.String("server-cert")).
-	// 		Msg("failed to open cert file")
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("cert", viper.GetString("output.cert")).
+			Msg("Failed to open cert file")
 
-	// 	return err
-	// }
+		os.Exit(1)
+	}
 
-	// if err := pem.Encode(
-	// 	crt,
-	// 	publicEncodeBlock(der),
-	// ); err != nil {
-	// 	log.Error().
-	// 		Err(err).
-	// 		Msg("failed to encode cert")
+	if err := pem.Encode(
+		crt,
+		publicEncodeBlock(der),
+	); err != nil {
+		log.Error().
+			Err(err).
+			Msg("Failed to encode cert")
 
-	// 	return err
-	// }
+		os.Exit(1)
+	}
 
-	// if err := crt.Close(); err != nil {
-	// 	log.Error().
-	// 		Err(err).
-	// 		Str("cert", c.String("server-cert")).
-	// 		Msg("failed to close cert file")
+	if err := crt.Close(); err != nil {
+		log.Error().
+			Err(err).
+			Str("cert", viper.GetString("output.cert")).
+			Msg("Failed to close cert file")
 
-	// 	return err
-	// }
+		os.Exit(1)
+	}
 
-	// key, err := os.OpenFile(
-	// 	c.String("server-key"),
-	// 	os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
-	// 	0o600,
-	// )
+	key, err := os.OpenFile(
+		viper.GetString("output.key"),
+		os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
+		0o600,
+	)
 
-	// if err != nil {
-	// 	log.Error().
-	// 		Err(err).
-	// 		Str("key", c.String("server-key")).
-	// 		Msg("failed to open key file")
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("key", viper.GetString("output.key")).
+			Msg("Failed to open key file")
 
-	// 	return err
-	// }
+		os.Exit(1)
+	}
 
-	// if err := pem.Encode(
-	// 	key,
-	// 	privateEncodeBlock(priv),
-	// ); err != nil {
-	// 	log.Error().
-	// 		Err(err).
-	// 		Msg("failed to encode key")
+	if err := pem.Encode(
+		key,
+		privateEncodeBlock(priv),
+	); err != nil {
+		log.Error().
+			Err(err).
+			Msg("Failed to encode key")
 
-	// 	return err
-	// }
+		os.Exit(1)
+	}
 
-	// if err := key.Close(); err != nil {
-	// 	log.Error().
-	// 		Err(err).
-	// 		Str("key", c.String("server-key")).
-	// 		Msg("failed to close key file")
+	if err := key.Close(); err != nil {
+		log.Error().
+			Err(err).
+			Str("key", viper.GetString("output.key")).
+			Msg("Failed to close key file")
 
-	// 	return err
-	// }
+		os.Exit(1)
+	}
 
-	// log.Info().
-	// 	Str("cert", c.String("server-cert")).
-	// 	Str("key", c.String("server-key")).
-	// 	Msg("successfully generated")
-
+	log.Info().
+		Str("cert", viper.GetString("output.cert")).
+		Str("key", viper.GetString("output.key")).
+		Msg("Successfully generated")
 }
 
-// func parseEcdsaCurve(c *cli.Context) (interface{}, error) {
-// 	switch c.String("ecdsa-curve") {
-// 	case "":
-// 		return rsa.GenerateKey(rand.Reader, c.Int("rsa-bits"))
-// 	case "P224":
-// 		return ecdsa.GenerateKey(elliptic.P224(), rand.Reader)
-// 	case "P256":
-// 		return ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-// 	case "P384":
-// 		return ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
-// 	case "P521":
-// 		return ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
-// 	default:
-// 		return nil, fmt.Errorf("unrecognized elliptic curve: %q", c.String("ecdsa-curve"))
-// 	}
-// }
+func parseEcdsaCurve() (interface{}, error) {
+	switch viper.GetString("ecdsa.curve") {
+	case "":
+		return rsa.GenerateKey(rand.Reader, viper.GetInt("rsa.bits"))
+	case "P224":
+		return ecdsa.GenerateKey(elliptic.P224(), rand.Reader)
+	case "P256":
+		return ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	case "P384":
+		return ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	case "P521":
+		return ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	default:
+		return nil, fmt.Errorf("unrecognized elliptic curve: %q", viper.GetString("ecdsa.curve"))
+	}
+}
 
-// func buildSerialNumber() (*big.Int, error) {
-// 	return rand.Int(
-// 		rand.Reader,
-// 		new(
-// 			big.Int,
-// 		).Lsh(
-// 			big.NewInt(1),
-// 			128,
-// 		),
-// 	)
-// }
+func buildSerialNumber() (*big.Int, error) {
+	return rand.Int(
+		rand.Reader,
+		new(
+			big.Int,
+		).Lsh(
+			big.NewInt(1),
+			128,
+		),
+	)
+}
 
-// func publicEncodeBlock(der []byte) *pem.Block {
-// 	return &pem.Block{
-// 		Type:  "CERTIFICATE",
-// 		Bytes: der,
-// 	}
-// }
+func publicEncodeBlock(der []byte) *pem.Block {
+	return &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: der,
+	}
+}
 
-// func privateEncodeBlock(priv interface{}) *pem.Block {
-// 	switch k := priv.(type) {
-// 	case *rsa.PrivateKey:
-// 		return &pem.Block{
-// 			Type:  "RSA PRIVATE KEY",
-// 			Bytes: x509.MarshalPKCS1PrivateKey(k),
-// 		}
-// 	case *ecdsa.PrivateKey:
-// 		b, err := x509.MarshalECPrivateKey(k)
+func privateEncodeBlock(priv interface{}) *pem.Block {
+	switch k := priv.(type) {
+	case *rsa.PrivateKey:
+		return &pem.Block{
+			Type:  "RSA PRIVATE KEY",
+			Bytes: x509.MarshalPKCS1PrivateKey(k),
+		}
+	case *ecdsa.PrivateKey:
+		b, err := x509.MarshalECPrivateKey(k)
 
-// 		if err != nil {
-// 			log.Error().
-// 				Err(err).
-// 				Msg("unable to marshal ECDSA key")
-// 		}
+		if err != nil {
+			log.Error().
+				Err(err).
+				Msg("unable to marshal ECDSA key")
+		}
 
-// 		return &pem.Block{
-// 			Type:  "EC PRIVATE KEY",
-// 			Bytes: b,
-// 		}
-// 	default:
-// 		return nil
-// 	}
-// }
+		return &pem.Block{
+			Type:  "EC PRIVATE KEY",
+			Bytes: b,
+		}
+	default:
+		return nil
+	}
+}
 
-// func extractPublicKey(priv interface{}) interface{} {
-// 	switch k := priv.(type) {
-// 	case *rsa.PrivateKey:
-// 		return &k.PublicKey
-// 	case *ecdsa.PrivateKey:
-// 		return &k.PublicKey
-// 	default:
-// 		return nil
-// 	}
-// }
+func extractPublicKey(priv interface{}) interface{} {
+	switch k := priv.(type) {
+	case *rsa.PrivateKey:
+		return &k.PublicKey
+	case *ecdsa.PrivateKey:
+		return &k.PublicKey
+	default:
+		return nil
+	}
+}

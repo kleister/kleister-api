@@ -1,11 +1,13 @@
-package userPacks
+package userpacks
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/model"
 	packsService "github.com/kleister/kleister-api/pkg/service/packs"
 	usersService "github.com/kleister/kleister-api/pkg/service/users"
@@ -15,72 +17,145 @@ import (
 
 // GormService defines the service to store content within a database based on Gorm.
 type GormService struct {
-	handle *gorm.DB
-	users  usersService.Service
-	packs  packsService.Service
+	handle    *gorm.DB
+	config    *config.Config
+	principal *model.User
+	users     usersService.Service
+	packs     packsService.Service
 }
 
 // NewGormService initializes the service to store content within a database based on Gorm.
 func NewGormService(
 	handle *gorm.DB,
+	cfg *config.Config,
 	users usersService.Service,
 	packs packsService.Service,
 ) *GormService {
 	return &GormService{
 		handle: handle,
+		config: cfg,
 		users:  users,
 		packs:  packs,
 	}
 }
 
+// WithPrincipal implements the Service interface for database persistence.
+func (s *GormService) WithPrincipal(principal *model.User) Service {
+	s.principal = principal
+	return s
+}
+
 // List implements the Service interface for database persistence.
-func (s *GormService) List(ctx context.Context, userID, packID string) ([]*model.UserPack, error) {
-	q := s.query(ctx)
+func (s *GormService) List(ctx context.Context, params model.UserPackParams) ([]*model.UserPack, int64, error) {
+	counter := int64(0)
+	records := make([]*model.UserPack, 0)
+	q := s.query(ctx).Debug()
 
 	switch {
-	case userID != "" && packID == "":
-		user, err := s.userID(ctx, userID)
+	case params.UserID != "" && params.PackID == "":
+		user, err := s.userID(ctx, params.UserID)
 		if err != nil {
-			return nil, err
+			return nil, counter, err
 		}
 
 		q = q.Where(
 			"user_id = ?",
 			user,
 		)
-	case packID != "" && userID == "":
-		pack, err := s.packID(ctx, packID)
+
+		if val, ok := s.validPackSort(params.Sort); ok {
+			q = q.Order(strings.Join(
+				[]string{
+					val,
+					sortOrder(params.Order),
+				},
+				" ",
+			))
+		}
+	case params.PackID != "" && params.UserID == "":
+		pack, err := s.packID(ctx, params.PackID)
 		if err != nil {
-			return nil, err
+			return nil, counter, err
 		}
 
 		q = q.Where(
 			"pack_id = ?",
 			pack,
 		)
+
+		if val, ok := s.validUserSort(params.Sort); ok {
+			q = q.Order(strings.Join(
+				[]string{
+					val,
+					sortOrder(params.Order),
+				},
+				" ",
+			))
+		}
 	default:
-		return nil, ErrInvalidListParams
+		return nil, counter, ErrInvalidListParams
 	}
 
-	records := make([]*model.UserPack, 0)
+	// if params.Search != "" {
+	// 	opts := queryparser.Options{
+	// 		CutFn: searchCut,
+	// 		Allowed: []string{},
+	// 	}
+
+	// 	parser := queryparser.New(
+	// 		params.Search,
+	// 		opts,
+	// 	).Parse()
+
+	// 	for _, name := range opts.Allowed {
+	// 		if parser.Has(name) {
+
+	// 			q = q.Where(
+	// 				fmt.Sprintf(
+	// 					"%s LIKE ?",
+	// 					name,
+	// 				),
+	// 				strings.ReplaceAll(
+	// 					parser.GetOne(name),
+	// 					"*",
+	// 					"%",
+	// 				),
+	// 			)
+	// 		}
+	// 	}
+	// }
+
+	if err := q.Count(
+		&counter,
+	).Error; err != nil {
+		return nil, counter, err
+	}
+
+	if params.Limit > 0 {
+		q = q.Limit(params.Limit)
+	}
+
+	if params.Offset > 0 {
+		q = q.Offset(params.Offset)
+	}
 
 	if err := q.Find(
 		&records,
 	).Error; err != nil {
-		return nil, err
+		return nil, counter, err
 	}
 
-	return records, nil
+	return records, counter, nil
 }
 
 // Attach implements the Service interface for database persistence.
-func (s *GormService) Attach(ctx context.Context, userID, packID, perm string) error {
-	user, err := s.userID(ctx, userID)
+func (s *GormService) Attach(ctx context.Context, params model.UserPackParams) error {
+	user, err := s.userID(ctx, params.UserID)
 	if err != nil {
 		return err
 	}
 
-	pack, err := s.packID(ctx, packID)
+	pack, err := s.packID(ctx, params.PackID)
 	if err != nil {
 		return err
 	}
@@ -97,7 +172,7 @@ func (s *GormService) Attach(ctx context.Context, userID, packID, perm string) e
 	record := &model.UserPack{
 		UserID: user,
 		PackID: pack,
-		Perm:   perm,
+		Perm:   params.Perm,
 	}
 
 	if err := s.validatePerm(record.Perm); err != nil {
@@ -112,13 +187,13 @@ func (s *GormService) Attach(ctx context.Context, userID, packID, perm string) e
 }
 
 // Permit implements the Service interface for database persistence.
-func (s *GormService) Permit(ctx context.Context, userID, packID, perm string) error {
-	user, err := s.userID(ctx, userID)
+func (s *GormService) Permit(ctx context.Context, params model.UserPackParams) error {
+	user, err := s.userID(ctx, params.UserID)
 	if err != nil {
 		return err
 	}
 
-	pack, err := s.packID(ctx, packID)
+	pack, err := s.packID(ctx, params.PackID)
 	if err != nil {
 		return err
 	}
@@ -133,7 +208,7 @@ func (s *GormService) Permit(ctx context.Context, userID, packID, perm string) e
 	defer tx.Rollback()
 
 	record := &model.UserPack{}
-	record.Perm = perm
+	record.Perm = params.Perm
 
 	if err := s.validatePerm(record.Perm); err != nil {
 		return err
@@ -155,13 +230,13 @@ func (s *GormService) Permit(ctx context.Context, userID, packID, perm string) e
 }
 
 // Drop implements the Service interface for database persistence.
-func (s *GormService) Drop(ctx context.Context, userID, packID string) error {
-	user, err := s.userID(ctx, userID)
+func (s *GormService) Drop(ctx context.Context, params model.UserPackParams) error {
+	user, err := s.userID(ctx, params.UserID)
 	if err != nil {
 		return err
 	}
 
-	pack, err := s.packID(ctx, packID)
+	pack, err := s.packID(ctx, params.PackID)
 	if err != nil {
 		return err
 	}
@@ -251,7 +326,11 @@ func (s *GormService) query(ctx context.Context) *gorm.DB {
 		&model.UserPack{},
 	).Preload(
 		"Team",
+	).Joins(
+		"Team",
 	).Preload(
+		"User",
+	).Joins(
 		"User",
 	)
 }
@@ -272,4 +351,45 @@ func (s *GormService) validatePerm(perm string) error {
 	}
 
 	return nil
+}
+
+func (s *GormService) validUserSort(val string) (string, bool) {
+	if val == "" {
+		return "User.username", true
+	}
+
+	val = strings.ToLower(val)
+
+	for key, name := range map[string]string{
+		"username": "User.username",
+		"email":    "User.email",
+		"fullname": "User.fullname",
+		"active":   "User.active",
+		"admin":    "User.admin",
+	} {
+		if val == key {
+			return name, true
+		}
+	}
+
+	return "User.username", true
+}
+
+func (s *GormService) validPackSort(val string) (string, bool) {
+	if val == "" {
+		return "Pack.name", true
+	}
+
+	val = strings.ToLower(val)
+
+	for key, name := range map[string]string{
+		"slug": "Pack.slug",
+		"name": "Pack.name",
+	} {
+		if val == key {
+			return name, true
+		}
+	}
+
+	return "Pack.name", true
 }

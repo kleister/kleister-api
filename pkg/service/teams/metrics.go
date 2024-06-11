@@ -58,20 +58,26 @@ func NewMetricsService(s Service, m *metrics.Metrics) Service {
 	}
 }
 
+// External implements the Service interface for metrics.
+func (s *metricsService) WithPrincipal(principal *model.User) Service {
+	s.service.WithPrincipal(principal)
+	return s
+}
+
 // List implements the Service interface for metrics.
-func (s *metricsService) List(ctx context.Context) ([]*model.Team, error) {
+func (s *metricsService) List(ctx context.Context, params model.ListParams) ([]*model.Team, int64, error) {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("list").Add(1)
 		s.requestLatency.WithLabelValues("list").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	records, err := s.service.List(ctx)
+	records, counter, err := s.service.List(ctx, params)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("list").Add(1)
 	}
 
-	return records, err
+	return records, counter, err
 }
 
 // Show implements the Service interface for metrics.
@@ -91,35 +97,35 @@ func (s *metricsService) Show(ctx context.Context, id string) (*model.Team, erro
 }
 
 // Create implements the Service interface for metrics.
-func (s *metricsService) Create(ctx context.Context, team *model.Team) (*model.Team, error) {
+func (s *metricsService) Create(ctx context.Context, team *model.Team) error {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("create").Add(1)
 		s.requestLatency.WithLabelValues("create").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	record, err := s.service.Create(ctx, team)
+	err := s.service.Create(ctx, team)
 
 	if err != nil {
 		s.errorsCount.WithLabelValues("create").Add(1)
 	}
 
-	return record, err
+	return err
 }
 
 // Update implements the Service interface for metrics.
-func (s *metricsService) Update(ctx context.Context, team *model.Team) (*model.Team, error) {
+func (s *metricsService) Update(ctx context.Context, team *model.Team) error {
 	defer func(start time.Time) {
 		s.requestCount.WithLabelValues("update").Add(1)
 		s.requestLatency.WithLabelValues("update").Observe(time.Since(start).Seconds())
 	}(time.Now())
 
-	record, err := s.service.Update(ctx, team)
+	err := s.service.Update(ctx, team)
 
 	if err != nil && !errors.Is(err, ErrNotFound) {
 		s.errorsCount.WithLabelValues("update").Add(1)
 	}
 
-	return record, err
+	return err
 }
 
 // Delete implements the Service interface for metrics.
@@ -138,7 +144,12 @@ func (s *metricsService) Delete(ctx context.Context, name string) error {
 	return err
 }
 
-// Exists implements the Service interface for logging.
+// Exists implements the Service interface for metrics.
 func (s *metricsService) Exists(ctx context.Context, name string) (bool, error) {
 	return s.service.Exists(ctx, name)
+}
+
+// Column implements the Service interface for metrics.
+func (s *metricsService) Column(ctx context.Context, name, col string, val any) error {
+	return s.service.Column(ctx, name, col, val)
 }

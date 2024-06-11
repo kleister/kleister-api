@@ -13,21 +13,21 @@ import (
 	"github.com/kleister/kleister-api/pkg/providers"
 	"github.com/kleister/kleister-api/pkg/router"
 	"github.com/kleister/kleister-api/pkg/secret"
-	buildVersions "github.com/kleister/kleister-api/pkg/service/build_versions"
+	buildversions "github.com/kleister/kleister-api/pkg/service/build_versions"
 	"github.com/kleister/kleister-api/pkg/service/builds"
 	"github.com/kleister/kleister-api/pkg/service/fabric"
 	"github.com/kleister/kleister-api/pkg/service/forge"
-	"github.com/kleister/kleister-api/pkg/service/members"
 	"github.com/kleister/kleister-api/pkg/service/minecraft"
 	"github.com/kleister/kleister-api/pkg/service/mods"
 	"github.com/kleister/kleister-api/pkg/service/neoforge"
 	"github.com/kleister/kleister-api/pkg/service/packs"
 	"github.com/kleister/kleister-api/pkg/service/quilt"
-	teamMods "github.com/kleister/kleister-api/pkg/service/team_mods"
-	teamPacks "github.com/kleister/kleister-api/pkg/service/team_packs"
+	teammods "github.com/kleister/kleister-api/pkg/service/team_mods"
+	teampacks "github.com/kleister/kleister-api/pkg/service/team_packs"
 	"github.com/kleister/kleister-api/pkg/service/teams"
-	userMods "github.com/kleister/kleister-api/pkg/service/user_mods"
-	userPacks "github.com/kleister/kleister-api/pkg/service/user_packs"
+	usermods "github.com/kleister/kleister-api/pkg/service/user_mods"
+	userpacks "github.com/kleister/kleister-api/pkg/service/user_packs"
+	userteams "github.com/kleister/kleister-api/pkg/service/user_teams"
 	"github.com/kleister/kleister-api/pkg/service/users"
 	"github.com/kleister/kleister-api/pkg/service/versions"
 	"github.com/kleister/kleister-api/pkg/session"
@@ -45,41 +45,39 @@ var (
 		Args:  cobra.NoArgs,
 	}
 
-	defaultMetricsAddr         = "0.0.0.0:8000"
-	defaultMetricsToken        = ""
-	defaultServerAddr          = "0.0.0.0:8080"
-	defaultServerPprof         = false
-	defaultServerDocs          = true
-	defaultServerRoot          = "/"
-	defaultServerHost          = "http://localhost:8080"
-	defaultServerCert          = ""
-	defaultServerKey           = ""
-	defaultServerStrictCurves  = false
-	defaultServerStrictCiphers = false
-	defaultDatabaseDriver      = "sqlite3"
-	defaultDatabaseAddress     = ""
-	defaultDatabasePort        = ""
-	defaultDatabaseUsername    = ""
-	defaultDatabasePassword    = ""
-	defaultDatabaseName        = "storage/kleister.sqlite3"
-	defaultDatabaseOptions     = make(map[string]string, 0)
-	defaultUploadDriver        = "file"
-	defaultUploadEndpoint      = ""
-	defaultUploadPath          = "storage/uploads/"
-	defaultUploadAccess        = ""
-	defaultUploadSecret        = ""
-	defaultUploadBucket        = ""
-	defaultUploadRegion        = "us-east-1"
-	defaultUploadPerms         = "0755"
-	defaultSessionSecret       = secret.Generate(32)
-	defaultSessionExpire       = time.Hour * 24
-	defaultSessionSecure       = false
-	defaultAdminCreate         = true
-	defaultAdminUsername       = "admin"
-	defaultAdminPassword       = "admin"
-	defaultAdminEmail          = "admin@localhost"
-	defaultAdminUsers          = []string{}
-	defaultAuthConfig          = ""
+	defaultMetricsAddr      = "0.0.0.0:8000"
+	defaultMetricsToken     = ""
+	defaultServerAddr       = "0.0.0.0:8080"
+	defaultMetricsPprof     = false
+	defaultServerHost       = "http://localhost:8080"
+	defaultServerRoot       = "/"
+	defaultServerCert       = ""
+	defaultServerKey        = ""
+	defaultDatabaseDriver   = "sqlite3"
+	defaultDatabaseAddress  = ""
+	defaultDatabasePort     = ""
+	defaultDatabaseUsername = ""
+	defaultDatabasePassword = ""
+	defaultDatabaseName     = "storage/kleister.sqlite3"
+	defaultDatabaseOptions  = make(map[string]string, 0)
+	defaultUploadDriver     = "file"
+	defaultUploadEndpoint   = ""
+	defaultUploadPath       = "storage/uploads/"
+	defaultUploadAccess     = ""
+	defaultUploadSecret     = ""
+	defaultUploadBucket     = ""
+	defaultUploadRegion     = "us-east-1"
+	defaultUploadPerms      = "0755"
+	defaultSessionName      = "kleister"
+	defaultSessionSecret    = secret.Generate(32)
+	defaultSessionExpire    = time.Hour * 24
+	defaultSessionSecure    = false
+	defaultAdminCreate      = true
+	defaultAdminUsername    = "admin"
+	defaultAdminPassword    = "admin"
+	defaultAdminEmail       = "admin@localhost"
+	defaultAdminUsers       = []string{}
+	defaultAuthConfig       = ""
 )
 
 func init() {
@@ -93,17 +91,13 @@ func init() {
 	viper.SetDefault("metrics.token", defaultMetricsToken)
 	_ = viper.BindPFlag("metrics.token", serverCmd.PersistentFlags().Lookup("metrics-token"))
 
+	serverCmd.PersistentFlags().Bool("metrics-pprof", defaultMetricsPprof, "Enable pprof debugging")
+	viper.SetDefault("metrics.pprof", defaultMetricsPprof)
+	_ = viper.BindPFlag("metrics.pprof", serverCmd.PersistentFlags().Lookup("metrics-pprof"))
+
 	serverCmd.PersistentFlags().String("server-addr", defaultServerAddr, "Address to bind the server")
 	viper.SetDefault("server.addr", defaultServerAddr)
 	_ = viper.BindPFlag("server.addr", serverCmd.PersistentFlags().Lookup("server-addr"))
-
-	serverCmd.PersistentFlags().Bool("server-pprof", defaultServerPprof, "Enable pprof debugging")
-	viper.SetDefault("server.pprof", defaultServerPprof)
-	_ = viper.BindPFlag("server.pprof", serverCmd.PersistentFlags().Lookup("server-pprof"))
-
-	serverCmd.PersistentFlags().Bool("server-docs", defaultServerDocs, "Enable OpenAPI documentation")
-	viper.SetDefault("server.docs", defaultServerDocs)
-	_ = viper.BindPFlag("server.docs", serverCmd.PersistentFlags().Lookup("server-docs"))
 
 	serverCmd.PersistentFlags().String("server-host", defaultServerHost, "External access to server")
 	viper.SetDefault("server.host", defaultServerHost)
@@ -113,21 +107,13 @@ func init() {
 	viper.SetDefault("server.root", defaultServerRoot)
 	_ = viper.BindPFlag("server.root", serverCmd.PersistentFlags().Lookup("server-root"))
 
-	serverCmd.PersistentFlags().String("server-cert", defaultServerCert, "Path to cert for SSL encryption")
+	serverCmd.PersistentFlags().String("server-cert", defaultServerCert, "Path to SSL cert")
 	viper.SetDefault("server.cert", defaultServerCert)
 	_ = viper.BindPFlag("server.cert", serverCmd.PersistentFlags().Lookup("server-cert"))
 
-	serverCmd.PersistentFlags().String("server-key", defaultServerKey, "Path to key for SSL encryption")
+	serverCmd.PersistentFlags().String("server-key", defaultServerKey, "Path to SSL key")
 	viper.SetDefault("server.key", defaultServerKey)
 	_ = viper.BindPFlag("server.key", serverCmd.PersistentFlags().Lookup("server-key"))
-
-	serverCmd.PersistentFlags().Bool("strict-curves", defaultServerStrictCurves, "Use strict SSL curves")
-	viper.SetDefault("server.strictCurves", defaultServerStrictCurves)
-	_ = viper.BindPFlag("server.strictCurves", serverCmd.PersistentFlags().Lookup("strict-curves"))
-
-	serverCmd.PersistentFlags().Bool("strict-ciphers", defaultServerStrictCiphers, "Use strict SSL ciphers")
-	viper.SetDefault("server.strictCiphers", defaultServerStrictCiphers)
-	_ = viper.BindPFlag("server.strictCiphers", serverCmd.PersistentFlags().Lookup("strict-ciphers"))
 
 	serverCmd.PersistentFlags().String("database-driver", defaultDatabaseDriver, "Driver for the database")
 	viper.SetDefault("database.driver", defaultDatabaseDriver)
@@ -189,6 +175,10 @@ func init() {
 	viper.SetDefault("upload.perms", defaultUploadPerms)
 	_ = viper.BindPFlag("upload.perms", serverCmd.PersistentFlags().Lookup("upload-perms"))
 
+	serverCmd.PersistentFlags().String("session-name", defaultSessionName, "Session cookie name")
+	viper.SetDefault("session.name", defaultSessionName)
+	_ = viper.BindPFlag("session.name", serverCmd.PersistentFlags().Lookup("session-name"))
+
 	serverCmd.PersistentFlags().String("session-secret", defaultSessionSecret, "Session encryption secret")
 	viper.SetDefault("session.secret", defaultSessionSecret)
 	_ = viper.BindPFlag("session.secret", serverCmd.PersistentFlags().Lookup("session-secret"))
@@ -237,7 +227,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 		os.Exit(1)
 	}
 
-	uploads, err := setupUploads()
+	uploads, err := setupUploads(cfg)
 
 	if err != nil {
 		log.Fatal().
@@ -255,7 +245,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 		defer uploads.Close()
 	}
 
-	storage, err := setupStorage()
+	storage, err := setupStorage(cfg)
 
 	if err != nil {
 		log.Fatal().
@@ -371,13 +361,14 @@ func serverAction(_ *cobra.Command, _ []string) {
 	}
 
 	registry := metrics.New(
-		metrics.WithNamespace("gopad_api"),
+		metrics.WithNamespace("kleister_api"),
 		metrics.WithToken(token),
 	)
 
 	sess := session.New(
 		session.WithStore(storage.Session()),
 		session.WithLifetime(cfg.Session.Expire),
+		session.WithName(cfg.Session.Name),
 		session.WithPath(cfg.Server.Root),
 		session.WithSecure(cfg.Session.Secure),
 	)
@@ -390,6 +381,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 				minecraft.NewService(
 					minecraft.NewGormService(
 						storage.Handle(),
+						cfg,
 					),
 				),
 			),
@@ -401,6 +393,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 				forge.NewService(
 					forge.NewGormService(
 						storage.Handle(),
+						cfg,
 					),
 				),
 			),
@@ -412,6 +405,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 				neoforge.NewService(
 					neoforge.NewGormService(
 						storage.Handle(),
+						cfg,
 					),
 				),
 			),
@@ -423,6 +417,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 				quilt.NewService(
 					quilt.NewGormService(
 						storage.Handle(),
+						cfg,
 					),
 				),
 			),
@@ -434,6 +429,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 				fabric.NewService(
 					fabric.NewGormService(
 						storage.Handle(),
+						cfg,
 					),
 				),
 			),
@@ -445,6 +441,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 				teams.NewService(
 					teams.NewGormService(
 						storage.Handle(),
+						cfg,
 					),
 				),
 			),
@@ -456,17 +453,19 @@ func serverAction(_ *cobra.Command, _ []string) {
 				users.NewService(
 					users.NewGormService(
 						storage.Handle(),
+						cfg,
 					),
 				),
 			),
 			registry,
 		)
 
-		membersService := members.NewMetricsService(
-			members.NewLoggingService(
-				members.NewService(
-					members.NewGormService(
+		userteamsService := userteams.NewMetricsService(
+			userteams.NewLoggingService(
+				userteams.NewService(
+					userteams.NewGormService(
 						storage.Handle(),
+						cfg,
 						teamsService,
 						usersService,
 					),
@@ -480,38 +479,39 @@ func serverAction(_ *cobra.Command, _ []string) {
 				mods.NewService(
 					mods.NewGormService(
 						storage.Handle(),
+						cfg,
 					),
 				),
 			),
 			registry,
 		)
 
-		userModsService := userMods.NewMetricsService(
-			userMods.NewLoggingService(
-				userMods.NewService(
-					userMods.NewGormService(
+		usermodsService := usermods.NewMetricsService(
+			usermods.NewLoggingService(
+				usermods.NewService(
+					usermods.NewGormService(
 						storage.Handle(),
+						cfg,
 						usersService,
 						modsService,
 					),
 				),
-				requestid.Get,
 			),
-			metricz,
+			registry,
 		)
 
-		teamModsService := teamMods.NewMetricsService(
-			teamMods.NewLoggingService(
-				teamMods.NewService(
-					teamMods.NewGormService(
+		teammodsService := teammods.NewMetricsService(
+			teammods.NewLoggingService(
+				teammods.NewService(
+					teammods.NewGormService(
 						storage.Handle(),
+						cfg,
 						teamsService,
 						modsService,
 					),
 				),
-				requestid.Get,
 			),
-			metricz,
+			registry,
 		)
 
 		versionsService := versions.NewMetricsService(
@@ -519,11 +519,12 @@ func serverAction(_ *cobra.Command, _ []string) {
 				versions.NewService(
 					versions.NewGormService(
 						storage.Handle(),
+						cfg,
+						modsService,
 					),
 				),
-				requestid.Get,
 			),
-			metricz,
+			registry,
 		)
 
 		packsService := packs.NewMetricsService(
@@ -531,17 +532,19 @@ func serverAction(_ *cobra.Command, _ []string) {
 				packs.NewService(
 					packs.NewGormService(
 						storage.Handle(),
+						cfg,
 					),
 				),
 			),
 			registry,
 		)
 
-		userPacksService := userPacks.NewMetricsService(
-			userPacks.NewLoggingService(
-				userPacks.NewService(
-					userPacks.NewGormService(
+		userpacksService := userpacks.NewMetricsService(
+			userpacks.NewLoggingService(
+				userpacks.NewService(
+					userpacks.NewGormService(
 						storage.Handle(),
+						cfg,
 						usersService,
 						packsService,
 					),
@@ -550,11 +553,12 @@ func serverAction(_ *cobra.Command, _ []string) {
 			registry,
 		)
 
-		teamPacksService := teamPacks.NewMetricsService(
-			teamPacks.NewLoggingService(
-				teamPacks.NewService(
-					teamPacks.NewGormService(
+		teampacksService := teampacks.NewMetricsService(
+			teampacks.NewLoggingService(
+				teampacks.NewService(
+					teampacks.NewGormService(
 						storage.Handle(),
+						cfg,
 						teamsService,
 						packsService,
 					),
@@ -568,17 +572,20 @@ func serverAction(_ *cobra.Command, _ []string) {
 				builds.NewService(
 					builds.NewGormService(
 						storage.Handle(),
+						cfg,
+						packsService,
 					),
 				),
 			),
 			registry,
 		)
 
-		buildVersionsService := buildVersions.NewMetricsService(
-			buildVersions.NewLoggingService(
-				buildVersions.NewService(
-					buildVersions.NewGormService(
+		buildversionsService := buildversions.NewMetricsService(
+			buildversions.NewLoggingService(
+				buildversions.NewService(
+					buildversions.NewGormService(
 						storage.Handle(),
+						cfg,
 						packsService,
 						buildsService,
 						modsService,
@@ -604,13 +611,16 @@ func serverAction(_ *cobra.Command, _ []string) {
 				fabricService,
 				teamsService,
 				usersService,
-				membersService,
+				userteamsService,
 				modsService,
+				usermodsService,
+				teammodsService,
+				versionsService,
 				packsService,
-				userPacksService,
-				teamPacksService,
+				userpacksService,
+				teampacksService,
 				buildsService,
-				buildVersionsService,
+				buildversionsService,
 			),
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
@@ -643,7 +653,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 
 			log.Info().
 				Err(reason).
-				Msg("Application shutdown gracefully")
+				Msg("Shutdown application gracefully")
 		})
 	}
 
@@ -688,7 +698,7 @@ func serverAction(_ *cobra.Command, _ []string) {
 			<-stop
 
 			return nil
-		}, func(err error) {
+		}, func(_ error) {
 			close(stop)
 		})
 	}

@@ -3,7 +3,7 @@ package store
 import (
 	"fmt"
 
-	"github.com/alexedwards/scs/v2"
+	scs "github.com/alexedwards/scs/v2"
 	"gorm.io/gorm"
 )
 
@@ -20,6 +20,7 @@ type Store interface {
 	Close() error
 	Ping() error
 	Migrate() error
+	Admin(string, string, string) error
 	Handle() *gorm.DB
 	Session() scs.Store
 }

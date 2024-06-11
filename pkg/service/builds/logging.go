@@ -6,37 +6,39 @@ import (
 
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 )
 
-// LoggingRequestID returns the request ID as string for logging
-type LoggingRequestID func(context.Context) string
-
 type loggingService struct {
-	service   Service
-	requestID LoggingRequestID
-	logger    zerolog.Logger
+	service Service
+	logger  zerolog.Logger
 }
 
 // NewLoggingService wraps the Service and provides logging for its methods.
-func NewLoggingService(s Service, requestID LoggingRequestID) Service {
+func NewLoggingService(s Service) Service {
 	return &loggingService{
-		service:   s,
-		requestID: requestID,
-		logger:    log.With().Str("service", "builds").Logger(),
+		service: s,
+		logger:  log.With().Str("service", "builds").Logger(),
 	}
 }
 
+// External implements the Service interface for logging.
+func (s *loggingService) WithPrincipal(principal *model.User) Service {
+	s.service.WithPrincipal(principal)
+	return s
+}
+
 // List implements the Service interface for logging.
-func (s *loggingService) List(ctx context.Context, packID string) ([]*model.Build, error) {
+func (s *loggingService) List(ctx context.Context, params model.BuildParams) ([]*model.Build, int64, error) {
 	start := time.Now()
-	records, err := s.service.List(ctx, packID)
+	records, counter, err := s.service.List(ctx, params)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
 		Str("method", "list").
 		Dur("duration", time.Since(start)).
-		Str("pack", packID).
+		Str("pack", params.PackID).
 		Logger()
 
 	if err != nil {
@@ -48,20 +50,20 @@ func (s *loggingService) List(ctx context.Context, packID string) ([]*model.Buil
 			Msg("")
 	}
 
-	return records, err
+	return records, counter, err
 }
 
 // Show implements the Service interface for logging.
-func (s *loggingService) Show(ctx context.Context, packID, name string) (*model.Build, error) {
+func (s *loggingService) Show(ctx context.Context, params model.BuildParams) (*model.Build, error) {
 	start := time.Now()
-	record, err := s.service.Show(ctx, packID, name)
+	record, err := s.service.Show(ctx, params)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
 		Str("method", "show").
 		Dur("duration", time.Since(start)).
-		Str("pack", packID).
-		Str("name", name).
+		Str("pack", params.PackID).
+		Str("name", params.BuildID).
 		Logger()
 
 	if err != nil && err != ErrNotFound {
@@ -77,16 +79,16 @@ func (s *loggingService) Show(ctx context.Context, packID, name string) (*model.
 }
 
 // Create implements the Service interface for logging.
-func (s *loggingService) Create(ctx context.Context, packID string, build *model.Build) (*model.Build, error) {
+func (s *loggingService) Create(ctx context.Context, params model.BuildParams, build *model.Build) error {
 	start := time.Now()
-	record, err := s.service.Create(ctx, packID, build)
+	err := s.service.Create(ctx, params, build)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
 		Str("method", "create").
 		Dur("duration", time.Since(start)).
-		Str("pack", packID).
-		Str("name", s.extractIdentifier(record)).
+		Str("pack", params.PackID).
+		Str("name", build.ID).
 		Logger()
 
 	if err != nil {
@@ -98,20 +100,20 @@ func (s *loggingService) Create(ctx context.Context, packID string, build *model
 			Msg("")
 	}
 
-	return record, err
+	return err
 }
 
 // Update implements the Service interface for logging.
-func (s *loggingService) Update(ctx context.Context, packID string, build *model.Build) (*model.Build, error) {
+func (s *loggingService) Update(ctx context.Context, params model.BuildParams, build *model.Build) error {
 	start := time.Now()
-	record, err := s.service.Update(ctx, packID, build)
+	err := s.service.Update(ctx, params, build)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
 		Str("method", "update").
 		Dur("duration", time.Since(start)).
-		Str("pack", packID).
-		Str("name", s.extractIdentifier(record)).
+		Str("pack", params.PackID).
+		Str("name", build.ID).
 		Logger()
 
 	if err != nil && err != ErrNotFound {
@@ -123,20 +125,20 @@ func (s *loggingService) Update(ctx context.Context, packID string, build *model
 			Msg("")
 	}
 
-	return record, err
+	return err
 }
 
 // Delete implements the Service interface for logging.
-func (s *loggingService) Delete(ctx context.Context, packID, name string) error {
+func (s *loggingService) Delete(ctx context.Context, params model.BuildParams) error {
 	start := time.Now()
-	err := s.service.Delete(ctx, packID, name)
+	err := s.service.Delete(ctx, params)
 
 	logger := s.logger.With().
 		Str("request", s.requestID(ctx)).
 		Str("method", "delete").
 		Dur("duration", time.Since(start)).
-		Str("pack", packID).
-		Str("name", name).
+		Str("pack", params.PackID).
+		Str("name", params.BuildID).
 		Logger()
 
 	if err != nil && err != ErrNotFound {
@@ -152,22 +154,20 @@ func (s *loggingService) Delete(ctx context.Context, packID, name string) error 
 }
 
 // Exists implements the Service interface for logging.
-func (s *loggingService) Exists(ctx context.Context, packID, name string) (bool, error) {
-	return s.service.Exists(ctx, packID, name)
+func (s *loggingService) Exists(ctx context.Context, params model.BuildParams) (bool, error) {
+	return s.service.Exists(ctx, params)
 }
 
-// Column implements the Service interface.
-func (s *loggingService) Column(ctx context.Context, packID, id, col string, val any) error {
-	return s.service.Column(ctx, packID, id, col, val)
+// Column implements the Service interface for logging.
+func (s *loggingService) Column(ctx context.Context, params model.BuildParams, col string, val any) error {
+	return s.service.Column(ctx, params, col, val)
 }
 
-func (s *loggingService) extractIdentifier(record *model.Build) string {
-	if record == nil {
-		return ""
-	}
+func (s *loggingService) requestID(ctx context.Context) string {
+	id, ok := hlog.IDFromCtx(ctx)
 
-	if record.ID != "" {
-		return record.ID
+	if ok {
+		return id.String()
 	}
 
 	return ""

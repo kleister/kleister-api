@@ -41,7 +41,8 @@ func (m *Metrics) Handler() http.HandlerFunc {
 	h := promhttp.HandlerFor(
 		m.Registry,
 		promhttp.HandlerOpts{
-			ErrorLog: Logger{},
+			EnableOpenMetrics: true,
+			ErrorLog:          Logger{},
 		},
 	)
 
