@@ -50,7 +50,7 @@ var (
 	defaultServerAddr       = "0.0.0.0:8080"
 	defaultMetricsPprof     = false
 	defaultServerHost       = "http://localhost:8080"
-	defaultServerRoot       = "/"
+	defaultServerRoot       = "/api"
 	defaultServerCert       = ""
 	defaultServerKey        = ""
 	defaultDatabaseDriver   = "sqlite3"

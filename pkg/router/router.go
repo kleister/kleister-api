@@ -98,22 +98,7 @@ func Server(
 	mux.Use(current.Middleware)
 
 	mux.Route(cfg.Server.Root, func(root chi.Router) {
-		root.Get("/", func(w http.ResponseWriter, r *http.Request) {
-
-			respond.JSON(
-				w,
-				r,
-				map[string]string{
-					"user": sess.Get(
-						r.Context(),
-						"user",
-					),
-				},
-			)
-
-		})
-
-		root.Route("/api/v1", func(rapi chi.Router) {
+		root.Route("/v1", func(rapi chi.Router) {
 			swagger, err := v1.GetSwagger()
 
 			if err != nil {
@@ -127,7 +112,6 @@ func Server(
 				{
 					URL: cfg.Server.Host + path.Join(
 						cfg.Server.Root,
-						"api",
 						"v1",
 					),
 				},
@@ -144,13 +128,11 @@ func Server(
 			rapi.Handle("/docs", oamw.SwaggerUI(oamw.SwaggerUIOpts{
 				Path: path.Join(
 					cfg.Server.Root,
-					"api",
 					"v1",
 					"docs",
 				),
 				SpecURL: cfg.Server.Host + path.Join(
 					cfg.Server.Root,
-					"api",
 					"v1",
 					"swagger",
 				),
@@ -366,7 +348,6 @@ func Server(
 			rapi.Handle("/storage/*", uploads.Handler(
 				path.Join(
 					cfg.Server.Root,
-					"api",
 					"v1",
 					"storage",
 				),
