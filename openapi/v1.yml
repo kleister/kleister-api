@@ -7766,7 +7766,7 @@ components:
           type: "string"
           default: "team"
           enum:
-            - "team"
+            - "user"
             - "admin"
             - "owner"
 
@@ -7799,7 +7799,7 @@ components:
           type: "string"
           default: "team"
           enum:
-            - "team"
+            - "user"
             - "admin"
             - "owner"
 
@@ -7829,7 +7829,7 @@ components:
           type: "string"
           default: "team"
           enum:
-            - "team"
+            - "user"
             - "admin"
             - "owner"
         created_at:
@@ -7870,7 +7870,7 @@ components:
           type: "string"
           default: "team"
           enum:
-            - "team"
+            - "user"
             - "admin"
             - "owner"
 
@@ -7903,7 +7903,7 @@ components:
           type: "string"
           default: "team"
           enum:
-            - "team"
+            - "user"
             - "admin"
             - "owner"
 
@@ -7933,7 +7933,7 @@ components:
           type: "string"
           default: "team"
           enum:
-            - "team"
+            - "user"
             - "admin"
             - "owner"
         created_at:
