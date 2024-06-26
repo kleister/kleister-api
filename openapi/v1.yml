@@ -7764,7 +7764,7 @@ components:
           type: "string"
         perm:
           type: "string"
-          default: "team"
+          default: "user"
           enum:
             - "user"
             - "admin"
@@ -7797,7 +7797,7 @@ components:
           type: "string"
         perm:
           type: "string"
-          default: "team"
+          default: "user"
           enum:
             - "user"
             - "admin"
@@ -7827,7 +7827,7 @@ components:
           $ref: "#/components/schemas/pack"
         perm:
           type: "string"
-          default: "team"
+          default: "user"
           enum:
             - "user"
             - "admin"
@@ -7868,7 +7868,7 @@ components:
           type: "string"
         perm:
           type: "string"
-          default: "team"
+          default: "user"
           enum:
             - "user"
             - "admin"
@@ -7901,7 +7901,7 @@ components:
           type: "string"
         perm:
           type: "string"
-          default: "team"
+          default: "user"
           enum:
             - "user"
             - "admin"
@@ -7931,7 +7931,7 @@ components:
           $ref: "#/components/schemas/mod"
         perm:
           type: "string"
-          default: "team"
+          default: "user"
           enum:
             - "user"
             - "admin"
