@@ -329,9 +329,9 @@ func (s *GormService) query(ctx context.Context) *gorm.DB {
 	).Joins(
 		"Team",
 	).Preload(
-		"User",
+		"Pack",
 	).Joins(
-		"User",
+		"Pack",
 	)
 }
 
