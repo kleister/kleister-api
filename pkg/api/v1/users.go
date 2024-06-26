@@ -1073,6 +1073,7 @@ func (a *API) convertUserPack(record *model.UserPack) UserPack {
 		PackId:    record.PackID,
 		Pack:      ToPtr(a.convertPack(record.Pack)),
 		UserId:    record.UserID,
+		Perm:      ToPtr(UserPackPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
@@ -1085,6 +1086,7 @@ func (a *API) convertUserMod(record *model.UserMod) UserMod {
 		ModId:     record.ModID,
 		Mod:       ToPtr(a.convertMod(record.Mod)),
 		UserId:    record.UserID,
+		Perm:      ToPtr(UserModPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}

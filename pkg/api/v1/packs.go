@@ -757,6 +757,7 @@ func (a *API) convertPackTeam(record *model.TeamPack) TeamPack {
 		PackId:    record.PackID,
 		TeamId:    record.TeamID,
 		Team:      ToPtr(a.convertTeam(record.Team)),
+		Perm:      ToPtr(TeamPackPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
@@ -769,6 +770,7 @@ func (a *API) convertPackUser(record *model.UserPack) UserPack {
 		PackId:    record.PackID,
 		UserId:    record.UserID,
 		User:      ToPtr(a.convertUser(record.User)),
+		Perm:      ToPtr(UserPackPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}

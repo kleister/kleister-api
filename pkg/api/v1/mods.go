@@ -781,6 +781,7 @@ func (a *API) convertModTeam(record *model.TeamMod) TeamMod {
 		ModId:     record.ModID,
 		TeamId:    record.TeamID,
 		Team:      ToPtr(a.convertTeam(record.Team)),
+		Perm:      ToPtr(TeamModPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
@@ -793,6 +794,7 @@ func (a *API) convertModUser(record *model.UserMod) UserMod {
 		ModId:     record.ModID,
 		UserId:    record.UserID,
 		User:      ToPtr(a.convertUser(record.User)),
+		Perm:      ToPtr(UserModPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
