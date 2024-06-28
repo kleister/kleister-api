@@ -683,7 +683,10 @@ func (a *API) convertBuild(record *model.Build) Build {
 		Public:    ToPtr(record.Public),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
-		Pack:      ToPtr(a.convertPack(record.Pack)),
+	}
+
+	if record.Pack != nil {
+		result.Pack = ToPtr(a.convertPack(record.Pack))
 	}
 
 	if record.MinecraftID != nil {

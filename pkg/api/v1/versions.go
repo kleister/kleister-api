@@ -441,7 +441,10 @@ func (a *API) convertVersion(record *model.Version) Version {
 		Public:    ToPtr(record.Public),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
-		Mod:       ToPtr(a.convertMod(record.Mod)),
+	}
+
+	if record.Mod != nil {
+		result.Mod = ToPtr(a.convertMod(record.Mod))
 	}
 
 	// TODO: File
