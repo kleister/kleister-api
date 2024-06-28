@@ -1012,9 +1012,9 @@ func (a *API) convertTeamUser(record *model.UserTeam) UserTeam {
 
 func (a *API) convertTeamPack(record *model.TeamPack) TeamPack {
 	result := TeamPack{
-		TeamId:    record.TeamID,
-		Team:      ToPtr(a.convertTeam(record.Team)),
 		PackId:    record.PackID,
+		Pack:      ToPtr(a.convertPack(record.Pack)),
+		TeamId:    record.TeamID,
 		Perm:      ToPtr(TeamPackPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
@@ -1025,9 +1025,9 @@ func (a *API) convertTeamPack(record *model.TeamPack) TeamPack {
 
 func (a *API) convertTeamMod(record *model.TeamMod) TeamMod {
 	result := TeamMod{
-		TeamId:    record.TeamID,
-		Team:      ToPtr(a.convertTeam(record.Team)),
 		ModId:     record.ModID,
+		Mod:       ToPtr(a.convertMod(record.Mod)),
+		TeamId:    record.TeamID,
 		Perm:      ToPtr(TeamModPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
