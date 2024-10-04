@@ -17,11 +17,11 @@ GO     ?= $(shell which go)
 #	@echo "Running golangci-lint"
 #	@$(GOLANGCI_LINT) <flags/args..>
 #
-GOLANGCI_LINT := $(GOBIN)/golangci-lint-v1.59.0
+GOLANGCI_LINT := $(GOBIN)/golangci-lint-v1.61.0
 $(GOLANGCI_LINT): $(BINGO_DIR)/golangci-lint.mod
 	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
-	@echo "(re)installing $(GOBIN)/golangci-lint-v1.59.0"
-	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=golangci-lint.mod -o=$(GOBIN)/golangci-lint-v1.59.0 "github.com/golangci/golangci-lint/cmd/golangci-lint"
+	@echo "(re)installing $(GOBIN)/golangci-lint-v1.61.0"
+	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=golangci-lint.mod -o=$(GOBIN)/golangci-lint-v1.61.0 "github.com/golangci/golangci-lint/cmd/golangci-lint"
 
 MOCKGEN := $(GOBIN)/mockgen-v1.6.0
 $(MOCKGEN): $(BINGO_DIR)/mockgen.mod
@@ -29,11 +29,11 @@ $(MOCKGEN): $(BINGO_DIR)/mockgen.mod
 	@echo "(re)installing $(GOBIN)/mockgen-v1.6.0"
 	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=mockgen.mod -o=$(GOBIN)/mockgen-v1.6.0 "github.com/golang/mock/mockgen"
 
-OAPI_CODEGEN := $(GOBIN)/oapi-codegen-v2.2.0
+OAPI_CODEGEN := $(GOBIN)/oapi-codegen-v2.4.1
 $(OAPI_CODEGEN): $(BINGO_DIR)/oapi-codegen.mod
 	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
-	@echo "(re)installing $(GOBIN)/oapi-codegen-v2.2.0"
-	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=oapi-codegen.mod -o=$(GOBIN)/oapi-codegen-v2.2.0 "github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen"
+	@echo "(re)installing $(GOBIN)/oapi-codegen-v2.4.1"
+	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=oapi-codegen.mod -o=$(GOBIN)/oapi-codegen-v2.4.1 "github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen"
 
 REFLEX := $(GOBIN)/reflex-v0.3.1
 $(REFLEX): $(BINGO_DIR)/reflex.mod
@@ -41,15 +41,15 @@ $(REFLEX): $(BINGO_DIR)/reflex.mod
 	@echo "(re)installing $(GOBIN)/reflex-v0.3.1"
 	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=reflex.mod -o=$(GOBIN)/reflex-v0.3.1 "github.com/cespare/reflex"
 
-REVIVE := $(GOBIN)/revive-v1.3.7
+REVIVE := $(GOBIN)/revive-v1.4.0
 $(REVIVE): $(BINGO_DIR)/revive.mod
 	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
-	@echo "(re)installing $(GOBIN)/revive-v1.3.7"
-	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=revive.mod -o=$(GOBIN)/revive-v1.3.7 "github.com/mgechev/revive"
+	@echo "(re)installing $(GOBIN)/revive-v1.4.0"
+	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=revive.mod -o=$(GOBIN)/revive-v1.4.0 "github.com/mgechev/revive"
 
-STATICCHECK := $(GOBIN)/staticcheck-v0.4.7
+STATICCHECK := $(GOBIN)/staticcheck-v0.5.1
 $(STATICCHECK): $(BINGO_DIR)/staticcheck.mod
 	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
-	@echo "(re)installing $(GOBIN)/staticcheck-v0.4.7"
-	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=staticcheck.mod -o=$(GOBIN)/staticcheck-v0.4.7 "honnef.co/go/tools/cmd/staticcheck"
+	@echo "(re)installing $(GOBIN)/staticcheck-v0.5.1"
+	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=staticcheck.mod -o=$(GOBIN)/staticcheck-v0.5.1 "honnef.co/go/tools/cmd/staticcheck"
 
