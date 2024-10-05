@@ -70,11 +70,10 @@ type Session struct {
 
 // Admin defines the initial admin user configuration.
 type Admin struct {
-	Create   bool     `mapstructure:"create"`
-	Username string   `mapstructure:"username"`
-	Password string   `mapstructure:"password"`
-	Email    string   `mapstructure:"email"`
-	Users    []string `mapstructure:"users"`
+	Create   bool   `mapstructure:"create"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
+	Email    string `mapstructure:"email"`
 }
 
 // Config is a combination of all available configurations.

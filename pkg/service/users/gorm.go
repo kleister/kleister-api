@@ -40,7 +40,7 @@ func (s *GormService) WithPrincipal(principal *model.User) Service {
 }
 
 // External implements the Service interface for database persistence.
-func (s *GormService) External(ctx context.Context, provider, ref, username, email, fullname string) (*model.User, error) {
+func (s *GormService) External(ctx context.Context, provider, ref, username, email, fullname string, admin bool) (*model.User, error) {
 	tx := s.handle.WithContext(
 		ctx,
 	).Begin()
@@ -75,12 +75,12 @@ func (s *GormService) External(ctx context.Context, provider, ref, username, ema
 
 	record.User.Email = email
 	record.User.Fullname = fullname
+	record.User.Admin = admin
 
 	if record.User.ID == "" {
 		record.User.Username = username
 		record.User.Password = secret.Generate(32)
 		record.User.Active = true
-		record.User.Admin = s.checkAdmin(email) || s.checkAdmin(username)
 
 		if err := tx.Create(record).Error; err != nil {
 			return nil, err
@@ -90,9 +90,11 @@ func (s *GormService) External(ctx context.Context, provider, ref, username, ema
 			return nil, err
 		}
 	} else {
-		record.User.Admin = s.checkAdmin(email) || s.checkAdmin(username)
-
 		if err := tx.Save(record).Error; err != nil {
+			return nil, err
+		}
+
+		if err := tx.Save(record.User).Error; err != nil {
 			return nil, err
 		}
 
@@ -423,14 +425,4 @@ func (s *GormService) validSort(val string) (string, bool) {
 	}
 
 	return "username", true
-}
-
-func (s *GormService) checkAdmin(val string) bool {
-	for _, admin := range s.config.Admin.Users {
-		if val == admin {
-			return true
-		}
-	}
-
-	return false
 }

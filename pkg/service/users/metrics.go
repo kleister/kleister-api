@@ -65,8 +65,8 @@ func (s *metricsService) WithPrincipal(principal *model.User) Service {
 }
 
 // External implements the Service interface for metrics.
-func (s *metricsService) External(ctx context.Context, provider, ref, username, email, fullname string) (*model.User, error) {
-	return s.service.External(ctx, provider, ref, username, email, fullname)
+func (s *metricsService) External(ctx context.Context, provider, ref, username, email, fullname string, admin bool) (*model.User, error) {
+	return s.service.External(ctx, provider, ref, username, email, fullname, admin)
 }
 
 // AuthByID implements the Service interface for metrics.

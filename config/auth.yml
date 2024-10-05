@@ -8,6 +8,9 @@ providers:
     scopes:
       - read:user
       - user:email
+    admins:
+      users:
+        - your-username
 
   - driver: gitea
     name: gitea
@@ -19,6 +22,9 @@ providers:
       auth: https://gitea.com/login/oauth/authorize
       token: https://gitea.com/login/oauth/access_token
       profile: https://gitea.com/api/v1/user
+    admins:
+      users:
+        - your-username
 
   - driver: gitlab
     name: gitlab
@@ -30,6 +36,9 @@ providers:
       auth: https://gitlab.com/oauth/authorize
       token: https://gitlab.com/oauth/token
       profile: https://gitlab.com/api/v3/user
+    admins:
+      users:
+        - your-username
 
   - driver: google
     name: google
@@ -37,6 +46,9 @@ providers:
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
     scopes: []
+    admins:
+      emails:
+        - *@webhippie.de
 
   - driver: azuread
     name: azuread
@@ -44,6 +56,9 @@ providers:
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
     scopes: []
+    admins:
+      emails:
+        - *@webhippie.de
 
   - driver: oidc
     name: keycloak
@@ -57,19 +72,30 @@ providers:
       login: preferred_username
       name: name
       email: email
+      role: roles
+    admins:
+      roles:
+        - Admins
 
   - driver: oidc
     name: authentik
     callback: http://localhost:8080/api/v1/auth/authentik/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes: []
+    scopes:
+      - openid
+      - email
+      - profile
     endpoints:
-      discovery: https://authentik.example.com/application/o/kleister/.well-known/openid-configuration
+      discovery: https://authentik.example.com/application/o/kleister/
     mappings:
       login: preferred_username
       name: name
       email: email
+      role: groups
+    admins:
+      roles:
+        - Admins
 
   - driver: oidc
     name: kanidm

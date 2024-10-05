@@ -12,8 +12,10 @@ import (
 	"strings"
 
 	"github.com/Machiel/slugify"
+	"github.com/gobwas/glob"
 	"github.com/kleister/kleister-api/pkg/middleware/current"
 	"github.com/kleister/kleister-api/pkg/model"
+	"github.com/kleister/kleister-api/pkg/providers"
 	"github.com/kleister/kleister-api/pkg/service/users"
 	"github.com/kleister/kleister-api/pkg/token"
 	"github.com/markbates/goth"
@@ -168,11 +170,9 @@ func (a *API) ExternalCallback(ctx context.Context, request ExternalCallbackRequ
 		Str("provider", external.Provider).
 		Str("email", external.Email).
 		Str("name", external.Name).
-		Str("firstname", external.FirstName).
-		Str("lastname", external.LastName).
 		Str("nickname", external.NickName).
 		Str("user_id", external.UserID).
-		Msg("requested auth")
+		Msg("Requested auth")
 
 	if err == nil {
 		nickname := slugify.Slugify(external.NickName)
@@ -184,6 +184,7 @@ func (a *API) ExternalCallback(ctx context.Context, request ExternalCallbackRequ
 			nickname,
 			external.Email,
 			external.Name,
+			detectAdminFor(request.Provider, external),
 		)
 
 		if err != nil {
@@ -260,11 +261,9 @@ func (a *API) ExternalCallback(ctx context.Context, request ExternalCallbackRequ
 		Str("provider", external.Provider).
 		Str("email", external.Email).
 		Str("name", external.Name).
-		Str("firstname", external.FirstName).
-		Str("lastname", external.LastName).
 		Str("nickname", external.NickName).
 		Str("user_id", external.UserID).
-		Msg("requested auth")
+		Msg("Requested auth")
 
 	if err != nil {
 		log.Error().
@@ -287,6 +286,7 @@ func (a *API) ExternalCallback(ctx context.Context, request ExternalCallbackRequ
 		nickname,
 		external.Email,
 		external.Name,
+		detectAdminFor(request.Provider, external),
 	)
 
 	if err != nil {
@@ -510,4 +510,49 @@ func verifyAuthState(state *string, sess goth.Session) error {
 	}
 
 	return nil
+}
+
+func detectAdminFor(providerName string, external goth.User) bool {
+	if cfg, ok := providers.Config[providerName]; ok {
+		for _, user := range cfg.Admins.Users {
+			if user == external.NickName {
+				return true
+			}
+		}
+
+		for _, email := range cfg.Admins.Emails {
+			g, err := glob.Compile(email)
+
+			if err != nil {
+				log.Error().
+					Str("provider", providerName).
+					Str("glob", email).
+					Msg("Failed to compile email globbing")
+
+				continue
+			}
+
+			if g.Match(external.Email) {
+				return true
+			}
+		}
+
+		if cfg.Mappings.Role != "" {
+			if mappedRoles, ok := external.RawData[cfg.Mappings.Role]; ok {
+				for _, role := range cfg.Admins.Roles {
+					for _, mappedRole := range mappedRoles.([]interface{}) {
+						if role == mappedRole.(string) {
+							return true
+						}
+					}
+				}
+			}
+		}
+	} else {
+		log.Error().
+			Str("provider", providerName).
+			Msg("Failed to detect a provider config")
+	}
+
+	return false
 }

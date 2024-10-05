@@ -76,7 +76,6 @@ var (
 	defaultAdminUsername    = "admin"
 	defaultAdminPassword    = "admin"
 	defaultAdminEmail       = "admin@localhost"
-	defaultAdminUsers       = []string{}
 	defaultAuthConfig       = ""
 )
 
@@ -206,10 +205,6 @@ func init() {
 	serverCmd.PersistentFlags().String("admin-email", defaultAdminEmail, "Initial admin email")
 	viper.SetDefault("admin.email", defaultAdminEmail)
 	_ = viper.BindPFlag("admin.email", serverCmd.PersistentFlags().Lookup("admin-email"))
-
-	serverCmd.PersistentFlags().StringSlice("admin-users", defaultAdminUsers, "List of admin usernames")
-	viper.SetDefault("admin.users", defaultAdminUsers)
-	_ = viper.BindPFlag("admin.users", serverCmd.PersistentFlags().Lookup("admin-users"))
 
 	serverCmd.PersistentFlags().String("auth-config", defaultAuthConfig, "Path to authentication config for OAuth2/OIDC")
 	viper.SetDefault("auth.config", defaultAuthConfig)

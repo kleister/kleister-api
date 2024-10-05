@@ -99,6 +99,7 @@
               packages = with pkgs; [
                 bingo
                 gnumake
+                goreleaser
                 httpie
                 nixpkgs-fmt
                 sqlite

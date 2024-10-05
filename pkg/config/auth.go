@@ -14,6 +14,14 @@ type AuthMappings struct {
 	Login string `mapstructure:"login"`
 	Name  string `mapstructure:"name"`
 	Email string `mapstructure:"email"`
+	Role  string `mapstructure:"role"`
+}
+
+// AuthAdmins defines the mappings for administrative users.
+type AuthAdmins struct {
+	Users  []string `mapstructure:"users"`
+	Emails []string `mapstructure:"emails"`
+	Roles  []string `mapstructure:"roles"`
 }
 
 // AuthProvider defines a single provider auth source.
@@ -26,6 +34,7 @@ type AuthProvider struct {
 	Scopes       []string      `mapstructure:"scopes"`
 	Endpoints    AuthEndpoints `mapstructure:"endpoints"`
 	Mappings     AuthMappings  `mapstructure:"mappings"`
+	Admins       AuthAdmins    `mapstructure:"admins"`
 }
 
 // AuthConfig defines the configuration for auth sources.

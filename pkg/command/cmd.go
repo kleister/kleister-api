@@ -10,7 +10,7 @@ import (
 var (
 	rootCmd = &cobra.Command{
 		Use:           "kleister-api",
-		Short:         "Etherpad for markdown with go",
+		Short:         "Etherpad for markdown with Go",
 		Version:       version.String,
 		SilenceErrors: false,
 		SilenceUsage:  true,

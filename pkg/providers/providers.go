@@ -18,6 +18,9 @@ import (
 var (
 	// ErrMissingDiscoveryEndpoint defines the error of an discovery endpoint is missing.
 	ErrMissingDiscoveryEndpoint = fmt.Errorf("missing discovery endpoint")
+
+	// Config stores the configuration mapped by the provider name for easier reference.
+	Config = make(map[string]config.AuthProvider)
 )
 
 // Providers simple stores the registered providers for goth.
@@ -125,6 +128,8 @@ func Register(opts ...Option) error {
 			default:
 				return fmt.Errorf("unsupport auth provider: %s", provider.Driver)
 			}
+
+			Config[provider.Name] = provider
 		}
 
 		goth.UseProviders(client.providers...)

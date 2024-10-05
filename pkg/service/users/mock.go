@@ -123,18 +123,18 @@ func (mr *MockServiceMockRecorder) Exists(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // External mocks base method.
-func (m *MockService) External(arg0 context.Context, arg1, arg2, arg3, arg4, arg5 string) (*model.User, error) {
+func (m *MockService) External(arg0 context.Context, arg1, arg2, arg3, arg4, arg5 string, arg6 bool) (*model.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "External", arg0, arg1, arg2, arg3, arg4, arg5)
+	ret := m.ctrl.Call(m, "External", arg0, arg1, arg2, arg3, arg4, arg5, arg6)
 	ret0, _ := ret[0].(*model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // External indicates an expected call of External.
-func (mr *MockServiceMockRecorder) External(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) External(arg0, arg1, arg2, arg3, arg4, arg5, arg6 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "External", reflect.TypeOf((*MockService)(nil).External), arg0, arg1, arg2, arg3, arg4, arg5)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "External", reflect.TypeOf((*MockService)(nil).External), arg0, arg1, arg2, arg3, arg4, arg5, arg6)
 }
 
 // List mocks base method.
