@@ -1,0 +1,14 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "make bin/kleister-api-debug"
+
+bin = "bin/kleister-api-debug"
+args_bin = "--log-pretty --log-color --log-level debug server --session-secret TxHrYxmAg01rBeEWrHn1BjOP --admin-email kleister@webhippie.de"
+
+exclude_dir = [".direnv", ".devenv", "storage"]
+exclude_regex = ["_test\\.go"]
+
+[misc]
+clean_on_exit = true

@@ -235,7 +235,3 @@ release-checksum:
 
 .PHONY: release-finish
 release-finish: release-reduce release-checksum
-
-.PHONY: watch
-watch: $(REFLEX)
-	$(REFLEX) -c reflex.conf
