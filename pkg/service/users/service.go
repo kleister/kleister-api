@@ -11,8 +11,8 @@ var (
 	// ErrNotFound is returned when a user was not found.
 	ErrNotFound = errors.New("user not found")
 
-	// ErrWrongCredentials is returned when credentials are wrong.
-	ErrWrongCredentials = errors.New("wrong credentials provided")
+	// ErrBadCredentials is returned when credentials are wrong.
+	ErrBadCredentials = errors.New("wrong credentials provided")
 )
 
 // Service handles all interactions with users.

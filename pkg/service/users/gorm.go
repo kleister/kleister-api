@@ -137,7 +137,7 @@ func (s *GormService) AuthByCreds(ctx context.Context, username, password string
 		[]byte(record.Hashword),
 		[]byte(password),
 	); err != nil {
-		return nil, ErrWrongCredentials
+		return nil, ErrBadCredentials
 	}
 
 	return record, nil

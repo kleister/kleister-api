@@ -366,7 +366,7 @@ func (a *API) LoginAuth(ctx context.Context, request LoginAuthRequestObject) (Lo
 			}, nil
 		}
 
-		if errors.Is(err, users.ErrWrongCredentials) {
+		if errors.Is(err, users.ErrBadCredentials) {
 			return LoginAuth401JSONResponse{
 				Message: ToPtr("Wrong username or password"),
 				Status:  ToPtr(http.StatusUnauthorized),
