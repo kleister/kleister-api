@@ -45,14 +45,18 @@ session:
   expire: 24h0m0s
   secure: false
 
+scim:
+  enabled: false
+  token:
+
 admin:
   create: true
   username: admin
   password: p455w0rd
   email: admin@localhost
   users:
-  - username1
-  - username2
-  - username3
+    - username1
+    - username2
+    - username3
 
 ...

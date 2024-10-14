@@ -21,6 +21,7 @@ import (
 	"github.com/kleister/kleister-api/pkg/middleware/header"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/respond"
+	"github.com/kleister/kleister-api/pkg/scim"
 	buildversions "github.com/kleister/kleister-api/pkg/service/build_versions"
 	"github.com/kleister/kleister-api/pkg/service/builds"
 	"github.com/kleister/kleister-api/pkg/service/fabric"
@@ -98,7 +99,33 @@ func Server(
 	mux.Use(current.Middleware)
 
 	mux.Route(cfg.Server.Root, func(root chi.Router) {
-		root.Route("/v1", func(rapi chi.Router) {
+		if cfg.Scim.Enabled {
+			srv, err := scim.New(
+				scim.WithRoot(
+					path.Join(
+						cfg.Server.Root,
+						"scim",
+						"v2",
+					),
+				),
+				scim.WithStore(
+					storage.Handle(),
+				),
+				scim.WithConfig(
+					cfg.Scim,
+				),
+			).Server()
+
+			if err != nil {
+				log.Error().
+					Err(err).
+					Msg("Failed to linitialize scim server")
+			}
+
+			root.Mount("/scim/v2", srv)
+		}
+
+		root.Route("/v1", func(r chi.Router) {
 			swagger, err := v1.GetSwagger()
 
 			if err != nil {
@@ -117,7 +144,7 @@ func Server(
 				},
 			}
 
-			rapi.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
+			r.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
 				respond.JSON(
 					w,
 					r,
@@ -125,7 +152,7 @@ func Server(
 				)
 			})
 
-			rapi.Handle("/docs", oamw.SwaggerUI(oamw.SwaggerUIOpts{
+			r.Handle("/docs", oamw.SwaggerUI(oamw.SwaggerUIOpts{
 				Path: path.Join(
 					cfg.Server.Root,
 					"v1",
@@ -138,7 +165,7 @@ func Server(
 				),
 			}, nil))
 
-			rapi.With(cgmw.OapiRequestValidatorWithOptions(
+			r.With(cgmw.OapiRequestValidatorWithOptions(
 				swagger,
 				&cgmw.Options{
 					SilenceServersWarning: true,
@@ -345,7 +372,7 @@ func Server(
 				),
 			))
 
-			rapi.Handle("/storage/*", uploads.Handler(
+			r.Handle("/storage/*", uploads.Handler(
 				path.Join(
 					cfg.Server.Root,
 					"v1",

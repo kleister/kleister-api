@@ -72,6 +72,8 @@ var (
 	defaultSessionSecret    = secret.Generate(32)
 	defaultSessionExpire    = time.Hour * 24
 	defaultSessionSecure    = false
+	defaultScimEnabled      = false
+	defaultScimToken        = ""
 	defaultAdminCreate      = true
 	defaultAdminUsername    = "admin"
 	defaultAdminPassword    = "admin"
@@ -189,6 +191,14 @@ func init() {
 	serverCmd.PersistentFlags().Bool("session-secure", defaultSessionSecure, "Enable secure cookie on HTTPS")
 	viper.SetDefault("session.secure", defaultSessionSecure)
 	_ = viper.BindPFlag("session.secure", serverCmd.PersistentFlags().Lookup("session-secure"))
+
+	serverCmd.PersistentFlags().Bool("scim-enabled", defaultScimEnabled, "Enable SCIM provisioning integration")
+	viper.SetDefault("scim.enabled", defaultScimEnabled)
+	_ = viper.BindPFlag("scim.enabled", serverCmd.PersistentFlags().Lookup("scim-enabled"))
+
+	serverCmd.PersistentFlags().String("scim-token", defaultScimToken, "Bearer token for SCIM authentication")
+	viper.SetDefault("scim.token", defaultScimToken)
+	_ = viper.BindPFlag("scim.token", serverCmd.PersistentFlags().Lookup("scim-token"))
 
 	serverCmd.PersistentFlags().Bool("admin-create", defaultAdminCreate, "Create an initial admin user")
 	viper.SetDefault("admin.create", defaultAdminCreate)

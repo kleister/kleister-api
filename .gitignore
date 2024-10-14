@@ -3,6 +3,7 @@
 
 coverage.out
 
-/bin
-/dist
-/storage
+bin/
+dist/
+storage/
+tmp/

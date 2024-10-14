@@ -12,10 +12,11 @@ import (
 // User within Kleister.
 type User struct {
 	ID        string `gorm:"primaryKey;length:20"`
+	Scim      string `gorm:"length:255"`
 	Username  string `gorm:"unique;length:255"`
 	Password  string `gorm:"-"`
 	Hashword  string `gorm:"lenght:255"`
-	Email     string `gorm:"unique;length:255"`
+	Email     string `gorm:"length:255"`
 	Fullname  string `gorm:"length:255"`
 	Profile   string `gorm:"-"`
 	Active    bool   `gorm:"default:false"`

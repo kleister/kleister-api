@@ -68,6 +68,12 @@ type Session struct {
 	Secure bool          `mapstructure:"secure"`
 }
 
+// Scim defines the scim provisioning configuration.
+type Scim struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Token   string `mapstructure:"token"`
+}
+
 // Admin defines the initial admin user configuration.
 type Admin struct {
 	Create   bool   `mapstructure:"create"`
@@ -85,6 +91,7 @@ type Config struct {
 	Database Database `mapstructure:"database"`
 	Upload   Upload   `mapstructure:"upload"`
 	Session  Session  `mapstructure:"session"`
+	Scim     Scim     `mapstructure:"scim"`
 	Admin    Admin    `mapstructure:"admin"`
 }
 

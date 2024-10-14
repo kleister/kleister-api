@@ -13,6 +13,7 @@ require (
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e
 	github.com/dchest/uniuri v1.2.0
 	github.com/drexedam/gravatar v0.0.0-20210327211422-e94eea8c338e
+	github.com/elimity-com/scim v0.0.0-20240320110924-172bf2aee9c8
 	github.com/getkin/kin-openapi v0.128.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-chi/chi/v5 v5.1.0
@@ -32,6 +33,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.20.4
 	github.com/rs/zerolog v1.33.0
+	github.com/scim2/filter-parser/v2 v2.2.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
@@ -50,6 +52,8 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/di-wu/parser v0.2.2 // indirect
+	github.com/di-wu/xsd-datetime v1.0.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/glebarez/go-sqlite v1.22.0 // indirect

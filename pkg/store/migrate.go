@@ -15,6 +15,7 @@ var (
 			Migrate: func(tx *gorm.DB) error {
 				type User struct {
 					ID        string `gorm:"primaryKey;length:20"`
+					Scim      string `gorm:"length:255"`
 					Username  string `gorm:"unique;length:255"`
 					Hashword  string `gorm:"length:255"`
 					Email     string `gorm:"length:255"`
@@ -81,6 +82,7 @@ var (
 			Migrate: func(tx *gorm.DB) error {
 				type Team struct {
 					ID        string `gorm:"primaryKey;length:20"`
+					Scim      string `gorm:"length:255"`
 					Slug      string `gorm:"unique;length:255"`
 					Name      string `gorm:"unique;length:255"`
 					CreatedAt time.Time

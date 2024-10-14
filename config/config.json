@@ -45,6 +45,10 @@
     "expire": "24h0m0s",
     "secure": false
   },
+  "scim": {
+    "enabled": true,
+    "token": ""
+  },
   "admin": {
     "create": true,
     "username": "admin",
