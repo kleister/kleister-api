@@ -22,7 +22,7 @@ guidance how to install this take a look at our [documentation][docs].
 
 Make sure you have a working Go environment, for further reference or a guide
 take a look at the [install instructions][golang]. This project requires
-Go >= v1.18, at least that's the version we are using.
+Go >= v1.23.1, at least that's the version we are using.
 
 ```console
 git clone https://github.com/kleister/kleister-api.git
