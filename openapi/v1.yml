@@ -115,6 +115,33 @@ paths:
               schema:
                 $ref: "#/components/schemas/notification"
 
+  /auth/providers:
+    get:
+      summary: "Fetch the available auth providers"
+      operationId: "ExternalProviders"
+      tags:
+        - "auth"
+      security: []
+      responses:
+        "200":
+          description: "A collection of auth providers"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/providers"
+        "500":
+          description: "Some internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/notification"
+        default:
+          description: "Some error unrelated to the handler"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/notification"
+
   /auth/login:
     post:
       summary: "Authenticate an user by credentials"
@@ -8434,6 +8461,37 @@ components:
         updated_at:
           type: "string"
           format: "date-time"
+          readOnly: true
+
+    providers:
+      title: "Providers"
+      description: "Model to represent list of auth providers"
+      type: "object"
+      properties:
+        total:
+          type: integer
+          format: int64
+        versions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/provider"
+
+    provider:
+      title: "Provider"
+      description: "Model to represent auth provider"
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          readOnly: true
+        driver:
+          type: "string"
+          readOnly: true
+        display:
+          type: "string"
+          readOnly: true
+        icon:
+          type: "string"
           readOnly: true
 
     notification:

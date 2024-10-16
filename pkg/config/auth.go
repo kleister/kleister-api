@@ -28,6 +28,8 @@ type AuthAdmins struct {
 type AuthProvider struct {
 	Driver       string        `mapstructure:"driver"`
 	Name         string        `mapstructure:"name"`
+	Display      string        `mapstructure:"display"`
+	Icon         string        `mapstructure:"icon"`
 	Callback     string        `mapstructure:"callback"`
 	ClientID     string        `mapstructure:"client_id"`
 	ClientSecret string        `mapstructure:"client_secret"`

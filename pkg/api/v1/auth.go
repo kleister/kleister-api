@@ -350,6 +350,28 @@ func (r ExternalCallbackRedirectResponse) VisitExternalCallbackResponse(w http.R
 	return nil
 }
 
+// ExternalProviders implements the v1.ServerInterface.
+func (a *API) ExternalProviders(_ context.Context, _ ExternalProvidersRequestObject) (ExternalProvidersResponseObject, error) {
+	records := make([]Provider, 0)
+
+	for _, provider := range providers.Config {
+		records = append(
+			records,
+			Provider{
+				Name:    ToPtr(provider.Name),
+				Driver:  ToPtr(provider.Driver),
+				Display: ToPtr(provider.Display),
+				Icon:    ToPtr(provider.Icon),
+			},
+		)
+	}
+
+	return ExternalProviders200JSONResponse{
+		Total:    ToPtr(int64(len(records))),
+		Versions: ToPtr(records),
+	}, nil
+}
+
 // LoginAuth implements the v1.ServerInterface.
 func (a *API) LoginAuth(ctx context.Context, request LoginAuthRequestObject) (LoginAuthResponseObject, error) {
 	user, err := a.users.AuthByCreds(

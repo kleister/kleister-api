@@ -2,6 +2,8 @@
 providers:
   - driver: github
     name: github
+    display: Sign in with GitHub
+    icon: fa-brands fa-github
     callback: http://localhost:8080/api/v1/auth/github/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
@@ -14,6 +16,8 @@ providers:
 
   - driver: gitea
     name: gitea
+    display: Sign in with Gitea
+    icon: fa-solid fa-code-merge
     callback: http://localhost:8080/api/v1/auth/gitea/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
@@ -28,6 +32,8 @@ providers:
 
   - driver: gitlab
     name: gitlab
+    display: Sign in with Gitlab
+    icon: fa-brands fa-gitlab
     callback: http://localhost:8080/api/v1/auth/gitlab/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
@@ -42,6 +48,8 @@ providers:
 
   - driver: google
     name: google
+    display: Sign in with Google
+    icon: fa-brands fa-google
     callback: http://localhost:8080/api/v1/auth/google/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
@@ -52,6 +60,8 @@ providers:
 
   - driver: azuread
     name: azuread
+    display: Sign in with EntraID
+    icon: fa-brands fa-microsoft
     callback: http://localhost:8080/api/v1/auth/azuread/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
@@ -62,6 +72,8 @@ providers:
 
   - driver: oidc
     name: keycloak
+    display: Sign in with Keycloak
+    icon: fa-brands fa-openid
     callback: http://localhost:8080/api/v1/auth/keycloak/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
@@ -79,6 +91,8 @@ providers:
 
   - driver: oidc
     name: authentik
+    display: Sign in with Authentik
+    icon: fa-brands fa-openid
     callback: http://localhost:8080/api/v1/auth/authentik/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
@@ -99,6 +113,8 @@ providers:
 
   - driver: oidc
     name: kanidm
+    display: Sign in with Kanidm
+    icon: fa-brands fa-openid
     callback: http://localhost:8080/api/v1/auth/kanidm/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
