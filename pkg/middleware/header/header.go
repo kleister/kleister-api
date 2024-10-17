@@ -26,7 +26,7 @@ func Options(next http.Handler) http.Handler {
 		} else {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "authorization, origin, content-type, accept, connect-protocol-version")
+			w.Header().Set("Access-Control-Allow-Headers", "authorization, origin, content-type, accept, connect-protocol-version, x-api-key")
 			w.Header().Set("Allow", "HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS")
 
 			w.WriteHeader(http.StatusOK)
