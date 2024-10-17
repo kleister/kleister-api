@@ -59,6 +59,28 @@ func Register(opts ...Option) error {
 
 		for _, provider := range client.config.Providers {
 			switch provider.Driver {
+			case "google":
+				p, err := googleProvider(provider)
+
+				if err != nil {
+					return err
+				}
+
+				client.providers = append(
+					client.providers,
+					p,
+				)
+			case "azuread":
+				p, err := azureadProvider(provider)
+
+				if err != nil {
+					return err
+				}
+
+				client.providers = append(
+					client.providers,
+					p,
+				)
 			case "github":
 				p, err := githubProvider(provider)
 
@@ -92,28 +114,6 @@ func Register(opts ...Option) error {
 					client.providers,
 					p,
 				)
-			case "google":
-				p, err := googleProvider(provider)
-
-				if err != nil {
-					return err
-				}
-
-				client.providers = append(
-					client.providers,
-					p,
-				)
-			case "azuread":
-				p, err := azureadProvider(provider)
-
-				if err != nil {
-					return err
-				}
-
-				client.providers = append(
-					client.providers,
-					p,
-				)
 			case "oidc":
 				p, err := oidcProvider(provider)
 
@@ -136,150 +136,6 @@ func Register(opts ...Option) error {
 	}
 
 	return nil
-}
-
-func githubProvider(cfg config.AuthProvider) (*github.Provider, error) {
-	log.Info().
-		Str("service", "provider").
-		Str("provider", "github").
-		Str("name", cfg.Name).
-		Msg("Registering auth provider")
-
-	authEndpoint := "https://github.com/login/oauth/authorize"
-	if cfg.Endpoints.Auth != "" {
-		authEndpoint = cfg.Endpoints.Auth
-	}
-
-	tokenEndpoint := "https://github.com/login/oauth/access_token"
-	if cfg.Endpoints.Auth != "" {
-		tokenEndpoint = cfg.Endpoints.Auth
-	}
-
-	profileEndpoint := "https://api.github.com/user"
-	if cfg.Endpoints.Auth != "" {
-		profileEndpoint = cfg.Endpoints.Auth
-	}
-
-	emailEndpoint := "https://api.github.com/user/emails"
-	if cfg.Endpoints.Auth != "" {
-		emailEndpoint = cfg.Endpoints.Auth
-	}
-
-	clientID, err := config.Value(cfg.ClientID)
-	if err != nil {
-		return nil, err
-	}
-
-	clientSecret, err := config.Value(cfg.ClientSecret)
-	if err != nil {
-		return nil, err
-	}
-
-	provider := github.NewCustomisedURL(
-		clientID,
-		clientSecret,
-		cfg.Callback,
-		authEndpoint,
-		tokenEndpoint,
-		profileEndpoint,
-		emailEndpoint,
-		cfg.Scopes...,
-	)
-
-	provider.SetName(cfg.Name)
-	return provider, nil
-}
-
-func giteaProvider(cfg config.AuthProvider) (*gitea.Provider, error) {
-	log.Info().
-		Str("service", "provider").
-		Str("provider", "gitea").
-		Str("name", cfg.Name).
-		Msg("Registering auth provider")
-
-	authEndpoint := "https://gitea.com/login/oauth/authorize"
-	if cfg.Endpoints.Auth != "" {
-		authEndpoint = cfg.Endpoints.Auth
-	}
-
-	tokenEndpoint := "https://gitea.com/login/oauth/access_token"
-	if cfg.Endpoints.Auth != "" {
-		tokenEndpoint = cfg.Endpoints.Auth
-	}
-
-	profileEndpoint := "https://gitea.com/api/v1/user"
-	if cfg.Endpoints.Auth != "" {
-		profileEndpoint = cfg.Endpoints.Auth
-	}
-
-	clientID, err := config.Value(cfg.ClientID)
-	if err != nil {
-		return nil, err
-	}
-
-	clientSecret, err := config.Value(cfg.ClientSecret)
-	if err != nil {
-		return nil, err
-	}
-
-	provider := gitea.NewCustomisedURL(
-		clientID,
-		clientSecret,
-		cfg.Callback,
-		authEndpoint,
-		tokenEndpoint,
-		profileEndpoint,
-		cfg.Scopes...,
-	)
-
-	provider.SetName(cfg.Name)
-	return provider, nil
-}
-
-func gitlabProvider(cfg config.AuthProvider) (*gitlab.Provider, error) {
-	log.Info().
-		Str("service", "provider").
-		Str("provider", "gitlab").
-		Str("name", cfg.Name).
-		Msg("Registering auth provider")
-
-	authEndpoint := "https://gitlab.com/oauth/authorize"
-	if cfg.Endpoints.Auth != "" {
-		authEndpoint = cfg.Endpoints.Auth
-	}
-
-	tokenEndpoint := "https://gitlab.com/oauth/token"
-	if cfg.Endpoints.Auth != "" {
-		tokenEndpoint = cfg.Endpoints.Auth
-	}
-
-	profileEndpoint := "https://gitlab.com/api/v3/user"
-	if cfg.Endpoints.Auth != "" {
-		profileEndpoint = cfg.Endpoints.Auth
-	}
-
-	clientID, err := config.Value(cfg.ClientID)
-	if err != nil {
-		return nil, err
-	}
-
-	clientSecret, err := config.Value(cfg.ClientSecret)
-	if err != nil {
-		return nil, err
-	}
-
-	provider := gitlab.NewCustomisedURL(
-		clientID,
-		clientSecret,
-		cfg.Callback,
-		authEndpoint,
-		tokenEndpoint,
-		profileEndpoint,
-		cfg.Scopes...,
-	)
-
-	provider.SetName(cfg.Name)
-	return provider, nil
 }
 
 func googleProvider(cfg config.AuthProvider) (*google.Provider, error) {
@@ -344,6 +200,150 @@ func azureadProvider(cfg config.AuthProvider) (*azureadv2.Provider, error) {
 			Tenant: azureadv2.CommonTenant,
 			Scopes: azureScopes,
 		},
+	)
+
+	provider.SetName(cfg.Name)
+	return provider, nil
+}
+
+func githubProvider(cfg config.AuthProvider) (*github.Provider, error) {
+	log.Info().
+		Str("service", "provider").
+		Str("provider", "github").
+		Str("name", cfg.Name).
+		Msg("Registering auth provider")
+
+	authEndpoint := "https://github.com/login/oauth/authorize"
+	if cfg.Endpoints.Auth != "" {
+		authEndpoint = cfg.Endpoints.Auth
+	}
+
+	tokenEndpoint := "https://github.com/login/oauth/access_token"
+	if cfg.Endpoints.Token != "" {
+		tokenEndpoint = cfg.Endpoints.Token
+	}
+
+	profileEndpoint := "https://api.github.com/user"
+	if cfg.Endpoints.Profile != "" {
+		profileEndpoint = cfg.Endpoints.Profile
+	}
+
+	emailEndpoint := "https://api.github.com/user/emails"
+	if cfg.Endpoints.Email != "" {
+		emailEndpoint = cfg.Endpoints.Email
+	}
+
+	clientID, err := config.Value(cfg.ClientID)
+	if err != nil {
+		return nil, err
+	}
+
+	clientSecret, err := config.Value(cfg.ClientSecret)
+	if err != nil {
+		return nil, err
+	}
+
+	provider := github.NewCustomisedURL(
+		clientID,
+		clientSecret,
+		cfg.Callback,
+		authEndpoint,
+		tokenEndpoint,
+		profileEndpoint,
+		emailEndpoint,
+		cfg.Scopes...,
+	)
+
+	provider.SetName(cfg.Name)
+	return provider, nil
+}
+
+func giteaProvider(cfg config.AuthProvider) (*gitea.Provider, error) {
+	log.Info().
+		Str("service", "provider").
+		Str("provider", "gitea").
+		Str("name", cfg.Name).
+		Msg("Registering auth provider")
+
+	authEndpoint := "https://gitea.com/login/oauth/authorize"
+	if cfg.Endpoints.Auth != "" {
+		authEndpoint = cfg.Endpoints.Auth
+	}
+
+	tokenEndpoint := "https://gitea.com/login/oauth/access_token"
+	if cfg.Endpoints.Token != "" {
+		tokenEndpoint = cfg.Endpoints.Token
+	}
+
+	profileEndpoint := "https://gitea.com/api/v1/user"
+	if cfg.Endpoints.Profile != "" {
+		profileEndpoint = cfg.Endpoints.Profile
+	}
+
+	clientID, err := config.Value(cfg.ClientID)
+	if err != nil {
+		return nil, err
+	}
+
+	clientSecret, err := config.Value(cfg.ClientSecret)
+	if err != nil {
+		return nil, err
+	}
+
+	provider := gitea.NewCustomisedURL(
+		clientID,
+		clientSecret,
+		cfg.Callback,
+		authEndpoint,
+		tokenEndpoint,
+		profileEndpoint,
+		cfg.Scopes...,
+	)
+
+	provider.SetName(cfg.Name)
+	return provider, nil
+}
+
+func gitlabProvider(cfg config.AuthProvider) (*gitlab.Provider, error) {
+	log.Info().
+		Str("service", "provider").
+		Str("provider", "gitlab").
+		Str("name", cfg.Name).
+		Msg("Registering auth provider")
+
+	authEndpoint := "https://gitlab.com/oauth/authorize"
+	if cfg.Endpoints.Auth != "" {
+		authEndpoint = cfg.Endpoints.Auth
+	}
+
+	tokenEndpoint := "https://gitlab.com/oauth/token"
+	if cfg.Endpoints.Token != "" {
+		tokenEndpoint = cfg.Endpoints.Token
+	}
+
+	profileEndpoint := "https://gitlab.com/api/v3/user"
+	if cfg.Endpoints.Profile != "" {
+		profileEndpoint = cfg.Endpoints.Profile
+	}
+
+	clientID, err := config.Value(cfg.ClientID)
+	if err != nil {
+		return nil, err
+	}
+
+	clientSecret, err := config.Value(cfg.ClientSecret)
+	if err != nil {
+		return nil, err
+	}
+
+	provider := gitlab.NewCustomisedURL(
+		clientID,
+		clientSecret,
+		cfg.Callback,
+		authEndpoint,
+		tokenEndpoint,
+		profileEndpoint,
+		cfg.Scopes...,
 	)
 
 	provider.SetName(cfg.Name)

@@ -1,5 +1,29 @@
 ---
 providers:
+  - driver: google
+    name: google
+    display: Sign in with Google
+    icon: fa-brands fa-google
+    callback: http://localhost:8080/api/v1/auth/google/callback
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
+    scopes: []
+    admins:
+      emails:
+        - *@webhippie.de
+
+  - driver: azuread
+    name: azuread
+    display: Sign in with EntraID
+    icon: fa-brands fa-microsoft
+    callback: http://localhost:8080/api/v1/auth/azuread/callback
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
+    scopes: []
+    admins:
+      emails:
+        - *@webhippie.de
+
   - driver: github
     name: github
     display: Sign in with GitHub
@@ -10,6 +34,11 @@ providers:
     scopes:
       - read:user
       - user:email
+    endpoints:
+      auth: https://github.com/login/oauth/authorize
+      token: https://github.com/login/oauth/access_token
+      profile: https://api.github.com/user
+      email: https://api.github.com/user/emails
     admins:
       users:
         - your-username
@@ -45,30 +74,6 @@ providers:
     admins:
       users:
         - your-username
-
-  - driver: google
-    name: google
-    display: Sign in with Google
-    icon: fa-brands fa-google
-    callback: http://localhost:8080/api/v1/auth/google/callback
-    client_id: your-client-id # altneratively file://path/to/client_id
-    client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes: []
-    admins:
-      emails:
-        - *@webhippie.de
-
-  - driver: azuread
-    name: azuread
-    display: Sign in with EntraID
-    icon: fa-brands fa-microsoft
-    callback: http://localhost:8080/api/v1/auth/azuread/callback
-    client_id: your-client-id # altneratively file://path/to/client_id
-    client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes: []
-    admins:
-      emails:
-        - *@webhippie.de
 
   - driver: oidc
     name: keycloak
