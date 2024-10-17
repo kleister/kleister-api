@@ -367,8 +367,8 @@ func (a *API) ExternalProviders(_ context.Context, _ ExternalProvidersRequestObj
 	}
 
 	return ExternalProviders200JSONResponse{
-		Total:    ToPtr(int64(len(records))),
-		Versions: ToPtr(records),
+		Total:   ToPtr(int64(len(records))),
+		Listing: ToPtr(records),
 	}, nil
 }
 

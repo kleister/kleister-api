@@ -8471,7 +8471,7 @@ components:
         total:
           type: integer
           format: int64
-        versions:
+        listing:
           type: "array"
           items:
             $ref: "#/components/schemas/provider"
