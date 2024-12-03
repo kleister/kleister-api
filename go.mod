@@ -2,7 +2,7 @@ module github.com/kleister/kleister-api
 
 go 1.22.0
 
-toolchain go1.23.3
+toolchain go1.23.4
 
 require (
 	github.com/Machiel/slugify v1.0.1
