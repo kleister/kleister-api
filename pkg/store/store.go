@@ -16,9 +16,9 @@ var (
 type Store interface {
 	Info() map[string]interface{}
 	Prepare() error
-	Open() error
+	Open() (bool, error)
 	Close() error
-	Ping() error
+	Ping() (bool, error)
 	Migrate() error
 	Admin(string, string, string) error
 	Handle() *gorm.DB

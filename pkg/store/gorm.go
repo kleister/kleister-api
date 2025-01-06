@@ -138,11 +138,11 @@ func (s *GormStore) Prepare() error {
 }
 
 // Open simply opens the database connection.
-func (s *GormStore) Open() error {
+func (s *GormStore) Open() (bool, error) {
 	dialect, err := s.open()
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	handle, err := gorm.Open(
@@ -154,19 +154,23 @@ func (s *GormStore) Open() error {
 	)
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	session, err := gormstore.New(handle)
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	s.handle = handle
 	s.session = session
 
-	return s.Prepare()
+	if err := s.Prepare(); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // Close simply closes the database connection.
@@ -181,14 +185,18 @@ func (s *GormStore) Close() error {
 }
 
 // Ping just tests the database connection.
-func (s *GormStore) Ping() error {
+func (s *GormStore) Ping() (bool, error) {
 	sqldb, err := s.handle.DB()
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	return sqldb.Ping()
+	if err := sqldb.Ping(); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // Migrate executes required db migrations.
