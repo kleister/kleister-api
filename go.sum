@@ -9,6 +9,8 @@ github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0
 github.com/RaveNoX/go-jsoncommentstrip v1.0.0/go.mod h1:78ihd09MekBnJnxpICcwzCMzGrKSKYe4AqU6PDYYpjk=
 github.com/alexedwards/scs/gormstore v0.0.0-20240316134038-7e11d57e8885 h1:WWR8ds6hWpSWsW+lVw+10p4S1IsZOoaWDOu00lwCs8Y=
 github.com/alexedwards/scs/gormstore v0.0.0-20240316134038-7e11d57e8885/go.mod h1:71Tjis42WRntbMZN27G3GjS/GcRVDwEDQO8zTowqu/s=
+github.com/alexedwards/scs/gormstore v0.0.0-20250212122300-421ef1d8611c h1:2kIaotNguZZESoWZXWhPS5G51tTTSjlCtTN9Oh7MhUY=
+github.com/alexedwards/scs/gormstore v0.0.0-20250212122300-421ef1d8611c/go.mod h1:71Tjis42WRntbMZN27G3GjS/GcRVDwEDQO8zTowqu/s=
 github.com/alexedwards/scs/v2 v2.8.0 h1:h31yUYoycPuL0zt14c0gd+oqxfRwIj6SOjHdKRZxhEw=
 github.com/alexedwards/scs/v2 v2.8.0/go.mod h1:ToaROZxyKukJKT/xLcVQAChi5k6+Pn1Gvmdl7h3RRj8=
 github.com/apapsch/go-jsonmerge/v2 v2.0.0 h1:axGnT1gRIfimI7gJifB699GoE/oq+F2MU7Dml6nw9rQ=
