@@ -8,29 +8,12 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v5"
+	"github.com/kleister/kleister-api/pkg/authn"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/metrics"
-	"github.com/kleister/kleister-api/pkg/providers"
 	"github.com/kleister/kleister-api/pkg/router"
 	"github.com/kleister/kleister-api/pkg/secret"
-	buildversions "github.com/kleister/kleister-api/pkg/service/build_versions"
-	"github.com/kleister/kleister-api/pkg/service/builds"
-	"github.com/kleister/kleister-api/pkg/service/fabric"
-	"github.com/kleister/kleister-api/pkg/service/forge"
-	"github.com/kleister/kleister-api/pkg/service/minecraft"
-	"github.com/kleister/kleister-api/pkg/service/mods"
-	"github.com/kleister/kleister-api/pkg/service/neoforge"
-	"github.com/kleister/kleister-api/pkg/service/packs"
-	"github.com/kleister/kleister-api/pkg/service/quilt"
-	teammods "github.com/kleister/kleister-api/pkg/service/team_mods"
-	teampacks "github.com/kleister/kleister-api/pkg/service/team_packs"
-	"github.com/kleister/kleister-api/pkg/service/teams"
-	usermods "github.com/kleister/kleister-api/pkg/service/user_mods"
-	userpacks "github.com/kleister/kleister-api/pkg/service/user_packs"
-	userteams "github.com/kleister/kleister-api/pkg/service/user_teams"
-	"github.com/kleister/kleister-api/pkg/service/users"
-	"github.com/kleister/kleister-api/pkg/service/versions"
-	"github.com/kleister/kleister-api/pkg/session"
+	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/oklog/run"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -47,33 +30,38 @@ var (
 
 	defaultMetricsAddr      = "0.0.0.0:8000"
 	defaultMetricsToken     = ""
-	defaultServerAddr       = "0.0.0.0:8080"
 	defaultMetricsPprof     = false
+	defaultServerAddr       = "0.0.0.0:8080"
 	defaultServerHost       = "http://localhost:8080"
 	defaultServerRoot       = "/api"
+	defaultServerFrontend   = "http://localhost:8081"
 	defaultServerCert       = ""
 	defaultServerKey        = ""
+	defaultServerTemplates  = ""
+	defaultServerDocs       = true
 	defaultDatabaseDriver   = "sqlite3"
 	defaultDatabaseAddress  = ""
 	defaultDatabasePort     = ""
 	defaultDatabaseUsername = ""
 	defaultDatabasePassword = ""
-	defaultDatabaseName     = "storage/kleister.sqlite3"
+	defaultDatabaseName     = "kleister.sqlite3"
 	defaultDatabaseOptions  = make(map[string]string, 0)
 	defaultUploadDriver     = "file"
 	defaultUploadEndpoint   = ""
-	defaultUploadPath       = "storage/uploads/"
+	defaultUploadPath       = ""
 	defaultUploadAccess     = ""
 	defaultUploadSecret     = ""
 	defaultUploadBucket     = ""
 	defaultUploadRegion     = "us-east-1"
 	defaultUploadPerms      = "0755"
-	defaultSessionName      = "kleister"
-	defaultSessionSecret    = secret.Generate(32)
-	defaultSessionExpire    = time.Hour * 24
-	defaultSessionSecure    = false
+	defaultUploadPathstyle  = false
+	defaultUploadProxy      = true
+	defaultTokenSecret      = secret.Generate(32)
+	defaultTokenExpire      = time.Hour * 1
 	defaultScimEnabled      = false
 	defaultScimToken        = ""
+	defaultCleanupEnabled   = true
+	defaultCleanupInterval  = 30 * time.Minute
 	defaultAdminCreate      = true
 	defaultAdminUsername    = "admin"
 	defaultAdminPassword    = "admin"
@@ -108,6 +96,10 @@ func init() {
 	viper.SetDefault("server.root", defaultServerRoot)
 	_ = viper.BindPFlag("server.root", serverCmd.PersistentFlags().Lookup("server-root"))
 
+	serverCmd.PersistentFlags().String("server-frontend", defaultServerFrontend, "Target for frontend redirects")
+	viper.SetDefault("server.frontend", defaultServerFrontend)
+	_ = viper.BindPFlag("server.frontend", serverCmd.PersistentFlags().Lookup("server-frontend"))
+
 	serverCmd.PersistentFlags().String("server-cert", defaultServerCert, "Path to SSL cert")
 	viper.SetDefault("server.cert", defaultServerCert)
 	_ = viper.BindPFlag("server.cert", serverCmd.PersistentFlags().Lookup("server-cert"))
@@ -115,6 +107,14 @@ func init() {
 	serverCmd.PersistentFlags().String("server-key", defaultServerKey, "Path to SSL key")
 	viper.SetDefault("server.key", defaultServerKey)
 	_ = viper.BindPFlag("server.key", serverCmd.PersistentFlags().Lookup("server-key"))
+
+	serverCmd.PersistentFlags().String("server-templates", defaultServerTemplates, "Path to custom template filrs")
+	viper.SetDefault("server.templates", defaultServerTemplates)
+	_ = viper.BindPFlag("server.templates", serverCmd.PersistentFlags().Lookup("server-templates"))
+
+	serverCmd.PersistentFlags().Bool("server-docs", defaultServerDocs, "Enable OpenAPI docs")
+	viper.SetDefault("server.docs", defaultServerDocs)
+	_ = viper.BindPFlag("server.docs", serverCmd.PersistentFlags().Lookup("server-docs"))
 
 	serverCmd.PersistentFlags().String("database-driver", defaultDatabaseDriver, "Driver for the database")
 	viper.SetDefault("database.driver", defaultDatabaseDriver)
@@ -176,21 +176,21 @@ func init() {
 	viper.SetDefault("upload.perms", defaultUploadPerms)
 	_ = viper.BindPFlag("upload.perms", serverCmd.PersistentFlags().Lookup("upload-perms"))
 
-	serverCmd.PersistentFlags().String("session-name", defaultSessionName, "Session cookie name")
-	viper.SetDefault("session.name", defaultSessionName)
-	_ = viper.BindPFlag("session.name", serverCmd.PersistentFlags().Lookup("session-name"))
+	serverCmd.PersistentFlags().Bool("upload-pathstyle", defaultUploadPathstyle, "Enable S3 pathstyle access")
+	viper.SetDefault("upload.pathstyle", defaultUploadPathstyle)
+	_ = viper.BindPFlag("upload.pathstyle", serverCmd.PersistentFlags().Lookup("upload-pathstyle"))
 
-	serverCmd.PersistentFlags().String("session-secret", defaultSessionSecret, "Session encryption secret")
-	viper.SetDefault("session.secret", defaultSessionSecret)
-	_ = viper.BindPFlag("session.secret", serverCmd.PersistentFlags().Lookup("session-secret"))
+	serverCmd.PersistentFlags().Bool("upload-proxy", defaultUploadProxy, "Proxy S3 access through server")
+	viper.SetDefault("upload.proxy", defaultUploadProxy)
+	_ = viper.BindPFlag("upload.proxy", serverCmd.PersistentFlags().Lookup("upload-proxy"))
 
-	serverCmd.PersistentFlags().Duration("session-expire", defaultSessionExpire, "Session expire duration")
-	viper.SetDefault("session.expire", defaultSessionExpire)
-	_ = viper.BindPFlag("session.expire", serverCmd.PersistentFlags().Lookup("session-expire"))
+	serverCmd.PersistentFlags().String("token-secret", defaultTokenSecret, "Token encryption secret")
+	viper.SetDefault("token.secret", defaultTokenSecret)
+	_ = viper.BindPFlag("token.secret", serverCmd.PersistentFlags().Lookup("token-secret"))
 
-	serverCmd.PersistentFlags().Bool("session-secure", defaultSessionSecure, "Enable secure cookie on HTTPS")
-	viper.SetDefault("session.secure", defaultSessionSecure)
-	_ = viper.BindPFlag("session.secure", serverCmd.PersistentFlags().Lookup("session-secure"))
+	serverCmd.PersistentFlags().Duration("token-expire", defaultTokenExpire, "Token expire duration")
+	viper.SetDefault("token.expire", defaultTokenExpire)
+	_ = viper.BindPFlag("token.expire", serverCmd.PersistentFlags().Lookup("token-expire"))
 
 	serverCmd.PersistentFlags().Bool("scim-enabled", defaultScimEnabled, "Enable SCIM provisioning integration")
 	viper.SetDefault("scim.enabled", defaultScimEnabled)
@@ -199,6 +199,14 @@ func init() {
 	serverCmd.PersistentFlags().String("scim-token", defaultScimToken, "Bearer token for SCIM authentication")
 	viper.SetDefault("scim.token", defaultScimToken)
 	_ = viper.BindPFlag("scim.token", serverCmd.PersistentFlags().Lookup("scim-token"))
+
+	serverCmd.PersistentFlags().Bool("cleanup-enabled", defaultCleanupEnabled, "Enable periodic cleanup tasks")
+	viper.SetDefault("cleanup.enabled", defaultCleanupEnabled)
+	_ = viper.BindPFlag("cleanup.enabled", serverCmd.PersistentFlags().Lookup("cleanup-enabled"))
+
+	serverCmd.PersistentFlags().Duration("cleanup-interval", defaultCleanupInterval, "Interval for cleanup task")
+	viper.SetDefault("cleanup.interval", defaultCleanupInterval)
+	_ = viper.BindPFlag("cleanup.interval", serverCmd.PersistentFlags().Lookup("cleanup-interval"))
 
 	serverCmd.PersistentFlags().Bool("admin-create", defaultAdminCreate, "Create an initial admin user")
 	viper.SetDefault("admin.create", defaultAdminCreate)
@@ -222,12 +230,14 @@ func init() {
 }
 
 func serverAction(ccmd *cobra.Command, _ []string) {
-	if err := providers.Register(
-		providers.WithConfig(cfg.Auth.Config),
-	); err != nil {
+	identity, err := authn.New(
+		authn.WithConfig(cfg.Auth.Config),
+	)
+
+	if err != nil {
 		log.Fatal().
 			Err(err).
-			Msg("Failed to load providers")
+			Msg("Failed to setup identity")
 
 		os.Exit(1)
 	}
@@ -246,11 +256,13 @@ func serverAction(ccmd *cobra.Command, _ []string) {
 		Fields(uploads.Info()).
 		Msg("Preparing uploads")
 
-	if uploads != nil {
-		defer uploads.Close()
-	}
+	defer uploads.Close()
 
-	storage, err := setupStorage(cfg)
+	storage, err := store.NewStore(
+		cfg.Database,
+		cfg.Scim,
+		uploads,
+	)
 
 	if err != nil {
 		log.Fatal().
@@ -264,11 +276,9 @@ func serverAction(ccmd *cobra.Command, _ []string) {
 		Fields(storage.Info()).
 		Msg("Preparing database")
 
-	if storage != nil {
-		defer storage.Close()
-	}
+	defer storage.Close()
 
-	if _, err := backoff.Retry(
+	if val, err := backoff.Retry(
 		ccmd.Context(),
 		storage.Open,
 		backoff.WithBackOff(backoff.NewExponentialBackOff()),
@@ -278,7 +288,7 @@ func serverAction(ccmd *cobra.Command, _ []string) {
 				Dur("retry", dur).
 				Msg("Database open failed")
 		}),
-	); err != nil {
+	); err != nil || !val {
 		log.Fatal().
 			Err(err).
 			Msg("Giving up to connect to db")
@@ -286,7 +296,7 @@ func serverAction(ccmd *cobra.Command, _ []string) {
 		os.Exit(1)
 	}
 
-	if _, err := backoff.Retry(
+	if val, err := backoff.Retry(
 		ccmd.Context(),
 		storage.Ping,
 		backoff.WithBackOff(backoff.NewExponentialBackOff()),
@@ -296,7 +306,7 @@ func serverAction(ccmd *cobra.Command, _ []string) {
 				Dur("retry", dur).
 				Msg("Database ping failed")
 		}),
-	); err != nil {
+	); err != nil || !val {
 		log.Fatal().
 			Err(err).
 			Msg("Giving up to ping the db")
@@ -304,7 +314,7 @@ func serverAction(ccmd *cobra.Command, _ []string) {
 		os.Exit(1)
 	}
 
-	if err := storage.Migrate(); err != nil {
+	if _, err := storage.Migrate(ccmd.Context()); err != nil {
 		log.Fatal().
 			Err(err).
 			Msg("Failed to migrate database")
@@ -374,262 +384,17 @@ func serverAction(ccmd *cobra.Command, _ []string) {
 		metrics.WithToken(token),
 	)
 
-	sess := session.New(
-		session.WithStore(storage.Session()),
-		session.WithLifetime(cfg.Session.Expire),
-		session.WithName(cfg.Session.Name),
-		session.WithPath(cfg.Server.Root),
-		session.WithSecure(cfg.Session.Secure),
-	)
-
 	gr := run.Group{}
 
 	{
-		minecraftService := minecraft.NewMetricsService(
-			minecraft.NewLoggingService(
-				minecraft.NewService(
-					minecraft.NewGormService(
-						storage.Handle(),
-						cfg,
-					),
-				),
-			),
-			registry,
-		)
-
-		forgeService := forge.NewMetricsService(
-			forge.NewLoggingService(
-				forge.NewService(
-					forge.NewGormService(
-						storage.Handle(),
-						cfg,
-					),
-				),
-			),
-			registry,
-		)
-
-		neoforgeService := neoforge.NewMetricsService(
-			neoforge.NewLoggingService(
-				neoforge.NewService(
-					neoforge.NewGormService(
-						storage.Handle(),
-						cfg,
-					),
-				),
-			),
-			registry,
-		)
-
-		quiltService := quilt.NewMetricsService(
-			quilt.NewLoggingService(
-				quilt.NewService(
-					quilt.NewGormService(
-						storage.Handle(),
-						cfg,
-					),
-				),
-			),
-			registry,
-		)
-
-		fabricService := fabric.NewMetricsService(
-			fabric.NewLoggingService(
-				fabric.NewService(
-					fabric.NewGormService(
-						storage.Handle(),
-						cfg,
-					),
-				),
-			),
-			registry,
-		)
-
-		teamsService := teams.NewMetricsService(
-			teams.NewLoggingService(
-				teams.NewService(
-					teams.NewGormService(
-						storage.Handle(),
-						cfg,
-					),
-				),
-			),
-			registry,
-		)
-
-		usersService := users.NewMetricsService(
-			users.NewLoggingService(
-				users.NewService(
-					users.NewGormService(
-						storage.Handle(),
-						cfg,
-					),
-				),
-			),
-			registry,
-		)
-
-		userteamsService := userteams.NewMetricsService(
-			userteams.NewLoggingService(
-				userteams.NewService(
-					userteams.NewGormService(
-						storage.Handle(),
-						cfg,
-						teamsService,
-						usersService,
-					),
-				),
-			),
-			registry,
-		)
-
-		modsService := mods.NewMetricsService(
-			mods.NewLoggingService(
-				mods.NewService(
-					mods.NewGormService(
-						storage.Handle(),
-						cfg,
-					),
-				),
-			),
-			registry,
-		)
-
-		usermodsService := usermods.NewMetricsService(
-			usermods.NewLoggingService(
-				usermods.NewService(
-					usermods.NewGormService(
-						storage.Handle(),
-						cfg,
-						usersService,
-						modsService,
-					),
-				),
-			),
-			registry,
-		)
-
-		teammodsService := teammods.NewMetricsService(
-			teammods.NewLoggingService(
-				teammods.NewService(
-					teammods.NewGormService(
-						storage.Handle(),
-						cfg,
-						teamsService,
-						modsService,
-					),
-				),
-			),
-			registry,
-		)
-
-		versionsService := versions.NewMetricsService(
-			versions.NewLoggingService(
-				versions.NewService(
-					versions.NewGormService(
-						storage.Handle(),
-						cfg,
-						modsService,
-					),
-				),
-			),
-			registry,
-		)
-
-		packsService := packs.NewMetricsService(
-			packs.NewLoggingService(
-				packs.NewService(
-					packs.NewGormService(
-						storage.Handle(),
-						cfg,
-					),
-				),
-			),
-			registry,
-		)
-
-		userpacksService := userpacks.NewMetricsService(
-			userpacks.NewLoggingService(
-				userpacks.NewService(
-					userpacks.NewGormService(
-						storage.Handle(),
-						cfg,
-						usersService,
-						packsService,
-					),
-				),
-			),
-			registry,
-		)
-
-		teampacksService := teampacks.NewMetricsService(
-			teampacks.NewLoggingService(
-				teampacks.NewService(
-					teampacks.NewGormService(
-						storage.Handle(),
-						cfg,
-						teamsService,
-						packsService,
-					),
-				),
-			),
-			registry,
-		)
-
-		buildsService := builds.NewMetricsService(
-			builds.NewLoggingService(
-				builds.NewService(
-					builds.NewGormService(
-						storage.Handle(),
-						cfg,
-						packsService,
-					),
-				),
-			),
-			registry,
-		)
-
-		buildversionsService := buildversions.NewMetricsService(
-			buildversions.NewLoggingService(
-				buildversions.NewService(
-					buildversions.NewGormService(
-						storage.Handle(),
-						cfg,
-						packsService,
-						buildsService,
-						modsService,
-						versionsService,
-					),
-				),
-			),
-			registry,
-		)
-
 		server := &http.Server{
 			Addr: cfg.Server.Addr,
 			Handler: router.Server(
 				cfg,
 				registry,
-				sess,
+				identity,
 				uploads,
 				storage,
-				minecraftService,
-				forgeService,
-				neoforgeService,
-				quiltService,
-				fabricService,
-				teamsService,
-				usersService,
-				userteamsService,
-				modsService,
-				usermodsService,
-				teammodsService,
-				versionsService,
-				packsService,
-				userpacksService,
-				teampacksService,
-				buildsService,
-				buildversionsService,
 			),
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
@@ -668,8 +433,11 @@ func serverAction(ccmd *cobra.Command, _ []string) {
 
 	{
 		server := &http.Server{
-			Addr:         cfg.Metrics.Addr,
-			Handler:      router.Metrics(cfg, registry),
+			Addr: cfg.Metrics.Addr,
+			Handler: router.Metrics(
+				cfg,
+				registry,
+			),
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
 		}
@@ -695,6 +463,42 @@ func serverAction(ccmd *cobra.Command, _ []string) {
 			log.Info().
 				Err(reason).
 				Msg("Metrics shutdown gracefully")
+		})
+	}
+
+	if cfg.Cleanup.Enabled {
+		ticker := time.NewTicker(cfg.Cleanup.Interval)
+		stop := make(chan struct{})
+
+		gr.Add(func() error {
+			defer ticker.Stop()
+
+			log.Info().
+				Str("interval", cfg.Cleanup.Interval.String()).
+				Msg("Starting periodic cleanup")
+
+			for {
+				select {
+				case <-ticker.C:
+					log.Debug().
+						Msg("Running periodic cleanup")
+
+					if err := storage.Users.CleanupRedirectTokens(
+						context.Background(),
+					); err != nil {
+						log.Error().
+							Err(err).
+							Msg("Failed to cleanup redirect tokens")
+					}
+				case <-stop:
+					log.Info().
+						Msg("Shutdown periodic cleanup")
+
+					return nil
+				}
+			}
+		}, func(_ error) {
+			close(stop)
 		})
 	}
 

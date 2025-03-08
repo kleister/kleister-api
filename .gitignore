@@ -7,3 +7,5 @@ bin/
 dist/
 storage/
 tmp/
+
+.pre-commit-config.yaml

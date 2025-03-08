@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/HEAD/configuration-schema.json
 package: v1
 
 generate:
@@ -10,10 +11,10 @@ generate:
 compatibility:
   apply-chi-middleware-first-to-last: true
 
-output: pkg/api/v1/gen.go
+output: gen.go
 
 output-options:
   user-templates:
-    constants.tmpl: pkg/api/v1/override/constants.tmpl
+    constants.tmpl: override/constants.tmpl
 
 ...

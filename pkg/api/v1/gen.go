@@ -10,6 +10,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"path"
@@ -20,6 +22,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/oapi-codegen/runtime"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // contextKey provides a type for use with context.WithValue.
@@ -28,71 +31,28 @@ type contextKey string
 const (
 	BasicScopes  contextKey = "Basic.Scopes"
 	BearerScopes contextKey = "Bearer.Scopes"
-	CookieScopes contextKey = "Cookie.Scopes"
 	HeaderScopes contextKey = "Header.Scopes"
 )
 
-// Defines values for ModTeamParamsPerm.
+// Defines values for GroupModPerm.
 const (
-	ModTeamParamsPermAdmin ModTeamParamsPerm = "admin"
-	ModTeamParamsPermOwner ModTeamParamsPerm = "owner"
-	ModTeamParamsPermUser  ModTeamParamsPerm = "user"
+	GroupModPermAdmin GroupModPerm = "admin"
+	GroupModPermOwner GroupModPerm = "owner"
+	GroupModPermUser  GroupModPerm = "user"
 )
 
-// Defines values for ModUserParamsPerm.
+// Defines values for GroupPackPerm.
 const (
-	ModUserParamsPermAdmin ModUserParamsPerm = "admin"
-	ModUserParamsPermOwner ModUserParamsPerm = "owner"
-	ModUserParamsPermUser  ModUserParamsPerm = "user"
+	GroupPackPermAdmin GroupPackPerm = "admin"
+	GroupPackPermOwner GroupPackPerm = "owner"
+	GroupPackPermUser  GroupPackPerm = "user"
 )
 
-// Defines values for PackTeamParamsPerm.
+// Defines values for UserGroupPerm.
 const (
-	PackTeamParamsPermAdmin PackTeamParamsPerm = "admin"
-	PackTeamParamsPermOwner PackTeamParamsPerm = "owner"
-	PackTeamParamsPermUser  PackTeamParamsPerm = "user"
-)
-
-// Defines values for PackUserParamsPerm.
-const (
-	PackUserParamsPermAdmin PackUserParamsPerm = "admin"
-	PackUserParamsPermOwner PackUserParamsPerm = "owner"
-	PackUserParamsPermUser  PackUserParamsPerm = "user"
-)
-
-// Defines values for TeamModPerm.
-const (
-	TeamModPermAdmin TeamModPerm = "admin"
-	TeamModPermOwner TeamModPerm = "owner"
-	TeamModPermUser  TeamModPerm = "user"
-)
-
-// Defines values for TeamModParamsPerm.
-const (
-	TeamModParamsPermAdmin TeamModParamsPerm = "admin"
-	TeamModParamsPermOwner TeamModParamsPerm = "owner"
-	TeamModParamsPermUser  TeamModParamsPerm = "user"
-)
-
-// Defines values for TeamPackPerm.
-const (
-	TeamPackPermAdmin TeamPackPerm = "admin"
-	TeamPackPermOwner TeamPackPerm = "owner"
-	TeamPackPermUser  TeamPackPerm = "user"
-)
-
-// Defines values for TeamPackParamsPerm.
-const (
-	TeamPackParamsPermAdmin TeamPackParamsPerm = "admin"
-	TeamPackParamsPermOwner TeamPackParamsPerm = "owner"
-	TeamPackParamsPermUser  TeamPackParamsPerm = "user"
-)
-
-// Defines values for TeamUserParamsPerm.
-const (
-	TeamUserParamsPermAdmin TeamUserParamsPerm = "admin"
-	TeamUserParamsPermOwner TeamUserParamsPerm = "owner"
-	TeamUserParamsPermUser  TeamUserParamsPerm = "user"
+	UserGroupPermAdmin UserGroupPerm = "admin"
+	UserGroupPermOwner UserGroupPerm = "owner"
+	UserGroupPermUser  UserGroupPerm = "user"
 )
 
 // Defines values for UserModPerm.
@@ -102,13 +62,6 @@ const (
 	UserModPermUser  UserModPerm = "user"
 )
 
-// Defines values for UserModParamsPerm.
-const (
-	UserModParamsPermAdmin UserModParamsPerm = "admin"
-	UserModParamsPermOwner UserModParamsPerm = "owner"
-	UserModParamsPermUser  UserModParamsPerm = "user"
-)
-
 // Defines values for UserPackPerm.
 const (
 	UserPackPermAdmin UserPackPerm = "admin"
@@ -116,33 +69,10 @@ const (
 	UserPackPermUser  UserPackPerm = "user"
 )
 
-// Defines values for UserPackParamsPerm.
+// Defines values for SortOrderParam.
 const (
-	UserPackParamsPermAdmin UserPackParamsPerm = "admin"
-	UserPackParamsPermOwner UserPackParamsPerm = "owner"
-	UserPackParamsPermUser  UserPackParamsPerm = "user"
-)
-
-// Defines values for UserTeamPerm.
-const (
-	UserTeamPermAdmin UserTeamPerm = "admin"
-	UserTeamPermOwner UserTeamPerm = "owner"
-	UserTeamPermUser  UserTeamPerm = "user"
-)
-
-// Defines values for UserTeamParamsPerm.
-const (
-	UserTeamParamsPermAdmin UserTeamParamsPerm = "admin"
-	UserTeamParamsPermOwner UserTeamParamsPerm = "owner"
-	UserTeamParamsPermUser  UserTeamParamsPerm = "user"
-)
-
-// Defines values for ListFabricBuildsParamsSort.
-const (
-	ListFabricBuildsParamsSortBuildName   ListFabricBuildsParamsSort = "build_name"
-	ListFabricBuildsParamsSortBuildPublic ListFabricBuildsParamsSort = "build_public"
-	ListFabricBuildsParamsSortPackName    ListFabricBuildsParamsSort = "pack_name"
-	ListFabricBuildsParamsSortPackSlug    ListFabricBuildsParamsSort = "pack_slug"
+	SortOrderParamAsc  SortOrderParam = "asc"
+	SortOrderParamDesc SortOrderParam = "desc"
 )
 
 // Defines values for ListFabricBuildsParamsOrder.
@@ -151,26 +81,34 @@ const (
 	ListFabricBuildsParamsOrderDesc ListFabricBuildsParamsOrder = "desc"
 )
 
-// Defines values for ListForgeBuildsParamsSort.
-const (
-	ListForgeBuildsParamsSortBuildName   ListForgeBuildsParamsSort = "build_name"
-	ListForgeBuildsParamsSortBuildPublic ListForgeBuildsParamsSort = "build_public"
-	ListForgeBuildsParamsSortPackName    ListForgeBuildsParamsSort = "pack_name"
-	ListForgeBuildsParamsSortPackSlug    ListForgeBuildsParamsSort = "pack_slug"
-)
-
 // Defines values for ListForgeBuildsParamsOrder.
 const (
 	ListForgeBuildsParamsOrderAsc  ListForgeBuildsParamsOrder = "asc"
 	ListForgeBuildsParamsOrderDesc ListForgeBuildsParamsOrder = "desc"
 )
 
-// Defines values for ListMinecraftBuildsParamsSort.
+// Defines values for ListGroupsParamsOrder.
 const (
-	ListMinecraftBuildsParamsSortBuildName   ListMinecraftBuildsParamsSort = "build_name"
-	ListMinecraftBuildsParamsSortBuildPublic ListMinecraftBuildsParamsSort = "build_public"
-	ListMinecraftBuildsParamsSortPackName    ListMinecraftBuildsParamsSort = "pack_name"
-	ListMinecraftBuildsParamsSortPackSlug    ListMinecraftBuildsParamsSort = "pack_slug"
+	ListGroupsParamsOrderAsc  ListGroupsParamsOrder = "asc"
+	ListGroupsParamsOrderDesc ListGroupsParamsOrder = "desc"
+)
+
+// Defines values for ListGroupModsParamsOrder.
+const (
+	ListGroupModsParamsOrderAsc  ListGroupModsParamsOrder = "asc"
+	ListGroupModsParamsOrderDesc ListGroupModsParamsOrder = "desc"
+)
+
+// Defines values for ListGroupPacksParamsOrder.
+const (
+	ListGroupPacksParamsOrderAsc  ListGroupPacksParamsOrder = "asc"
+	ListGroupPacksParamsOrderDesc ListGroupPacksParamsOrder = "desc"
+)
+
+// Defines values for ListGroupUsersParamsOrder.
+const (
+	ListGroupUsersParamsOrderAsc  ListGroupUsersParamsOrder = "asc"
+	ListGroupUsersParamsOrderDesc ListGroupUsersParamsOrder = "desc"
 )
 
 // Defines values for ListMinecraftBuildsParamsOrder.
@@ -179,38 +117,16 @@ const (
 	ListMinecraftBuildsParamsOrderDesc ListMinecraftBuildsParamsOrder = "desc"
 )
 
-// Defines values for ListModsParamsSort.
-const (
-	ListModsParamsSortName   ListModsParamsSort = "name"
-	ListModsParamsSortPublic ListModsParamsSort = "public"
-	ListModsParamsSortSlug   ListModsParamsSort = "slug"
-)
-
 // Defines values for ListModsParamsOrder.
 const (
 	ListModsParamsOrderAsc  ListModsParamsOrder = "asc"
 	ListModsParamsOrderDesc ListModsParamsOrder = "desc"
 )
 
-// Defines values for ListModTeamsParamsSort.
+// Defines values for ListModGroupsParamsOrder.
 const (
-	ListModTeamsParamsSortName ListModTeamsParamsSort = "name"
-	ListModTeamsParamsSortSlug ListModTeamsParamsSort = "slug"
-)
-
-// Defines values for ListModTeamsParamsOrder.
-const (
-	ListModTeamsParamsOrderAsc  ListModTeamsParamsOrder = "asc"
-	ListModTeamsParamsOrderDesc ListModTeamsParamsOrder = "desc"
-)
-
-// Defines values for ListModUsersParamsSort.
-const (
-	ListModUsersParamsSortActive   ListModUsersParamsSort = "active"
-	ListModUsersParamsSortAdmin    ListModUsersParamsSort = "admin"
-	ListModUsersParamsSortEmail    ListModUsersParamsSort = "email"
-	ListModUsersParamsSortFullname ListModUsersParamsSort = "fullname"
-	ListModUsersParamsSortUsername ListModUsersParamsSort = "username"
+	ListModGroupsParamsOrderAsc  ListModGroupsParamsOrder = "asc"
+	ListModGroupsParamsOrderDesc ListModGroupsParamsOrder = "desc"
 )
 
 // Defines values for ListModUsersParamsOrder.
@@ -219,22 +135,10 @@ const (
 	ListModUsersParamsOrderDesc ListModUsersParamsOrder = "desc"
 )
 
-// Defines values for ListVersionsParamsSort.
-const (
-	ListVersionsParamsSortName   ListVersionsParamsSort = "name"
-	ListVersionsParamsSortPublic ListVersionsParamsSort = "public"
-)
-
 // Defines values for ListVersionsParamsOrder.
 const (
 	ListVersionsParamsOrderAsc  ListVersionsParamsOrder = "asc"
 	ListVersionsParamsOrderDesc ListVersionsParamsOrder = "desc"
-)
-
-// Defines values for ListVersionBuildsParamsSort.
-const (
-	ListVersionBuildsParamsSortName   ListVersionBuildsParamsSort = "name"
-	ListVersionBuildsParamsSortPublic ListVersionBuildsParamsSort = "public"
 )
 
 // Defines values for ListVersionBuildsParamsOrder.
@@ -243,25 +147,10 @@ const (
 	ListVersionBuildsParamsOrderDesc ListVersionBuildsParamsOrder = "desc"
 )
 
-// Defines values for ListNeoforgeBuildsParamsSort.
-const (
-	ListNeoforgeBuildsParamsSortBuildName   ListNeoforgeBuildsParamsSort = "build_name"
-	ListNeoforgeBuildsParamsSortBuildPublic ListNeoforgeBuildsParamsSort = "build_public"
-	ListNeoforgeBuildsParamsSortPackName    ListNeoforgeBuildsParamsSort = "pack_name"
-	ListNeoforgeBuildsParamsSortPackSlug    ListNeoforgeBuildsParamsSort = "pack_slug"
-)
-
 // Defines values for ListNeoforgeBuildsParamsOrder.
 const (
 	ListNeoforgeBuildsParamsOrderAsc  ListNeoforgeBuildsParamsOrder = "asc"
 	ListNeoforgeBuildsParamsOrderDesc ListNeoforgeBuildsParamsOrder = "desc"
-)
-
-// Defines values for ListPacksParamsSort.
-const (
-	ListPacksParamsSortName   ListPacksParamsSort = "name"
-	ListPacksParamsSortPublic ListPacksParamsSort = "public"
-	ListPacksParamsSortSlug   ListPacksParamsSort = "slug"
 )
 
 // Defines values for ListPacksParamsOrder.
@@ -270,22 +159,10 @@ const (
 	ListPacksParamsOrderDesc ListPacksParamsOrder = "desc"
 )
 
-// Defines values for ListBuildsParamsSort.
-const (
-	ListBuildsParamsSortName   ListBuildsParamsSort = "name"
-	ListBuildsParamsSortPublic ListBuildsParamsSort = "public"
-)
-
 // Defines values for ListBuildsParamsOrder.
 const (
 	ListBuildsParamsOrderAsc  ListBuildsParamsOrder = "asc"
 	ListBuildsParamsOrderDesc ListBuildsParamsOrder = "desc"
-)
-
-// Defines values for ListBuildVersionsParamsSort.
-const (
-	ListBuildVersionsParamsSortName   ListBuildVersionsParamsSort = "name"
-	ListBuildVersionsParamsSortPublic ListBuildVersionsParamsSort = "public"
 )
 
 // Defines values for ListBuildVersionsParamsOrder.
@@ -294,25 +171,10 @@ const (
 	ListBuildVersionsParamsOrderDesc ListBuildVersionsParamsOrder = "desc"
 )
 
-// Defines values for ListPackTeamsParamsSort.
+// Defines values for ListPackGroupsParamsOrder.
 const (
-	ListPackTeamsParamsSortName ListPackTeamsParamsSort = "name"
-	ListPackTeamsParamsSortSlug ListPackTeamsParamsSort = "slug"
-)
-
-// Defines values for ListPackTeamsParamsOrder.
-const (
-	ListPackTeamsParamsOrderAsc  ListPackTeamsParamsOrder = "asc"
-	ListPackTeamsParamsOrderDesc ListPackTeamsParamsOrder = "desc"
-)
-
-// Defines values for ListPackUsersParamsSort.
-const (
-	ListPackUsersParamsSortActive   ListPackUsersParamsSort = "active"
-	ListPackUsersParamsSortAdmin    ListPackUsersParamsSort = "admin"
-	ListPackUsersParamsSortEmail    ListPackUsersParamsSort = "email"
-	ListPackUsersParamsSortFullname ListPackUsersParamsSort = "fullname"
-	ListPackUsersParamsSortUsername ListPackUsersParamsSort = "username"
+	ListPackGroupsParamsOrderAsc  ListPackGroupsParamsOrder = "asc"
+	ListPackGroupsParamsOrderDesc ListPackGroupsParamsOrder = "desc"
 )
 
 // Defines values for ListPackUsersParamsOrder.
@@ -321,80 +183,10 @@ const (
 	ListPackUsersParamsOrderDesc ListPackUsersParamsOrder = "desc"
 )
 
-// Defines values for ListQuiltBuildsParamsSort.
-const (
-	BuildName   ListQuiltBuildsParamsSort = "build_name"
-	BuildPublic ListQuiltBuildsParamsSort = "build_public"
-	PackName    ListQuiltBuildsParamsSort = "pack_name"
-	PackSlug    ListQuiltBuildsParamsSort = "pack_slug"
-)
-
 // Defines values for ListQuiltBuildsParamsOrder.
 const (
 	ListQuiltBuildsParamsOrderAsc  ListQuiltBuildsParamsOrder = "asc"
 	ListQuiltBuildsParamsOrderDesc ListQuiltBuildsParamsOrder = "desc"
-)
-
-// Defines values for ListTeamsParamsSort.
-const (
-	ListTeamsParamsSortName ListTeamsParamsSort = "name"
-	ListTeamsParamsSortSlug ListTeamsParamsSort = "slug"
-)
-
-// Defines values for ListTeamsParamsOrder.
-const (
-	ListTeamsParamsOrderAsc  ListTeamsParamsOrder = "asc"
-	ListTeamsParamsOrderDesc ListTeamsParamsOrder = "desc"
-)
-
-// Defines values for ListTeamModsParamsSort.
-const (
-	ListTeamModsParamsSortName   ListTeamModsParamsSort = "name"
-	ListTeamModsParamsSortPublic ListTeamModsParamsSort = "public"
-	ListTeamModsParamsSortSlug   ListTeamModsParamsSort = "slug"
-)
-
-// Defines values for ListTeamModsParamsOrder.
-const (
-	ListTeamModsParamsOrderAsc  ListTeamModsParamsOrder = "asc"
-	ListTeamModsParamsOrderDesc ListTeamModsParamsOrder = "desc"
-)
-
-// Defines values for ListTeamPacksParamsSort.
-const (
-	ListTeamPacksParamsSortName   ListTeamPacksParamsSort = "name"
-	ListTeamPacksParamsSortPublic ListTeamPacksParamsSort = "public"
-	ListTeamPacksParamsSortSlug   ListTeamPacksParamsSort = "slug"
-)
-
-// Defines values for ListTeamPacksParamsOrder.
-const (
-	ListTeamPacksParamsOrderAsc  ListTeamPacksParamsOrder = "asc"
-	ListTeamPacksParamsOrderDesc ListTeamPacksParamsOrder = "desc"
-)
-
-// Defines values for ListTeamUsersParamsSort.
-const (
-	ListTeamUsersParamsSortActive   ListTeamUsersParamsSort = "active"
-	ListTeamUsersParamsSortAdmin    ListTeamUsersParamsSort = "admin"
-	ListTeamUsersParamsSortEmail    ListTeamUsersParamsSort = "email"
-	ListTeamUsersParamsSortFullname ListTeamUsersParamsSort = "fullname"
-	ListTeamUsersParamsSortUsername ListTeamUsersParamsSort = "username"
-)
-
-// Defines values for ListTeamUsersParamsOrder.
-const (
-	ListTeamUsersParamsOrderAsc  ListTeamUsersParamsOrder = "asc"
-	ListTeamUsersParamsOrderDesc ListTeamUsersParamsOrder = "desc"
-)
-
-// Defines values for ListUsersParamsSort.
-const (
-	Active   ListUsersParamsSort = "active"
-	Admin    ListUsersParamsSort = "admin"
-	Email    ListUsersParamsSort = "email"
-	Fullname ListUsersParamsSort = "fullname"
-	Username ListUsersParamsSort = "username"
 )
 
 // Defines values for ListUsersParamsOrder.
@@ -403,11 +195,10 @@ const (
 	ListUsersParamsOrderDesc ListUsersParamsOrder = "desc"
 )
 
-// Defines values for ListUserModsParamsSort.
+// Defines values for ListUserGroupsParamsOrder.
 const (
-	ListUserModsParamsSortName   ListUserModsParamsSort = "name"
-	ListUserModsParamsSortPublic ListUserModsParamsSort = "public"
-	ListUserModsParamsSortSlug   ListUserModsParamsSort = "slug"
+	ListUserGroupsParamsOrderAsc  ListUserGroupsParamsOrder = "asc"
+	ListUserGroupsParamsOrderDesc ListUserGroupsParamsOrder = "desc"
 )
 
 // Defines values for ListUserModsParamsOrder.
@@ -416,44 +207,19 @@ const (
 	ListUserModsParamsOrderDesc ListUserModsParamsOrder = "desc"
 )
 
-// Defines values for ListUserPacksParamsSort.
-const (
-	ListUserPacksParamsSortName   ListUserPacksParamsSort = "name"
-	ListUserPacksParamsSortPublic ListUserPacksParamsSort = "public"
-	ListUserPacksParamsSortSlug   ListUserPacksParamsSort = "slug"
-)
-
 // Defines values for ListUserPacksParamsOrder.
 const (
 	ListUserPacksParamsOrderAsc  ListUserPacksParamsOrder = "asc"
 	ListUserPacksParamsOrderDesc ListUserPacksParamsOrder = "desc"
 )
 
-// Defines values for ListUserTeamsParamsSort.
-const (
-	ListUserTeamsParamsSortName ListUserTeamsParamsSort = "name"
-	ListUserTeamsParamsSortSlug ListUserTeamsParamsSort = "slug"
-)
-
-// Defines values for ListUserTeamsParamsOrder.
-const (
-	Asc  ListUserTeamsParamsOrder = "asc"
-	Desc ListUserTeamsParamsOrder = "desc"
-)
-
-// AuthLogin defines model for auth_login.
-type AuthLogin struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
-}
-
-// AuthToken defines model for auth_token.
+// AuthToken defines model for AuthToken.
 type AuthToken struct {
 	ExpiresAt *time.Time `json:"expires_at,omitempty"`
 	Token     *string    `json:"token,omitempty"`
 }
 
-// AuthVerify defines model for auth_verify.
+// AuthVerify defines model for AuthVerify.
 type AuthVerify struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	Username  *string    `json:"username,omitempty"`
@@ -465,24 +231,24 @@ type Build struct {
 
 	// Fabric Model to represent fabric
 	Fabric   *Fabric `json:"fabric,omitempty"`
-	FabricId *string `json:"fabric_id,omitempty"`
+	FabricID *string `json:"fabric_id,omitempty"`
 
 	// Forge Model to represent forge
 	Forge   *Forge  `json:"forge,omitempty"`
-	ForgeId *string `json:"forge_id,omitempty"`
-	Id      *string `json:"id,omitempty"`
+	ForgeID *string `json:"forge_id,omitempty"`
+	ID      *string `json:"id,omitempty"`
 	Java    *string `json:"java,omitempty"`
 	Latest  *bool   `json:"latest,omitempty"`
 	Memory  *string `json:"memory,omitempty"`
 
 	// Minecraft Model to represent minecraft
 	Minecraft   *Minecraft `json:"minecraft,omitempty"`
-	MinecraftId *string    `json:"minecraft_id,omitempty"`
+	MinecraftID *string    `json:"minecraft_id,omitempty"`
 	Name        *string    `json:"name,omitempty"`
 
 	// Neoforge Model to represent neoforge
 	Neoforge   *Neoforge `json:"neoforge,omitempty"`
-	NeoforgeId *string   `json:"neoforge_id,omitempty"`
+	NeoforgeID *string   `json:"neoforge_id,omitempty"`
 
 	// Pack Model to represent pack
 	Pack   *Pack `json:"pack,omitempty"`
@@ -490,9 +256,8 @@ type Build struct {
 
 	// Quilt Model to represent quilt
 	Quilt       *Quilt     `json:"quilt,omitempty"`
-	QuiltId     *string    `json:"quilt_id,omitempty"`
+	QuiltID     *string    `json:"quilt_id,omitempty"`
 	Recommended *bool      `json:"recommended,omitempty"`
-	Slug        *string    `json:"slug,omitempty"`
 	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
 }
 
@@ -500,137 +265,96 @@ type Build struct {
 type BuildVersion struct {
 	// Build Model to represent build
 	Build     *Build     `json:"build,omitempty"`
-	BuildId   string     `json:"build_id"`
+	BuildID   string     `json:"build_id"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 
 	// Version Model to represent version
 	Version   *Version `json:"version,omitempty"`
-	VersionId string   `json:"version_id"`
-}
-
-// BuildVersionParams Parameters to attach or unlink build version
-type BuildVersionParams struct {
-	Mod     string `json:"mod"`
-	Version string `json:"version"`
-}
-
-// BuildVersions Model to represent build versions
-type BuildVersions struct {
-	// Build Model to represent build
-	Build *Build `json:"build,omitempty"`
-
-	// Pack Model to represent pack
-	Pack     *Pack           `json:"pack,omitempty"`
-	Total    *int64          `json:"total,omitempty"`
-	Versions *[]BuildVersion `json:"versions,omitempty"`
-}
-
-// Builds Model to represent list of builds
-type Builds struct {
-	Builds *[]Build `json:"builds,omitempty"`
-
-	// Pack Model to represent pack
-	Pack  *Pack  `json:"pack,omitempty"`
-	Total *int64 `json:"total,omitempty"`
+	VersionID string   `json:"version_id"`
 }
 
 // Fabric Model to represent fabric
 type Fabric struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
+	ID        *string    `json:"id,omitempty"`
 	Name      *string    `json:"name,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// FabricBuildParams Model to represent params for fabric builds
-type FabricBuildParams struct {
-	Build string `json:"build"`
-	Pack  string `json:"pack"`
-}
-
-// FabricBuilds Model to represent fabric builds
-type FabricBuilds struct {
-	Builds *[]Build `json:"builds,omitempty"`
-
-	// Fabric Model to represent fabric
-	Fabric *Fabric `json:"fabric,omitempty"`
-	Total  *int64  `json:"total,omitempty"`
-}
-
-// Fabrics Model to represent list of fabrics
-type Fabrics struct {
-	Total    *int64    `json:"total,omitempty"`
-	Versions *[]Fabric `json:"versions,omitempty"`
 }
 
 // Forge Model to represent forge
 type Forge struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
+	ID        *string    `json:"id,omitempty"`
 	Minecraft *string    `json:"minecraft,omitempty"`
 	Name      *string    `json:"name,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
-// ForgeBuildParams Model to represent params for forge builds
-type ForgeBuildParams struct {
-	Build string `json:"build"`
-	Pack  string `json:"pack"`
+// Group Model to represent group
+type Group struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	ID        *string    `json:"id,omitempty"`
+	Name      *string    `json:"name,omitempty"`
+	Slug      *string    `json:"slug,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
-// ForgeBuilds Model to represent forge builds
-type ForgeBuilds struct {
-	Builds *[]Build `json:"builds,omitempty"`
+// GroupMod Model to represent group mod
+type GroupMod struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 
-	// Forge Model to represent forge
-	Forge *Forge `json:"forge,omitempty"`
-	Total *int64 `json:"total,omitempty"`
+	// Group Model to represent group
+	Group   *Group `json:"group,omitempty"`
+	GroupID string `json:"group_id"`
+
+	// Mod Model to represent mod
+	Mod       *Mod          `json:"mod,omitempty"`
+	ModID     string        `json:"mod_id"`
+	Perm      *GroupModPerm `json:"perm,omitempty"`
+	UpdatedAt *time.Time    `json:"updated_at,omitempty"`
 }
 
-// Forges Model to represent list of forges
-type Forges struct {
-	Total    *int64   `json:"total,omitempty"`
-	Versions *[]Forge `json:"versions,omitempty"`
+// GroupModPerm defines model for GroupMod.Perm.
+type GroupModPerm string
+
+// GroupPack Model to represent group pack
+type GroupPack struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Group Model to represent group
+	Group   *Group `json:"group,omitempty"`
+	GroupID string `json:"group_id"`
+
+	// Pack Model to represent pack
+	Pack      *Pack          `json:"pack,omitempty"`
+	PackID    string         `json:"pack_id"`
+	Perm      *GroupPackPerm `json:"perm,omitempty"`
+	UpdatedAt *time.Time     `json:"updated_at,omitempty"`
 }
+
+// GroupPackPerm defines model for GroupPack.Perm.
+type GroupPackPerm string
 
 // Minecraft Model to represent minecraft
 type Minecraft struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
+	ID        *string    `json:"id,omitempty"`
 	Name      *string    `json:"name,omitempty"`
 	Type      *string    `json:"type,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
-// MinecraftBuildParams Model to represent params for minecraft builds
-type MinecraftBuildParams struct {
-	Build string `json:"build"`
-	Pack  string `json:"pack"`
-}
-
-// MinecraftBuilds Model to represent minecraft builds
-type MinecraftBuilds struct {
-	Builds *[]Build `json:"builds,omitempty"`
-
-	// Minecraft Model to represent minecraft
-	Minecraft *Minecraft `json:"minecraft,omitempty"`
-	Total     *int64     `json:"total,omitempty"`
-}
-
-// Minecrafts Model to represent list of minecrafts
-type Minecrafts struct {
-	Total    *int64       `json:"total,omitempty"`
-	Versions *[]Minecraft `json:"versions,omitempty"`
-}
-
 // Mod Model to represent mod
 type Mod struct {
-	Author      *string    `json:"author,omitempty"`
+	Author *string `json:"author,omitempty"`
+
+	// Avatar Model to represent mod avatar
+	Avatar      *ModAvatar `json:"avatar,omitempty"`
 	CreatedAt   *time.Time `json:"created_at,omitempty"`
 	Description *string    `json:"description,omitempty"`
 	Donate      *string    `json:"donate,omitempty"`
-	Id          *string    `json:"id,omitempty"`
+	ID          *string    `json:"id,omitempty"`
 	Name        *string    `json:"name,omitempty"`
 	Public      *bool      `json:"public,omitempty"`
 	Side        *string    `json:"side,omitempty"`
@@ -639,73 +363,20 @@ type Mod struct {
 	Website     *string    `json:"website,omitempty"`
 }
 
-// ModTeamParams Parameters to attach or unlink mod team
-type ModTeamParams struct {
-	Perm *ModTeamParamsPerm `json:"perm,omitempty"`
-	Team string             `json:"team"`
-}
-
-// ModTeamParamsPerm defines model for ModTeamParams.Perm.
-type ModTeamParamsPerm string
-
-// ModTeams Model to represent mod teams
-type ModTeams struct {
-	// Mod Model to represent mod
-	Mod   *Mod       `json:"mod,omitempty"`
-	Teams *[]TeamMod `json:"teams,omitempty"`
-	Total *int64     `json:"total,omitempty"`
-}
-
-// ModUserParams Parameters to attach or unlink mod user
-type ModUserParams struct {
-	Perm *ModUserParamsPerm `json:"perm,omitempty"`
-	User string             `json:"user"`
-}
-
-// ModUserParamsPerm defines model for ModUserParams.Perm.
-type ModUserParamsPerm string
-
-// ModUsers Model to represent mod users
-type ModUsers struct {
-	// Mod Model to represent mod
-	Mod   *Mod       `json:"mod,omitempty"`
-	Total *int64     `json:"total,omitempty"`
-	Users *[]UserMod `json:"users,omitempty"`
-}
-
-// Mods Model to represent list of mods
-type Mods struct {
-	Mods  *[]Mod `json:"mods,omitempty"`
-	Total *int64 `json:"total,omitempty"`
+// ModAvatar Model to represent mod avatar
+type ModAvatar struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	Slug      *string    `json:"slug,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	URL       *string    `json:"url,omitempty"`
 }
 
 // Neoforge Model to represent neoforge
 type Neoforge struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
+	ID        *string    `json:"id,omitempty"`
 	Name      *string    `json:"name,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// NeoforgeBuildParams Model to represent params for neoforge builds
-type NeoforgeBuildParams struct {
-	Build string `json:"build"`
-	Pack  string `json:"pack"`
-}
-
-// NeoforgeBuilds Model to represent neoforge builds
-type NeoforgeBuilds struct {
-	Builds *[]Build `json:"builds,omitempty"`
-
-	// Neoforge Model to represent neoforge
-	Neoforge *Neoforge `json:"neoforge,omitempty"`
-	Total    *int64    `json:"total,omitempty"`
-}
-
-// Neoforges Model to represent list of neoforges
-type Neoforges struct {
-	Total    *int64      `json:"total,omitempty"`
-	Versions *[]Neoforge `json:"versions,omitempty"`
 }
 
 // Notification Generic response for errors and validations
@@ -717,118 +388,41 @@ type Notification struct {
 
 // Pack Model to represent pack
 type Pack struct {
-	// Back Model to represent pack background
-	Back      *PackBack  `json:"back,omitempty"`
+	// Avatar Model to represent pack avatar
+	Avatar    *PackAvatar `json:"avatar,omitempty"`
+	CreatedAt *time.Time  `json:"created_at,omitempty"`
+	ID        *string     `json:"id,omitempty"`
+	Name      *string     `json:"name,omitempty"`
+	Public    *bool       `json:"public,omitempty"`
+	Slug      *string     `json:"slug,omitempty"`
+	UpdatedAt *time.Time  `json:"updated_at,omitempty"`
+	Website   *string     `json:"website,omitempty"`
+}
+
+// PackAvatar Model to represent pack avatar
+type PackAvatar struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
-
-	// Icon Model to represent pack icon
-	Icon *PackIcon `json:"icon,omitempty"`
-	Id   *string   `json:"id,omitempty"`
-
-	// Logo Model to represent pack logo
-	Logo      *PackLogo  `json:"logo,omitempty"`
-	Name      *string    `json:"name,omitempty"`
-	Public    *bool      `json:"public,omitempty"`
 	Slug      *string    `json:"slug,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-	Website   *string    `json:"website,omitempty"`
-}
-
-// PackBack Model to represent pack background
-type PackBack struct {
-	ContentType *string    `json:"content_type,omitempty"`
-	CreatedAt   *time.Time `json:"created_at,omitempty"`
-	Id          *string    `json:"id,omitempty"`
-	Md5         *string    `json:"md5,omitempty"`
-	Path        *string    `json:"path,omitempty"`
-	Slug        *string    `json:"slug,omitempty"`
-	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
-	Upload      *string    `json:"upload,omitempty"`
-	Url         *string    `json:"url,omitempty"`
-}
-
-// PackIcon Model to represent pack icon
-type PackIcon struct {
-	ContentType *string    `json:"content_type,omitempty"`
-	CreatedAt   *time.Time `json:"created_at,omitempty"`
-	Id          *string    `json:"id,omitempty"`
-	Md5         *string    `json:"md5,omitempty"`
-	Path        *string    `json:"path,omitempty"`
-	Slug        *string    `json:"slug,omitempty"`
-	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
-	Upload      *string    `json:"upload,omitempty"`
-	Url         *string    `json:"url,omitempty"`
-}
-
-// PackLogo Model to represent pack logo
-type PackLogo struct {
-	ContentType *string    `json:"content_type,omitempty"`
-	CreatedAt   *time.Time `json:"created_at,omitempty"`
-	Id          *string    `json:"id,omitempty"`
-	Md5         *string    `json:"md5,omitempty"`
-	Path        *string    `json:"path,omitempty"`
-	Slug        *string    `json:"slug,omitempty"`
-	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
-	Upload      *string    `json:"upload,omitempty"`
-	Url         *string    `json:"url,omitempty"`
-}
-
-// PackTeamParams Parameters to attach or unlink pack team
-type PackTeamParams struct {
-	Perm *PackTeamParamsPerm `json:"perm,omitempty"`
-	Team string              `json:"team"`
-}
-
-// PackTeamParamsPerm defines model for PackTeamParams.Perm.
-type PackTeamParamsPerm string
-
-// PackTeams Model to represent pack teams
-type PackTeams struct {
-	// Pack Model to represent pack
-	Pack  *Pack       `json:"pack,omitempty"`
-	Teams *[]TeamPack `json:"teams,omitempty"`
-	Total *int64      `json:"total,omitempty"`
-}
-
-// PackUserParams Parameters to attach or unlink pack user
-type PackUserParams struct {
-	Perm *PackUserParamsPerm `json:"perm,omitempty"`
-	User string              `json:"user"`
-}
-
-// PackUserParamsPerm defines model for PackUserParams.Perm.
-type PackUserParamsPerm string
-
-// PackUsers Model to represent pack users
-type PackUsers struct {
-	// Pack Model to represent pack
-	Pack  *Pack       `json:"pack,omitempty"`
-	Total *int64      `json:"total,omitempty"`
-	Users *[]UserPack `json:"users,omitempty"`
-}
-
-// Packs Model to represent list of packs
-type Packs struct {
-	Packs *[]Pack `json:"packs,omitempty"`
-	Total *int64  `json:"total,omitempty"`
+	URL       *string    `json:"url,omitempty"`
 }
 
 // Profile Model to represent profile
 type Profile struct {
-	Active    *bool       `json:"active,omitempty"`
-	Admin     *bool       `json:"admin,omitempty"`
-	Auths     *[]UserAuth `json:"auths,omitempty"`
-	CreatedAt *time.Time  `json:"created_at,omitempty"`
-	Email     *string     `json:"email,omitempty"`
-	Fullname  *string     `json:"fullname,omitempty"`
-	Id        *string     `json:"id,omitempty"`
-	Mods      *[]UserMod  `json:"mods,omitempty"`
-	Packs     *[]UserPack `json:"packs,omitempty"`
-	Password  *string     `json:"password,omitempty"`
-	Profile   *string     `json:"profile,omitempty"`
-	Teams     *[]UserTeam `json:"teams,omitempty"`
-	UpdatedAt *time.Time  `json:"updated_at,omitempty"`
-	Username  *string     `json:"username,omitempty"`
+	Active    *bool        `json:"active,omitempty"`
+	Admin     *bool        `json:"admin,omitempty"`
+	Auths     *[]UserAuth  `json:"auths,omitempty"`
+	CreatedAt *time.Time   `json:"created_at,omitempty"`
+	Email     *string      `json:"email,omitempty"`
+	Fullname  *string      `json:"fullname,omitempty"`
+	Groups    *[]UserGroup `json:"groups,omitempty"`
+	ID        *string      `json:"id,omitempty"`
+	Mods      *[]UserMod   `json:"mods,omitempty"`
+	Packs     *[]UserPack  `json:"packs,omitempty"`
+	Password  *string      `json:"password,omitempty"`
+	Profile   *string      `json:"profile,omitempty"`
+	UpdatedAt *time.Time   `json:"updated_at,omitempty"`
+	Username  *string      `json:"username,omitempty"`
 }
 
 // Provider Model to represent auth provider
@@ -839,143 +433,12 @@ type Provider struct {
 	Name    *string `json:"name,omitempty"`
 }
 
-// Providers Model to represent list of auth providers
-type Providers struct {
-	Listing *[]Provider `json:"listing,omitempty"`
-	Total   *int64      `json:"total,omitempty"`
-}
-
 // Quilt Model to represent quilt
 type Quilt struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
+	ID        *string    `json:"id,omitempty"`
 	Name      *string    `json:"name,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// QuiltBuildParams Model to represent params for quilt builds
-type QuiltBuildParams struct {
-	Build string `json:"build"`
-	Pack  string `json:"pack"`
-}
-
-// QuiltBuilds Model to represent quilt builds
-type QuiltBuilds struct {
-	Builds *[]Build `json:"builds,omitempty"`
-
-	// Quilt Model to represent quilt
-	Quilt *Quilt `json:"quilt,omitempty"`
-	Total *int64 `json:"total,omitempty"`
-}
-
-// Quilts Model to represent list of quilts
-type Quilts struct {
-	Total    *int64   `json:"total,omitempty"`
-	Versions *[]Quilt `json:"versions,omitempty"`
-}
-
-// Team Model to represent team
-type Team struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	Name      *string    `json:"name,omitempty"`
-	Slug      *string    `json:"slug,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// TeamMod Model to represent team mod
-type TeamMod struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-
-	// Mod Model to represent mod
-	Mod   *Mod         `json:"mod,omitempty"`
-	ModId string       `json:"mod_id"`
-	Perm  *TeamModPerm `json:"perm,omitempty"`
-
-	// Team Model to represent team
-	Team      *Team      `json:"team,omitempty"`
-	TeamId    string     `json:"team_id"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// TeamModPerm defines model for TeamMod.Perm.
-type TeamModPerm string
-
-// TeamModParams Parameters to attach or unlink team mod
-type TeamModParams struct {
-	Mod  string             `json:"mod"`
-	Perm *TeamModParamsPerm `json:"perm,omitempty"`
-}
-
-// TeamModParamsPerm defines model for TeamModParams.Perm.
-type TeamModParamsPerm string
-
-// TeamMods Model to represent team mods
-type TeamMods struct {
-	Mods *[]TeamMod `json:"mods,omitempty"`
-
-	// Team Model to represent team
-	Team  *Team  `json:"team,omitempty"`
-	Total *int64 `json:"total,omitempty"`
-}
-
-// TeamPack Model to represent team pack
-type TeamPack struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-
-	// Pack Model to represent pack
-	Pack   *Pack         `json:"pack,omitempty"`
-	PackId string        `json:"pack_id"`
-	Perm   *TeamPackPerm `json:"perm,omitempty"`
-
-	// Team Model to represent team
-	Team      *Team      `json:"team,omitempty"`
-	TeamId    string     `json:"team_id"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// TeamPackPerm defines model for TeamPack.Perm.
-type TeamPackPerm string
-
-// TeamPackParams Parameters to attach or unlink team pack
-type TeamPackParams struct {
-	Pack string              `json:"pack"`
-	Perm *TeamPackParamsPerm `json:"perm,omitempty"`
-}
-
-// TeamPackParamsPerm defines model for TeamPackParams.Perm.
-type TeamPackParamsPerm string
-
-// TeamPacks Model to represent team packs
-type TeamPacks struct {
-	Packs *[]TeamPack `json:"packs,omitempty"`
-
-	// Team Model to represent team
-	Team  *Team  `json:"team,omitempty"`
-	Total *int64 `json:"total,omitempty"`
-}
-
-// TeamUserParams Parameters to attach or unlink team user
-type TeamUserParams struct {
-	Perm *TeamUserParamsPerm `json:"perm,omitempty"`
-	User string              `json:"user"`
-}
-
-// TeamUserParamsPerm defines model for TeamUserParams.Perm.
-type TeamUserParamsPerm string
-
-// TeamUsers Model to represent team users
-type TeamUsers struct {
-	// Team Model to represent team
-	Team  *Team       `json:"team,omitempty"`
-	Total *int64      `json:"total,omitempty"`
-	Users *[]UserTeam `json:"users,omitempty"`
-}
-
-// Teams Model to represent list of teams
-type Teams struct {
-	Teams *[]Team `json:"teams,omitempty"`
-	Total *int64  `json:"total,omitempty"`
 }
 
 // User Model to represent user
@@ -986,7 +449,7 @@ type User struct {
 	CreatedAt *time.Time  `json:"created_at,omitempty"`
 	Email     *string     `json:"email,omitempty"`
 	Fullname  *string     `json:"fullname,omitempty"`
-	Id        *string     `json:"id,omitempty"`
+	ID        *string     `json:"id,omitempty"`
 	Password  *string     `json:"password,omitempty"`
 	Profile   *string     `json:"profile,omitempty"`
 	UpdatedAt *time.Time  `json:"updated_at,omitempty"`
@@ -1001,41 +464,41 @@ type UserAuth struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
+// UserGroup Model to represent user group
+type UserGroup struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Group Model to represent group
+	Group     *Group         `json:"group,omitempty"`
+	GroupID   string         `json:"group_id"`
+	Perm      *UserGroupPerm `json:"perm,omitempty"`
+	UpdatedAt *time.Time     `json:"updated_at,omitempty"`
+
+	// User Model to represent user
+	User   *User  `json:"user,omitempty"`
+	UserID string `json:"user_id"`
+}
+
+// UserGroupPerm defines model for UserGroup.Perm.
+type UserGroupPerm string
+
 // UserMod Model to represent user mod
 type UserMod struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 
 	// Mod Model to represent mod
 	Mod       *Mod         `json:"mod,omitempty"`
-	ModId     string       `json:"mod_id"`
+	ModID     string       `json:"mod_id"`
 	Perm      *UserModPerm `json:"perm,omitempty"`
 	UpdatedAt *time.Time   `json:"updated_at,omitempty"`
 
 	// User Model to represent user
 	User   *User  `json:"user,omitempty"`
-	UserId string `json:"user_id"`
+	UserID string `json:"user_id"`
 }
 
 // UserModPerm defines model for UserMod.Perm.
 type UserModPerm string
-
-// UserModParams Parameters to attach or unlink user mod
-type UserModParams struct {
-	Mod  string             `json:"mod"`
-	Perm *UserModParamsPerm `json:"perm,omitempty"`
-}
-
-// UserModParamsPerm defines model for UserModParams.Perm.
-type UserModParamsPerm string
-
-// UserMods Model to represent user mods
-type UserMods struct {
-	Mods  *[]UserMod `json:"mods,omitempty"`
-	Total *int64     `json:"total,omitempty"`
-
-	// User Model to represent user
-	User *User `json:"user,omitempty"`
-}
 
 // UserPack Model to represent user pack
 type UserPack struct {
@@ -1043,77 +506,17 @@ type UserPack struct {
 
 	// Pack Model to represent pack
 	Pack      *Pack         `json:"pack,omitempty"`
-	PackId    string        `json:"pack_id"`
+	PackID    string        `json:"pack_id"`
 	Perm      *UserPackPerm `json:"perm,omitempty"`
 	UpdatedAt *time.Time    `json:"updated_at,omitempty"`
 
 	// User Model to represent user
 	User   *User  `json:"user,omitempty"`
-	UserId string `json:"user_id"`
+	UserID string `json:"user_id"`
 }
 
 // UserPackPerm defines model for UserPack.Perm.
 type UserPackPerm string
-
-// UserPackParams Parameters to attach or unlink user pack
-type UserPackParams struct {
-	Pack string              `json:"pack"`
-	Perm *UserPackParamsPerm `json:"perm,omitempty"`
-}
-
-// UserPackParamsPerm defines model for UserPackParams.Perm.
-type UserPackParamsPerm string
-
-// UserPacks Model to represent user packs
-type UserPacks struct {
-	Packs *[]UserPack `json:"packs,omitempty"`
-	Total *int64      `json:"total,omitempty"`
-
-	// User Model to represent user
-	User *User `json:"user,omitempty"`
-}
-
-// UserTeam Model to represent user team
-type UserTeam struct {
-	CreatedAt *time.Time    `json:"created_at,omitempty"`
-	Perm      *UserTeamPerm `json:"perm,omitempty"`
-
-	// Team Model to represent team
-	Team      *Team      `json:"team,omitempty"`
-	TeamId    string     `json:"team_id"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-
-	// User Model to represent user
-	User   *User  `json:"user,omitempty"`
-	UserId string `json:"user_id"`
-}
-
-// UserTeamPerm defines model for UserTeam.Perm.
-type UserTeamPerm string
-
-// UserTeamParams Parameters to attach or unlink user team
-type UserTeamParams struct {
-	Perm *UserTeamParamsPerm `json:"perm,omitempty"`
-	Team string              `json:"team"`
-}
-
-// UserTeamParamsPerm defines model for UserTeamParams.Perm.
-type UserTeamParamsPerm string
-
-// UserTeams Model to represent user teams
-type UserTeams struct {
-	Teams *[]UserTeam `json:"teams,omitempty"`
-	Total *int64      `json:"total,omitempty"`
-
-	// User Model to represent user
-	User *User `json:"user,omitempty"`
-}
-
-// Users Model to represent list of users
-type Users struct {
-	Total *int64  `json:"total,omitempty"`
-	Users *[]User `json:"users,omitempty"`
-}
 
 // Validation General structure to show validation errors
 type Validation struct {
@@ -1127,825 +530,1837 @@ type Version struct {
 
 	// File Model to represent version file
 	File *VersionFile `json:"file,omitempty"`
-	Id   *string      `json:"id,omitempty"`
+	ID   *string      `json:"id,omitempty"`
 
 	// Mod Model to represent mod
 	Mod       *Mod       `json:"mod,omitempty"`
 	Name      *string    `json:"name,omitempty"`
 	Public    *bool      `json:"public,omitempty"`
-	Slug      *string    `json:"slug,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// VersionBuildParams Parameters to attach or unlink version build
-type VersionBuildParams struct {
-	Build string `json:"build"`
-	Pack  string `json:"pack"`
-}
-
-// VersionBuilds Model to represent version builds
-type VersionBuilds struct {
-	Builds *[]BuildVersion `json:"builds,omitempty"`
-
-	// Mod Model to represent mod
-	Mod   *Mod   `json:"mod,omitempty"`
-	Total *int64 `json:"total,omitempty"`
-
-	// Version Model to represent version
-	Version *Version `json:"version,omitempty"`
 }
 
 // VersionFile Model to represent version file
 type VersionFile struct {
 	ContentType *string    `json:"content_type,omitempty"`
 	CreatedAt   *time.Time `json:"created_at,omitempty"`
-	Id          *string    `json:"id,omitempty"`
-	Md5         *string    `json:"md5,omitempty"`
+	MD5         *string    `json:"md5,omitempty"`
 	Path        *string    `json:"path,omitempty"`
 	Slug        *string    `json:"slug,omitempty"`
 	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
-	Upload      *string    `json:"upload,omitempty"`
-	Url         *string    `json:"url,omitempty"`
+	URL         *string    `json:"url,omitempty"`
 }
 
-// Versions Model to represent list of versions
-type Versions struct {
+// AuthCodeParam defines model for AuthCodeParam.
+type AuthCodeParam = string
+
+// AuthProviderParam defines model for AuthProviderParam.
+type AuthProviderParam = string
+
+// AuthStateParam defines model for AuthStateParam.
+type AuthStateParam = string
+
+// BuildID defines model for BuildParam.
+type BuildID = string
+
+// FabricID defines model for FabricParam.
+type FabricID = string
+
+// ForgeID defines model for ForgeParam.
+type ForgeID = string
+
+// GroupID defines model for GroupParam.
+type GroupID = string
+
+// MinecraftID defines model for MinecraftParam.
+type MinecraftID = string
+
+// ModID defines model for ModParam.
+type ModID = string
+
+// NeoforgeID defines model for NeoforgeParam.
+type NeoforgeID = string
+
+// PackID defines model for PackParam.
+type PackID = string
+
+// PagingLimitParam defines model for PagingLimitParam.
+type PagingLimitParam = int
+
+// PagingOffsetParam defines model for PagingOffsetParam.
+type PagingOffsetParam = int
+
+// QuiltID defines model for QuiltParam.
+type QuiltID = string
+
+// SearchQueryParam defines model for SearchQueryParam.
+type SearchQueryParam = string
+
+// SortColumnParam defines model for SortColumnParam.
+type SortColumnParam = string
+
+// SortOrderParam defines model for SortOrderParam.
+type SortOrderParam string
+
+// UserID defines model for UserParam.
+type UserID = string
+
+// VersionID defines model for VersionParam.
+type VersionID = string
+
+// ActionFailedError Generic response for errors and validations
+type ActionFailedError = Notification
+
+// AlreadyAttachedError Generic response for errors and validations
+type AlreadyAttachedError = Notification
+
+// BadCredentialsError Generic response for errors and validations
+type BadCredentialsError = Notification
+
+// BadRequestError Generic response for errors and validations
+type BadRequestError = Notification
+
+// BuildResponse Model to represent build
+type BuildResponse = Build
+
+// BuildVersionsResponse defines model for BuildVersionsResponse.
+type BuildVersionsResponse struct {
+	// Build Model to represent build
+	Build  *Build `json:"build,omitempty"`
+	Limit  int64  `json:"limit"`
+	Offset int64  `json:"offset"`
+
+	// Pack Model to represent pack
+	Pack     *Pack          `json:"pack,omitempty"`
+	Total    int64          `json:"total"`
+	Versions []BuildVersion `json:"versions"`
+}
+
+// BuildsResponse defines model for BuildsResponse.
+type BuildsResponse struct {
+	Builds []Build `json:"builds"`
+	Limit  int64   `json:"limit"`
+	Offset int64   `json:"offset"`
+
+	// Pack Model to represent pack
+	Pack  *Pack `json:"pack,omitempty"`
+	Total int64 `json:"total"`
+}
+
+// FabricBuildsResponse defines model for FabricBuildsResponse.
+type FabricBuildsResponse struct {
+	Builds []Build `json:"builds"`
+
+	// Fabric Model to represent fabric
+	Fabric *Fabric `json:"fabric,omitempty"`
+	Limit  int64   `json:"limit"`
+	Offset int64   `json:"offset"`
+	Total  int64   `json:"total"`
+}
+
+// FabricsResponse defines model for FabricsResponse.
+type FabricsResponse struct {
+	Limit    int64    `json:"limit"`
+	Offset   int64    `json:"offset"`
+	Total    int64    `json:"total"`
+	Versions []Fabric `json:"versions"`
+}
+
+// ForgeBuildsResponse defines model for ForgeBuildsResponse.
+type ForgeBuildsResponse struct {
+	Builds []Build `json:"builds"`
+
+	// Forge Model to represent forge
+	Forge  *Forge `json:"forge,omitempty"`
+	Limit  int64  `json:"limit"`
+	Offset int64  `json:"offset"`
+	Total  int64  `json:"total"`
+}
+
+// ForgesResponse defines model for ForgesResponse.
+type ForgesResponse struct {
+	Limit    int64   `json:"limit"`
+	Offset   int64   `json:"offset"`
+	Total    int64   `json:"total"`
+	Versions []Forge `json:"versions"`
+}
+
+// GroupModsResponse defines model for GroupModsResponse.
+type GroupModsResponse struct {
+	// Group Model to represent group
+	Group  *Group     `json:"group,omitempty"`
+	Limit  int64      `json:"limit"`
+	Mods   []GroupMod `json:"mods"`
+	Offset int64      `json:"offset"`
+	Total  int64      `json:"total"`
+}
+
+// GroupPacksResponse defines model for GroupPacksResponse.
+type GroupPacksResponse struct {
+	// Group Model to represent group
+	Group  *Group      `json:"group,omitempty"`
+	Limit  int64       `json:"limit"`
+	Offset int64       `json:"offset"`
+	Packs  []GroupPack `json:"packs"`
+	Total  int64       `json:"total"`
+}
+
+// GroupResponse Model to represent group
+type GroupResponse = Group
+
+// GroupUsersResponse defines model for GroupUsersResponse.
+type GroupUsersResponse struct {
+	// Group Model to represent group
+	Group  *Group      `json:"group,omitempty"`
+	Limit  int64       `json:"limit"`
+	Offset int64       `json:"offset"`
+	Total  int64       `json:"total"`
+	Users  []UserGroup `json:"users"`
+}
+
+// GroupsResponse defines model for GroupsResponse.
+type GroupsResponse struct {
+	Groups []Group `json:"groups"`
+	Limit  int64   `json:"limit"`
+	Offset int64   `json:"offset"`
+	Total  int64   `json:"total"`
+}
+
+// InternalServerError Generic response for errors and validations
+type InternalServerError = Notification
+
+// InvalidTokenError Generic response for errors and validations
+type InvalidTokenError = Notification
+
+// LoginResponse defines model for LoginResponse.
+type LoginResponse = AuthToken
+
+// MinecraftBuildsResponse defines model for MinecraftBuildsResponse.
+type MinecraftBuildsResponse struct {
+	Builds []Build `json:"builds"`
+	Limit  int64   `json:"limit"`
+
+	// Minecraft Model to represent minecraft
+	Minecraft *Minecraft `json:"minecraft,omitempty"`
+	Offset    int64      `json:"offset"`
+	Total     int64      `json:"total"`
+}
+
+// MinecraftsResponse defines model for MinecraftsResponse.
+type MinecraftsResponse struct {
+	Limit    int64       `json:"limit"`
+	Offset   int64       `json:"offset"`
+	Total    int64       `json:"total"`
+	Versions []Minecraft `json:"versions"`
+}
+
+// ModAvatarResponse Model to represent mod avatar
+type ModAvatarResponse = ModAvatar
+
+// ModGroupsResponse defines model for ModGroupsResponse.
+type ModGroupsResponse struct {
+	Groups []GroupMod `json:"groups"`
+	Limit  int64      `json:"limit"`
+
 	// Mod Model to represent mod
-	Mod      *Mod       `json:"mod,omitempty"`
-	Total    *int64     `json:"total,omitempty"`
-	Versions *[]Version `json:"versions,omitempty"`
+	Mod    *Mod  `json:"mod,omitempty"`
+	Offset int64 `json:"offset"`
+	Total  int64 `json:"total"`
 }
 
-// ExternalCallbackParams defines parameters for ExternalCallback.
-type ExternalCallbackParams struct {
+// ModResponse Model to represent mod
+type ModResponse = Mod
+
+// ModUsersResponse defines model for ModUsersResponse.
+type ModUsersResponse struct {
+	Limit int64 `json:"limit"`
+
+	// Mod Model to represent mod
+	Mod    *Mod      `json:"mod,omitempty"`
+	Offset int64     `json:"offset"`
+	Total  int64     `json:"total"`
+	Users  []UserMod `json:"users"`
+}
+
+// ModsResponse defines model for ModsResponse.
+type ModsResponse struct {
+	Limit  int64 `json:"limit"`
+	Mods   []Mod `json:"mods"`
+	Offset int64 `json:"offset"`
+	Total  int64 `json:"total"`
+}
+
+// NeoforgeBuildsResponse defines model for NeoforgeBuildsResponse.
+type NeoforgeBuildsResponse struct {
+	Builds []Build `json:"builds"`
+	Limit  int64   `json:"limit"`
+
+	// Neoforge Model to represent neoforge
+	Neoforge *Neoforge `json:"neoforge,omitempty"`
+	Offset   int64     `json:"offset"`
+	Total    int64     `json:"total"`
+}
+
+// NeoforgesResponse defines model for NeoforgesResponse.
+type NeoforgesResponse struct {
+	Limit    int64      `json:"limit"`
+	Offset   int64      `json:"offset"`
+	Total    int64      `json:"total"`
+	Versions []Neoforge `json:"versions"`
+}
+
+// NotAttachedError Generic response for errors and validations
+type NotAttachedError = Notification
+
+// NotAuthorizedError Generic response for errors and validations
+type NotAuthorizedError = Notification
+
+// NotFoundError Generic response for errors and validations
+type NotFoundError = Notification
+
+// PackAvatarResponse Model to represent pack avatar
+type PackAvatarResponse = PackAvatar
+
+// PackGroupsResponse defines model for PackGroupsResponse.
+type PackGroupsResponse struct {
+	Groups []GroupPack `json:"groups"`
+	Limit  int64       `json:"limit"`
+	Offset int64       `json:"offset"`
+
+	// Pack Model to represent pack
+	Pack  *Pack `json:"pack,omitempty"`
+	Total int64 `json:"total"`
+}
+
+// PackResponse Model to represent pack
+type PackResponse = Pack
+
+// PackUsersResponse defines model for PackUsersResponse.
+type PackUsersResponse struct {
+	Limit  int64 `json:"limit"`
+	Offset int64 `json:"offset"`
+
+	// Pack Model to represent pack
+	Pack  *Pack      `json:"pack,omitempty"`
+	Total int64      `json:"total"`
+	Users []UserPack `json:"users"`
+}
+
+// PacksResponse defines model for PacksResponse.
+type PacksResponse struct {
+	Limit  int64  `json:"limit"`
+	Offset int64  `json:"offset"`
+	Packs  []Pack `json:"packs"`
+	Total  int64  `json:"total"`
+}
+
+// ProfileResponse Model to represent profile
+type ProfileResponse = Profile
+
+// ProvidersResponse defines model for ProvidersResponse.
+type ProvidersResponse struct {
+	Providers []Provider `json:"providers"`
+	Total     int64      `json:"total"`
+}
+
+// QuiltBuildsResponse defines model for QuiltBuildsResponse.
+type QuiltBuildsResponse struct {
+	Builds []Build `json:"builds"`
+	Limit  int64   `json:"limit"`
+	Offset int64   `json:"offset"`
+
+	// Quilt Model to represent quilt
+	Quilt *Quilt `json:"quilt,omitempty"`
+	Total int64  `json:"total"`
+}
+
+// QuiltsResponse defines model for QuiltsResponse.
+type QuiltsResponse struct {
+	Limit    int64   `json:"limit"`
+	Offset   int64   `json:"offset"`
+	Total    int64   `json:"total"`
+	Versions []Quilt `json:"versions"`
+}
+
+// RefreshResponse defines model for RefreshResponse.
+type RefreshResponse = AuthToken
+
+// RemoteUnavailableError Generic response for errors and validations
+type RemoteUnavailableError = Notification
+
+// SuccessMessage Generic response for errors and validations
+type SuccessMessage = Notification
+
+// TokenResponse defines model for TokenResponse.
+type TokenResponse = AuthToken
+
+// UserGroupsResponse defines model for UserGroupsResponse.
+type UserGroupsResponse struct {
+	Groups []UserGroup `json:"groups"`
+	Limit  int64       `json:"limit"`
+	Offset int64       `json:"offset"`
+	Total  int64       `json:"total"`
+
+	// User Model to represent user
+	User *User `json:"user,omitempty"`
+}
+
+// UserModsResponse defines model for UserModsResponse.
+type UserModsResponse struct {
+	Limit  int64     `json:"limit"`
+	Mods   []UserMod `json:"mods"`
+	Offset int64     `json:"offset"`
+	Total  int64     `json:"total"`
+
+	// User Model to represent user
+	User *User `json:"user,omitempty"`
+}
+
+// UserPacksResponse defines model for UserPacksResponse.
+type UserPacksResponse struct {
+	Limit  int64      `json:"limit"`
+	Offset int64      `json:"offset"`
+	Packs  []UserPack `json:"packs"`
+	Total  int64      `json:"total"`
+
+	// User Model to represent user
+	User *User `json:"user,omitempty"`
+}
+
+// UserResponse Model to represent user
+type UserResponse = User
+
+// UsersResponse defines model for UsersResponse.
+type UsersResponse struct {
+	Limit  int64  `json:"limit"`
+	Offset int64  `json:"offset"`
+	Total  int64  `json:"total"`
+	Users  []User `json:"users"`
+}
+
+// ValidationError Generic response for errors and validations
+type ValidationError = Notification
+
+// VerifyResponse defines model for VerifyResponse.
+type VerifyResponse = AuthVerify
+
+// VersionBuildsResponse defines model for VersionBuildsResponse.
+type VersionBuildsResponse struct {
+	Builds []BuildVersion `json:"builds"`
+	Limit  int64          `json:"limit"`
+
+	// Mod Model to represent mod
+	Mod    *Mod  `json:"mod,omitempty"`
+	Offset int64 `json:"offset"`
+	Total  int64 `json:"total"`
+
+	// Version Model to represent version
+	Version *Version `json:"version,omitempty"`
+}
+
+// VersionResponse Model to represent version
+type VersionResponse = Version
+
+// VersionsResponse defines model for VersionsResponse.
+type VersionsResponse struct {
+	Limit int64 `json:"limit"`
+
+	// Mod Model to represent mod
+	Mod      *Mod      `json:"mod,omitempty"`
+	Offset   int64     `json:"offset"`
+	Total    int64     `json:"total"`
+	Versions []Version `json:"versions"`
+}
+
+// BuildVersionBody defines model for BuildVersionBody.
+type BuildVersionBody struct {
+	Mod     string `json:"mod,omitempty"`
+	Version string `json:"version,omitempty"`
+}
+
+// CreateBuildBody defines model for CreateBuildBody.
+type CreateBuildBody struct {
+	FabricID    *string `json:"fabric_id,omitempty"`
+	ForgeID     *string `json:"forge_id,omitempty"`
+	Java        *string `json:"java,omitempty"`
+	Latest      *bool   `json:"latest,omitempty"`
+	Memory      *string `json:"memory,omitempty"`
+	MinecraftID *string `json:"minecraft_id,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	NeoforgeID  *string `json:"neoforge_id,omitempty"`
+	Public      *bool   `json:"public,omitempty"`
+	QuiltID     *string `json:"quilt_id,omitempty"`
+	Recommended *bool   `json:"recommended,omitempty"`
+}
+
+// CreateGroupBody defines model for CreateGroupBody.
+type CreateGroupBody struct {
+	Name *string `json:"name,omitempty"`
+	Slug *string `json:"slug,omitempty"`
+}
+
+// CreateModBody defines model for CreateModBody.
+type CreateModBody struct {
+	Author      *string `json:"author,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Donate      *string `json:"donate,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	Public      *bool   `json:"public,omitempty"`
+	Side        *string `json:"side,omitempty"`
+	Slug        *string `json:"slug,omitempty"`
+	Website     *string `json:"website,omitempty"`
+}
+
+// CreatePackBody defines model for CreatePackBody.
+type CreatePackBody struct {
+	Name    *string `json:"name,omitempty"`
+	Public  *bool   `json:"public,omitempty"`
+	Slug    *string `json:"slug,omitempty"`
+	Website *string `json:"website,omitempty"`
+}
+
+// CreateUserBody defines model for CreateUserBody.
+type CreateUserBody struct {
+	Active   *bool   `json:"active,omitempty"`
+	Admin    *bool   `json:"admin,omitempty"`
+	Email    *string `json:"email,omitempty"`
+	Fullname *string `json:"fullname,omitempty"`
+	Password *string `json:"password,omitempty"`
+	Username *string `json:"username,omitempty"`
+}
+
+// CreateVersionBody defines model for CreateVersionBody.
+type CreateVersionBody struct {
+	Name   *string `json:"name,omitempty"`
+	Public *bool   `json:"public,omitempty"`
+	Upload *string `json:"upload,omitempty"`
+}
+
+// FabricBuildBody defines model for FabricBuildBody.
+type FabricBuildBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
+// ForgeBuildBody defines model for ForgeBuildBody.
+type ForgeBuildBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
+// GroupModDropBody defines model for GroupModDropBody.
+type GroupModDropBody struct {
+	Mod string `json:"mod"`
+}
+
+// GroupModPermBody defines model for GroupModPermBody.
+type GroupModPermBody struct {
+	Mod  string `json:"mod"`
+	Perm string `json:"perm"`
+}
+
+// GroupPackDropBody defines model for GroupPackDropBody.
+type GroupPackDropBody struct {
+	Pack string `json:"pack"`
+}
+
+// GroupPackPermBody defines model for GroupPackPermBody.
+type GroupPackPermBody struct {
+	Pack string `json:"pack"`
+	Perm string `json:"perm"`
+}
+
+// GroupUserDropBody defines model for GroupUserDropBody.
+type GroupUserDropBody struct {
+	User string `json:"user"`
+}
+
+// GroupUserPermBody defines model for GroupUserPermBody.
+type GroupUserPermBody struct {
+	Perm string `json:"perm"`
+	User string `json:"user"`
+}
+
+// LoginAuthBody defines model for LoginAuthBody.
+type LoginAuthBody struct {
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+// MinecraftBuildBody defines model for MinecraftBuildBody.
+type MinecraftBuildBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
+// ModGroupDropBody defines model for ModGroupDropBody.
+type ModGroupDropBody struct {
+	Group string `json:"group"`
+}
+
+// ModGroupPermBody defines model for ModGroupPermBody.
+type ModGroupPermBody struct {
+	Group string `json:"group"`
+	Perm  string `json:"perm"`
+}
+
+// ModUserDropBody defines model for ModUserDropBody.
+type ModUserDropBody struct {
+	User string `json:"user"`
+}
+
+// ModUserPermBody defines model for ModUserPermBody.
+type ModUserPermBody struct {
+	Perm string `json:"perm"`
+	User string `json:"user"`
+}
+
+// NeoforgeBuildBody defines model for NeoforgeBuildBody.
+type NeoforgeBuildBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
+// PackGroupDropBody defines model for PackGroupDropBody.
+type PackGroupDropBody struct {
+	Group string `json:"group"`
+}
+
+// PackGroupPermBody defines model for PackGroupPermBody.
+type PackGroupPermBody struct {
+	Group string `json:"group"`
+	Perm  string `json:"perm"`
+}
+
+// PackUserDropBody defines model for PackUserDropBody.
+type PackUserDropBody struct {
+	User string `json:"user"`
+}
+
+// PackUserPermBody defines model for PackUserPermBody.
+type PackUserPermBody struct {
+	Perm string `json:"perm"`
+	User string `json:"user"`
+}
+
+// QuiltBuildBody defines model for QuiltBuildBody.
+type QuiltBuildBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
+// RedirectAuthBody defines model for RedirectAuthBody.
+type RedirectAuthBody struct {
+	Token string `json:"token"`
+}
+
+// UpdateBuildBody defines model for UpdateBuildBody.
+type UpdateBuildBody struct {
+	FabricID    *string `json:"fabric_id,omitempty"`
+	ForgeID     *string `json:"forge_id,omitempty"`
+	Java        *string `json:"java,omitempty"`
+	Latest      *bool   `json:"latest,omitempty"`
+	Memory      *string `json:"memory,omitempty"`
+	MinecraftID *string `json:"minecraft_id,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	NeoforgeID  *string `json:"neoforge_id,omitempty"`
+	Public      *bool   `json:"public,omitempty"`
+	QuiltID     *string `json:"quilt_id,omitempty"`
+	Recommended *bool   `json:"recommended,omitempty"`
+}
+
+// UpdateGroupBody defines model for UpdateGroupBody.
+type UpdateGroupBody struct {
+	Name *string `json:"name,omitempty"`
+	Slug *string `json:"slug,omitempty"`
+}
+
+// UpdateModBody defines model for UpdateModBody.
+type UpdateModBody struct {
+	Author      *string `json:"author,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Donate      *string `json:"donate,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	Public      *bool   `json:"public,omitempty"`
+	Side        *string `json:"side,omitempty"`
+	Slug        *string `json:"slug,omitempty"`
+	Website     *string `json:"website,omitempty"`
+}
+
+// UpdatePackBody defines model for UpdatePackBody.
+type UpdatePackBody struct {
+	Name    *string `json:"name,omitempty"`
+	Public  *bool   `json:"public,omitempty"`
+	Slug    *string `json:"slug,omitempty"`
+	Website *string `json:"website,omitempty"`
+}
+
+// UpdateProfileBody defines model for UpdateProfileBody.
+type UpdateProfileBody struct {
+	Email    *string `json:"email,omitempty"`
+	Fullname *string `json:"fullname,omitempty"`
+	Password *string `json:"password,omitempty"`
+	Username *string `json:"username,omitempty"`
+}
+
+// UpdateUserBody defines model for UpdateUserBody.
+type UpdateUserBody struct {
+	Active   *bool   `json:"active,omitempty"`
+	Admin    *bool   `json:"admin,omitempty"`
+	Email    *string `json:"email,omitempty"`
+	Fullname *string `json:"fullname,omitempty"`
+	Password *string `json:"password,omitempty"`
+	Username *string `json:"username,omitempty"`
+}
+
+// UpdateVersionBody defines model for UpdateVersionBody.
+type UpdateVersionBody struct {
+	Name   *string `json:"name,omitempty"`
+	Public *bool   `json:"public,omitempty"`
+	Upload *string `json:"upload,omitempty"`
+}
+
+// UserGroupDropBody defines model for UserGroupDropBody.
+type UserGroupDropBody struct {
+	Group string `json:"group"`
+}
+
+// UserGroupPermBody defines model for UserGroupPermBody.
+type UserGroupPermBody struct {
+	Group string `json:"group"`
+	Perm  string `json:"perm"`
+}
+
+// UserModDropBody defines model for UserModDropBody.
+type UserModDropBody struct {
+	Mod string `json:"mod"`
+}
+
+// UserModPermBody defines model for UserModPermBody.
+type UserModPermBody struct {
+	Mod  string `json:"mod"`
+	Perm string `json:"perm"`
+}
+
+// UserPackDropBody defines model for UserPackDropBody.
+type UserPackDropBody struct {
+	Pack string `json:"pack"`
+}
+
+// UserPackPermBody defines model for UserPackPermBody.
+type UserPackPermBody struct {
+	Pack string `json:"pack"`
+	Perm string `json:"perm"`
+}
+
+// VersionBuildBody defines model for VersionBuildBody.
+type VersionBuildBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
+// LoginAuthJSONBody defines parameters for LoginAuth.
+type LoginAuthJSONBody struct {
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+// RedirectAuthJSONBody defines parameters for RedirectAuth.
+type RedirectAuthJSONBody struct {
+	Token string `json:"token"`
+}
+
+// CallbackProviderParams defines parameters for CallbackProvider.
+type CallbackProviderParams struct {
 	// State Auth state
-	State *string `form:"state,omitempty" json:"state,omitempty"`
+	State *AuthStateParam `form:"state,omitempty" json:"state,omitempty"`
 
 	// Code Auth code
-	Code *string `form:"code,omitempty" json:"code,omitempty"`
-}
-
-// ExternalInitializeParams defines parameters for ExternalInitialize.
-type ExternalInitializeParams struct {
-	// State Auth state
-	State *string `form:"state,omitempty" json:"state,omitempty"`
+	Code *AuthCodeParam `form:"code,omitempty" json:"code,omitempty"`
 }
 
 // ListFabricsParams defines parameters for ListFabrics.
 type ListFabricsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+}
+
+// DeleteFabricFromBuildJSONBody defines parameters for DeleteFabricFromBuild.
+type DeleteFabricFromBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
 }
 
 // ListFabricBuildsParams defines parameters for ListFabricBuilds.
 type ListFabricBuildsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListFabricBuildsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListFabricBuildsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListFabricBuildsParamsSort defines parameters for ListFabricBuilds.
-type ListFabricBuildsParamsSort string
 
 // ListFabricBuildsParamsOrder defines parameters for ListFabricBuilds.
 type ListFabricBuildsParamsOrder string
 
+// AttachFabricToBuildJSONBody defines parameters for AttachFabricToBuild.
+type AttachFabricToBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
 // ListForgesParams defines parameters for ListForges.
 type ListForgesParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+}
+
+// DeleteForgeFromBuildJSONBody defines parameters for DeleteForgeFromBuild.
+type DeleteForgeFromBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
 }
 
 // ListForgeBuildsParams defines parameters for ListForgeBuilds.
 type ListForgeBuildsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListForgeBuildsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListForgeBuildsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListForgeBuildsParamsSort defines parameters for ListForgeBuilds.
-type ListForgeBuildsParamsSort string
 
 // ListForgeBuildsParamsOrder defines parameters for ListForgeBuilds.
 type ListForgeBuildsParamsOrder string
 
+// AttachForgeToBuildJSONBody defines parameters for AttachForgeToBuild.
+type AttachForgeToBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
+// ListGroupsParams defines parameters for ListGroups.
+type ListGroupsParams struct {
+	// Search Search query
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+
+	// Sort Sorting column
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// Order Sorting order
+	Order *ListGroupsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
+
+	// Limit Paging limit
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset Paging offset
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// ListGroupsParamsOrder defines parameters for ListGroups.
+type ListGroupsParamsOrder string
+
+// CreateGroupJSONBody defines parameters for CreateGroup.
+type CreateGroupJSONBody struct {
+	Name *string `json:"name,omitempty"`
+	Slug *string `json:"slug,omitempty"`
+}
+
+// UpdateGroupJSONBody defines parameters for UpdateGroup.
+type UpdateGroupJSONBody struct {
+	Name *string `json:"name,omitempty"`
+	Slug *string `json:"slug,omitempty"`
+}
+
+// DeleteGroupFromModJSONBody defines parameters for DeleteGroupFromMod.
+type DeleteGroupFromModJSONBody struct {
+	Mod string `json:"mod"`
+}
+
+// ListGroupModsParams defines parameters for ListGroupMods.
+type ListGroupModsParams struct {
+	// Search Search query
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+
+	// Sort Sorting column
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// Order Sorting order
+	Order *ListGroupModsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
+
+	// Limit Paging limit
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset Paging offset
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// ListGroupModsParamsOrder defines parameters for ListGroupMods.
+type ListGroupModsParamsOrder string
+
+// AttachGroupToModJSONBody defines parameters for AttachGroupToMod.
+type AttachGroupToModJSONBody struct {
+	Mod  string `json:"mod"`
+	Perm string `json:"perm"`
+}
+
+// PermitGroupModJSONBody defines parameters for PermitGroupMod.
+type PermitGroupModJSONBody struct {
+	Mod  string `json:"mod"`
+	Perm string `json:"perm"`
+}
+
+// DeleteGroupFromPackJSONBody defines parameters for DeleteGroupFromPack.
+type DeleteGroupFromPackJSONBody struct {
+	Pack string `json:"pack"`
+}
+
+// ListGroupPacksParams defines parameters for ListGroupPacks.
+type ListGroupPacksParams struct {
+	// Search Search query
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+
+	// Sort Sorting column
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// Order Sorting order
+	Order *ListGroupPacksParamsOrder `form:"order,omitempty" json:"order,omitempty"`
+
+	// Limit Paging limit
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset Paging offset
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// ListGroupPacksParamsOrder defines parameters for ListGroupPacks.
+type ListGroupPacksParamsOrder string
+
+// AttachGroupToPackJSONBody defines parameters for AttachGroupToPack.
+type AttachGroupToPackJSONBody struct {
+	Pack string `json:"pack"`
+	Perm string `json:"perm"`
+}
+
+// PermitGroupPackJSONBody defines parameters for PermitGroupPack.
+type PermitGroupPackJSONBody struct {
+	Pack string `json:"pack"`
+	Perm string `json:"perm"`
+}
+
+// DeleteGroupFromUserJSONBody defines parameters for DeleteGroupFromUser.
+type DeleteGroupFromUserJSONBody struct {
+	User string `json:"user"`
+}
+
+// ListGroupUsersParams defines parameters for ListGroupUsers.
+type ListGroupUsersParams struct {
+	// Search Search query
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+
+	// Sort Sorting column
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// Order Sorting order
+	Order *ListGroupUsersParamsOrder `form:"order,omitempty" json:"order,omitempty"`
+
+	// Limit Paging limit
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset Paging offset
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// ListGroupUsersParamsOrder defines parameters for ListGroupUsers.
+type ListGroupUsersParamsOrder string
+
+// AttachGroupToUserJSONBody defines parameters for AttachGroupToUser.
+type AttachGroupToUserJSONBody struct {
+	Perm string `json:"perm"`
+	User string `json:"user"`
+}
+
+// PermitGroupUserJSONBody defines parameters for PermitGroupUser.
+type PermitGroupUserJSONBody struct {
+	Perm string `json:"perm"`
+	User string `json:"user"`
+}
+
 // ListMinecraftsParams defines parameters for ListMinecrafts.
 type ListMinecraftsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+}
+
+// DeleteMinecraftFromBuildJSONBody defines parameters for DeleteMinecraftFromBuild.
+type DeleteMinecraftFromBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
 }
 
 // ListMinecraftBuildsParams defines parameters for ListMinecraftBuilds.
 type ListMinecraftBuildsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListMinecraftBuildsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListMinecraftBuildsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListMinecraftBuildsParamsSort defines parameters for ListMinecraftBuilds.
-type ListMinecraftBuildsParamsSort string
 
 // ListMinecraftBuildsParamsOrder defines parameters for ListMinecraftBuilds.
 type ListMinecraftBuildsParamsOrder string
 
+// AttachMinecraftToBuildJSONBody defines parameters for AttachMinecraftToBuild.
+type AttachMinecraftToBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
 // ListModsParams defines parameters for ListMods.
 type ListModsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListModsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListModsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListModsParamsSort defines parameters for ListMods.
-type ListModsParamsSort string
 
 // ListModsParamsOrder defines parameters for ListMods.
 type ListModsParamsOrder string
 
-// ListModTeamsParams defines parameters for ListModTeams.
-type ListModTeamsParams struct {
-	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
-
-	// Sort Sorting column
-	Sort *ListModTeamsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
-
-	// Order Sorting order
-	Order *ListModTeamsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
-
-	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+// CreateModJSONBody defines parameters for CreateMod.
+type CreateModJSONBody struct {
+	Author      *string `json:"author,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Donate      *string `json:"donate,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	Public      *bool   `json:"public,omitempty"`
+	Side        *string `json:"side,omitempty"`
+	Slug        *string `json:"slug,omitempty"`
+	Website     *string `json:"website,omitempty"`
 }
 
-// ListModTeamsParamsSort defines parameters for ListModTeams.
-type ListModTeamsParamsSort string
+// UpdateModJSONBody defines parameters for UpdateMod.
+type UpdateModJSONBody struct {
+	Author      *string `json:"author,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Donate      *string `json:"donate,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	Public      *bool   `json:"public,omitempty"`
+	Side        *string `json:"side,omitempty"`
+	Slug        *string `json:"slug,omitempty"`
+	Website     *string `json:"website,omitempty"`
+}
 
-// ListModTeamsParamsOrder defines parameters for ListModTeams.
-type ListModTeamsParamsOrder string
+// CreateModAvatarMultipartBody defines parameters for CreateModAvatar.
+type CreateModAvatarMultipartBody struct {
+	File *openapi_types.File `json:"file,omitempty"`
+}
+
+// DeleteModFromGroupJSONBody defines parameters for DeleteModFromGroup.
+type DeleteModFromGroupJSONBody struct {
+	Group string `json:"group"`
+}
+
+// ListModGroupsParams defines parameters for ListModGroups.
+type ListModGroupsParams struct {
+	// Search Search query
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+
+	// Sort Sorting column
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// Order Sorting order
+	Order *ListModGroupsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
+
+	// Limit Paging limit
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset Paging offset
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// ListModGroupsParamsOrder defines parameters for ListModGroups.
+type ListModGroupsParamsOrder string
+
+// AttachModToGroupJSONBody defines parameters for AttachModToGroup.
+type AttachModToGroupJSONBody struct {
+	Group string `json:"group"`
+	Perm  string `json:"perm"`
+}
+
+// PermitModGroupJSONBody defines parameters for PermitModGroup.
+type PermitModGroupJSONBody struct {
+	Group string `json:"group"`
+	Perm  string `json:"perm"`
+}
+
+// DeleteModFromUserJSONBody defines parameters for DeleteModFromUser.
+type DeleteModFromUserJSONBody struct {
+	User string `json:"user"`
+}
 
 // ListModUsersParams defines parameters for ListModUsers.
 type ListModUsersParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListModUsersParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListModUsersParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListModUsersParamsSort defines parameters for ListModUsers.
-type ListModUsersParamsSort string
 
 // ListModUsersParamsOrder defines parameters for ListModUsers.
 type ListModUsersParamsOrder string
 
+// AttachModToUserJSONBody defines parameters for AttachModToUser.
+type AttachModToUserJSONBody struct {
+	Perm string `json:"perm"`
+	User string `json:"user"`
+}
+
+// PermitModUserJSONBody defines parameters for PermitModUser.
+type PermitModUserJSONBody struct {
+	Perm string `json:"perm"`
+	User string `json:"user"`
+}
+
 // ListVersionsParams defines parameters for ListVersions.
 type ListVersionsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListVersionsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListVersionsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListVersionsParamsSort defines parameters for ListVersions.
-type ListVersionsParamsSort string
 
 // ListVersionsParamsOrder defines parameters for ListVersions.
 type ListVersionsParamsOrder string
 
+// CreateVersionJSONBody defines parameters for CreateVersion.
+type CreateVersionJSONBody struct {
+	Name   *string `json:"name,omitempty"`
+	Public *bool   `json:"public,omitempty"`
+	Upload *string `json:"upload,omitempty"`
+}
+
+// UpdateVersionJSONBody defines parameters for UpdateVersion.
+type UpdateVersionJSONBody struct {
+	Name   *string `json:"name,omitempty"`
+	Public *bool   `json:"public,omitempty"`
+	Upload *string `json:"upload,omitempty"`
+}
+
+// DeleteVersionFromBuildJSONBody defines parameters for DeleteVersionFromBuild.
+type DeleteVersionFromBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
 // ListVersionBuildsParams defines parameters for ListVersionBuilds.
 type ListVersionBuildsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListVersionBuildsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListVersionBuildsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListVersionBuildsParamsSort defines parameters for ListVersionBuilds.
-type ListVersionBuildsParamsSort string
 
 // ListVersionBuildsParamsOrder defines parameters for ListVersionBuilds.
 type ListVersionBuildsParamsOrder string
 
+// AttachVersionToBuildJSONBody defines parameters for AttachVersionToBuild.
+type AttachVersionToBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
 // ListNeoforgesParams defines parameters for ListNeoforges.
 type ListNeoforgesParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+}
+
+// DeleteNeoforgeFromBuildJSONBody defines parameters for DeleteNeoforgeFromBuild.
+type DeleteNeoforgeFromBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
 }
 
 // ListNeoforgeBuildsParams defines parameters for ListNeoforgeBuilds.
 type ListNeoforgeBuildsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListNeoforgeBuildsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListNeoforgeBuildsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListNeoforgeBuildsParamsSort defines parameters for ListNeoforgeBuilds.
-type ListNeoforgeBuildsParamsSort string
 
 // ListNeoforgeBuildsParamsOrder defines parameters for ListNeoforgeBuilds.
 type ListNeoforgeBuildsParamsOrder string
 
+// AttachNeoforgeToBuildJSONBody defines parameters for AttachNeoforgeToBuild.
+type AttachNeoforgeToBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
+}
+
 // ListPacksParams defines parameters for ListPacks.
 type ListPacksParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListPacksParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListPacksParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListPacksParamsSort defines parameters for ListPacks.
-type ListPacksParamsSort string
 
 // ListPacksParamsOrder defines parameters for ListPacks.
 type ListPacksParamsOrder string
 
+// CreatePackJSONBody defines parameters for CreatePack.
+type CreatePackJSONBody struct {
+	Name    *string `json:"name,omitempty"`
+	Public  *bool   `json:"public,omitempty"`
+	Slug    *string `json:"slug,omitempty"`
+	Website *string `json:"website,omitempty"`
+}
+
+// UpdatePackJSONBody defines parameters for UpdatePack.
+type UpdatePackJSONBody struct {
+	Name    *string `json:"name,omitempty"`
+	Public  *bool   `json:"public,omitempty"`
+	Slug    *string `json:"slug,omitempty"`
+	Website *string `json:"website,omitempty"`
+}
+
+// CreatePackAvatarMultipartBody defines parameters for CreatePackAvatar.
+type CreatePackAvatarMultipartBody struct {
+	File *openapi_types.File `json:"file,omitempty"`
+}
+
 // ListBuildsParams defines parameters for ListBuilds.
 type ListBuildsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListBuildsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListBuildsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListBuildsParamsSort defines parameters for ListBuilds.
-type ListBuildsParamsSort string
 
 // ListBuildsParamsOrder defines parameters for ListBuilds.
 type ListBuildsParamsOrder string
 
+// CreateBuildJSONBody defines parameters for CreateBuild.
+type CreateBuildJSONBody struct {
+	FabricID    *string `json:"fabric_id,omitempty"`
+	ForgeID     *string `json:"forge_id,omitempty"`
+	Java        *string `json:"java,omitempty"`
+	Latest      *bool   `json:"latest,omitempty"`
+	Memory      *string `json:"memory,omitempty"`
+	MinecraftID *string `json:"minecraft_id,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	NeoforgeID  *string `json:"neoforge_id,omitempty"`
+	Public      *bool   `json:"public,omitempty"`
+	QuiltID     *string `json:"quilt_id,omitempty"`
+	Recommended *bool   `json:"recommended,omitempty"`
+}
+
+// UpdateBuildJSONBody defines parameters for UpdateBuild.
+type UpdateBuildJSONBody struct {
+	FabricID    *string `json:"fabric_id,omitempty"`
+	ForgeID     *string `json:"forge_id,omitempty"`
+	Java        *string `json:"java,omitempty"`
+	Latest      *bool   `json:"latest,omitempty"`
+	Memory      *string `json:"memory,omitempty"`
+	MinecraftID *string `json:"minecraft_id,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	NeoforgeID  *string `json:"neoforge_id,omitempty"`
+	Public      *bool   `json:"public,omitempty"`
+	QuiltID     *string `json:"quilt_id,omitempty"`
+	Recommended *bool   `json:"recommended,omitempty"`
+}
+
+// DeleteBuildFromVersionJSONBody defines parameters for DeleteBuildFromVersion.
+type DeleteBuildFromVersionJSONBody struct {
+	Mod     string `json:"mod,omitempty"`
+	Version string `json:"version,omitempty"`
+}
+
 // ListBuildVersionsParams defines parameters for ListBuildVersions.
 type ListBuildVersionsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListBuildVersionsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListBuildVersionsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListBuildVersionsParamsSort defines parameters for ListBuildVersions.
-type ListBuildVersionsParamsSort string
 
 // ListBuildVersionsParamsOrder defines parameters for ListBuildVersions.
 type ListBuildVersionsParamsOrder string
 
-// ListPackTeamsParams defines parameters for ListPackTeams.
-type ListPackTeamsParams struct {
-	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
-
-	// Sort Sorting column
-	Sort *ListPackTeamsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
-
-	// Order Sorting order
-	Order *ListPackTeamsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
-
-	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+// AttachBuildToVersionJSONBody defines parameters for AttachBuildToVersion.
+type AttachBuildToVersionJSONBody struct {
+	Mod     string `json:"mod,omitempty"`
+	Version string `json:"version,omitempty"`
 }
 
-// ListPackTeamsParamsSort defines parameters for ListPackTeams.
-type ListPackTeamsParamsSort string
+// DeletePackFromGroupJSONBody defines parameters for DeletePackFromGroup.
+type DeletePackFromGroupJSONBody struct {
+	Group string `json:"group"`
+}
 
-// ListPackTeamsParamsOrder defines parameters for ListPackTeams.
-type ListPackTeamsParamsOrder string
+// ListPackGroupsParams defines parameters for ListPackGroups.
+type ListPackGroupsParams struct {
+	// Search Search query
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+
+	// Sort Sorting column
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// Order Sorting order
+	Order *ListPackGroupsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
+
+	// Limit Paging limit
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset Paging offset
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// ListPackGroupsParamsOrder defines parameters for ListPackGroups.
+type ListPackGroupsParamsOrder string
+
+// AttachPackToGroupJSONBody defines parameters for AttachPackToGroup.
+type AttachPackToGroupJSONBody struct {
+	Group string `json:"group"`
+	Perm  string `json:"perm"`
+}
+
+// PermitPackGroupJSONBody defines parameters for PermitPackGroup.
+type PermitPackGroupJSONBody struct {
+	Group string `json:"group"`
+	Perm  string `json:"perm"`
+}
+
+// DeletePackFromUserJSONBody defines parameters for DeletePackFromUser.
+type DeletePackFromUserJSONBody struct {
+	User string `json:"user"`
+}
 
 // ListPackUsersParams defines parameters for ListPackUsers.
 type ListPackUsersParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListPackUsersParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListPackUsersParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListPackUsersParamsSort defines parameters for ListPackUsers.
-type ListPackUsersParamsSort string
 
 // ListPackUsersParamsOrder defines parameters for ListPackUsers.
 type ListPackUsersParamsOrder string
 
+// AttachPackToUserJSONBody defines parameters for AttachPackToUser.
+type AttachPackToUserJSONBody struct {
+	Perm string `json:"perm"`
+	User string `json:"user"`
+}
+
+// PermitPackUserJSONBody defines parameters for PermitPackUser.
+type PermitPackUserJSONBody struct {
+	Perm string `json:"perm"`
+	User string `json:"user"`
+}
+
+// UpdateProfileJSONBody defines parameters for UpdateProfile.
+type UpdateProfileJSONBody struct {
+	Email    *string `json:"email,omitempty"`
+	Fullname *string `json:"fullname,omitempty"`
+	Password *string `json:"password,omitempty"`
+	Username *string `json:"username,omitempty"`
+}
+
 // ListQuiltsParams defines parameters for ListQuilts.
 type ListQuiltsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+}
+
+// DeleteQuiltFromBuildJSONBody defines parameters for DeleteQuiltFromBuild.
+type DeleteQuiltFromBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
 }
 
 // ListQuiltBuildsParams defines parameters for ListQuiltBuilds.
 type ListQuiltBuildsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListQuiltBuildsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListQuiltBuildsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListQuiltBuildsParamsSort defines parameters for ListQuiltBuilds.
-type ListQuiltBuildsParamsSort string
 
 // ListQuiltBuildsParamsOrder defines parameters for ListQuiltBuilds.
 type ListQuiltBuildsParamsOrder string
 
-// ListTeamsParams defines parameters for ListTeams.
-type ListTeamsParams struct {
-	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
-
-	// Sort Sorting column
-	Sort *ListTeamsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
-
-	// Order Sorting order
-	Order *ListTeamsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
-
-	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+// AttachQuiltToBuildJSONBody defines parameters for AttachQuiltToBuild.
+type AttachQuiltToBuildJSONBody struct {
+	Build string `json:"build,omitempty"`
+	Pack  string `json:"pack,omitempty"`
 }
-
-// ListTeamsParamsSort defines parameters for ListTeams.
-type ListTeamsParamsSort string
-
-// ListTeamsParamsOrder defines parameters for ListTeams.
-type ListTeamsParamsOrder string
-
-// ListTeamModsParams defines parameters for ListTeamMods.
-type ListTeamModsParams struct {
-	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
-
-	// Sort Sorting column
-	Sort *ListTeamModsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
-
-	// Order Sorting order
-	Order *ListTeamModsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
-
-	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
-}
-
-// ListTeamModsParamsSort defines parameters for ListTeamMods.
-type ListTeamModsParamsSort string
-
-// ListTeamModsParamsOrder defines parameters for ListTeamMods.
-type ListTeamModsParamsOrder string
-
-// ListTeamPacksParams defines parameters for ListTeamPacks.
-type ListTeamPacksParams struct {
-	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
-
-	// Sort Sorting column
-	Sort *ListTeamPacksParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
-
-	// Order Sorting order
-	Order *ListTeamPacksParamsOrder `form:"order,omitempty" json:"order,omitempty"`
-
-	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
-}
-
-// ListTeamPacksParamsSort defines parameters for ListTeamPacks.
-type ListTeamPacksParamsSort string
-
-// ListTeamPacksParamsOrder defines parameters for ListTeamPacks.
-type ListTeamPacksParamsOrder string
-
-// ListTeamUsersParams defines parameters for ListTeamUsers.
-type ListTeamUsersParams struct {
-	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
-
-	// Sort Sorting column
-	Sort *ListTeamUsersParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
-
-	// Order Sorting order
-	Order *ListTeamUsersParamsOrder `form:"order,omitempty" json:"order,omitempty"`
-
-	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
-}
-
-// ListTeamUsersParamsSort defines parameters for ListTeamUsers.
-type ListTeamUsersParamsSort string
-
-// ListTeamUsersParamsOrder defines parameters for ListTeamUsers.
-type ListTeamUsersParamsOrder string
 
 // ListUsersParams defines parameters for ListUsers.
 type ListUsersParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListUsersParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListUsersParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListUsersParamsSort defines parameters for ListUsers.
-type ListUsersParamsSort string
 
 // ListUsersParamsOrder defines parameters for ListUsers.
 type ListUsersParamsOrder string
 
+// CreateUserJSONBody defines parameters for CreateUser.
+type CreateUserJSONBody struct {
+	Active   *bool   `json:"active,omitempty"`
+	Admin    *bool   `json:"admin,omitempty"`
+	Email    *string `json:"email,omitempty"`
+	Fullname *string `json:"fullname,omitempty"`
+	Password *string `json:"password,omitempty"`
+	Username *string `json:"username,omitempty"`
+}
+
+// UpdateUserJSONBody defines parameters for UpdateUser.
+type UpdateUserJSONBody struct {
+	Active   *bool   `json:"active,omitempty"`
+	Admin    *bool   `json:"admin,omitempty"`
+	Email    *string `json:"email,omitempty"`
+	Fullname *string `json:"fullname,omitempty"`
+	Password *string `json:"password,omitempty"`
+	Username *string `json:"username,omitempty"`
+}
+
+// DeleteUserFromGroupJSONBody defines parameters for DeleteUserFromGroup.
+type DeleteUserFromGroupJSONBody struct {
+	Group string `json:"group"`
+}
+
+// ListUserGroupsParams defines parameters for ListUserGroups.
+type ListUserGroupsParams struct {
+	// Search Search query
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
+
+	// Sort Sorting column
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// Order Sorting order
+	Order *ListUserGroupsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
+
+	// Limit Paging limit
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset Paging offset
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// ListUserGroupsParamsOrder defines parameters for ListUserGroups.
+type ListUserGroupsParamsOrder string
+
+// AttachUserToGroupJSONBody defines parameters for AttachUserToGroup.
+type AttachUserToGroupJSONBody struct {
+	Group string `json:"group"`
+	Perm  string `json:"perm"`
+}
+
+// PermitUserGroupJSONBody defines parameters for PermitUserGroup.
+type PermitUserGroupJSONBody struct {
+	Group string `json:"group"`
+	Perm  string `json:"perm"`
+}
+
+// DeleteUserFromModJSONBody defines parameters for DeleteUserFromMod.
+type DeleteUserFromModJSONBody struct {
+	Mod string `json:"mod"`
+}
+
 // ListUserModsParams defines parameters for ListUserMods.
 type ListUserModsParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListUserModsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListUserModsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListUserModsParamsSort defines parameters for ListUserMods.
-type ListUserModsParamsSort string
 
 // ListUserModsParamsOrder defines parameters for ListUserMods.
 type ListUserModsParamsOrder string
 
+// AttachUserToModJSONBody defines parameters for AttachUserToMod.
+type AttachUserToModJSONBody struct {
+	Mod  string `json:"mod"`
+	Perm string `json:"perm"`
+}
+
+// PermitUserModJSONBody defines parameters for PermitUserMod.
+type PermitUserModJSONBody struct {
+	Mod  string `json:"mod"`
+	Perm string `json:"perm"`
+}
+
+// DeleteUserFromPackJSONBody defines parameters for DeleteUserFromPack.
+type DeleteUserFromPackJSONBody struct {
+	Pack string `json:"pack"`
+}
+
 // ListUserPacksParams defines parameters for ListUserPacks.
 type ListUserPacksParams struct {
 	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
+	Search *SearchQueryParam `form:"search,omitempty" json:"search,omitempty"`
 
 	// Sort Sorting column
-	Sort *ListUserPacksParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
+	Sort *SortColumnParam `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// Order Sorting order
 	Order *ListUserPacksParamsOrder `form:"order,omitempty" json:"order,omitempty"`
 
 	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *PagingLimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	Offset *PagingOffsetParam `form:"offset,omitempty" json:"offset,omitempty"`
 }
-
-// ListUserPacksParamsSort defines parameters for ListUserPacks.
-type ListUserPacksParamsSort string
 
 // ListUserPacksParamsOrder defines parameters for ListUserPacks.
 type ListUserPacksParamsOrder string
 
-// ListUserTeamsParams defines parameters for ListUserTeams.
-type ListUserTeamsParams struct {
-	// Search Search query
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
-
-	// Sort Sorting column
-	Sort *ListUserTeamsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
-
-	// Order Sorting order
-	Order *ListUserTeamsParamsOrder `form:"order,omitempty" json:"order,omitempty"`
-
-	// Limit Paging limit
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// Offset Paging offset
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+// AttachUserToPackJSONBody defines parameters for AttachUserToPack.
+type AttachUserToPackJSONBody struct {
+	Pack string `json:"pack"`
+	Perm string `json:"perm"`
 }
 
-// ListUserTeamsParamsSort defines parameters for ListUserTeams.
-type ListUserTeamsParamsSort string
-
-// ListUserTeamsParamsOrder defines parameters for ListUserTeams.
-type ListUserTeamsParamsOrder string
+// PermitUserPackJSONBody defines parameters for PermitUserPack.
+type PermitUserPackJSONBody struct {
+	Pack string `json:"pack"`
+	Perm string `json:"perm"`
+}
 
 // LoginAuthJSONRequestBody defines body for LoginAuth for application/json ContentType.
-type LoginAuthJSONRequestBody = AuthLogin
+type LoginAuthJSONRequestBody LoginAuthJSONBody
+
+// RedirectAuthJSONRequestBody defines body for RedirectAuth for application/json ContentType.
+type RedirectAuthJSONRequestBody RedirectAuthJSONBody
 
 // DeleteFabricFromBuildJSONRequestBody defines body for DeleteFabricFromBuild for application/json ContentType.
-type DeleteFabricFromBuildJSONRequestBody = FabricBuildParams
+type DeleteFabricFromBuildJSONRequestBody DeleteFabricFromBuildJSONBody
 
 // AttachFabricToBuildJSONRequestBody defines body for AttachFabricToBuild for application/json ContentType.
-type AttachFabricToBuildJSONRequestBody = FabricBuildParams
+type AttachFabricToBuildJSONRequestBody AttachFabricToBuildJSONBody
 
 // DeleteForgeFromBuildJSONRequestBody defines body for DeleteForgeFromBuild for application/json ContentType.
-type DeleteForgeFromBuildJSONRequestBody = ForgeBuildParams
+type DeleteForgeFromBuildJSONRequestBody DeleteForgeFromBuildJSONBody
 
 // AttachForgeToBuildJSONRequestBody defines body for AttachForgeToBuild for application/json ContentType.
-type AttachForgeToBuildJSONRequestBody = ForgeBuildParams
+type AttachForgeToBuildJSONRequestBody AttachForgeToBuildJSONBody
+
+// CreateGroupJSONRequestBody defines body for CreateGroup for application/json ContentType.
+type CreateGroupJSONRequestBody CreateGroupJSONBody
+
+// UpdateGroupJSONRequestBody defines body for UpdateGroup for application/json ContentType.
+type UpdateGroupJSONRequestBody UpdateGroupJSONBody
+
+// DeleteGroupFromModJSONRequestBody defines body for DeleteGroupFromMod for application/json ContentType.
+type DeleteGroupFromModJSONRequestBody DeleteGroupFromModJSONBody
+
+// AttachGroupToModJSONRequestBody defines body for AttachGroupToMod for application/json ContentType.
+type AttachGroupToModJSONRequestBody AttachGroupToModJSONBody
+
+// PermitGroupModJSONRequestBody defines body for PermitGroupMod for application/json ContentType.
+type PermitGroupModJSONRequestBody PermitGroupModJSONBody
+
+// DeleteGroupFromPackJSONRequestBody defines body for DeleteGroupFromPack for application/json ContentType.
+type DeleteGroupFromPackJSONRequestBody DeleteGroupFromPackJSONBody
+
+// AttachGroupToPackJSONRequestBody defines body for AttachGroupToPack for application/json ContentType.
+type AttachGroupToPackJSONRequestBody AttachGroupToPackJSONBody
+
+// PermitGroupPackJSONRequestBody defines body for PermitGroupPack for application/json ContentType.
+type PermitGroupPackJSONRequestBody PermitGroupPackJSONBody
+
+// DeleteGroupFromUserJSONRequestBody defines body for DeleteGroupFromUser for application/json ContentType.
+type DeleteGroupFromUserJSONRequestBody DeleteGroupFromUserJSONBody
+
+// AttachGroupToUserJSONRequestBody defines body for AttachGroupToUser for application/json ContentType.
+type AttachGroupToUserJSONRequestBody AttachGroupToUserJSONBody
+
+// PermitGroupUserJSONRequestBody defines body for PermitGroupUser for application/json ContentType.
+type PermitGroupUserJSONRequestBody PermitGroupUserJSONBody
 
 // DeleteMinecraftFromBuildJSONRequestBody defines body for DeleteMinecraftFromBuild for application/json ContentType.
-type DeleteMinecraftFromBuildJSONRequestBody = MinecraftBuildParams
+type DeleteMinecraftFromBuildJSONRequestBody DeleteMinecraftFromBuildJSONBody
 
 // AttachMinecraftToBuildJSONRequestBody defines body for AttachMinecraftToBuild for application/json ContentType.
-type AttachMinecraftToBuildJSONRequestBody = MinecraftBuildParams
+type AttachMinecraftToBuildJSONRequestBody AttachMinecraftToBuildJSONBody
 
 // CreateModJSONRequestBody defines body for CreateMod for application/json ContentType.
-type CreateModJSONRequestBody = Mod
+type CreateModJSONRequestBody CreateModJSONBody
 
 // UpdateModJSONRequestBody defines body for UpdateMod for application/json ContentType.
-type UpdateModJSONRequestBody = Mod
+type UpdateModJSONRequestBody UpdateModJSONBody
 
-// DeleteModFromTeamJSONRequestBody defines body for DeleteModFromTeam for application/json ContentType.
-type DeleteModFromTeamJSONRequestBody = ModTeamParams
+// CreateModAvatarMultipartRequestBody defines body for CreateModAvatar for multipart/form-data ContentType.
+type CreateModAvatarMultipartRequestBody CreateModAvatarMultipartBody
 
-// AttachModToTeamJSONRequestBody defines body for AttachModToTeam for application/json ContentType.
-type AttachModToTeamJSONRequestBody = ModTeamParams
+// DeleteModFromGroupJSONRequestBody defines body for DeleteModFromGroup for application/json ContentType.
+type DeleteModFromGroupJSONRequestBody DeleteModFromGroupJSONBody
 
-// PermitModTeamJSONRequestBody defines body for PermitModTeam for application/json ContentType.
-type PermitModTeamJSONRequestBody = ModTeamParams
+// AttachModToGroupJSONRequestBody defines body for AttachModToGroup for application/json ContentType.
+type AttachModToGroupJSONRequestBody AttachModToGroupJSONBody
+
+// PermitModGroupJSONRequestBody defines body for PermitModGroup for application/json ContentType.
+type PermitModGroupJSONRequestBody PermitModGroupJSONBody
 
 // DeleteModFromUserJSONRequestBody defines body for DeleteModFromUser for application/json ContentType.
-type DeleteModFromUserJSONRequestBody = ModUserParams
+type DeleteModFromUserJSONRequestBody DeleteModFromUserJSONBody
 
 // AttachModToUserJSONRequestBody defines body for AttachModToUser for application/json ContentType.
-type AttachModToUserJSONRequestBody = ModUserParams
+type AttachModToUserJSONRequestBody AttachModToUserJSONBody
 
 // PermitModUserJSONRequestBody defines body for PermitModUser for application/json ContentType.
-type PermitModUserJSONRequestBody = ModUserParams
+type PermitModUserJSONRequestBody PermitModUserJSONBody
 
 // CreateVersionJSONRequestBody defines body for CreateVersion for application/json ContentType.
-type CreateVersionJSONRequestBody = Version
+type CreateVersionJSONRequestBody CreateVersionJSONBody
 
 // UpdateVersionJSONRequestBody defines body for UpdateVersion for application/json ContentType.
-type UpdateVersionJSONRequestBody = Version
+type UpdateVersionJSONRequestBody UpdateVersionJSONBody
 
 // DeleteVersionFromBuildJSONRequestBody defines body for DeleteVersionFromBuild for application/json ContentType.
-type DeleteVersionFromBuildJSONRequestBody = VersionBuildParams
+type DeleteVersionFromBuildJSONRequestBody DeleteVersionFromBuildJSONBody
 
 // AttachVersionToBuildJSONRequestBody defines body for AttachVersionToBuild for application/json ContentType.
-type AttachVersionToBuildJSONRequestBody = VersionBuildParams
+type AttachVersionToBuildJSONRequestBody AttachVersionToBuildJSONBody
 
 // DeleteNeoforgeFromBuildJSONRequestBody defines body for DeleteNeoforgeFromBuild for application/json ContentType.
-type DeleteNeoforgeFromBuildJSONRequestBody = NeoforgeBuildParams
+type DeleteNeoforgeFromBuildJSONRequestBody DeleteNeoforgeFromBuildJSONBody
 
 // AttachNeoforgeToBuildJSONRequestBody defines body for AttachNeoforgeToBuild for application/json ContentType.
-type AttachNeoforgeToBuildJSONRequestBody = NeoforgeBuildParams
+type AttachNeoforgeToBuildJSONRequestBody AttachNeoforgeToBuildJSONBody
 
 // CreatePackJSONRequestBody defines body for CreatePack for application/json ContentType.
-type CreatePackJSONRequestBody = Pack
+type CreatePackJSONRequestBody CreatePackJSONBody
 
 // UpdatePackJSONRequestBody defines body for UpdatePack for application/json ContentType.
-type UpdatePackJSONRequestBody = Pack
+type UpdatePackJSONRequestBody UpdatePackJSONBody
+
+// CreatePackAvatarMultipartRequestBody defines body for CreatePackAvatar for multipart/form-data ContentType.
+type CreatePackAvatarMultipartRequestBody CreatePackAvatarMultipartBody
 
 // CreateBuildJSONRequestBody defines body for CreateBuild for application/json ContentType.
-type CreateBuildJSONRequestBody = Build
+type CreateBuildJSONRequestBody CreateBuildJSONBody
 
 // UpdateBuildJSONRequestBody defines body for UpdateBuild for application/json ContentType.
-type UpdateBuildJSONRequestBody = Build
+type UpdateBuildJSONRequestBody UpdateBuildJSONBody
 
 // DeleteBuildFromVersionJSONRequestBody defines body for DeleteBuildFromVersion for application/json ContentType.
-type DeleteBuildFromVersionJSONRequestBody = BuildVersionParams
+type DeleteBuildFromVersionJSONRequestBody DeleteBuildFromVersionJSONBody
 
 // AttachBuildToVersionJSONRequestBody defines body for AttachBuildToVersion for application/json ContentType.
-type AttachBuildToVersionJSONRequestBody = BuildVersionParams
+type AttachBuildToVersionJSONRequestBody AttachBuildToVersionJSONBody
 
-// DeletePackFromTeamJSONRequestBody defines body for DeletePackFromTeam for application/json ContentType.
-type DeletePackFromTeamJSONRequestBody = PackTeamParams
+// DeletePackFromGroupJSONRequestBody defines body for DeletePackFromGroup for application/json ContentType.
+type DeletePackFromGroupJSONRequestBody DeletePackFromGroupJSONBody
 
-// AttachPackToTeamJSONRequestBody defines body for AttachPackToTeam for application/json ContentType.
-type AttachPackToTeamJSONRequestBody = PackTeamParams
+// AttachPackToGroupJSONRequestBody defines body for AttachPackToGroup for application/json ContentType.
+type AttachPackToGroupJSONRequestBody AttachPackToGroupJSONBody
 
-// PermitPackTeamJSONRequestBody defines body for PermitPackTeam for application/json ContentType.
-type PermitPackTeamJSONRequestBody = PackTeamParams
+// PermitPackGroupJSONRequestBody defines body for PermitPackGroup for application/json ContentType.
+type PermitPackGroupJSONRequestBody PermitPackGroupJSONBody
 
 // DeletePackFromUserJSONRequestBody defines body for DeletePackFromUser for application/json ContentType.
-type DeletePackFromUserJSONRequestBody = PackUserParams
+type DeletePackFromUserJSONRequestBody DeletePackFromUserJSONBody
 
 // AttachPackToUserJSONRequestBody defines body for AttachPackToUser for application/json ContentType.
-type AttachPackToUserJSONRequestBody = PackUserParams
+type AttachPackToUserJSONRequestBody AttachPackToUserJSONBody
 
 // PermitPackUserJSONRequestBody defines body for PermitPackUser for application/json ContentType.
-type PermitPackUserJSONRequestBody = PackUserParams
+type PermitPackUserJSONRequestBody PermitPackUserJSONBody
 
 // UpdateProfileJSONRequestBody defines body for UpdateProfile for application/json ContentType.
-type UpdateProfileJSONRequestBody = Profile
+type UpdateProfileJSONRequestBody UpdateProfileJSONBody
 
 // DeleteQuiltFromBuildJSONRequestBody defines body for DeleteQuiltFromBuild for application/json ContentType.
-type DeleteQuiltFromBuildJSONRequestBody = QuiltBuildParams
+type DeleteQuiltFromBuildJSONRequestBody DeleteQuiltFromBuildJSONBody
 
 // AttachQuiltToBuildJSONRequestBody defines body for AttachQuiltToBuild for application/json ContentType.
-type AttachQuiltToBuildJSONRequestBody = QuiltBuildParams
-
-// CreateTeamJSONRequestBody defines body for CreateTeam for application/json ContentType.
-type CreateTeamJSONRequestBody = Team
-
-// UpdateTeamJSONRequestBody defines body for UpdateTeam for application/json ContentType.
-type UpdateTeamJSONRequestBody = Team
-
-// DeleteTeamFromModJSONRequestBody defines body for DeleteTeamFromMod for application/json ContentType.
-type DeleteTeamFromModJSONRequestBody = TeamModParams
-
-// AttachTeamToModJSONRequestBody defines body for AttachTeamToMod for application/json ContentType.
-type AttachTeamToModJSONRequestBody = TeamModParams
-
-// PermitTeamModJSONRequestBody defines body for PermitTeamMod for application/json ContentType.
-type PermitTeamModJSONRequestBody = TeamModParams
-
-// DeleteTeamFromPackJSONRequestBody defines body for DeleteTeamFromPack for application/json ContentType.
-type DeleteTeamFromPackJSONRequestBody = TeamPackParams
-
-// AttachTeamToPackJSONRequestBody defines body for AttachTeamToPack for application/json ContentType.
-type AttachTeamToPackJSONRequestBody = TeamPackParams
-
-// PermitTeamPackJSONRequestBody defines body for PermitTeamPack for application/json ContentType.
-type PermitTeamPackJSONRequestBody = TeamPackParams
-
-// DeleteTeamFromUserJSONRequestBody defines body for DeleteTeamFromUser for application/json ContentType.
-type DeleteTeamFromUserJSONRequestBody = TeamUserParams
-
-// AttachTeamToUserJSONRequestBody defines body for AttachTeamToUser for application/json ContentType.
-type AttachTeamToUserJSONRequestBody = TeamUserParams
-
-// PermitTeamUserJSONRequestBody defines body for PermitTeamUser for application/json ContentType.
-type PermitTeamUserJSONRequestBody = TeamUserParams
+type AttachQuiltToBuildJSONRequestBody AttachQuiltToBuildJSONBody
 
 // CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
-type CreateUserJSONRequestBody = User
+type CreateUserJSONRequestBody CreateUserJSONBody
 
 // UpdateUserJSONRequestBody defines body for UpdateUser for application/json ContentType.
-type UpdateUserJSONRequestBody = User
+type UpdateUserJSONRequestBody UpdateUserJSONBody
+
+// DeleteUserFromGroupJSONRequestBody defines body for DeleteUserFromGroup for application/json ContentType.
+type DeleteUserFromGroupJSONRequestBody DeleteUserFromGroupJSONBody
+
+// AttachUserToGroupJSONRequestBody defines body for AttachUserToGroup for application/json ContentType.
+type AttachUserToGroupJSONRequestBody AttachUserToGroupJSONBody
+
+// PermitUserGroupJSONRequestBody defines body for PermitUserGroup for application/json ContentType.
+type PermitUserGroupJSONRequestBody PermitUserGroupJSONBody
 
 // DeleteUserFromModJSONRequestBody defines body for DeleteUserFromMod for application/json ContentType.
-type DeleteUserFromModJSONRequestBody = UserModParams
+type DeleteUserFromModJSONRequestBody DeleteUserFromModJSONBody
 
 // AttachUserToModJSONRequestBody defines body for AttachUserToMod for application/json ContentType.
-type AttachUserToModJSONRequestBody = UserModParams
+type AttachUserToModJSONRequestBody AttachUserToModJSONBody
 
 // PermitUserModJSONRequestBody defines body for PermitUserMod for application/json ContentType.
-type PermitUserModJSONRequestBody = UserModParams
+type PermitUserModJSONRequestBody PermitUserModJSONBody
 
 // DeleteUserFromPackJSONRequestBody defines body for DeleteUserFromPack for application/json ContentType.
-type DeleteUserFromPackJSONRequestBody = UserPackParams
+type DeleteUserFromPackJSONRequestBody DeleteUserFromPackJSONBody
 
 // AttachUserToPackJSONRequestBody defines body for AttachUserToPack for application/json ContentType.
-type AttachUserToPackJSONRequestBody = UserPackParams
+type AttachUserToPackJSONRequestBody AttachUserToPackJSONBody
 
 // PermitUserPackJSONRequestBody defines body for PermitUserPack for application/json ContentType.
-type PermitUserPackJSONRequestBody = UserPackParams
-
-// DeleteUserFromTeamJSONRequestBody defines body for DeleteUserFromTeam for application/json ContentType.
-type DeleteUserFromTeamJSONRequestBody = UserTeamParams
-
-// AttachUserToTeamJSONRequestBody defines body for AttachUserToTeam for application/json ContentType.
-type AttachUserToTeamJSONRequestBody = UserTeamParams
-
-// PermitUserTeamJSONRequestBody defines body for PermitUserTeam for application/json ContentType.
-type PermitUserTeamJSONRequestBody = UserTeamParams
+type PermitUserPackJSONRequestBody PermitUserPackJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -1954,19 +2369,22 @@ type ServerInterface interface {
 	LoginAuth(w http.ResponseWriter, r *http.Request)
 	// Fetch the available auth providers
 	// (GET /auth/providers)
-	ExternalProviders(w http.ResponseWriter, r *http.Request)
+	ListProviders(w http.ResponseWriter, r *http.Request)
+	// Retrieve real token after redirect
+	// (POST /auth/redirect)
+	RedirectAuth(w http.ResponseWriter, r *http.Request)
 	// Refresh an auth token before it expires
 	// (GET /auth/refresh)
 	RefreshAuth(w http.ResponseWriter, r *http.Request)
 	// Verify validity for an authentication token
 	// (GET /auth/verify)
 	VerifyAuth(w http.ResponseWriter, r *http.Request)
-	// Callback for external authentication
+	// Callback to parse the defined provider
 	// (GET /auth/{provider}/callback)
-	ExternalCallback(w http.ResponseWriter, r *http.Request, provider string, params ExternalCallbackParams)
-	// Initialize the external authentication
-	// (GET /auth/{provider}/initialize)
-	ExternalInitialize(w http.ResponseWriter, r *http.Request, provider string, params ExternalInitializeParams)
+	CallbackProvider(w http.ResponseWriter, r *http.Request, provider AuthProviderParam, params CallbackProviderParams)
+	// Request the redirect to defined provider
+	// (GET /auth/{provider}/request)
+	RequestProvider(w http.ResponseWriter, r *http.Request, provider AuthProviderParam)
 	// Fetch the available Fabric versions
 	// (GET /fabric)
 	ListFabrics(w http.ResponseWriter, r *http.Request, params ListFabricsParams)
@@ -1975,13 +2393,13 @@ type ServerInterface interface {
 	UpdateFabric(w http.ResponseWriter, r *http.Request)
 	// Unlink a build from a Fabric version
 	// (DELETE /fabric/{fabric_id}/builds)
-	DeleteFabricFromBuild(w http.ResponseWriter, r *http.Request, fabricId string)
+	DeleteFabricFromBuild(w http.ResponseWriter, r *http.Request, fabricID FabricID)
 	// Fetch the builds attached to a Fabric version
 	// (GET /fabric/{fabric_id}/builds)
-	ListFabricBuilds(w http.ResponseWriter, r *http.Request, fabricId string, params ListFabricBuildsParams)
+	ListFabricBuilds(w http.ResponseWriter, r *http.Request, fabricID FabricID, params ListFabricBuildsParams)
 	// Attach a build to a Fabric version
 	// (POST /fabric/{fabric_id}/builds)
-	AttachFabricToBuild(w http.ResponseWriter, r *http.Request, fabricId string)
+	AttachFabricToBuild(w http.ResponseWriter, r *http.Request, fabricID FabricID)
 	// Fetch the available Forge versions
 	// (GET /forge)
 	ListForges(w http.ResponseWriter, r *http.Request, params ListForgesParams)
@@ -1990,13 +2408,64 @@ type ServerInterface interface {
 	UpdateForge(w http.ResponseWriter, r *http.Request)
 	// Unlink a build from a Forge version
 	// (DELETE /forge/{forge_id}/builds)
-	DeleteForgeFromBuild(w http.ResponseWriter, r *http.Request, forgeId string)
+	DeleteForgeFromBuild(w http.ResponseWriter, r *http.Request, forgeID ForgeID)
 	// Fetch the builds attached to a Forge version
 	// (GET /forge/{forge_id}/builds)
-	ListForgeBuilds(w http.ResponseWriter, r *http.Request, forgeId string, params ListForgeBuildsParams)
+	ListForgeBuilds(w http.ResponseWriter, r *http.Request, forgeID ForgeID, params ListForgeBuildsParams)
 	// Attach a build to a Forge version
 	// (POST /forge/{forge_id}/builds)
-	AttachForgeToBuild(w http.ResponseWriter, r *http.Request, forgeId string)
+	AttachForgeToBuild(w http.ResponseWriter, r *http.Request, forgeID ForgeID)
+	// Fetch all available groups
+	// (GET /groups)
+	ListGroups(w http.ResponseWriter, r *http.Request, params ListGroupsParams)
+	// Create a new group
+	// (POST /groups)
+	CreateGroup(w http.ResponseWriter, r *http.Request)
+	// Delete a specific group
+	// (DELETE /groups/{group_id})
+	DeleteGroup(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Fetch a specific group
+	// (GET /groups/{group_id})
+	ShowGroup(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Update a specific group
+	// (PUT /groups/{group_id})
+	UpdateGroup(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Unlink a mod from group
+	// (DELETE /groups/{group_id}/mods)
+	DeleteGroupFromMod(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Fetch all mods attached to group
+	// (GET /groups/{group_id}/mods)
+	ListGroupMods(w http.ResponseWriter, r *http.Request, groupID GroupID, params ListGroupModsParams)
+	// Attach a mod to group
+	// (POST /groups/{group_id}/mods)
+	AttachGroupToMod(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Update mod perms for group
+	// (PUT /groups/{group_id}/mods)
+	PermitGroupMod(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Unlink a pack from group
+	// (DELETE /groups/{group_id}/packs)
+	DeleteGroupFromPack(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Fetch all packs attached to group
+	// (GET /groups/{group_id}/packs)
+	ListGroupPacks(w http.ResponseWriter, r *http.Request, groupID GroupID, params ListGroupPacksParams)
+	// Attach a pack to group
+	// (POST /groups/{group_id}/packs)
+	AttachGroupToPack(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Update pack perms for group
+	// (PUT /groups/{group_id}/packs)
+	PermitGroupPack(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Unlink a user from group
+	// (DELETE /groups/{group_id}/users)
+	DeleteGroupFromUser(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Fetch all users attached to group
+	// (GET /groups/{group_id}/users)
+	ListGroupUsers(w http.ResponseWriter, r *http.Request, groupID GroupID, params ListGroupUsersParams)
+	// Attach a user to group
+	// (POST /groups/{group_id}/users)
+	AttachGroupToUser(w http.ResponseWriter, r *http.Request, groupID GroupID)
+	// Update user perms for group
+	// (PUT /groups/{group_id}/users)
+	PermitGroupUser(w http.ResponseWriter, r *http.Request, groupID GroupID)
 	// Fetch the available Minecraft versions
 	// (GET /minecraft)
 	ListMinecrafts(w http.ResponseWriter, r *http.Request, params ListMinecraftsParams)
@@ -2005,13 +2474,13 @@ type ServerInterface interface {
 	UpdateMinecraft(w http.ResponseWriter, r *http.Request)
 	// Unlink a build from a Minecraft version
 	// (DELETE /minecraft/{minecraft_id}/builds)
-	DeleteMinecraftFromBuild(w http.ResponseWriter, r *http.Request, minecraftId string)
+	DeleteMinecraftFromBuild(w http.ResponseWriter, r *http.Request, minecraftID MinecraftID)
 	// Fetch the builds attached to a Minecraft version
 	// (GET /minecraft/{minecraft_id}/builds)
-	ListMinecraftBuilds(w http.ResponseWriter, r *http.Request, minecraftId string, params ListMinecraftBuildsParams)
+	ListMinecraftBuilds(w http.ResponseWriter, r *http.Request, minecraftID MinecraftID, params ListMinecraftBuildsParams)
 	// Attach a build to a Minecraft version
 	// (POST /minecraft/{minecraft_id}/builds)
-	AttachMinecraftToBuild(w http.ResponseWriter, r *http.Request, minecraftId string)
+	AttachMinecraftToBuild(w http.ResponseWriter, r *http.Request, minecraftID MinecraftID)
 	// Fetch all available mods
 	// (GET /mods)
 	ListMods(w http.ResponseWriter, r *http.Request, params ListModsParams)
@@ -2020,61 +2489,67 @@ type ServerInterface interface {
 	CreateMod(w http.ResponseWriter, r *http.Request)
 	// Delete a specific mod
 	// (DELETE /mods/{mod_id})
-	DeleteMod(w http.ResponseWriter, r *http.Request, modId string)
+	DeleteMod(w http.ResponseWriter, r *http.Request, modID ModID)
 	// Fetch a specific mod
 	// (GET /mods/{mod_id})
-	ShowMod(w http.ResponseWriter, r *http.Request, modId string)
+	ShowMod(w http.ResponseWriter, r *http.Request, modID ModID)
 	// Update a specific mod
 	// (PUT /mods/{mod_id})
-	UpdateMod(w http.ResponseWriter, r *http.Request, modId string)
-	// Unlink a team from mod
-	// (DELETE /mods/{mod_id}/teams)
-	DeleteModFromTeam(w http.ResponseWriter, r *http.Request, modId string)
-	// Fetch all teams attached to mod
-	// (GET /mods/{mod_id}/teams)
-	ListModTeams(w http.ResponseWriter, r *http.Request, modId string, params ListModTeamsParams)
-	// Attach a team to mod
-	// (POST /mods/{mod_id}/teams)
-	AttachModToTeam(w http.ResponseWriter, r *http.Request, modId string)
-	// Update team perms for mod
-	// (PUT /mods/{mod_id}/teams)
-	PermitModTeam(w http.ResponseWriter, r *http.Request, modId string)
+	UpdateMod(w http.ResponseWriter, r *http.Request, modID ModID)
+	// Delete the avatar for the defined mod
+	// (DELETE /mods/{mod_id}/avatar)
+	DeleteModAvatar(w http.ResponseWriter, r *http.Request, modID ModID)
+	// Upload an avatar for the defined mod
+	// (POST /mods/{mod_id}/avatar)
+	CreateModAvatar(w http.ResponseWriter, r *http.Request, modID ModID)
+	// Unlink a group from mod
+	// (DELETE /mods/{mod_id}/groups)
+	DeleteModFromGroup(w http.ResponseWriter, r *http.Request, modID ModID)
+	// Fetch all groups attached to mod
+	// (GET /mods/{mod_id}/groups)
+	ListModGroups(w http.ResponseWriter, r *http.Request, modID ModID, params ListModGroupsParams)
+	// Attach a group to mod
+	// (POST /mods/{mod_id}/groups)
+	AttachModToGroup(w http.ResponseWriter, r *http.Request, modID ModID)
+	// Update group perms for mod
+	// (PUT /mods/{mod_id}/groups)
+	PermitModGroup(w http.ResponseWriter, r *http.Request, modID ModID)
 	// Unlink a user from mod
 	// (DELETE /mods/{mod_id}/users)
-	DeleteModFromUser(w http.ResponseWriter, r *http.Request, modId string)
+	DeleteModFromUser(w http.ResponseWriter, r *http.Request, modID ModID)
 	// Fetch all users attached to mod
 	// (GET /mods/{mod_id}/users)
-	ListModUsers(w http.ResponseWriter, r *http.Request, modId string, params ListModUsersParams)
+	ListModUsers(w http.ResponseWriter, r *http.Request, modID ModID, params ListModUsersParams)
 	// Attach a user to mod
 	// (POST /mods/{mod_id}/users)
-	AttachModToUser(w http.ResponseWriter, r *http.Request, modId string)
+	AttachModToUser(w http.ResponseWriter, r *http.Request, modID ModID)
 	// Update user perms for mod
 	// (PUT /mods/{mod_id}/users)
-	PermitModUser(w http.ResponseWriter, r *http.Request, modId string)
+	PermitModUser(w http.ResponseWriter, r *http.Request, modID ModID)
 	// Fetch all available versions for a mod
 	// (GET /mods/{mod_id}/versions)
-	ListVersions(w http.ResponseWriter, r *http.Request, modId string, params ListVersionsParams)
+	ListVersions(w http.ResponseWriter, r *http.Request, modID ModID, params ListVersionsParams)
 	// Create a new version for a mod
 	// (POST /mods/{mod_id}/versions)
-	CreateVersion(w http.ResponseWriter, r *http.Request, modId string)
+	CreateVersion(w http.ResponseWriter, r *http.Request, modID ModID)
 	// Delete a specific version for a mod
 	// (DELETE /mods/{mod_id}/versions/{version_id})
-	DeleteVersion(w http.ResponseWriter, r *http.Request, modId string, versionId string)
+	DeleteVersion(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID)
 	// Fetch a specific version for a mod
 	// (GET /mods/{mod_id}/versions/{version_id})
-	ShowVersion(w http.ResponseWriter, r *http.Request, modId string, versionId string)
+	ShowVersion(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID)
 	// Update a specific version for a mod
 	// (PUT /mods/{mod_id}/versions/{version_id})
-	UpdateVersion(w http.ResponseWriter, r *http.Request, modId string, versionId string)
+	UpdateVersion(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID)
 	// Unlink a build from a version
 	// (DELETE /mods/{mod_id}/versions/{version_id}/builds)
-	DeleteVersionFromBuild(w http.ResponseWriter, r *http.Request, modId string, versionId string)
+	DeleteVersionFromBuild(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID)
 	// Fetch all builds attached to version
 	// (GET /mods/{mod_id}/versions/{version_id}/builds)
-	ListVersionBuilds(w http.ResponseWriter, r *http.Request, modId string, versionId string, params ListVersionBuildsParams)
+	ListVersionBuilds(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID, params ListVersionBuildsParams)
 	// Attach a build to a version
 	// (POST /mods/{mod_id}/versions/{version_id}/builds)
-	AttachVersionToBuild(w http.ResponseWriter, r *http.Request, modId string, versionId string)
+	AttachVersionToBuild(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID)
 	// Fetch the available Neoforge versions
 	// (GET /neoforge)
 	ListNeoforges(w http.ResponseWriter, r *http.Request, params ListNeoforgesParams)
@@ -2083,13 +2558,13 @@ type ServerInterface interface {
 	UpdateNeoforge(w http.ResponseWriter, r *http.Request)
 	// Unlink a build from a Neoforge version
 	// (DELETE /neoforge/{neoforge_id}/builds)
-	DeleteNeoforgeFromBuild(w http.ResponseWriter, r *http.Request, neoforgeId string)
+	DeleteNeoforgeFromBuild(w http.ResponseWriter, r *http.Request, neoforgeID NeoforgeID)
 	// Fetch the builds attached to a Neoforge version
 	// (GET /neoforge/{neoforge_id}/builds)
-	ListNeoforgeBuilds(w http.ResponseWriter, r *http.Request, neoforgeId string, params ListNeoforgeBuildsParams)
+	ListNeoforgeBuilds(w http.ResponseWriter, r *http.Request, neoforgeID NeoforgeID, params ListNeoforgeBuildsParams)
 	// Attach a build to a Neoforge version
 	// (POST /neoforge/{neoforge_id}/builds)
-	AttachNeoforgeToBuild(w http.ResponseWriter, r *http.Request, neoforgeId string)
+	AttachNeoforgeToBuild(w http.ResponseWriter, r *http.Request, neoforgeID NeoforgeID)
 	// Fetch all available packs
 	// (GET /packs)
 	ListPacks(w http.ResponseWriter, r *http.Request, params ListPacksParams)
@@ -2098,61 +2573,67 @@ type ServerInterface interface {
 	CreatePack(w http.ResponseWriter, r *http.Request)
 	// Delete a specific pack
 	// (DELETE /packs/{pack_id})
-	DeletePack(w http.ResponseWriter, r *http.Request, packId string)
+	DeletePack(w http.ResponseWriter, r *http.Request, packID PackID)
 	// Fetch a specific pack
 	// (GET /packs/{pack_id})
-	ShowPack(w http.ResponseWriter, r *http.Request, packId string)
+	ShowPack(w http.ResponseWriter, r *http.Request, packID PackID)
 	// Update a specific pack
 	// (PUT /packs/{pack_id})
-	UpdatePack(w http.ResponseWriter, r *http.Request, packId string)
+	UpdatePack(w http.ResponseWriter, r *http.Request, packID PackID)
+	// Delete the avatar for the defined pack
+	// (DELETE /packs/{pack_id}/avatar)
+	DeletePackAvatar(w http.ResponseWriter, r *http.Request, packID PackID)
+	// Upload an avatar for the defined pack
+	// (POST /packs/{pack_id}/avatar)
+	CreatePackAvatar(w http.ResponseWriter, r *http.Request, packID PackID)
 	// Fetch all available builds for a pack
 	// (GET /packs/{pack_id}/builds)
-	ListBuilds(w http.ResponseWriter, r *http.Request, packId string, params ListBuildsParams)
+	ListBuilds(w http.ResponseWriter, r *http.Request, packID PackID, params ListBuildsParams)
 	// Create a new build for a pack
 	// (POST /packs/{pack_id}/builds)
-	CreateBuild(w http.ResponseWriter, r *http.Request, packId string)
+	CreateBuild(w http.ResponseWriter, r *http.Request, packID PackID)
 	// Delete a specific build for a pack
 	// (DELETE /packs/{pack_id}/builds/{build_id})
-	DeleteBuild(w http.ResponseWriter, r *http.Request, packId string, buildId string)
+	DeleteBuild(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID)
 	// Fetch a specific build for a pack
 	// (GET /packs/{pack_id}/builds/{build_id})
-	ShowBuild(w http.ResponseWriter, r *http.Request, packId string, buildId string)
+	ShowBuild(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID)
 	// Update a specific build for a pack
 	// (PUT /packs/{pack_id}/builds/{build_id})
-	UpdateBuild(w http.ResponseWriter, r *http.Request, packId string, buildId string)
+	UpdateBuild(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID)
 	// Unlink a version from a build
 	// (DELETE /packs/{pack_id}/builds/{build_id}/versions)
-	DeleteBuildFromVersion(w http.ResponseWriter, r *http.Request, packId string, buildId string)
+	DeleteBuildFromVersion(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID)
 	// Fetch all versions attached to build
 	// (GET /packs/{pack_id}/builds/{build_id}/versions)
-	ListBuildVersions(w http.ResponseWriter, r *http.Request, packId string, buildId string, params ListBuildVersionsParams)
+	ListBuildVersions(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID, params ListBuildVersionsParams)
 	// Attach a version to a build
 	// (POST /packs/{pack_id}/builds/{build_id}/versions)
-	AttachBuildToVersion(w http.ResponseWriter, r *http.Request, packId string, buildId string)
-	// Unlink a team from pack
-	// (DELETE /packs/{pack_id}/teams)
-	DeletePackFromTeam(w http.ResponseWriter, r *http.Request, packId string)
-	// Fetch all teams attached to pack
-	// (GET /packs/{pack_id}/teams)
-	ListPackTeams(w http.ResponseWriter, r *http.Request, packId string, params ListPackTeamsParams)
-	// Attach a team to pack
-	// (POST /packs/{pack_id}/teams)
-	AttachPackToTeam(w http.ResponseWriter, r *http.Request, packId string)
-	// Update team perms for pack
-	// (PUT /packs/{pack_id}/teams)
-	PermitPackTeam(w http.ResponseWriter, r *http.Request, packId string)
+	AttachBuildToVersion(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID)
+	// Unlink a group from pack
+	// (DELETE /packs/{pack_id}/groups)
+	DeletePackFromGroup(w http.ResponseWriter, r *http.Request, packID PackID)
+	// Fetch all groups attached to pack
+	// (GET /packs/{pack_id}/groups)
+	ListPackGroups(w http.ResponseWriter, r *http.Request, packID PackID, params ListPackGroupsParams)
+	// Attach a group to pack
+	// (POST /packs/{pack_id}/groups)
+	AttachPackToGroup(w http.ResponseWriter, r *http.Request, packID PackID)
+	// Update group perms for pack
+	// (PUT /packs/{pack_id}/groups)
+	PermitPackGroup(w http.ResponseWriter, r *http.Request, packID PackID)
 	// Unlink a user from pack
 	// (DELETE /packs/{pack_id}/users)
-	DeletePackFromUser(w http.ResponseWriter, r *http.Request, packId string)
+	DeletePackFromUser(w http.ResponseWriter, r *http.Request, packID PackID)
 	// Fetch all users attached to pack
 	// (GET /packs/{pack_id}/users)
-	ListPackUsers(w http.ResponseWriter, r *http.Request, packId string, params ListPackUsersParams)
+	ListPackUsers(w http.ResponseWriter, r *http.Request, packID PackID, params ListPackUsersParams)
 	// Attach a user to pack
 	// (POST /packs/{pack_id}/users)
-	AttachPackToUser(w http.ResponseWriter, r *http.Request, packId string)
+	AttachPackToUser(w http.ResponseWriter, r *http.Request, packID PackID)
 	// Update user perms for pack
 	// (PUT /packs/{pack_id}/users)
-	PermitPackUser(w http.ResponseWriter, r *http.Request, packId string)
+	PermitPackUser(w http.ResponseWriter, r *http.Request, packID PackID)
 	// Fetch profile details of the personal account
 	// (GET /profile/self)
 	ShowProfile(w http.ResponseWriter, r *http.Request)
@@ -2170,64 +2651,13 @@ type ServerInterface interface {
 	UpdateQuilt(w http.ResponseWriter, r *http.Request)
 	// Unlink a build from a Quilt version
 	// (DELETE /quilt/{quilt_id}/builds)
-	DeleteQuiltFromBuild(w http.ResponseWriter, r *http.Request, quiltId string)
+	DeleteQuiltFromBuild(w http.ResponseWriter, r *http.Request, quiltID QuiltID)
 	// Fetch the builds attached to a Quilt version
 	// (GET /quilt/{quilt_id}/builds)
-	ListQuiltBuilds(w http.ResponseWriter, r *http.Request, quiltId string, params ListQuiltBuildsParams)
+	ListQuiltBuilds(w http.ResponseWriter, r *http.Request, quiltID QuiltID, params ListQuiltBuildsParams)
 	// Attach a build to a Quilt version
 	// (POST /quilt/{quilt_id}/builds)
-	AttachQuiltToBuild(w http.ResponseWriter, r *http.Request, quiltId string)
-	// Fetch all available teams
-	// (GET /teams)
-	ListTeams(w http.ResponseWriter, r *http.Request, params ListTeamsParams)
-	// Create a new team
-	// (POST /teams)
-	CreateTeam(w http.ResponseWriter, r *http.Request)
-	// Delete a specific team
-	// (DELETE /teams/{team_id})
-	DeleteTeam(w http.ResponseWriter, r *http.Request, teamId string)
-	// Fetch a specific team
-	// (GET /teams/{team_id})
-	ShowTeam(w http.ResponseWriter, r *http.Request, teamId string)
-	// Update a specific team
-	// (PUT /teams/{team_id})
-	UpdateTeam(w http.ResponseWriter, r *http.Request, teamId string)
-	// Unlink a mod from team
-	// (DELETE /teams/{team_id}/mods)
-	DeleteTeamFromMod(w http.ResponseWriter, r *http.Request, teamId string)
-	// Fetch all mods attached to team
-	// (GET /teams/{team_id}/mods)
-	ListTeamMods(w http.ResponseWriter, r *http.Request, teamId string, params ListTeamModsParams)
-	// Attach a mod to team
-	// (POST /teams/{team_id}/mods)
-	AttachTeamToMod(w http.ResponseWriter, r *http.Request, teamId string)
-	// Update mod perms for team
-	// (PUT /teams/{team_id}/mods)
-	PermitTeamMod(w http.ResponseWriter, r *http.Request, teamId string)
-	// Unlink a pack from team
-	// (DELETE /teams/{team_id}/packs)
-	DeleteTeamFromPack(w http.ResponseWriter, r *http.Request, teamId string)
-	// Fetch all packs attached to team
-	// (GET /teams/{team_id}/packs)
-	ListTeamPacks(w http.ResponseWriter, r *http.Request, teamId string, params ListTeamPacksParams)
-	// Attach a pack to team
-	// (POST /teams/{team_id}/packs)
-	AttachTeamToPack(w http.ResponseWriter, r *http.Request, teamId string)
-	// Update pack perms for team
-	// (PUT /teams/{team_id}/packs)
-	PermitTeamPack(w http.ResponseWriter, r *http.Request, teamId string)
-	// Unlink a user from team
-	// (DELETE /teams/{team_id}/users)
-	DeleteTeamFromUser(w http.ResponseWriter, r *http.Request, teamId string)
-	// Fetch all users attached to team
-	// (GET /teams/{team_id}/users)
-	ListTeamUsers(w http.ResponseWriter, r *http.Request, teamId string, params ListTeamUsersParams)
-	// Attach a user to team
-	// (POST /teams/{team_id}/users)
-	AttachTeamToUser(w http.ResponseWriter, r *http.Request, teamId string)
-	// Update user perms for team
-	// (PUT /teams/{team_id}/users)
-	PermitTeamUser(w http.ResponseWriter, r *http.Request, teamId string)
+	AttachQuiltToBuild(w http.ResponseWriter, r *http.Request, quiltID QuiltID)
 	// Fetch all available users
 	// (GET /users)
 	ListUsers(w http.ResponseWriter, r *http.Request, params ListUsersParams)
@@ -2236,49 +2666,49 @@ type ServerInterface interface {
 	CreateUser(w http.ResponseWriter, r *http.Request)
 	// Delete a specific user
 	// (DELETE /users/{user_id})
-	DeleteUser(w http.ResponseWriter, r *http.Request, userId string)
+	DeleteUser(w http.ResponseWriter, r *http.Request, userID UserID)
 	// Fetch a specific user
 	// (GET /users/{user_id})
-	ShowUser(w http.ResponseWriter, r *http.Request, userId string)
+	ShowUser(w http.ResponseWriter, r *http.Request, userID UserID)
 	// Update a specific user
 	// (PUT /users/{user_id})
-	UpdateUser(w http.ResponseWriter, r *http.Request, userId string)
+	UpdateUser(w http.ResponseWriter, r *http.Request, userID UserID)
+	// Unlink a group from user
+	// (DELETE /users/{user_id}/groups)
+	DeleteUserFromGroup(w http.ResponseWriter, r *http.Request, userID UserID)
+	// Fetch all groups attached to user
+	// (GET /users/{user_id}/groups)
+	ListUserGroups(w http.ResponseWriter, r *http.Request, userID UserID, params ListUserGroupsParams)
+	// Attach a group to user
+	// (POST /users/{user_id}/groups)
+	AttachUserToGroup(w http.ResponseWriter, r *http.Request, userID UserID)
+	// Update group perms for user
+	// (PUT /users/{user_id}/groups)
+	PermitUserGroup(w http.ResponseWriter, r *http.Request, userID UserID)
 	// Unlink a mod from user
 	// (DELETE /users/{user_id}/mods)
-	DeleteUserFromMod(w http.ResponseWriter, r *http.Request, userId string)
+	DeleteUserFromMod(w http.ResponseWriter, r *http.Request, userID UserID)
 	// Fetch all mods attached to user
 	// (GET /users/{user_id}/mods)
-	ListUserMods(w http.ResponseWriter, r *http.Request, userId string, params ListUserModsParams)
+	ListUserMods(w http.ResponseWriter, r *http.Request, userID UserID, params ListUserModsParams)
 	// Attach a mod to user
 	// (POST /users/{user_id}/mods)
-	AttachUserToMod(w http.ResponseWriter, r *http.Request, userId string)
+	AttachUserToMod(w http.ResponseWriter, r *http.Request, userID UserID)
 	// Update mod perms for user
 	// (PUT /users/{user_id}/mods)
-	PermitUserMod(w http.ResponseWriter, r *http.Request, userId string)
+	PermitUserMod(w http.ResponseWriter, r *http.Request, userID UserID)
 	// Unlink a pack from user
 	// (DELETE /users/{user_id}/packs)
-	DeleteUserFromPack(w http.ResponseWriter, r *http.Request, userId string)
+	DeleteUserFromPack(w http.ResponseWriter, r *http.Request, userID UserID)
 	// Fetch all packs attached to user
 	// (GET /users/{user_id}/packs)
-	ListUserPacks(w http.ResponseWriter, r *http.Request, userId string, params ListUserPacksParams)
+	ListUserPacks(w http.ResponseWriter, r *http.Request, userID UserID, params ListUserPacksParams)
 	// Attach a pack to user
 	// (POST /users/{user_id}/packs)
-	AttachUserToPack(w http.ResponseWriter, r *http.Request, userId string)
+	AttachUserToPack(w http.ResponseWriter, r *http.Request, userID UserID)
 	// Update pack perms for user
 	// (PUT /users/{user_id}/packs)
-	PermitUserPack(w http.ResponseWriter, r *http.Request, userId string)
-	// Unlink a team from user
-	// (DELETE /users/{user_id}/teams)
-	DeleteUserFromTeam(w http.ResponseWriter, r *http.Request, userId string)
-	// Fetch all teams attached to user
-	// (GET /users/{user_id}/teams)
-	ListUserTeams(w http.ResponseWriter, r *http.Request, userId string, params ListUserTeamsParams)
-	// Attach a team to user
-	// (POST /users/{user_id}/teams)
-	AttachUserToTeam(w http.ResponseWriter, r *http.Request, userId string)
-	// Update team perms for user
-	// (PUT /users/{user_id}/teams)
-	PermitUserTeam(w http.ResponseWriter, r *http.Request, userId string)
+	PermitUserPack(w http.ResponseWriter, r *http.Request, userID UserID)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -2293,7 +2723,13 @@ func (_ Unimplemented) LoginAuth(w http.ResponseWriter, r *http.Request) {
 
 // Fetch the available auth providers
 // (GET /auth/providers)
-func (_ Unimplemented) ExternalProviders(w http.ResponseWriter, r *http.Request) {
+func (_ Unimplemented) ListProviders(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Retrieve real token after redirect
+// (POST /auth/redirect)
+func (_ Unimplemented) RedirectAuth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2309,15 +2745,15 @@ func (_ Unimplemented) VerifyAuth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Callback for external authentication
+// Callback to parse the defined provider
 // (GET /auth/{provider}/callback)
-func (_ Unimplemented) ExternalCallback(w http.ResponseWriter, r *http.Request, provider string, params ExternalCallbackParams) {
+func (_ Unimplemented) CallbackProvider(w http.ResponseWriter, r *http.Request, provider AuthProviderParam, params CallbackProviderParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Initialize the external authentication
-// (GET /auth/{provider}/initialize)
-func (_ Unimplemented) ExternalInitialize(w http.ResponseWriter, r *http.Request, provider string, params ExternalInitializeParams) {
+// Request the redirect to defined provider
+// (GET /auth/{provider}/request)
+func (_ Unimplemented) RequestProvider(w http.ResponseWriter, r *http.Request, provider AuthProviderParam) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2335,19 +2771,19 @@ func (_ Unimplemented) UpdateFabric(w http.ResponseWriter, r *http.Request) {
 
 // Unlink a build from a Fabric version
 // (DELETE /fabric/{fabric_id}/builds)
-func (_ Unimplemented) DeleteFabricFromBuild(w http.ResponseWriter, r *http.Request, fabricId string) {
+func (_ Unimplemented) DeleteFabricFromBuild(w http.ResponseWriter, r *http.Request, fabricID FabricID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch the builds attached to a Fabric version
 // (GET /fabric/{fabric_id}/builds)
-func (_ Unimplemented) ListFabricBuilds(w http.ResponseWriter, r *http.Request, fabricId string, params ListFabricBuildsParams) {
+func (_ Unimplemented) ListFabricBuilds(w http.ResponseWriter, r *http.Request, fabricID FabricID, params ListFabricBuildsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a build to a Fabric version
 // (POST /fabric/{fabric_id}/builds)
-func (_ Unimplemented) AttachFabricToBuild(w http.ResponseWriter, r *http.Request, fabricId string) {
+func (_ Unimplemented) AttachFabricToBuild(w http.ResponseWriter, r *http.Request, fabricID FabricID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2365,19 +2801,121 @@ func (_ Unimplemented) UpdateForge(w http.ResponseWriter, r *http.Request) {
 
 // Unlink a build from a Forge version
 // (DELETE /forge/{forge_id}/builds)
-func (_ Unimplemented) DeleteForgeFromBuild(w http.ResponseWriter, r *http.Request, forgeId string) {
+func (_ Unimplemented) DeleteForgeFromBuild(w http.ResponseWriter, r *http.Request, forgeID ForgeID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch the builds attached to a Forge version
 // (GET /forge/{forge_id}/builds)
-func (_ Unimplemented) ListForgeBuilds(w http.ResponseWriter, r *http.Request, forgeId string, params ListForgeBuildsParams) {
+func (_ Unimplemented) ListForgeBuilds(w http.ResponseWriter, r *http.Request, forgeID ForgeID, params ListForgeBuildsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a build to a Forge version
 // (POST /forge/{forge_id}/builds)
-func (_ Unimplemented) AttachForgeToBuild(w http.ResponseWriter, r *http.Request, forgeId string) {
+func (_ Unimplemented) AttachForgeToBuild(w http.ResponseWriter, r *http.Request, forgeID ForgeID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Fetch all available groups
+// (GET /groups)
+func (_ Unimplemented) ListGroups(w http.ResponseWriter, r *http.Request, params ListGroupsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new group
+// (POST /groups)
+func (_ Unimplemented) CreateGroup(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete a specific group
+// (DELETE /groups/{group_id})
+func (_ Unimplemented) DeleteGroup(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Fetch a specific group
+// (GET /groups/{group_id})
+func (_ Unimplemented) ShowGroup(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update a specific group
+// (PUT /groups/{group_id})
+func (_ Unimplemented) UpdateGroup(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Unlink a mod from group
+// (DELETE /groups/{group_id}/mods)
+func (_ Unimplemented) DeleteGroupFromMod(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Fetch all mods attached to group
+// (GET /groups/{group_id}/mods)
+func (_ Unimplemented) ListGroupMods(w http.ResponseWriter, r *http.Request, groupID GroupID, params ListGroupModsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Attach a mod to group
+// (POST /groups/{group_id}/mods)
+func (_ Unimplemented) AttachGroupToMod(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update mod perms for group
+// (PUT /groups/{group_id}/mods)
+func (_ Unimplemented) PermitGroupMod(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Unlink a pack from group
+// (DELETE /groups/{group_id}/packs)
+func (_ Unimplemented) DeleteGroupFromPack(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Fetch all packs attached to group
+// (GET /groups/{group_id}/packs)
+func (_ Unimplemented) ListGroupPacks(w http.ResponseWriter, r *http.Request, groupID GroupID, params ListGroupPacksParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Attach a pack to group
+// (POST /groups/{group_id}/packs)
+func (_ Unimplemented) AttachGroupToPack(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update pack perms for group
+// (PUT /groups/{group_id}/packs)
+func (_ Unimplemented) PermitGroupPack(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Unlink a user from group
+// (DELETE /groups/{group_id}/users)
+func (_ Unimplemented) DeleteGroupFromUser(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Fetch all users attached to group
+// (GET /groups/{group_id}/users)
+func (_ Unimplemented) ListGroupUsers(w http.ResponseWriter, r *http.Request, groupID GroupID, params ListGroupUsersParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Attach a user to group
+// (POST /groups/{group_id}/users)
+func (_ Unimplemented) AttachGroupToUser(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update user perms for group
+// (PUT /groups/{group_id}/users)
+func (_ Unimplemented) PermitGroupUser(w http.ResponseWriter, r *http.Request, groupID GroupID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2395,19 +2933,19 @@ func (_ Unimplemented) UpdateMinecraft(w http.ResponseWriter, r *http.Request) {
 
 // Unlink a build from a Minecraft version
 // (DELETE /minecraft/{minecraft_id}/builds)
-func (_ Unimplemented) DeleteMinecraftFromBuild(w http.ResponseWriter, r *http.Request, minecraftId string) {
+func (_ Unimplemented) DeleteMinecraftFromBuild(w http.ResponseWriter, r *http.Request, minecraftID MinecraftID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch the builds attached to a Minecraft version
 // (GET /minecraft/{minecraft_id}/builds)
-func (_ Unimplemented) ListMinecraftBuilds(w http.ResponseWriter, r *http.Request, minecraftId string, params ListMinecraftBuildsParams) {
+func (_ Unimplemented) ListMinecraftBuilds(w http.ResponseWriter, r *http.Request, minecraftID MinecraftID, params ListMinecraftBuildsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a build to a Minecraft version
 // (POST /minecraft/{minecraft_id}/builds)
-func (_ Unimplemented) AttachMinecraftToBuild(w http.ResponseWriter, r *http.Request, minecraftId string) {
+func (_ Unimplemented) AttachMinecraftToBuild(w http.ResponseWriter, r *http.Request, minecraftID MinecraftID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2425,115 +2963,127 @@ func (_ Unimplemented) CreateMod(w http.ResponseWriter, r *http.Request) {
 
 // Delete a specific mod
 // (DELETE /mods/{mod_id})
-func (_ Unimplemented) DeleteMod(w http.ResponseWriter, r *http.Request, modId string) {
+func (_ Unimplemented) DeleteMod(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch a specific mod
 // (GET /mods/{mod_id})
-func (_ Unimplemented) ShowMod(w http.ResponseWriter, r *http.Request, modId string) {
+func (_ Unimplemented) ShowMod(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update a specific mod
 // (PUT /mods/{mod_id})
-func (_ Unimplemented) UpdateMod(w http.ResponseWriter, r *http.Request, modId string) {
+func (_ Unimplemented) UpdateMod(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Unlink a team from mod
-// (DELETE /mods/{mod_id}/teams)
-func (_ Unimplemented) DeleteModFromTeam(w http.ResponseWriter, r *http.Request, modId string) {
+// Delete the avatar for the defined mod
+// (DELETE /mods/{mod_id}/avatar)
+func (_ Unimplemented) DeleteModAvatar(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Fetch all teams attached to mod
-// (GET /mods/{mod_id}/teams)
-func (_ Unimplemented) ListModTeams(w http.ResponseWriter, r *http.Request, modId string, params ListModTeamsParams) {
+// Upload an avatar for the defined mod
+// (POST /mods/{mod_id}/avatar)
+func (_ Unimplemented) CreateModAvatar(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Attach a team to mod
-// (POST /mods/{mod_id}/teams)
-func (_ Unimplemented) AttachModToTeam(w http.ResponseWriter, r *http.Request, modId string) {
+// Unlink a group from mod
+// (DELETE /mods/{mod_id}/groups)
+func (_ Unimplemented) DeleteModFromGroup(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Update team perms for mod
-// (PUT /mods/{mod_id}/teams)
-func (_ Unimplemented) PermitModTeam(w http.ResponseWriter, r *http.Request, modId string) {
+// Fetch all groups attached to mod
+// (GET /mods/{mod_id}/groups)
+func (_ Unimplemented) ListModGroups(w http.ResponseWriter, r *http.Request, modID ModID, params ListModGroupsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Attach a group to mod
+// (POST /mods/{mod_id}/groups)
+func (_ Unimplemented) AttachModToGroup(w http.ResponseWriter, r *http.Request, modID ModID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update group perms for mod
+// (PUT /mods/{mod_id}/groups)
+func (_ Unimplemented) PermitModGroup(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Unlink a user from mod
 // (DELETE /mods/{mod_id}/users)
-func (_ Unimplemented) DeleteModFromUser(w http.ResponseWriter, r *http.Request, modId string) {
+func (_ Unimplemented) DeleteModFromUser(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch all users attached to mod
 // (GET /mods/{mod_id}/users)
-func (_ Unimplemented) ListModUsers(w http.ResponseWriter, r *http.Request, modId string, params ListModUsersParams) {
+func (_ Unimplemented) ListModUsers(w http.ResponseWriter, r *http.Request, modID ModID, params ListModUsersParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a user to mod
 // (POST /mods/{mod_id}/users)
-func (_ Unimplemented) AttachModToUser(w http.ResponseWriter, r *http.Request, modId string) {
+func (_ Unimplemented) AttachModToUser(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update user perms for mod
 // (PUT /mods/{mod_id}/users)
-func (_ Unimplemented) PermitModUser(w http.ResponseWriter, r *http.Request, modId string) {
+func (_ Unimplemented) PermitModUser(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch all available versions for a mod
 // (GET /mods/{mod_id}/versions)
-func (_ Unimplemented) ListVersions(w http.ResponseWriter, r *http.Request, modId string, params ListVersionsParams) {
+func (_ Unimplemented) ListVersions(w http.ResponseWriter, r *http.Request, modID ModID, params ListVersionsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Create a new version for a mod
 // (POST /mods/{mod_id}/versions)
-func (_ Unimplemented) CreateVersion(w http.ResponseWriter, r *http.Request, modId string) {
+func (_ Unimplemented) CreateVersion(w http.ResponseWriter, r *http.Request, modID ModID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Delete a specific version for a mod
 // (DELETE /mods/{mod_id}/versions/{version_id})
-func (_ Unimplemented) DeleteVersion(w http.ResponseWriter, r *http.Request, modId string, versionId string) {
+func (_ Unimplemented) DeleteVersion(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch a specific version for a mod
 // (GET /mods/{mod_id}/versions/{version_id})
-func (_ Unimplemented) ShowVersion(w http.ResponseWriter, r *http.Request, modId string, versionId string) {
+func (_ Unimplemented) ShowVersion(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update a specific version for a mod
 // (PUT /mods/{mod_id}/versions/{version_id})
-func (_ Unimplemented) UpdateVersion(w http.ResponseWriter, r *http.Request, modId string, versionId string) {
+func (_ Unimplemented) UpdateVersion(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Unlink a build from a version
 // (DELETE /mods/{mod_id}/versions/{version_id}/builds)
-func (_ Unimplemented) DeleteVersionFromBuild(w http.ResponseWriter, r *http.Request, modId string, versionId string) {
+func (_ Unimplemented) DeleteVersionFromBuild(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch all builds attached to version
 // (GET /mods/{mod_id}/versions/{version_id}/builds)
-func (_ Unimplemented) ListVersionBuilds(w http.ResponseWriter, r *http.Request, modId string, versionId string, params ListVersionBuildsParams) {
+func (_ Unimplemented) ListVersionBuilds(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID, params ListVersionBuildsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a build to a version
 // (POST /mods/{mod_id}/versions/{version_id}/builds)
-func (_ Unimplemented) AttachVersionToBuild(w http.ResponseWriter, r *http.Request, modId string, versionId string) {
+func (_ Unimplemented) AttachVersionToBuild(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2551,19 +3101,19 @@ func (_ Unimplemented) UpdateNeoforge(w http.ResponseWriter, r *http.Request) {
 
 // Unlink a build from a Neoforge version
 // (DELETE /neoforge/{neoforge_id}/builds)
-func (_ Unimplemented) DeleteNeoforgeFromBuild(w http.ResponseWriter, r *http.Request, neoforgeId string) {
+func (_ Unimplemented) DeleteNeoforgeFromBuild(w http.ResponseWriter, r *http.Request, neoforgeID NeoforgeID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch the builds attached to a Neoforge version
 // (GET /neoforge/{neoforge_id}/builds)
-func (_ Unimplemented) ListNeoforgeBuilds(w http.ResponseWriter, r *http.Request, neoforgeId string, params ListNeoforgeBuildsParams) {
+func (_ Unimplemented) ListNeoforgeBuilds(w http.ResponseWriter, r *http.Request, neoforgeID NeoforgeID, params ListNeoforgeBuildsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a build to a Neoforge version
 // (POST /neoforge/{neoforge_id}/builds)
-func (_ Unimplemented) AttachNeoforgeToBuild(w http.ResponseWriter, r *http.Request, neoforgeId string) {
+func (_ Unimplemented) AttachNeoforgeToBuild(w http.ResponseWriter, r *http.Request, neoforgeID NeoforgeID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2581,115 +3131,127 @@ func (_ Unimplemented) CreatePack(w http.ResponseWriter, r *http.Request) {
 
 // Delete a specific pack
 // (DELETE /packs/{pack_id})
-func (_ Unimplemented) DeletePack(w http.ResponseWriter, r *http.Request, packId string) {
+func (_ Unimplemented) DeletePack(w http.ResponseWriter, r *http.Request, packID PackID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch a specific pack
 // (GET /packs/{pack_id})
-func (_ Unimplemented) ShowPack(w http.ResponseWriter, r *http.Request, packId string) {
+func (_ Unimplemented) ShowPack(w http.ResponseWriter, r *http.Request, packID PackID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update a specific pack
 // (PUT /packs/{pack_id})
-func (_ Unimplemented) UpdatePack(w http.ResponseWriter, r *http.Request, packId string) {
+func (_ Unimplemented) UpdatePack(w http.ResponseWriter, r *http.Request, packID PackID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete the avatar for the defined pack
+// (DELETE /packs/{pack_id}/avatar)
+func (_ Unimplemented) DeletePackAvatar(w http.ResponseWriter, r *http.Request, packID PackID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Upload an avatar for the defined pack
+// (POST /packs/{pack_id}/avatar)
+func (_ Unimplemented) CreatePackAvatar(w http.ResponseWriter, r *http.Request, packID PackID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch all available builds for a pack
 // (GET /packs/{pack_id}/builds)
-func (_ Unimplemented) ListBuilds(w http.ResponseWriter, r *http.Request, packId string, params ListBuildsParams) {
+func (_ Unimplemented) ListBuilds(w http.ResponseWriter, r *http.Request, packID PackID, params ListBuildsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Create a new build for a pack
 // (POST /packs/{pack_id}/builds)
-func (_ Unimplemented) CreateBuild(w http.ResponseWriter, r *http.Request, packId string) {
+func (_ Unimplemented) CreateBuild(w http.ResponseWriter, r *http.Request, packID PackID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Delete a specific build for a pack
 // (DELETE /packs/{pack_id}/builds/{build_id})
-func (_ Unimplemented) DeleteBuild(w http.ResponseWriter, r *http.Request, packId string, buildId string) {
+func (_ Unimplemented) DeleteBuild(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch a specific build for a pack
 // (GET /packs/{pack_id}/builds/{build_id})
-func (_ Unimplemented) ShowBuild(w http.ResponseWriter, r *http.Request, packId string, buildId string) {
+func (_ Unimplemented) ShowBuild(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update a specific build for a pack
 // (PUT /packs/{pack_id}/builds/{build_id})
-func (_ Unimplemented) UpdateBuild(w http.ResponseWriter, r *http.Request, packId string, buildId string) {
+func (_ Unimplemented) UpdateBuild(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Unlink a version from a build
 // (DELETE /packs/{pack_id}/builds/{build_id}/versions)
-func (_ Unimplemented) DeleteBuildFromVersion(w http.ResponseWriter, r *http.Request, packId string, buildId string) {
+func (_ Unimplemented) DeleteBuildFromVersion(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch all versions attached to build
 // (GET /packs/{pack_id}/builds/{build_id}/versions)
-func (_ Unimplemented) ListBuildVersions(w http.ResponseWriter, r *http.Request, packId string, buildId string, params ListBuildVersionsParams) {
+func (_ Unimplemented) ListBuildVersions(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID, params ListBuildVersionsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a version to a build
 // (POST /packs/{pack_id}/builds/{build_id}/versions)
-func (_ Unimplemented) AttachBuildToVersion(w http.ResponseWriter, r *http.Request, packId string, buildId string) {
+func (_ Unimplemented) AttachBuildToVersion(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Unlink a team from pack
-// (DELETE /packs/{pack_id}/teams)
-func (_ Unimplemented) DeletePackFromTeam(w http.ResponseWriter, r *http.Request, packId string) {
+// Unlink a group from pack
+// (DELETE /packs/{pack_id}/groups)
+func (_ Unimplemented) DeletePackFromGroup(w http.ResponseWriter, r *http.Request, packID PackID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Fetch all teams attached to pack
-// (GET /packs/{pack_id}/teams)
-func (_ Unimplemented) ListPackTeams(w http.ResponseWriter, r *http.Request, packId string, params ListPackTeamsParams) {
+// Fetch all groups attached to pack
+// (GET /packs/{pack_id}/groups)
+func (_ Unimplemented) ListPackGroups(w http.ResponseWriter, r *http.Request, packID PackID, params ListPackGroupsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Attach a team to pack
-// (POST /packs/{pack_id}/teams)
-func (_ Unimplemented) AttachPackToTeam(w http.ResponseWriter, r *http.Request, packId string) {
+// Attach a group to pack
+// (POST /packs/{pack_id}/groups)
+func (_ Unimplemented) AttachPackToGroup(w http.ResponseWriter, r *http.Request, packID PackID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Update team perms for pack
-// (PUT /packs/{pack_id}/teams)
-func (_ Unimplemented) PermitPackTeam(w http.ResponseWriter, r *http.Request, packId string) {
+// Update group perms for pack
+// (PUT /packs/{pack_id}/groups)
+func (_ Unimplemented) PermitPackGroup(w http.ResponseWriter, r *http.Request, packID PackID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Unlink a user from pack
 // (DELETE /packs/{pack_id}/users)
-func (_ Unimplemented) DeletePackFromUser(w http.ResponseWriter, r *http.Request, packId string) {
+func (_ Unimplemented) DeletePackFromUser(w http.ResponseWriter, r *http.Request, packID PackID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch all users attached to pack
 // (GET /packs/{pack_id}/users)
-func (_ Unimplemented) ListPackUsers(w http.ResponseWriter, r *http.Request, packId string, params ListPackUsersParams) {
+func (_ Unimplemented) ListPackUsers(w http.ResponseWriter, r *http.Request, packID PackID, params ListPackUsersParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a user to pack
 // (POST /packs/{pack_id}/users)
-func (_ Unimplemented) AttachPackToUser(w http.ResponseWriter, r *http.Request, packId string) {
+func (_ Unimplemented) AttachPackToUser(w http.ResponseWriter, r *http.Request, packID PackID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update user perms for pack
 // (PUT /packs/{pack_id}/users)
-func (_ Unimplemented) PermitPackUser(w http.ResponseWriter, r *http.Request, packId string) {
+func (_ Unimplemented) PermitPackUser(w http.ResponseWriter, r *http.Request, packID PackID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2725,121 +3287,19 @@ func (_ Unimplemented) UpdateQuilt(w http.ResponseWriter, r *http.Request) {
 
 // Unlink a build from a Quilt version
 // (DELETE /quilt/{quilt_id}/builds)
-func (_ Unimplemented) DeleteQuiltFromBuild(w http.ResponseWriter, r *http.Request, quiltId string) {
+func (_ Unimplemented) DeleteQuiltFromBuild(w http.ResponseWriter, r *http.Request, quiltID QuiltID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch the builds attached to a Quilt version
 // (GET /quilt/{quilt_id}/builds)
-func (_ Unimplemented) ListQuiltBuilds(w http.ResponseWriter, r *http.Request, quiltId string, params ListQuiltBuildsParams) {
+func (_ Unimplemented) ListQuiltBuilds(w http.ResponseWriter, r *http.Request, quiltID QuiltID, params ListQuiltBuildsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a build to a Quilt version
 // (POST /quilt/{quilt_id}/builds)
-func (_ Unimplemented) AttachQuiltToBuild(w http.ResponseWriter, r *http.Request, quiltId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Fetch all available teams
-// (GET /teams)
-func (_ Unimplemented) ListTeams(w http.ResponseWriter, r *http.Request, params ListTeamsParams) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Create a new team
-// (POST /teams)
-func (_ Unimplemented) CreateTeam(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Delete a specific team
-// (DELETE /teams/{team_id})
-func (_ Unimplemented) DeleteTeam(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Fetch a specific team
-// (GET /teams/{team_id})
-func (_ Unimplemented) ShowTeam(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Update a specific team
-// (PUT /teams/{team_id})
-func (_ Unimplemented) UpdateTeam(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Unlink a mod from team
-// (DELETE /teams/{team_id}/mods)
-func (_ Unimplemented) DeleteTeamFromMod(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Fetch all mods attached to team
-// (GET /teams/{team_id}/mods)
-func (_ Unimplemented) ListTeamMods(w http.ResponseWriter, r *http.Request, teamId string, params ListTeamModsParams) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Attach a mod to team
-// (POST /teams/{team_id}/mods)
-func (_ Unimplemented) AttachTeamToMod(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Update mod perms for team
-// (PUT /teams/{team_id}/mods)
-func (_ Unimplemented) PermitTeamMod(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Unlink a pack from team
-// (DELETE /teams/{team_id}/packs)
-func (_ Unimplemented) DeleteTeamFromPack(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Fetch all packs attached to team
-// (GET /teams/{team_id}/packs)
-func (_ Unimplemented) ListTeamPacks(w http.ResponseWriter, r *http.Request, teamId string, params ListTeamPacksParams) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Attach a pack to team
-// (POST /teams/{team_id}/packs)
-func (_ Unimplemented) AttachTeamToPack(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Update pack perms for team
-// (PUT /teams/{team_id}/packs)
-func (_ Unimplemented) PermitTeamPack(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Unlink a user from team
-// (DELETE /teams/{team_id}/users)
-func (_ Unimplemented) DeleteTeamFromUser(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Fetch all users attached to team
-// (GET /teams/{team_id}/users)
-func (_ Unimplemented) ListTeamUsers(w http.ResponseWriter, r *http.Request, teamId string, params ListTeamUsersParams) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Attach a user to team
-// (POST /teams/{team_id}/users)
-func (_ Unimplemented) AttachTeamToUser(w http.ResponseWriter, r *http.Request, teamId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Update user perms for team
-// (PUT /teams/{team_id}/users)
-func (_ Unimplemented) PermitTeamUser(w http.ResponseWriter, r *http.Request, teamId string) {
+func (_ Unimplemented) AttachQuiltToBuild(w http.ResponseWriter, r *http.Request, quiltID QuiltID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2857,91 +3317,91 @@ func (_ Unimplemented) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 // Delete a specific user
 // (DELETE /users/{user_id})
-func (_ Unimplemented) DeleteUser(w http.ResponseWriter, r *http.Request, userId string) {
+func (_ Unimplemented) DeleteUser(w http.ResponseWriter, r *http.Request, userID UserID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch a specific user
 // (GET /users/{user_id})
-func (_ Unimplemented) ShowUser(w http.ResponseWriter, r *http.Request, userId string) {
+func (_ Unimplemented) ShowUser(w http.ResponseWriter, r *http.Request, userID UserID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update a specific user
 // (PUT /users/{user_id})
-func (_ Unimplemented) UpdateUser(w http.ResponseWriter, r *http.Request, userId string) {
+func (_ Unimplemented) UpdateUser(w http.ResponseWriter, r *http.Request, userID UserID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Unlink a group from user
+// (DELETE /users/{user_id}/groups)
+func (_ Unimplemented) DeleteUserFromGroup(w http.ResponseWriter, r *http.Request, userID UserID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Fetch all groups attached to user
+// (GET /users/{user_id}/groups)
+func (_ Unimplemented) ListUserGroups(w http.ResponseWriter, r *http.Request, userID UserID, params ListUserGroupsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Attach a group to user
+// (POST /users/{user_id}/groups)
+func (_ Unimplemented) AttachUserToGroup(w http.ResponseWriter, r *http.Request, userID UserID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update group perms for user
+// (PUT /users/{user_id}/groups)
+func (_ Unimplemented) PermitUserGroup(w http.ResponseWriter, r *http.Request, userID UserID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Unlink a mod from user
 // (DELETE /users/{user_id}/mods)
-func (_ Unimplemented) DeleteUserFromMod(w http.ResponseWriter, r *http.Request, userId string) {
+func (_ Unimplemented) DeleteUserFromMod(w http.ResponseWriter, r *http.Request, userID UserID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch all mods attached to user
 // (GET /users/{user_id}/mods)
-func (_ Unimplemented) ListUserMods(w http.ResponseWriter, r *http.Request, userId string, params ListUserModsParams) {
+func (_ Unimplemented) ListUserMods(w http.ResponseWriter, r *http.Request, userID UserID, params ListUserModsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a mod to user
 // (POST /users/{user_id}/mods)
-func (_ Unimplemented) AttachUserToMod(w http.ResponseWriter, r *http.Request, userId string) {
+func (_ Unimplemented) AttachUserToMod(w http.ResponseWriter, r *http.Request, userID UserID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update mod perms for user
 // (PUT /users/{user_id}/mods)
-func (_ Unimplemented) PermitUserMod(w http.ResponseWriter, r *http.Request, userId string) {
+func (_ Unimplemented) PermitUserMod(w http.ResponseWriter, r *http.Request, userID UserID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Unlink a pack from user
 // (DELETE /users/{user_id}/packs)
-func (_ Unimplemented) DeleteUserFromPack(w http.ResponseWriter, r *http.Request, userId string) {
+func (_ Unimplemented) DeleteUserFromPack(w http.ResponseWriter, r *http.Request, userID UserID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Fetch all packs attached to user
 // (GET /users/{user_id}/packs)
-func (_ Unimplemented) ListUserPacks(w http.ResponseWriter, r *http.Request, userId string, params ListUserPacksParams) {
+func (_ Unimplemented) ListUserPacks(w http.ResponseWriter, r *http.Request, userID UserID, params ListUserPacksParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Attach a pack to user
 // (POST /users/{user_id}/packs)
-func (_ Unimplemented) AttachUserToPack(w http.ResponseWriter, r *http.Request, userId string) {
+func (_ Unimplemented) AttachUserToPack(w http.ResponseWriter, r *http.Request, userID UserID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update pack perms for user
 // (PUT /users/{user_id}/packs)
-func (_ Unimplemented) PermitUserPack(w http.ResponseWriter, r *http.Request, userId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Unlink a team from user
-// (DELETE /users/{user_id}/teams)
-func (_ Unimplemented) DeleteUserFromTeam(w http.ResponseWriter, r *http.Request, userId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Fetch all teams attached to user
-// (GET /users/{user_id}/teams)
-func (_ Unimplemented) ListUserTeams(w http.ResponseWriter, r *http.Request, userId string, params ListUserTeamsParams) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Attach a team to user
-// (POST /users/{user_id}/teams)
-func (_ Unimplemented) AttachUserToTeam(w http.ResponseWriter, r *http.Request, userId string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Update team perms for user
-// (PUT /users/{user_id}/teams)
-func (_ Unimplemented) PermitUserTeam(w http.ResponseWriter, r *http.Request, userId string) {
+func (_ Unimplemented) PermitUserPack(w http.ResponseWriter, r *http.Request, userID UserID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2968,11 +3428,25 @@ func (siw *ServerInterfaceWrapper) LoginAuth(w http.ResponseWriter, r *http.Requ
 	handler.ServeHTTP(w, r)
 }
 
-// ExternalProviders operation middleware
-func (siw *ServerInterfaceWrapper) ExternalProviders(w http.ResponseWriter, r *http.Request) {
+// ListProviders operation middleware
+func (siw *ServerInterfaceWrapper) ListProviders(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ExternalProviders(w, r)
+		siw.Handler.ListProviders(w, r)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RedirectAuth operation middleware
+func (siw *ServerInterfaceWrapper) RedirectAuth(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RedirectAuth(w, r)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -2992,8 +3466,6 @@ func (siw *ServerInterfaceWrapper) RefreshAuth(w http.ResponseWriter, r *http.Re
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -3019,8 +3491,6 @@ func (siw *ServerInterfaceWrapper) VerifyAuth(w http.ResponseWriter, r *http.Req
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -3034,13 +3504,13 @@ func (siw *ServerInterfaceWrapper) VerifyAuth(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
-// ExternalCallback operation middleware
-func (siw *ServerInterfaceWrapper) ExternalCallback(w http.ResponseWriter, r *http.Request) {
+// CallbackProvider operation middleware
+func (siw *ServerInterfaceWrapper) CallbackProvider(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "provider" -------------
-	var provider string
+	var provider AuthProviderParam
 
 	err = runtime.BindStyledParameterWithOptions("simple", "provider", chi.URLParam(r, "provider"), &provider, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -3049,7 +3519,7 @@ func (siw *ServerInterfaceWrapper) ExternalCallback(w http.ResponseWriter, r *ht
 	}
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params ExternalCallbackParams
+	var params CallbackProviderParams
 
 	// ------------- Optional query parameter "state" -------------
 
@@ -3068,7 +3538,7 @@ func (siw *ServerInterfaceWrapper) ExternalCallback(w http.ResponseWriter, r *ht
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ExternalCallback(w, r, provider, params)
+		siw.Handler.CallbackProvider(w, r, provider, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3078,13 +3548,13 @@ func (siw *ServerInterfaceWrapper) ExternalCallback(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
-// ExternalInitialize operation middleware
-func (siw *ServerInterfaceWrapper) ExternalInitialize(w http.ResponseWriter, r *http.Request) {
+// RequestProvider operation middleware
+func (siw *ServerInterfaceWrapper) RequestProvider(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "provider" -------------
-	var provider string
+	var provider AuthProviderParam
 
 	err = runtime.BindStyledParameterWithOptions("simple", "provider", chi.URLParam(r, "provider"), &provider, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -3092,19 +3562,8 @@ func (siw *ServerInterfaceWrapper) ExternalInitialize(w http.ResponseWriter, r *
 		return
 	}
 
-	// Parameter object where we will unmarshal all parameters from the context
-	var params ExternalInitializeParams
-
-	// ------------- Optional query parameter "state" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "state", r.URL.Query(), &params.State)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "state", Err: err})
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ExternalInitialize(w, r, provider, params)
+		siw.Handler.RequestProvider(w, r, provider)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3126,8 +3585,6 @@ func (siw *ServerInterfaceWrapper) ListFabrics(w http.ResponseWriter, r *http.Re
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -3164,8 +3621,6 @@ func (siw *ServerInterfaceWrapper) UpdateFabric(w http.ResponseWriter, r *http.R
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -3185,9 +3640,9 @@ func (siw *ServerInterfaceWrapper) DeleteFabricFromBuild(w http.ResponseWriter, 
 	var err error
 
 	// ------------- Path parameter "fabric_id" -------------
-	var fabricId string
+	var fabricID FabricID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "fabric_id", chi.URLParam(r, "fabric_id"), &fabricId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "fabric_id", chi.URLParam(r, "fabric_id"), &fabricID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "fabric_id", Err: err})
 		return
@@ -3201,12 +3656,10 @@ func (siw *ServerInterfaceWrapper) DeleteFabricFromBuild(w http.ResponseWriter, 
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteFabricFromBuild(w, r, fabricId)
+		siw.Handler.DeleteFabricFromBuild(w, r, fabricID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3222,9 +3675,9 @@ func (siw *ServerInterfaceWrapper) ListFabricBuilds(w http.ResponseWriter, r *ht
 	var err error
 
 	// ------------- Path parameter "fabric_id" -------------
-	var fabricId string
+	var fabricID FabricID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "fabric_id", chi.URLParam(r, "fabric_id"), &fabricId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "fabric_id", chi.URLParam(r, "fabric_id"), &fabricID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "fabric_id", Err: err})
 		return
@@ -3237,8 +3690,6 @@ func (siw *ServerInterfaceWrapper) ListFabricBuilds(w http.ResponseWriter, r *ht
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -3286,7 +3737,7 @@ func (siw *ServerInterfaceWrapper) ListFabricBuilds(w http.ResponseWriter, r *ht
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListFabricBuilds(w, r, fabricId, params)
+		siw.Handler.ListFabricBuilds(w, r, fabricID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3302,9 +3753,9 @@ func (siw *ServerInterfaceWrapper) AttachFabricToBuild(w http.ResponseWriter, r 
 	var err error
 
 	// ------------- Path parameter "fabric_id" -------------
-	var fabricId string
+	var fabricID FabricID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "fabric_id", chi.URLParam(r, "fabric_id"), &fabricId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "fabric_id", chi.URLParam(r, "fabric_id"), &fabricID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "fabric_id", Err: err})
 		return
@@ -3318,12 +3769,10 @@ func (siw *ServerInterfaceWrapper) AttachFabricToBuild(w http.ResponseWriter, r 
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachFabricToBuild(w, r, fabricId)
+		siw.Handler.AttachFabricToBuild(w, r, fabricID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3345,8 +3794,6 @@ func (siw *ServerInterfaceWrapper) ListForges(w http.ResponseWriter, r *http.Req
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -3383,8 +3830,6 @@ func (siw *ServerInterfaceWrapper) UpdateForge(w http.ResponseWriter, r *http.Re
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -3404,9 +3849,9 @@ func (siw *ServerInterfaceWrapper) DeleteForgeFromBuild(w http.ResponseWriter, r
 	var err error
 
 	// ------------- Path parameter "forge_id" -------------
-	var forgeId string
+	var forgeID ForgeID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "forge_id", chi.URLParam(r, "forge_id"), &forgeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "forge_id", chi.URLParam(r, "forge_id"), &forgeID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "forge_id", Err: err})
 		return
@@ -3420,12 +3865,10 @@ func (siw *ServerInterfaceWrapper) DeleteForgeFromBuild(w http.ResponseWriter, r
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteForgeFromBuild(w, r, forgeId)
+		siw.Handler.DeleteForgeFromBuild(w, r, forgeID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3441,9 +3884,9 @@ func (siw *ServerInterfaceWrapper) ListForgeBuilds(w http.ResponseWriter, r *htt
 	var err error
 
 	// ------------- Path parameter "forge_id" -------------
-	var forgeId string
+	var forgeID ForgeID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "forge_id", chi.URLParam(r, "forge_id"), &forgeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "forge_id", chi.URLParam(r, "forge_id"), &forgeID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "forge_id", Err: err})
 		return
@@ -3456,8 +3899,6 @@ func (siw *ServerInterfaceWrapper) ListForgeBuilds(w http.ResponseWriter, r *htt
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -3505,7 +3946,7 @@ func (siw *ServerInterfaceWrapper) ListForgeBuilds(w http.ResponseWriter, r *htt
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListForgeBuilds(w, r, forgeId, params)
+		siw.Handler.ListForgeBuilds(w, r, forgeID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3521,9 +3962,9 @@ func (siw *ServerInterfaceWrapper) AttachForgeToBuild(w http.ResponseWriter, r *
 	var err error
 
 	// ------------- Path parameter "forge_id" -------------
-	var forgeId string
+	var forgeID ForgeID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "forge_id", chi.URLParam(r, "forge_id"), &forgeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "forge_id", chi.URLParam(r, "forge_id"), &forgeID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "forge_id", Err: err})
 		return
@@ -3537,12 +3978,757 @@ func (siw *ServerInterfaceWrapper) AttachForgeToBuild(w http.ResponseWriter, r *
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AttachForgeToBuild(w, r, forgeID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListGroups operation middleware
+func (siw *ServerInterfaceWrapper) ListGroups(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListGroupsParams
+
+	// ------------- Optional query parameter "search" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort", r.URL.Query(), &params.Sort)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "order" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "order", r.URL.Query(), &params.Order)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListGroups(w, r, params)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateGroup operation middleware
+func (siw *ServerInterfaceWrapper) CreateGroup(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachForgeToBuild(w, r, forgeId)
+		siw.Handler.CreateGroup(w, r)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteGroup operation middleware
+func (siw *ServerInterfaceWrapper) DeleteGroup(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteGroup(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ShowGroup operation middleware
+func (siw *ServerInterfaceWrapper) ShowGroup(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ShowGroup(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateGroup operation middleware
+func (siw *ServerInterfaceWrapper) UpdateGroup(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateGroup(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteGroupFromMod operation middleware
+func (siw *ServerInterfaceWrapper) DeleteGroupFromMod(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteGroupFromMod(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListGroupMods operation middleware
+func (siw *ServerInterfaceWrapper) ListGroupMods(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListGroupModsParams
+
+	// ------------- Optional query parameter "search" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort", r.URL.Query(), &params.Sort)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "order" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "order", r.URL.Query(), &params.Order)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListGroupMods(w, r, groupID, params)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AttachGroupToMod operation middleware
+func (siw *ServerInterfaceWrapper) AttachGroupToMod(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AttachGroupToMod(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PermitGroupMod operation middleware
+func (siw *ServerInterfaceWrapper) PermitGroupMod(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PermitGroupMod(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteGroupFromPack operation middleware
+func (siw *ServerInterfaceWrapper) DeleteGroupFromPack(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteGroupFromPack(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListGroupPacks operation middleware
+func (siw *ServerInterfaceWrapper) ListGroupPacks(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListGroupPacksParams
+
+	// ------------- Optional query parameter "search" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort", r.URL.Query(), &params.Sort)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "order" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "order", r.URL.Query(), &params.Order)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListGroupPacks(w, r, groupID, params)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AttachGroupToPack operation middleware
+func (siw *ServerInterfaceWrapper) AttachGroupToPack(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AttachGroupToPack(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PermitGroupPack operation middleware
+func (siw *ServerInterfaceWrapper) PermitGroupPack(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PermitGroupPack(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteGroupFromUser operation middleware
+func (siw *ServerInterfaceWrapper) DeleteGroupFromUser(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteGroupFromUser(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListGroupUsers operation middleware
+func (siw *ServerInterfaceWrapper) ListGroupUsers(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListGroupUsersParams
+
+	// ------------- Optional query parameter "search" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort", r.URL.Query(), &params.Sort)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "order" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "order", r.URL.Query(), &params.Order)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListGroupUsers(w, r, groupID, params)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AttachGroupToUser operation middleware
+func (siw *ServerInterfaceWrapper) AttachGroupToUser(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AttachGroupToUser(w, r, groupID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PermitGroupUser operation middleware
+func (siw *ServerInterfaceWrapper) PermitGroupUser(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "group_id" -------------
+	var groupID GroupID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "group_id", chi.URLParam(r, "group_id"), &groupID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "group_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PermitGroupUser(w, r, groupID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3564,8 +4750,6 @@ func (siw *ServerInterfaceWrapper) ListMinecrafts(w http.ResponseWriter, r *http
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -3602,8 +4786,6 @@ func (siw *ServerInterfaceWrapper) UpdateMinecraft(w http.ResponseWriter, r *htt
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -3623,9 +4805,9 @@ func (siw *ServerInterfaceWrapper) DeleteMinecraftFromBuild(w http.ResponseWrite
 	var err error
 
 	// ------------- Path parameter "minecraft_id" -------------
-	var minecraftId string
+	var minecraftID MinecraftID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "minecraft_id", chi.URLParam(r, "minecraft_id"), &minecraftId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "minecraft_id", chi.URLParam(r, "minecraft_id"), &minecraftID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "minecraft_id", Err: err})
 		return
@@ -3639,12 +4821,10 @@ func (siw *ServerInterfaceWrapper) DeleteMinecraftFromBuild(w http.ResponseWrite
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteMinecraftFromBuild(w, r, minecraftId)
+		siw.Handler.DeleteMinecraftFromBuild(w, r, minecraftID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3660,9 +4840,9 @@ func (siw *ServerInterfaceWrapper) ListMinecraftBuilds(w http.ResponseWriter, r 
 	var err error
 
 	// ------------- Path parameter "minecraft_id" -------------
-	var minecraftId string
+	var minecraftID MinecraftID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "minecraft_id", chi.URLParam(r, "minecraft_id"), &minecraftId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "minecraft_id", chi.URLParam(r, "minecraft_id"), &minecraftID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "minecraft_id", Err: err})
 		return
@@ -3675,8 +4855,6 @@ func (siw *ServerInterfaceWrapper) ListMinecraftBuilds(w http.ResponseWriter, r 
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -3724,7 +4902,7 @@ func (siw *ServerInterfaceWrapper) ListMinecraftBuilds(w http.ResponseWriter, r 
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListMinecraftBuilds(w, r, minecraftId, params)
+		siw.Handler.ListMinecraftBuilds(w, r, minecraftID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3740,9 +4918,9 @@ func (siw *ServerInterfaceWrapper) AttachMinecraftToBuild(w http.ResponseWriter,
 	var err error
 
 	// ------------- Path parameter "minecraft_id" -------------
-	var minecraftId string
+	var minecraftID MinecraftID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "minecraft_id", chi.URLParam(r, "minecraft_id"), &minecraftId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "minecraft_id", chi.URLParam(r, "minecraft_id"), &minecraftID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "minecraft_id", Err: err})
 		return
@@ -3756,12 +4934,10 @@ func (siw *ServerInterfaceWrapper) AttachMinecraftToBuild(w http.ResponseWriter,
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachMinecraftToBuild(w, r, minecraftId)
+		siw.Handler.AttachMinecraftToBuild(w, r, minecraftID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3783,8 +4959,6 @@ func (siw *ServerInterfaceWrapper) ListMods(w http.ResponseWriter, r *http.Reque
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -3853,8 +5027,6 @@ func (siw *ServerInterfaceWrapper) CreateMod(w http.ResponseWriter, r *http.Requ
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -3874,9 +5046,9 @@ func (siw *ServerInterfaceWrapper) DeleteMod(w http.ResponseWriter, r *http.Requ
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -3890,12 +5062,10 @@ func (siw *ServerInterfaceWrapper) DeleteMod(w http.ResponseWriter, r *http.Requ
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteMod(w, r, modId)
+		siw.Handler.DeleteMod(w, r, modID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3911,9 +5081,9 @@ func (siw *ServerInterfaceWrapper) ShowMod(w http.ResponseWriter, r *http.Reques
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -3927,12 +5097,10 @@ func (siw *ServerInterfaceWrapper) ShowMod(w http.ResponseWriter, r *http.Reques
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ShowMod(w, r, modId)
+		siw.Handler.ShowMod(w, r, modID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3948,9 +5116,9 @@ func (siw *ServerInterfaceWrapper) UpdateMod(w http.ResponseWriter, r *http.Requ
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -3964,12 +5132,10 @@ func (siw *ServerInterfaceWrapper) UpdateMod(w http.ResponseWriter, r *http.Requ
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateMod(w, r, modId)
+		siw.Handler.UpdateMod(w, r, modID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -3979,15 +5145,15 @@ func (siw *ServerInterfaceWrapper) UpdateMod(w http.ResponseWriter, r *http.Requ
 	handler.ServeHTTP(w, r)
 }
 
-// DeleteModFromTeam operation middleware
-func (siw *ServerInterfaceWrapper) DeleteModFromTeam(w http.ResponseWriter, r *http.Request) {
+// DeleteModAvatar operation middleware
+func (siw *ServerInterfaceWrapper) DeleteModAvatar(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -4001,12 +5167,10 @@ func (siw *ServerInterfaceWrapper) DeleteModFromTeam(w http.ResponseWriter, r *h
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteModFromTeam(w, r, modId)
+		siw.Handler.DeleteModAvatar(w, r, modID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4016,15 +5180,15 @@ func (siw *ServerInterfaceWrapper) DeleteModFromTeam(w http.ResponseWriter, r *h
 	handler.ServeHTTP(w, r)
 }
 
-// ListModTeams operation middleware
-func (siw *ServerInterfaceWrapper) ListModTeams(w http.ResponseWriter, r *http.Request) {
+// CreateModAvatar operation middleware
+func (siw *ServerInterfaceWrapper) CreateModAvatar(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -4038,12 +5202,80 @@ func (siw *ServerInterfaceWrapper) ListModTeams(w http.ResponseWriter, r *http.R
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateModAvatar(w, r, modID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteModFromGroup operation middleware
+func (siw *ServerInterfaceWrapper) DeleteModFromGroup(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "mod_id" -------------
+	var modID ModID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteModFromGroup(w, r, modID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListModGroups operation middleware
+func (siw *ServerInterfaceWrapper) ListModGroups(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "mod_id" -------------
+	var modID ModID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
 	r = r.WithContext(ctx)
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params ListModTeamsParams
+	var params ListModGroupsParams
 
 	// ------------- Optional query parameter "search" -------------
 
@@ -4086,7 +5318,7 @@ func (siw *ServerInterfaceWrapper) ListModTeams(w http.ResponseWriter, r *http.R
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListModTeams(w, r, modId, params)
+		siw.Handler.ListModGroups(w, r, modID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4096,15 +5328,15 @@ func (siw *ServerInterfaceWrapper) ListModTeams(w http.ResponseWriter, r *http.R
 	handler.ServeHTTP(w, r)
 }
 
-// AttachModToTeam operation middleware
-func (siw *ServerInterfaceWrapper) AttachModToTeam(w http.ResponseWriter, r *http.Request) {
+// AttachModToGroup operation middleware
+func (siw *ServerInterfaceWrapper) AttachModToGroup(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -4118,12 +5350,10 @@ func (siw *ServerInterfaceWrapper) AttachModToTeam(w http.ResponseWriter, r *htt
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachModToTeam(w, r, modId)
+		siw.Handler.AttachModToGroup(w, r, modID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4133,15 +5363,15 @@ func (siw *ServerInterfaceWrapper) AttachModToTeam(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
-// PermitModTeam operation middleware
-func (siw *ServerInterfaceWrapper) PermitModTeam(w http.ResponseWriter, r *http.Request) {
+// PermitModGroup operation middleware
+func (siw *ServerInterfaceWrapper) PermitModGroup(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -4155,12 +5385,10 @@ func (siw *ServerInterfaceWrapper) PermitModTeam(w http.ResponseWriter, r *http.
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PermitModTeam(w, r, modId)
+		siw.Handler.PermitModGroup(w, r, modID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4176,9 +5404,9 @@ func (siw *ServerInterfaceWrapper) DeleteModFromUser(w http.ResponseWriter, r *h
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -4192,12 +5420,10 @@ func (siw *ServerInterfaceWrapper) DeleteModFromUser(w http.ResponseWriter, r *h
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteModFromUser(w, r, modId)
+		siw.Handler.DeleteModFromUser(w, r, modID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4213,9 +5439,9 @@ func (siw *ServerInterfaceWrapper) ListModUsers(w http.ResponseWriter, r *http.R
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -4228,8 +5454,6 @@ func (siw *ServerInterfaceWrapper) ListModUsers(w http.ResponseWriter, r *http.R
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -4277,7 +5501,7 @@ func (siw *ServerInterfaceWrapper) ListModUsers(w http.ResponseWriter, r *http.R
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListModUsers(w, r, modId, params)
+		siw.Handler.ListModUsers(w, r, modID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4293,9 +5517,9 @@ func (siw *ServerInterfaceWrapper) AttachModToUser(w http.ResponseWriter, r *htt
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -4309,12 +5533,10 @@ func (siw *ServerInterfaceWrapper) AttachModToUser(w http.ResponseWriter, r *htt
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachModToUser(w, r, modId)
+		siw.Handler.AttachModToUser(w, r, modID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4330,9 +5552,9 @@ func (siw *ServerInterfaceWrapper) PermitModUser(w http.ResponseWriter, r *http.
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -4346,12 +5568,10 @@ func (siw *ServerInterfaceWrapper) PermitModUser(w http.ResponseWriter, r *http.
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PermitModUser(w, r, modId)
+		siw.Handler.PermitModUser(w, r, modID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4367,9 +5587,9 @@ func (siw *ServerInterfaceWrapper) ListVersions(w http.ResponseWriter, r *http.R
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -4382,8 +5602,6 @@ func (siw *ServerInterfaceWrapper) ListVersions(w http.ResponseWriter, r *http.R
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -4431,7 +5649,7 @@ func (siw *ServerInterfaceWrapper) ListVersions(w http.ResponseWriter, r *http.R
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListVersions(w, r, modId, params)
+		siw.Handler.ListVersions(w, r, modID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4447,9 +5665,9 @@ func (siw *ServerInterfaceWrapper) CreateVersion(w http.ResponseWriter, r *http.
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
@@ -4463,12 +5681,10 @@ func (siw *ServerInterfaceWrapper) CreateVersion(w http.ResponseWriter, r *http.
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.CreateVersion(w, r, modId)
+		siw.Handler.CreateVersion(w, r, modID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4484,18 +5700,18 @@ func (siw *ServerInterfaceWrapper) DeleteVersion(w http.ResponseWriter, r *http.
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "version_id" -------------
-	var versionId string
+	var versionID VersionID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "version_id", Err: err})
 		return
@@ -4509,12 +5725,10 @@ func (siw *ServerInterfaceWrapper) DeleteVersion(w http.ResponseWriter, r *http.
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteVersion(w, r, modId, versionId)
+		siw.Handler.DeleteVersion(w, r, modID, versionID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4530,18 +5744,18 @@ func (siw *ServerInterfaceWrapper) ShowVersion(w http.ResponseWriter, r *http.Re
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "version_id" -------------
-	var versionId string
+	var versionID VersionID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "version_id", Err: err})
 		return
@@ -4555,12 +5769,10 @@ func (siw *ServerInterfaceWrapper) ShowVersion(w http.ResponseWriter, r *http.Re
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ShowVersion(w, r, modId, versionId)
+		siw.Handler.ShowVersion(w, r, modID, versionID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4576,18 +5788,18 @@ func (siw *ServerInterfaceWrapper) UpdateVersion(w http.ResponseWriter, r *http.
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "version_id" -------------
-	var versionId string
+	var versionID VersionID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "version_id", Err: err})
 		return
@@ -4601,12 +5813,10 @@ func (siw *ServerInterfaceWrapper) UpdateVersion(w http.ResponseWriter, r *http.
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateVersion(w, r, modId, versionId)
+		siw.Handler.UpdateVersion(w, r, modID, versionID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4622,18 +5832,18 @@ func (siw *ServerInterfaceWrapper) DeleteVersionFromBuild(w http.ResponseWriter,
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "version_id" -------------
-	var versionId string
+	var versionID VersionID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "version_id", Err: err})
 		return
@@ -4647,12 +5857,10 @@ func (siw *ServerInterfaceWrapper) DeleteVersionFromBuild(w http.ResponseWriter,
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteVersionFromBuild(w, r, modId, versionId)
+		siw.Handler.DeleteVersionFromBuild(w, r, modID, versionID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4668,18 +5876,18 @@ func (siw *ServerInterfaceWrapper) ListVersionBuilds(w http.ResponseWriter, r *h
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "version_id" -------------
-	var versionId string
+	var versionID VersionID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "version_id", Err: err})
 		return
@@ -4692,8 +5900,6 @@ func (siw *ServerInterfaceWrapper) ListVersionBuilds(w http.ResponseWriter, r *h
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -4741,7 +5947,7 @@ func (siw *ServerInterfaceWrapper) ListVersionBuilds(w http.ResponseWriter, r *h
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListVersionBuilds(w, r, modId, versionId, params)
+		siw.Handler.ListVersionBuilds(w, r, modID, versionID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4757,18 +5963,18 @@ func (siw *ServerInterfaceWrapper) AttachVersionToBuild(w http.ResponseWriter, r
 	var err error
 
 	// ------------- Path parameter "mod_id" -------------
-	var modId string
+	var modID ModID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "mod_id", chi.URLParam(r, "mod_id"), &modID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "mod_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "version_id" -------------
-	var versionId string
+	var versionID VersionID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "version_id", chi.URLParam(r, "version_id"), &versionID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "version_id", Err: err})
 		return
@@ -4782,12 +5988,10 @@ func (siw *ServerInterfaceWrapper) AttachVersionToBuild(w http.ResponseWriter, r
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachVersionToBuild(w, r, modId, versionId)
+		siw.Handler.AttachVersionToBuild(w, r, modID, versionID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4809,8 +6013,6 @@ func (siw *ServerInterfaceWrapper) ListNeoforges(w http.ResponseWriter, r *http.
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -4847,8 +6049,6 @@ func (siw *ServerInterfaceWrapper) UpdateNeoforge(w http.ResponseWriter, r *http
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -4868,9 +6068,9 @@ func (siw *ServerInterfaceWrapper) DeleteNeoforgeFromBuild(w http.ResponseWriter
 	var err error
 
 	// ------------- Path parameter "neoforge_id" -------------
-	var neoforgeId string
+	var neoforgeID NeoforgeID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "neoforge_id", chi.URLParam(r, "neoforge_id"), &neoforgeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "neoforge_id", chi.URLParam(r, "neoforge_id"), &neoforgeID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "neoforge_id", Err: err})
 		return
@@ -4884,12 +6084,10 @@ func (siw *ServerInterfaceWrapper) DeleteNeoforgeFromBuild(w http.ResponseWriter
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteNeoforgeFromBuild(w, r, neoforgeId)
+		siw.Handler.DeleteNeoforgeFromBuild(w, r, neoforgeID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4905,9 +6103,9 @@ func (siw *ServerInterfaceWrapper) ListNeoforgeBuilds(w http.ResponseWriter, r *
 	var err error
 
 	// ------------- Path parameter "neoforge_id" -------------
-	var neoforgeId string
+	var neoforgeID NeoforgeID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "neoforge_id", chi.URLParam(r, "neoforge_id"), &neoforgeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "neoforge_id", chi.URLParam(r, "neoforge_id"), &neoforgeID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "neoforge_id", Err: err})
 		return
@@ -4920,8 +6118,6 @@ func (siw *ServerInterfaceWrapper) ListNeoforgeBuilds(w http.ResponseWriter, r *
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -4969,7 +6165,7 @@ func (siw *ServerInterfaceWrapper) ListNeoforgeBuilds(w http.ResponseWriter, r *
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListNeoforgeBuilds(w, r, neoforgeId, params)
+		siw.Handler.ListNeoforgeBuilds(w, r, neoforgeID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -4985,9 +6181,9 @@ func (siw *ServerInterfaceWrapper) AttachNeoforgeToBuild(w http.ResponseWriter, 
 	var err error
 
 	// ------------- Path parameter "neoforge_id" -------------
-	var neoforgeId string
+	var neoforgeID NeoforgeID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "neoforge_id", chi.URLParam(r, "neoforge_id"), &neoforgeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "neoforge_id", chi.URLParam(r, "neoforge_id"), &neoforgeID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "neoforge_id", Err: err})
 		return
@@ -5001,12 +6197,10 @@ func (siw *ServerInterfaceWrapper) AttachNeoforgeToBuild(w http.ResponseWriter, 
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachNeoforgeToBuild(w, r, neoforgeId)
+		siw.Handler.AttachNeoforgeToBuild(w, r, neoforgeID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5028,8 +6222,6 @@ func (siw *ServerInterfaceWrapper) ListPacks(w http.ResponseWriter, r *http.Requ
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -5098,8 +6290,6 @@ func (siw *ServerInterfaceWrapper) CreatePack(w http.ResponseWriter, r *http.Req
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -5119,9 +6309,9 @@ func (siw *ServerInterfaceWrapper) DeletePack(w http.ResponseWriter, r *http.Req
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5135,12 +6325,10 @@ func (siw *ServerInterfaceWrapper) DeletePack(w http.ResponseWriter, r *http.Req
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeletePack(w, r, packId)
+		siw.Handler.DeletePack(w, r, packID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5156,9 +6344,9 @@ func (siw *ServerInterfaceWrapper) ShowPack(w http.ResponseWriter, r *http.Reque
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5172,12 +6360,10 @@ func (siw *ServerInterfaceWrapper) ShowPack(w http.ResponseWriter, r *http.Reque
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ShowPack(w, r, packId)
+		siw.Handler.ShowPack(w, r, packID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5193,9 +6379,9 @@ func (siw *ServerInterfaceWrapper) UpdatePack(w http.ResponseWriter, r *http.Req
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5209,12 +6395,80 @@ func (siw *ServerInterfaceWrapper) UpdatePack(w http.ResponseWriter, r *http.Req
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdatePack(w, r, packID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeletePackAvatar operation middleware
+func (siw *ServerInterfaceWrapper) DeletePackAvatar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "pack_id" -------------
+	var packID PackID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdatePack(w, r, packId)
+		siw.Handler.DeletePackAvatar(w, r, packID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreatePackAvatar operation middleware
+func (siw *ServerInterfaceWrapper) CreatePackAvatar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "pack_id" -------------
+	var packID PackID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreatePackAvatar(w, r, packID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5230,9 +6484,9 @@ func (siw *ServerInterfaceWrapper) ListBuilds(w http.ResponseWriter, r *http.Req
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5245,8 +6499,6 @@ func (siw *ServerInterfaceWrapper) ListBuilds(w http.ResponseWriter, r *http.Req
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -5294,7 +6546,7 @@ func (siw *ServerInterfaceWrapper) ListBuilds(w http.ResponseWriter, r *http.Req
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListBuilds(w, r, packId, params)
+		siw.Handler.ListBuilds(w, r, packID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5310,9 +6562,9 @@ func (siw *ServerInterfaceWrapper) CreateBuild(w http.ResponseWriter, r *http.Re
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5326,12 +6578,10 @@ func (siw *ServerInterfaceWrapper) CreateBuild(w http.ResponseWriter, r *http.Re
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.CreateBuild(w, r, packId)
+		siw.Handler.CreateBuild(w, r, packID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5347,18 +6597,18 @@ func (siw *ServerInterfaceWrapper) DeleteBuild(w http.ResponseWriter, r *http.Re
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "build_id" -------------
-	var buildId string
+	var buildID BuildID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "build_id", Err: err})
 		return
@@ -5372,12 +6622,10 @@ func (siw *ServerInterfaceWrapper) DeleteBuild(w http.ResponseWriter, r *http.Re
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteBuild(w, r, packId, buildId)
+		siw.Handler.DeleteBuild(w, r, packID, buildID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5393,18 +6641,18 @@ func (siw *ServerInterfaceWrapper) ShowBuild(w http.ResponseWriter, r *http.Requ
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "build_id" -------------
-	var buildId string
+	var buildID BuildID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "build_id", Err: err})
 		return
@@ -5418,12 +6666,10 @@ func (siw *ServerInterfaceWrapper) ShowBuild(w http.ResponseWriter, r *http.Requ
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ShowBuild(w, r, packId, buildId)
+		siw.Handler.ShowBuild(w, r, packID, buildID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5439,18 +6685,18 @@ func (siw *ServerInterfaceWrapper) UpdateBuild(w http.ResponseWriter, r *http.Re
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "build_id" -------------
-	var buildId string
+	var buildID BuildID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "build_id", Err: err})
 		return
@@ -5464,12 +6710,10 @@ func (siw *ServerInterfaceWrapper) UpdateBuild(w http.ResponseWriter, r *http.Re
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateBuild(w, r, packId, buildId)
+		siw.Handler.UpdateBuild(w, r, packID, buildID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5485,18 +6729,18 @@ func (siw *ServerInterfaceWrapper) DeleteBuildFromVersion(w http.ResponseWriter,
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "build_id" -------------
-	var buildId string
+	var buildID BuildID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "build_id", Err: err})
 		return
@@ -5510,12 +6754,10 @@ func (siw *ServerInterfaceWrapper) DeleteBuildFromVersion(w http.ResponseWriter,
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteBuildFromVersion(w, r, packId, buildId)
+		siw.Handler.DeleteBuildFromVersion(w, r, packID, buildID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5531,18 +6773,18 @@ func (siw *ServerInterfaceWrapper) ListBuildVersions(w http.ResponseWriter, r *h
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "build_id" -------------
-	var buildId string
+	var buildID BuildID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "build_id", Err: err})
 		return
@@ -5555,8 +6797,6 @@ func (siw *ServerInterfaceWrapper) ListBuildVersions(w http.ResponseWriter, r *h
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -5604,7 +6844,7 @@ func (siw *ServerInterfaceWrapper) ListBuildVersions(w http.ResponseWriter, r *h
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListBuildVersions(w, r, packId, buildId, params)
+		siw.Handler.ListBuildVersions(w, r, packID, buildID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5620,18 +6860,18 @@ func (siw *ServerInterfaceWrapper) AttachBuildToVersion(w http.ResponseWriter, r
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
 	}
 
 	// ------------- Path parameter "build_id" -------------
-	var buildId string
+	var buildID BuildID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "build_id", chi.URLParam(r, "build_id"), &buildID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "build_id", Err: err})
 		return
@@ -5645,12 +6885,10 @@ func (siw *ServerInterfaceWrapper) AttachBuildToVersion(w http.ResponseWriter, r
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachBuildToVersion(w, r, packId, buildId)
+		siw.Handler.AttachBuildToVersion(w, r, packID, buildID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5660,15 +6898,15 @@ func (siw *ServerInterfaceWrapper) AttachBuildToVersion(w http.ResponseWriter, r
 	handler.ServeHTTP(w, r)
 }
 
-// DeletePackFromTeam operation middleware
-func (siw *ServerInterfaceWrapper) DeletePackFromTeam(w http.ResponseWriter, r *http.Request) {
+// DeletePackFromGroup operation middleware
+func (siw *ServerInterfaceWrapper) DeletePackFromGroup(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5682,12 +6920,10 @@ func (siw *ServerInterfaceWrapper) DeletePackFromTeam(w http.ResponseWriter, r *
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeletePackFromTeam(w, r, packId)
+		siw.Handler.DeletePackFromGroup(w, r, packID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5697,15 +6933,15 @@ func (siw *ServerInterfaceWrapper) DeletePackFromTeam(w http.ResponseWriter, r *
 	handler.ServeHTTP(w, r)
 }
 
-// ListPackTeams operation middleware
-func (siw *ServerInterfaceWrapper) ListPackTeams(w http.ResponseWriter, r *http.Request) {
+// ListPackGroups operation middleware
+func (siw *ServerInterfaceWrapper) ListPackGroups(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5718,13 +6954,11 @@ func (siw *ServerInterfaceWrapper) ListPackTeams(w http.ResponseWriter, r *http.
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params ListPackTeamsParams
+	var params ListPackGroupsParams
 
 	// ------------- Optional query parameter "search" -------------
 
@@ -5767,7 +7001,7 @@ func (siw *ServerInterfaceWrapper) ListPackTeams(w http.ResponseWriter, r *http.
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListPackTeams(w, r, packId, params)
+		siw.Handler.ListPackGroups(w, r, packID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5777,15 +7011,15 @@ func (siw *ServerInterfaceWrapper) ListPackTeams(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(w, r)
 }
 
-// AttachPackToTeam operation middleware
-func (siw *ServerInterfaceWrapper) AttachPackToTeam(w http.ResponseWriter, r *http.Request) {
+// AttachPackToGroup operation middleware
+func (siw *ServerInterfaceWrapper) AttachPackToGroup(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5799,12 +7033,10 @@ func (siw *ServerInterfaceWrapper) AttachPackToTeam(w http.ResponseWriter, r *ht
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachPackToTeam(w, r, packId)
+		siw.Handler.AttachPackToGroup(w, r, packID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5814,15 +7046,15 @@ func (siw *ServerInterfaceWrapper) AttachPackToTeam(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
-// PermitPackTeam operation middleware
-func (siw *ServerInterfaceWrapper) PermitPackTeam(w http.ResponseWriter, r *http.Request) {
+// PermitPackGroup operation middleware
+func (siw *ServerInterfaceWrapper) PermitPackGroup(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5836,12 +7068,10 @@ func (siw *ServerInterfaceWrapper) PermitPackTeam(w http.ResponseWriter, r *http
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PermitPackTeam(w, r, packId)
+		siw.Handler.PermitPackGroup(w, r, packID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5857,9 +7087,9 @@ func (siw *ServerInterfaceWrapper) DeletePackFromUser(w http.ResponseWriter, r *
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5873,12 +7103,10 @@ func (siw *ServerInterfaceWrapper) DeletePackFromUser(w http.ResponseWriter, r *
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeletePackFromUser(w, r, packId)
+		siw.Handler.DeletePackFromUser(w, r, packID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5894,9 +7122,9 @@ func (siw *ServerInterfaceWrapper) ListPackUsers(w http.ResponseWriter, r *http.
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5909,8 +7137,6 @@ func (siw *ServerInterfaceWrapper) ListPackUsers(w http.ResponseWriter, r *http.
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -5958,7 +7184,7 @@ func (siw *ServerInterfaceWrapper) ListPackUsers(w http.ResponseWriter, r *http.
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListPackUsers(w, r, packId, params)
+		siw.Handler.ListPackUsers(w, r, packID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -5974,9 +7200,9 @@ func (siw *ServerInterfaceWrapper) AttachPackToUser(w http.ResponseWriter, r *ht
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -5990,12 +7216,10 @@ func (siw *ServerInterfaceWrapper) AttachPackToUser(w http.ResponseWriter, r *ht
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachPackToUser(w, r, packId)
+		siw.Handler.AttachPackToUser(w, r, packID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -6011,9 +7235,9 @@ func (siw *ServerInterfaceWrapper) PermitPackUser(w http.ResponseWriter, r *http
 	var err error
 
 	// ------------- Path parameter "pack_id" -------------
-	var packId string
+	var packID PackID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "pack_id", chi.URLParam(r, "pack_id"), &packID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pack_id", Err: err})
 		return
@@ -6027,12 +7251,10 @@ func (siw *ServerInterfaceWrapper) PermitPackUser(w http.ResponseWriter, r *http
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PermitPackUser(w, r, packId)
+		siw.Handler.PermitPackUser(w, r, packID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -6052,8 +7274,6 @@ func (siw *ServerInterfaceWrapper) ShowProfile(w http.ResponseWriter, r *http.Re
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -6079,8 +7299,6 @@ func (siw *ServerInterfaceWrapper) UpdateProfile(w http.ResponseWriter, r *http.
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -6104,8 +7322,6 @@ func (siw *ServerInterfaceWrapper) TokenProfile(w http.ResponseWriter, r *http.R
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -6132,8 +7348,6 @@ func (siw *ServerInterfaceWrapper) ListQuilts(w http.ResponseWriter, r *http.Req
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -6170,8 +7384,6 @@ func (siw *ServerInterfaceWrapper) UpdateQuilt(w http.ResponseWriter, r *http.Re
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -6191,9 +7403,9 @@ func (siw *ServerInterfaceWrapper) DeleteQuiltFromBuild(w http.ResponseWriter, r
 	var err error
 
 	// ------------- Path parameter "quilt_id" -------------
-	var quiltId string
+	var quiltID QuiltID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "quilt_id", chi.URLParam(r, "quilt_id"), &quiltId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "quilt_id", chi.URLParam(r, "quilt_id"), &quiltID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "quilt_id", Err: err})
 		return
@@ -6207,12 +7419,10 @@ func (siw *ServerInterfaceWrapper) DeleteQuiltFromBuild(w http.ResponseWriter, r
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteQuiltFromBuild(w, r, quiltId)
+		siw.Handler.DeleteQuiltFromBuild(w, r, quiltID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -6228,9 +7438,9 @@ func (siw *ServerInterfaceWrapper) ListQuiltBuilds(w http.ResponseWriter, r *htt
 	var err error
 
 	// ------------- Path parameter "quilt_id" -------------
-	var quiltId string
+	var quiltID QuiltID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "quilt_id", chi.URLParam(r, "quilt_id"), &quiltId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "quilt_id", chi.URLParam(r, "quilt_id"), &quiltID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "quilt_id", Err: err})
 		return
@@ -6243,8 +7453,6 @@ func (siw *ServerInterfaceWrapper) ListQuiltBuilds(w http.ResponseWriter, r *htt
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -6292,7 +7500,7 @@ func (siw *ServerInterfaceWrapper) ListQuiltBuilds(w http.ResponseWriter, r *htt
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListQuiltBuilds(w, r, quiltId, params)
+		siw.Handler.ListQuiltBuilds(w, r, quiltID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -6308,9 +7516,9 @@ func (siw *ServerInterfaceWrapper) AttachQuiltToBuild(w http.ResponseWriter, r *
 	var err error
 
 	// ------------- Path parameter "quilt_id" -------------
-	var quiltId string
+	var quiltID QuiltID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "quilt_id", chi.URLParam(r, "quilt_id"), &quiltId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "quilt_id", chi.URLParam(r, "quilt_id"), &quiltID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "quilt_id", Err: err})
 		return
@@ -6324,793 +7532,10 @@ func (siw *ServerInterfaceWrapper) AttachQuiltToBuild(w http.ResponseWriter, r *
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachQuiltToBuild(w, r, quiltId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// ListTeams operation middleware
-func (siw *ServerInterfaceWrapper) ListTeams(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params ListTeamsParams
-
-	// ------------- Optional query parameter "search" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "sort" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "sort", r.URL.Query(), &params.Sort)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "order" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "order", r.URL.Query(), &params.Order)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "limit" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "offset" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListTeams(w, r, params)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// CreateTeam operation middleware
-func (siw *ServerInterfaceWrapper) CreateTeam(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.CreateTeam(w, r)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// DeleteTeam operation middleware
-func (siw *ServerInterfaceWrapper) DeleteTeam(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteTeam(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// ShowTeam operation middleware
-func (siw *ServerInterfaceWrapper) ShowTeam(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ShowTeam(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// UpdateTeam operation middleware
-func (siw *ServerInterfaceWrapper) UpdateTeam(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateTeam(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// DeleteTeamFromMod operation middleware
-func (siw *ServerInterfaceWrapper) DeleteTeamFromMod(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteTeamFromMod(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// ListTeamMods operation middleware
-func (siw *ServerInterfaceWrapper) ListTeamMods(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params ListTeamModsParams
-
-	// ------------- Optional query parameter "search" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "sort" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "sort", r.URL.Query(), &params.Sort)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "order" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "order", r.URL.Query(), &params.Order)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "limit" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "offset" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListTeamMods(w, r, teamId, params)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// AttachTeamToMod operation middleware
-func (siw *ServerInterfaceWrapper) AttachTeamToMod(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachTeamToMod(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// PermitTeamMod operation middleware
-func (siw *ServerInterfaceWrapper) PermitTeamMod(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PermitTeamMod(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// DeleteTeamFromPack operation middleware
-func (siw *ServerInterfaceWrapper) DeleteTeamFromPack(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteTeamFromPack(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// ListTeamPacks operation middleware
-func (siw *ServerInterfaceWrapper) ListTeamPacks(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params ListTeamPacksParams
-
-	// ------------- Optional query parameter "search" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "sort" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "sort", r.URL.Query(), &params.Sort)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "order" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "order", r.URL.Query(), &params.Order)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "limit" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "offset" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListTeamPacks(w, r, teamId, params)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// AttachTeamToPack operation middleware
-func (siw *ServerInterfaceWrapper) AttachTeamToPack(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachTeamToPack(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// PermitTeamPack operation middleware
-func (siw *ServerInterfaceWrapper) PermitTeamPack(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PermitTeamPack(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// DeleteTeamFromUser operation middleware
-func (siw *ServerInterfaceWrapper) DeleteTeamFromUser(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteTeamFromUser(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// ListTeamUsers operation middleware
-func (siw *ServerInterfaceWrapper) ListTeamUsers(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params ListTeamUsersParams
-
-	// ------------- Optional query parameter "search" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "sort" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "sort", r.URL.Query(), &params.Sort)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "order" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "order", r.URL.Query(), &params.Order)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "limit" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "offset" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListTeamUsers(w, r, teamId, params)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// AttachTeamToUser operation middleware
-func (siw *ServerInterfaceWrapper) AttachTeamToUser(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachTeamToUser(w, r, teamId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// PermitTeamUser operation middleware
-func (siw *ServerInterfaceWrapper) PermitTeamUser(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "team_id" -------------
-	var teamId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "team_id", chi.URLParam(r, "team_id"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "team_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PermitTeamUser(w, r, teamId)
+		siw.Handler.AttachQuiltToBuild(w, r, quiltID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7132,8 +7557,6 @@ func (siw *ServerInterfaceWrapper) ListUsers(w http.ResponseWriter, r *http.Requ
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -7202,8 +7625,6 @@ func (siw *ServerInterfaceWrapper) CreateUser(w http.ResponseWriter, r *http.Req
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -7223,9 +7644,9 @@ func (siw *ServerInterfaceWrapper) DeleteUser(w http.ResponseWriter, r *http.Req
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7239,12 +7660,10 @@ func (siw *ServerInterfaceWrapper) DeleteUser(w http.ResponseWriter, r *http.Req
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteUser(w, r, userId)
+		siw.Handler.DeleteUser(w, r, userID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7260,9 +7679,9 @@ func (siw *ServerInterfaceWrapper) ShowUser(w http.ResponseWriter, r *http.Reque
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7276,12 +7695,10 @@ func (siw *ServerInterfaceWrapper) ShowUser(w http.ResponseWriter, r *http.Reque
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ShowUser(w, r, userId)
+		siw.Handler.ShowUser(w, r, userID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7297,9 +7714,9 @@ func (siw *ServerInterfaceWrapper) UpdateUser(w http.ResponseWriter, r *http.Req
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7313,12 +7730,193 @@ func (siw *ServerInterfaceWrapper) UpdateUser(w http.ResponseWriter, r *http.Req
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateUser(w, r, userID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteUserFromGroup operation middleware
+func (siw *ServerInterfaceWrapper) DeleteUserFromGroup(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "user_id" -------------
+	var userID UserID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateUser(w, r, userId)
+		siw.Handler.DeleteUserFromGroup(w, r, userID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListUserGroups operation middleware
+func (siw *ServerInterfaceWrapper) ListUserGroups(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "user_id" -------------
+	var userID UserID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListUserGroupsParams
+
+	// ------------- Optional query parameter "search" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort", r.URL.Query(), &params.Sort)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "order" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "order", r.URL.Query(), &params.Order)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListUserGroups(w, r, userID, params)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AttachUserToGroup operation middleware
+func (siw *ServerInterfaceWrapper) AttachUserToGroup(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "user_id" -------------
+	var userID UserID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AttachUserToGroup(w, r, userID)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PermitUserGroup operation middleware
+func (siw *ServerInterfaceWrapper) PermitUserGroup(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "user_id" -------------
+	var userID UserID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, HeaderScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerScopes, []string{})
+
+	ctx = context.WithValue(ctx, BasicScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PermitUserGroup(w, r, userID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7334,9 +7932,9 @@ func (siw *ServerInterfaceWrapper) DeleteUserFromMod(w http.ResponseWriter, r *h
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7350,12 +7948,10 @@ func (siw *ServerInterfaceWrapper) DeleteUserFromMod(w http.ResponseWriter, r *h
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteUserFromMod(w, r, userId)
+		siw.Handler.DeleteUserFromMod(w, r, userID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7371,9 +7967,9 @@ func (siw *ServerInterfaceWrapper) ListUserMods(w http.ResponseWriter, r *http.R
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7386,8 +7982,6 @@ func (siw *ServerInterfaceWrapper) ListUserMods(w http.ResponseWriter, r *http.R
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -7435,7 +8029,7 @@ func (siw *ServerInterfaceWrapper) ListUserMods(w http.ResponseWriter, r *http.R
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListUserMods(w, r, userId, params)
+		siw.Handler.ListUserMods(w, r, userID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7451,9 +8045,9 @@ func (siw *ServerInterfaceWrapper) AttachUserToMod(w http.ResponseWriter, r *htt
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7467,12 +8061,10 @@ func (siw *ServerInterfaceWrapper) AttachUserToMod(w http.ResponseWriter, r *htt
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachUserToMod(w, r, userId)
+		siw.Handler.AttachUserToMod(w, r, userID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7488,9 +8080,9 @@ func (siw *ServerInterfaceWrapper) PermitUserMod(w http.ResponseWriter, r *http.
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7504,12 +8096,10 @@ func (siw *ServerInterfaceWrapper) PermitUserMod(w http.ResponseWriter, r *http.
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PermitUserMod(w, r, userId)
+		siw.Handler.PermitUserMod(w, r, userID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7525,9 +8115,9 @@ func (siw *ServerInterfaceWrapper) DeleteUserFromPack(w http.ResponseWriter, r *
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7541,12 +8131,10 @@ func (siw *ServerInterfaceWrapper) DeleteUserFromPack(w http.ResponseWriter, r *
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteUserFromPack(w, r, userId)
+		siw.Handler.DeleteUserFromPack(w, r, userID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7562,9 +8150,9 @@ func (siw *ServerInterfaceWrapper) ListUserPacks(w http.ResponseWriter, r *http.
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7577,8 +8165,6 @@ func (siw *ServerInterfaceWrapper) ListUserPacks(w http.ResponseWriter, r *http.
 	ctx = context.WithValue(ctx, BearerScopes, []string{})
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -7626,7 +8212,7 @@ func (siw *ServerInterfaceWrapper) ListUserPacks(w http.ResponseWriter, r *http.
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListUserPacks(w, r, userId, params)
+		siw.Handler.ListUserPacks(w, r, userID, params)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7642,9 +8228,9 @@ func (siw *ServerInterfaceWrapper) AttachUserToPack(w http.ResponseWriter, r *ht
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7658,12 +8244,10 @@ func (siw *ServerInterfaceWrapper) AttachUserToPack(w http.ResponseWriter, r *ht
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachUserToPack(w, r, userId)
+		siw.Handler.AttachUserToPack(w, r, userID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -7679,9 +8263,9 @@ func (siw *ServerInterfaceWrapper) PermitUserPack(w http.ResponseWriter, r *http
 	var err error
 
 	// ------------- Path parameter "user_id" -------------
-	var userId string
+	var userID UserID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
 		return
@@ -7695,203 +8279,10 @@ func (siw *ServerInterfaceWrapper) PermitUserPack(w http.ResponseWriter, r *http
 
 	ctx = context.WithValue(ctx, BasicScopes, []string{})
 
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PermitUserPack(w, r, userId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// DeleteUserFromTeam operation middleware
-func (siw *ServerInterfaceWrapper) DeleteUserFromTeam(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "user_id" -------------
-	var userId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteUserFromTeam(w, r, userId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// ListUserTeams operation middleware
-func (siw *ServerInterfaceWrapper) ListUserTeams(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "user_id" -------------
-	var userId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params ListUserTeamsParams
-
-	// ------------- Optional query parameter "search" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "sort" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "sort", r.URL.Query(), &params.Sort)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "order" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "order", r.URL.Query(), &params.Order)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "order", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "limit" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "offset" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListUserTeams(w, r, userId, params)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// AttachUserToTeam operation middleware
-func (siw *ServerInterfaceWrapper) AttachUserToTeam(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "user_id" -------------
-	var userId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AttachUserToTeam(w, r, userId)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// PermitUserTeam operation middleware
-func (siw *ServerInterfaceWrapper) PermitUserTeam(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "user_id" -------------
-	var userId string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "user_id", chi.URLParam(r, "user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
-		return
-	}
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, HeaderScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerScopes, []string{})
-
-	ctx = context.WithValue(ctx, BasicScopes, []string{})
-
-	ctx = context.WithValue(ctx, CookieScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PermitUserTeam(w, r, userId)
+		siw.Handler.PermitUserPack(w, r, userID)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -8018,7 +8409,10 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/auth/login", wrapper.LoginAuth)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/auth/providers", wrapper.ExternalProviders)
+		r.Get(options.BaseURL+"/auth/providers", wrapper.ListProviders)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/auth/redirect", wrapper.RedirectAuth)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/auth/refresh", wrapper.RefreshAuth)
@@ -8027,10 +8421,10 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/auth/verify", wrapper.VerifyAuth)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/auth/{provider}/callback", wrapper.ExternalCallback)
+		r.Get(options.BaseURL+"/auth/{provider}/callback", wrapper.CallbackProvider)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/auth/{provider}/initialize", wrapper.ExternalInitialize)
+		r.Get(options.BaseURL+"/auth/{provider}/request", wrapper.RequestProvider)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/fabric", wrapper.ListFabrics)
@@ -8063,6 +8457,57 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/forge/{forge_id}/builds", wrapper.AttachForgeToBuild)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/groups", wrapper.ListGroups)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/groups", wrapper.CreateGroup)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/groups/{group_id}", wrapper.DeleteGroup)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/groups/{group_id}", wrapper.ShowGroup)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/groups/{group_id}", wrapper.UpdateGroup)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/groups/{group_id}/mods", wrapper.DeleteGroupFromMod)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/groups/{group_id}/mods", wrapper.ListGroupMods)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/groups/{group_id}/mods", wrapper.AttachGroupToMod)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/groups/{group_id}/mods", wrapper.PermitGroupMod)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/groups/{group_id}/packs", wrapper.DeleteGroupFromPack)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/groups/{group_id}/packs", wrapper.ListGroupPacks)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/groups/{group_id}/packs", wrapper.AttachGroupToPack)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/groups/{group_id}/packs", wrapper.PermitGroupPack)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/groups/{group_id}/users", wrapper.DeleteGroupFromUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/groups/{group_id}/users", wrapper.ListGroupUsers)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/groups/{group_id}/users", wrapper.AttachGroupToUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/groups/{group_id}/users", wrapper.PermitGroupUser)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/minecraft", wrapper.ListMinecrafts)
 	})
 	r.Group(func(r chi.Router) {
@@ -8093,16 +8538,22 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Put(options.BaseURL+"/mods/{mod_id}", wrapper.UpdateMod)
 	})
 	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/mods/{mod_id}/teams", wrapper.DeleteModFromTeam)
+		r.Delete(options.BaseURL+"/mods/{mod_id}/avatar", wrapper.DeleteModAvatar)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/mods/{mod_id}/teams", wrapper.ListModTeams)
+		r.Post(options.BaseURL+"/mods/{mod_id}/avatar", wrapper.CreateModAvatar)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/mods/{mod_id}/teams", wrapper.AttachModToTeam)
+		r.Delete(options.BaseURL+"/mods/{mod_id}/groups", wrapper.DeleteModFromGroup)
 	})
 	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/mods/{mod_id}/teams", wrapper.PermitModTeam)
+		r.Get(options.BaseURL+"/mods/{mod_id}/groups", wrapper.ListModGroups)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/mods/{mod_id}/groups", wrapper.AttachModToGroup)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/mods/{mod_id}/groups", wrapper.PermitModGroup)
 	})
 	r.Group(func(r chi.Router) {
 		r.Delete(options.BaseURL+"/mods/{mod_id}/users", wrapper.DeleteModFromUser)
@@ -8171,6 +8622,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Put(options.BaseURL+"/packs/{pack_id}", wrapper.UpdatePack)
 	})
 	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/packs/{pack_id}/avatar", wrapper.DeletePackAvatar)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/packs/{pack_id}/avatar", wrapper.CreatePackAvatar)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/packs/{pack_id}/builds", wrapper.ListBuilds)
 	})
 	r.Group(func(r chi.Router) {
@@ -8195,16 +8652,16 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/packs/{pack_id}/builds/{build_id}/versions", wrapper.AttachBuildToVersion)
 	})
 	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/packs/{pack_id}/teams", wrapper.DeletePackFromTeam)
+		r.Delete(options.BaseURL+"/packs/{pack_id}/groups", wrapper.DeletePackFromGroup)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/packs/{pack_id}/teams", wrapper.ListPackTeams)
+		r.Get(options.BaseURL+"/packs/{pack_id}/groups", wrapper.ListPackGroups)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/packs/{pack_id}/teams", wrapper.AttachPackToTeam)
+		r.Post(options.BaseURL+"/packs/{pack_id}/groups", wrapper.AttachPackToGroup)
 	})
 	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/packs/{pack_id}/teams", wrapper.PermitPackTeam)
+		r.Put(options.BaseURL+"/packs/{pack_id}/groups", wrapper.PermitPackGroup)
 	})
 	r.Group(func(r chi.Router) {
 		r.Delete(options.BaseURL+"/packs/{pack_id}/users", wrapper.DeletePackFromUser)
@@ -8243,57 +8700,6 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/quilt/{quilt_id}/builds", wrapper.AttachQuiltToBuild)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/teams", wrapper.ListTeams)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/teams", wrapper.CreateTeam)
-	})
-	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/teams/{team_id}", wrapper.DeleteTeam)
-	})
-	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/teams/{team_id}", wrapper.ShowTeam)
-	})
-	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/teams/{team_id}", wrapper.UpdateTeam)
-	})
-	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/teams/{team_id}/mods", wrapper.DeleteTeamFromMod)
-	})
-	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/teams/{team_id}/mods", wrapper.ListTeamMods)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/teams/{team_id}/mods", wrapper.AttachTeamToMod)
-	})
-	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/teams/{team_id}/mods", wrapper.PermitTeamMod)
-	})
-	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/teams/{team_id}/packs", wrapper.DeleteTeamFromPack)
-	})
-	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/teams/{team_id}/packs", wrapper.ListTeamPacks)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/teams/{team_id}/packs", wrapper.AttachTeamToPack)
-	})
-	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/teams/{team_id}/packs", wrapper.PermitTeamPack)
-	})
-	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/teams/{team_id}/users", wrapper.DeleteTeamFromUser)
-	})
-	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/teams/{team_id}/users", wrapper.ListTeamUsers)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/teams/{team_id}/users", wrapper.AttachTeamToUser)
-	})
-	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/teams/{team_id}/users", wrapper.PermitTeamUser)
-	})
-	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/users", wrapper.ListUsers)
 	})
 	r.Group(func(r chi.Router) {
@@ -8307,6 +8713,18 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/users/{user_id}", wrapper.UpdateUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/users/{user_id}/groups", wrapper.DeleteUserFromGroup)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users/{user_id}/groups", wrapper.ListUserGroups)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/users/{user_id}/groups", wrapper.AttachUserToGroup)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/users/{user_id}/groups", wrapper.PermitUserGroup)
 	})
 	r.Group(func(r chi.Router) {
 		r.Delete(options.BaseURL+"/users/{user_id}/mods", wrapper.DeleteUserFromMod)
@@ -8332,20 +8750,318 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/users/{user_id}/packs", wrapper.PermitUserPack)
 	})
-	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/users/{user_id}/teams", wrapper.DeleteUserFromTeam)
-	})
-	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/users/{user_id}/teams", wrapper.ListUserTeams)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/users/{user_id}/teams", wrapper.AttachUserToTeam)
-	})
-	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/users/{user_id}/teams", wrapper.PermitUserTeam)
-	})
 
 	return r
+}
+
+type ActionFailedErrorJSONResponse Notification
+
+type AlreadyAttachedErrorJSONResponse Notification
+
+type BadCredentialsErrorJSONResponse Notification
+
+type BadRequestErrorJSONResponse Notification
+
+type BuildResponseJSONResponse Build
+
+type BuildVersionsResponseJSONResponse struct {
+	// Build Model to represent build
+	Build  *Build `json:"build,omitempty"`
+	Limit  int64  `json:"limit"`
+	Offset int64  `json:"offset"`
+
+	// Pack Model to represent pack
+	Pack     *Pack          `json:"pack,omitempty"`
+	Total    int64          `json:"total"`
+	Versions []BuildVersion `json:"versions"`
+}
+
+type BuildsResponseJSONResponse struct {
+	Builds []Build `json:"builds"`
+	Limit  int64   `json:"limit"`
+	Offset int64   `json:"offset"`
+
+	// Pack Model to represent pack
+	Pack  *Pack `json:"pack,omitempty"`
+	Total int64 `json:"total"`
+}
+
+type FabricBuildsResponseJSONResponse struct {
+	Builds []Build `json:"builds"`
+
+	// Fabric Model to represent fabric
+	Fabric *Fabric `json:"fabric,omitempty"`
+	Limit  int64   `json:"limit"`
+	Offset int64   `json:"offset"`
+	Total  int64   `json:"total"`
+}
+
+type FabricsResponseJSONResponse struct {
+	Limit    int64    `json:"limit"`
+	Offset   int64    `json:"offset"`
+	Total    int64    `json:"total"`
+	Versions []Fabric `json:"versions"`
+}
+
+type ForgeBuildsResponseJSONResponse struct {
+	Builds []Build `json:"builds"`
+
+	// Forge Model to represent forge
+	Forge  *Forge `json:"forge,omitempty"`
+	Limit  int64  `json:"limit"`
+	Offset int64  `json:"offset"`
+	Total  int64  `json:"total"`
+}
+
+type ForgesResponseJSONResponse struct {
+	Limit    int64   `json:"limit"`
+	Offset   int64   `json:"offset"`
+	Total    int64   `json:"total"`
+	Versions []Forge `json:"versions"`
+}
+
+type GroupModsResponseJSONResponse struct {
+	// Group Model to represent group
+	Group  *Group     `json:"group,omitempty"`
+	Limit  int64      `json:"limit"`
+	Mods   []GroupMod `json:"mods"`
+	Offset int64      `json:"offset"`
+	Total  int64      `json:"total"`
+}
+
+type GroupPacksResponseJSONResponse struct {
+	// Group Model to represent group
+	Group  *Group      `json:"group,omitempty"`
+	Limit  int64       `json:"limit"`
+	Offset int64       `json:"offset"`
+	Packs  []GroupPack `json:"packs"`
+	Total  int64       `json:"total"`
+}
+
+type GroupResponseJSONResponse Group
+
+type GroupUsersResponseJSONResponse struct {
+	// Group Model to represent group
+	Group  *Group      `json:"group,omitempty"`
+	Limit  int64       `json:"limit"`
+	Offset int64       `json:"offset"`
+	Total  int64       `json:"total"`
+	Users  []UserGroup `json:"users"`
+}
+
+type GroupsResponseJSONResponse struct {
+	Groups []Group `json:"groups"`
+	Limit  int64   `json:"limit"`
+	Offset int64   `json:"offset"`
+	Total  int64   `json:"total"`
+}
+
+type InternalServerErrorJSONResponse Notification
+
+type InvalidTokenErrorJSONResponse Notification
+
+type LoginResponseJSONResponse AuthToken
+
+type MinecraftBuildsResponseJSONResponse struct {
+	Builds []Build `json:"builds"`
+	Limit  int64   `json:"limit"`
+
+	// Minecraft Model to represent minecraft
+	Minecraft *Minecraft `json:"minecraft,omitempty"`
+	Offset    int64      `json:"offset"`
+	Total     int64      `json:"total"`
+}
+
+type MinecraftsResponseJSONResponse struct {
+	Limit    int64       `json:"limit"`
+	Offset   int64       `json:"offset"`
+	Total    int64       `json:"total"`
+	Versions []Minecraft `json:"versions"`
+}
+
+type ModAvatarResponseJSONResponse ModAvatar
+
+type ModGroupsResponseJSONResponse struct {
+	Groups []GroupMod `json:"groups"`
+	Limit  int64      `json:"limit"`
+
+	// Mod Model to represent mod
+	Mod    *Mod  `json:"mod,omitempty"`
+	Offset int64 `json:"offset"`
+	Total  int64 `json:"total"`
+}
+
+type ModResponseJSONResponse Mod
+
+type ModUsersResponseJSONResponse struct {
+	Limit int64 `json:"limit"`
+
+	// Mod Model to represent mod
+	Mod    *Mod      `json:"mod,omitempty"`
+	Offset int64     `json:"offset"`
+	Total  int64     `json:"total"`
+	Users  []UserMod `json:"users"`
+}
+
+type ModsResponseJSONResponse struct {
+	Limit  int64 `json:"limit"`
+	Mods   []Mod `json:"mods"`
+	Offset int64 `json:"offset"`
+	Total  int64 `json:"total"`
+}
+
+type NeoforgeBuildsResponseJSONResponse struct {
+	Builds []Build `json:"builds"`
+	Limit  int64   `json:"limit"`
+
+	// Neoforge Model to represent neoforge
+	Neoforge *Neoforge `json:"neoforge,omitempty"`
+	Offset   int64     `json:"offset"`
+	Total    int64     `json:"total"`
+}
+
+type NeoforgesResponseJSONResponse struct {
+	Limit    int64      `json:"limit"`
+	Offset   int64      `json:"offset"`
+	Total    int64      `json:"total"`
+	Versions []Neoforge `json:"versions"`
+}
+
+type NotAttachedErrorJSONResponse Notification
+
+type NotAuthorizedErrorJSONResponse Notification
+
+type NotFoundErrorJSONResponse Notification
+
+type PackAvatarResponseJSONResponse PackAvatar
+
+type PackGroupsResponseJSONResponse struct {
+	Groups []GroupPack `json:"groups"`
+	Limit  int64       `json:"limit"`
+	Offset int64       `json:"offset"`
+
+	// Pack Model to represent pack
+	Pack  *Pack `json:"pack,omitempty"`
+	Total int64 `json:"total"`
+}
+
+type PackResponseJSONResponse Pack
+
+type PackUsersResponseJSONResponse struct {
+	Limit  int64 `json:"limit"`
+	Offset int64 `json:"offset"`
+
+	// Pack Model to represent pack
+	Pack  *Pack      `json:"pack,omitempty"`
+	Total int64      `json:"total"`
+	Users []UserPack `json:"users"`
+}
+
+type PacksResponseJSONResponse struct {
+	Limit  int64  `json:"limit"`
+	Offset int64  `json:"offset"`
+	Packs  []Pack `json:"packs"`
+	Total  int64  `json:"total"`
+}
+
+type ProfileResponseJSONResponse Profile
+
+type ProvidersResponseJSONResponse struct {
+	Providers []Provider `json:"providers"`
+	Total     int64      `json:"total"`
+}
+
+type QuiltBuildsResponseJSONResponse struct {
+	Builds []Build `json:"builds"`
+	Limit  int64   `json:"limit"`
+	Offset int64   `json:"offset"`
+
+	// Quilt Model to represent quilt
+	Quilt *Quilt `json:"quilt,omitempty"`
+	Total int64  `json:"total"`
+}
+
+type QuiltsResponseJSONResponse struct {
+	Limit    int64   `json:"limit"`
+	Offset   int64   `json:"offset"`
+	Total    int64   `json:"total"`
+	Versions []Quilt `json:"versions"`
+}
+
+type RefreshResponseJSONResponse AuthToken
+
+type RemoteUnavailableErrorJSONResponse Notification
+
+type SuccessMessageJSONResponse Notification
+
+type TokenResponseJSONResponse AuthToken
+
+type UserGroupsResponseJSONResponse struct {
+	Groups []UserGroup `json:"groups"`
+	Limit  int64       `json:"limit"`
+	Offset int64       `json:"offset"`
+	Total  int64       `json:"total"`
+
+	// User Model to represent user
+	User *User `json:"user,omitempty"`
+}
+
+type UserModsResponseJSONResponse struct {
+	Limit  int64     `json:"limit"`
+	Mods   []UserMod `json:"mods"`
+	Offset int64     `json:"offset"`
+	Total  int64     `json:"total"`
+
+	// User Model to represent user
+	User *User `json:"user,omitempty"`
+}
+
+type UserPacksResponseJSONResponse struct {
+	Limit  int64      `json:"limit"`
+	Offset int64      `json:"offset"`
+	Packs  []UserPack `json:"packs"`
+	Total  int64      `json:"total"`
+
+	// User Model to represent user
+	User *User `json:"user,omitempty"`
+}
+
+type UserResponseJSONResponse User
+
+type UsersResponseJSONResponse struct {
+	Limit  int64  `json:"limit"`
+	Offset int64  `json:"offset"`
+	Total  int64  `json:"total"`
+	Users  []User `json:"users"`
+}
+
+type ValidationErrorJSONResponse Notification
+
+type VerifyResponseJSONResponse AuthVerify
+
+type VersionBuildsResponseJSONResponse struct {
+	Builds []BuildVersion `json:"builds"`
+	Limit  int64          `json:"limit"`
+
+	// Mod Model to represent mod
+	Mod    *Mod  `json:"mod,omitempty"`
+	Offset int64 `json:"offset"`
+	Total  int64 `json:"total"`
+
+	// Version Model to represent version
+	Version *Version `json:"version,omitempty"`
+}
+
+type VersionResponseJSONResponse Version
+
+type VersionsResponseJSONResponse struct {
+	Limit int64 `json:"limit"`
+
+	// Mod Model to represent mod
+	Mod      *Mod      `json:"mod,omitempty"`
+	Offset   int64     `json:"offset"`
+	Total    int64     `json:"total"`
+	Versions []Version `json:"versions"`
 }
 
 type LoginAuthRequestObject struct {
@@ -8356,7 +9072,7 @@ type LoginAuthResponseObject interface {
 	VisitLoginAuthResponse(w http.ResponseWriter) error
 }
 
-type LoginAuth200JSONResponse AuthToken
+type LoginAuth200JSONResponse struct{ LoginResponseJSONResponse }
 
 func (response LoginAuth200JSONResponse) VisitLoginAuthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8365,7 +9081,18 @@ func (response LoginAuth200JSONResponse) VisitLoginAuthResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type LoginAuth401JSONResponse Notification
+type LoginAuth400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response LoginAuth400JSONResponse) VisitLoginAuthResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type LoginAuth401JSONResponse struct {
+	BadCredentialsErrorJSONResponse
+}
 
 func (response LoginAuth401JSONResponse) VisitLoginAuthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8374,7 +9101,9 @@ func (response LoginAuth401JSONResponse) VisitLoginAuthResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type LoginAuth500JSONResponse Notification
+type LoginAuth500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response LoginAuth500JSONResponse) VisitLoginAuthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8383,53 +9112,66 @@ func (response LoginAuth500JSONResponse) VisitLoginAuthResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type LoginAuthdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type ListProvidersRequestObject struct {
 }
 
-func (response LoginAuthdefaultJSONResponse) VisitLoginAuthResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
+type ListProvidersResponseObject interface {
+	VisitListProvidersResponse(w http.ResponseWriter) error
 }
 
-type ExternalProvidersRequestObject struct {
-}
+type ListProviders200JSONResponse struct{ ProvidersResponseJSONResponse }
 
-type ExternalProvidersResponseObject interface {
-	VisitExternalProvidersResponse(w http.ResponseWriter) error
-}
-
-type ExternalProviders200JSONResponse Providers
-
-func (response ExternalProviders200JSONResponse) VisitExternalProvidersResponse(w http.ResponseWriter) error {
+func (response ListProviders200JSONResponse) VisitListProvidersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ExternalProviders500JSONResponse Notification
+type RedirectAuthRequestObject struct {
+	Body *RedirectAuthJSONRequestBody
+}
 
-func (response ExternalProviders500JSONResponse) VisitExternalProvidersResponse(w http.ResponseWriter) error {
+type RedirectAuthResponseObject interface {
+	VisitRedirectAuthResponse(w http.ResponseWriter) error
+}
+
+type RedirectAuth200JSONResponse struct{ TokenResponseJSONResponse }
+
+func (response RedirectAuth200JSONResponse) VisitRedirectAuthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ExternalProvidersdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type RedirectAuth400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response RedirectAuth400JSONResponse) VisitRedirectAuthResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
-func (response ExternalProvidersdefaultJSONResponse) VisitExternalProvidersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
+type RedirectAuth401JSONResponse struct{ InvalidTokenErrorJSONResponse }
 
-	return json.NewEncoder(w).Encode(response.Body)
+func (response RedirectAuth401JSONResponse) VisitRedirectAuthResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type RedirectAuth500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response RedirectAuth500JSONResponse) VisitRedirectAuthResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type RefreshAuthRequestObject struct {
@@ -8439,7 +9181,7 @@ type RefreshAuthResponseObject interface {
 	VisitRefreshAuthResponse(w http.ResponseWriter) error
 }
 
-type RefreshAuth200JSONResponse AuthToken
+type RefreshAuth200JSONResponse struct{ RefreshResponseJSONResponse }
 
 func (response RefreshAuth200JSONResponse) VisitRefreshAuthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8448,7 +9190,7 @@ func (response RefreshAuth200JSONResponse) VisitRefreshAuthResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type RefreshAuth401JSONResponse Notification
+type RefreshAuth401JSONResponse struct{ InvalidTokenErrorJSONResponse }
 
 func (response RefreshAuth401JSONResponse) VisitRefreshAuthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8457,25 +9199,15 @@ func (response RefreshAuth401JSONResponse) VisitRefreshAuthResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type RefreshAuth500JSONResponse Notification
+type RefreshAuth500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response RefreshAuth500JSONResponse) VisitRefreshAuthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type RefreshAuthdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response RefreshAuthdefaultJSONResponse) VisitRefreshAuthResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type VerifyAuthRequestObject struct {
@@ -8485,7 +9217,7 @@ type VerifyAuthResponseObject interface {
 	VisitVerifyAuthResponse(w http.ResponseWriter) error
 }
 
-type VerifyAuth200JSONResponse AuthVerify
+type VerifyAuth200JSONResponse struct{ VerifyResponseJSONResponse }
 
 func (response VerifyAuth200JSONResponse) VisitVerifyAuthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8494,7 +9226,7 @@ func (response VerifyAuth200JSONResponse) VisitVerifyAuthResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type VerifyAuth401JSONResponse Notification
+type VerifyAuth401JSONResponse struct{ InvalidTokenErrorJSONResponse }
 
 func (response VerifyAuth401JSONResponse) VisitVerifyAuthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8503,7 +9235,9 @@ func (response VerifyAuth401JSONResponse) VisitVerifyAuthResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type VerifyAuth500JSONResponse Notification
+type VerifyAuth500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response VerifyAuth500JSONResponse) VisitVerifyAuthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8512,110 +9246,154 @@ func (response VerifyAuth500JSONResponse) VisitVerifyAuthResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type VerifyAuthdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type CallbackProviderRequestObject struct {
+	Provider AuthProviderParam `json:"provider"`
+	Params   CallbackProviderParams
 }
 
-func (response VerifyAuthdefaultJSONResponse) VisitVerifyAuthResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
+type CallbackProviderResponseObject interface {
+	VisitCallbackProviderResponse(w http.ResponseWriter) error
 }
 
-type ExternalCallbackRequestObject struct {
-	Provider string `json:"provider"`
-	Params   ExternalCallbackParams
+type CallbackProvider308TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
 }
 
-type ExternalCallbackResponseObject interface {
-	VisitExternalCallbackResponse(w http.ResponseWriter) error
+func (response CallbackProvider308TexthtmlResponse) VisitCallbackProviderResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(308)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
 }
 
-type ExternalCallback307Response struct {
+type CallbackProvider404TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
 }
 
-func (response ExternalCallback307Response) VisitExternalCallbackResponse(w http.ResponseWriter) error {
-	w.WriteHeader(307)
-	return nil
-}
-
-type ExternalCallback404JSONResponse Notification
-
-func (response ExternalCallback404JSONResponse) VisitExternalCallbackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response CallbackProvider404TexthtmlResponse) VisitCallbackProviderResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
 	w.WriteHeader(404)
 
-	return json.NewEncoder(w).Encode(response)
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
 }
 
-type ExternalCallback412JSONResponse Notification
+type CallbackProvider412TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
 
-func (response ExternalCallback412JSONResponse) VisitExternalCallbackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response CallbackProvider412TexthtmlResponse) VisitCallbackProviderResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
 	w.WriteHeader(412)
 
-	return json.NewEncoder(w).Encode(response)
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
 }
 
-type ExternalCallbackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type CallbackProvider500TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
 }
 
-func (response ExternalCallbackdefaultJSONResponse) VisitExternalCallbackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
+func (response CallbackProvider500TexthtmlResponse) VisitCallbackProviderResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(500)
 
-	return json.NewEncoder(w).Encode(response.Body)
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
 }
 
-type ExternalInitializeRequestObject struct {
-	Provider string `json:"provider"`
-	Params   ExternalInitializeParams
+type RequestProviderRequestObject struct {
+	Provider AuthProviderParam `json:"provider"`
 }
 
-type ExternalInitializeResponseObject interface {
-	VisitExternalInitializeResponse(w http.ResponseWriter) error
+type RequestProviderResponseObject interface {
+	VisitRequestProviderResponse(w http.ResponseWriter) error
 }
 
-type ExternalInitialize307Response struct {
+type RequestProvider308TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
 }
 
-func (response ExternalInitialize307Response) VisitExternalInitializeResponse(w http.ResponseWriter) error {
-	w.WriteHeader(307)
-	return nil
+func (response RequestProvider308TexthtmlResponse) VisitRequestProviderResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(308)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
 }
 
-type ExternalInitialize404JSONResponse Notification
+type RequestProvider404TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
 
-func (response ExternalInitialize404JSONResponse) VisitExternalInitializeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response RequestProvider404TexthtmlResponse) VisitRequestProviderResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
 	w.WriteHeader(404)
 
-	return json.NewEncoder(w).Encode(response)
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
 }
 
-type ExternalInitialize412JSONResponse Notification
-
-func (response ExternalInitialize412JSONResponse) VisitExternalInitializeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
+type RequestProvider500TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
 }
 
-type ExternalInitializedefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
+func (response RequestProvider500TexthtmlResponse) VisitRequestProviderResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(500)
 
-func (response ExternalInitializedefaultJSONResponse) VisitExternalInitializeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
 }
 
 type ListFabricsRequestObject struct {
@@ -8626,7 +9404,7 @@ type ListFabricsResponseObject interface {
 	VisitListFabricsResponse(w http.ResponseWriter) error
 }
 
-type ListFabrics200JSONResponse Fabrics
+type ListFabrics200JSONResponse struct{ FabricsResponseJSONResponse }
 
 func (response ListFabrics200JSONResponse) VisitListFabricsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8635,7 +9413,7 @@ func (response ListFabrics200JSONResponse) VisitListFabricsResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListFabrics403JSONResponse Notification
+type ListFabrics403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListFabrics403JSONResponse) VisitListFabricsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8644,25 +9422,15 @@ func (response ListFabrics403JSONResponse) VisitListFabricsResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListFabrics500JSONResponse Notification
+type ListFabrics500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListFabrics500JSONResponse) VisitListFabricsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type ListFabricsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListFabricsdefaultJSONResponse) VisitListFabricsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type UpdateFabricRequestObject struct {
@@ -8672,7 +9440,7 @@ type UpdateFabricResponseObject interface {
 	VisitUpdateFabricResponse(w http.ResponseWriter) error
 }
 
-type UpdateFabric200JSONResponse Notification
+type UpdateFabric200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response UpdateFabric200JSONResponse) VisitUpdateFabricResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8681,7 +9449,7 @@ func (response UpdateFabric200JSONResponse) VisitUpdateFabricResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateFabric403JSONResponse Notification
+type UpdateFabric403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdateFabric403JSONResponse) VisitUpdateFabricResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8690,7 +9458,9 @@ func (response UpdateFabric403JSONResponse) VisitUpdateFabricResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateFabric500JSONResponse Notification
+type UpdateFabric500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdateFabric500JSONResponse) VisitUpdateFabricResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8699,7 +9469,9 @@ func (response UpdateFabric500JSONResponse) VisitUpdateFabricResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateFabric503JSONResponse Notification
+type UpdateFabric503JSONResponse struct {
+	RemoteUnavailableErrorJSONResponse
+}
 
 func (response UpdateFabric503JSONResponse) VisitUpdateFabricResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8708,20 +9480,8 @@ func (response UpdateFabric503JSONResponse) VisitUpdateFabricResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateFabricdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response UpdateFabricdefaultJSONResponse) VisitUpdateFabricResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteFabricFromBuildRequestObject struct {
-	FabricId string `json:"fabric_id"`
+	FabricID FabricID `json:"fabric_id"`
 	Body     *DeleteFabricFromBuildJSONRequestBody
 }
 
@@ -8729,7 +9489,7 @@ type DeleteFabricFromBuildResponseObject interface {
 	VisitDeleteFabricFromBuildResponse(w http.ResponseWriter) error
 }
 
-type DeleteFabricFromBuild200JSONResponse Notification
+type DeleteFabricFromBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteFabricFromBuild200JSONResponse) VisitDeleteFabricFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8738,7 +9498,16 @@ func (response DeleteFabricFromBuild200JSONResponse) VisitDeleteFabricFromBuildR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteFabricFromBuild403JSONResponse Notification
+type DeleteFabricFromBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteFabricFromBuild400JSONResponse) VisitDeleteFabricFromBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteFabricFromBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteFabricFromBuild403JSONResponse) VisitDeleteFabricFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8747,7 +9516,7 @@ func (response DeleteFabricFromBuild403JSONResponse) VisitDeleteFabricFromBuildR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteFabricFromBuild404JSONResponse Notification
+type DeleteFabricFromBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteFabricFromBuild404JSONResponse) VisitDeleteFabricFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8756,7 +9525,7 @@ func (response DeleteFabricFromBuild404JSONResponse) VisitDeleteFabricFromBuildR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteFabricFromBuild412JSONResponse Notification
+type DeleteFabricFromBuild412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeleteFabricFromBuild412JSONResponse) VisitDeleteFabricFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8765,7 +9534,9 @@ func (response DeleteFabricFromBuild412JSONResponse) VisitDeleteFabricFromBuildR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteFabricFromBuild500JSONResponse Notification
+type DeleteFabricFromBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteFabricFromBuild500JSONResponse) VisitDeleteFabricFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8774,20 +9545,8 @@ func (response DeleteFabricFromBuild500JSONResponse) VisitDeleteFabricFromBuildR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteFabricFromBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteFabricFromBuilddefaultJSONResponse) VisitDeleteFabricFromBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListFabricBuildsRequestObject struct {
-	FabricId string `json:"fabric_id"`
+	FabricID FabricID `json:"fabric_id"`
 	Params   ListFabricBuildsParams
 }
 
@@ -8795,7 +9554,9 @@ type ListFabricBuildsResponseObject interface {
 	VisitListFabricBuildsResponse(w http.ResponseWriter) error
 }
 
-type ListFabricBuilds200JSONResponse FabricBuilds
+type ListFabricBuilds200JSONResponse struct {
+	FabricBuildsResponseJSONResponse
+}
 
 func (response ListFabricBuilds200JSONResponse) VisitListFabricBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8804,7 +9565,7 @@ func (response ListFabricBuilds200JSONResponse) VisitListFabricBuildsResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListFabricBuilds403JSONResponse Notification
+type ListFabricBuilds403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListFabricBuilds403JSONResponse) VisitListFabricBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8813,7 +9574,7 @@ func (response ListFabricBuilds403JSONResponse) VisitListFabricBuildsResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListFabricBuilds404JSONResponse Notification
+type ListFabricBuilds404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListFabricBuilds404JSONResponse) VisitListFabricBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8822,7 +9583,9 @@ func (response ListFabricBuilds404JSONResponse) VisitListFabricBuildsResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListFabricBuilds500JSONResponse Notification
+type ListFabricBuilds500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListFabricBuilds500JSONResponse) VisitListFabricBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8831,20 +9594,8 @@ func (response ListFabricBuilds500JSONResponse) VisitListFabricBuildsResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListFabricBuildsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListFabricBuildsdefaultJSONResponse) VisitListFabricBuildsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachFabricToBuildRequestObject struct {
-	FabricId string `json:"fabric_id"`
+	FabricID FabricID `json:"fabric_id"`
 	Body     *AttachFabricToBuildJSONRequestBody
 }
 
@@ -8852,7 +9603,7 @@ type AttachFabricToBuildResponseObject interface {
 	VisitAttachFabricToBuildResponse(w http.ResponseWriter) error
 }
 
-type AttachFabricToBuild200JSONResponse Notification
+type AttachFabricToBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachFabricToBuild200JSONResponse) VisitAttachFabricToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8861,7 +9612,16 @@ func (response AttachFabricToBuild200JSONResponse) VisitAttachFabricToBuildRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachFabricToBuild403JSONResponse Notification
+type AttachFabricToBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachFabricToBuild400JSONResponse) VisitAttachFabricToBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachFabricToBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachFabricToBuild403JSONResponse) VisitAttachFabricToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8870,7 +9630,7 @@ func (response AttachFabricToBuild403JSONResponse) VisitAttachFabricToBuildRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachFabricToBuild404JSONResponse Notification
+type AttachFabricToBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachFabricToBuild404JSONResponse) VisitAttachFabricToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8879,7 +9639,9 @@ func (response AttachFabricToBuild404JSONResponse) VisitAttachFabricToBuildRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachFabricToBuild412JSONResponse Notification
+type AttachFabricToBuild412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachFabricToBuild412JSONResponse) VisitAttachFabricToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8888,7 +9650,7 @@ func (response AttachFabricToBuild412JSONResponse) VisitAttachFabricToBuildRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachFabricToBuild422JSONResponse Notification
+type AttachFabricToBuild422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachFabricToBuild422JSONResponse) VisitAttachFabricToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8897,25 +9659,15 @@ func (response AttachFabricToBuild422JSONResponse) VisitAttachFabricToBuildRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachFabricToBuild500JSONResponse Notification
+type AttachFabricToBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachFabricToBuild500JSONResponse) VisitAttachFabricToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachFabricToBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachFabricToBuilddefaultJSONResponse) VisitAttachFabricToBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type ListForgesRequestObject struct {
@@ -8926,7 +9678,7 @@ type ListForgesResponseObject interface {
 	VisitListForgesResponse(w http.ResponseWriter) error
 }
 
-type ListForges200JSONResponse Forges
+type ListForges200JSONResponse struct{ ForgesResponseJSONResponse }
 
 func (response ListForges200JSONResponse) VisitListForgesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8935,7 +9687,7 @@ func (response ListForges200JSONResponse) VisitListForgesResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListForges403JSONResponse Notification
+type ListForges403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListForges403JSONResponse) VisitListForgesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8944,25 +9696,15 @@ func (response ListForges403JSONResponse) VisitListForgesResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListForges500JSONResponse Notification
+type ListForges500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListForges500JSONResponse) VisitListForgesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type ListForgesdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListForgesdefaultJSONResponse) VisitListForgesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type UpdateForgeRequestObject struct {
@@ -8972,7 +9714,7 @@ type UpdateForgeResponseObject interface {
 	VisitUpdateForgeResponse(w http.ResponseWriter) error
 }
 
-type UpdateForge200JSONResponse Notification
+type UpdateForge200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response UpdateForge200JSONResponse) VisitUpdateForgeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8981,7 +9723,7 @@ func (response UpdateForge200JSONResponse) VisitUpdateForgeResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateForge403JSONResponse Notification
+type UpdateForge403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdateForge403JSONResponse) VisitUpdateForgeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8990,7 +9732,9 @@ func (response UpdateForge403JSONResponse) VisitUpdateForgeResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateForge500JSONResponse Notification
+type UpdateForge500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdateForge500JSONResponse) VisitUpdateForgeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -8999,7 +9743,9 @@ func (response UpdateForge500JSONResponse) VisitUpdateForgeResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateForge503JSONResponse Notification
+type UpdateForge503JSONResponse struct {
+	RemoteUnavailableErrorJSONResponse
+}
 
 func (response UpdateForge503JSONResponse) VisitUpdateForgeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9008,20 +9754,8 @@ func (response UpdateForge503JSONResponse) VisitUpdateForgeResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateForgedefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response UpdateForgedefaultJSONResponse) VisitUpdateForgeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteForgeFromBuildRequestObject struct {
-	ForgeId string `json:"forge_id"`
+	ForgeID ForgeID `json:"forge_id"`
 	Body    *DeleteForgeFromBuildJSONRequestBody
 }
 
@@ -9029,7 +9763,7 @@ type DeleteForgeFromBuildResponseObject interface {
 	VisitDeleteForgeFromBuildResponse(w http.ResponseWriter) error
 }
 
-type DeleteForgeFromBuild200JSONResponse Notification
+type DeleteForgeFromBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteForgeFromBuild200JSONResponse) VisitDeleteForgeFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9038,7 +9772,16 @@ func (response DeleteForgeFromBuild200JSONResponse) VisitDeleteForgeFromBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteForgeFromBuild403JSONResponse Notification
+type DeleteForgeFromBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteForgeFromBuild400JSONResponse) VisitDeleteForgeFromBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteForgeFromBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteForgeFromBuild403JSONResponse) VisitDeleteForgeFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9047,7 +9790,7 @@ func (response DeleteForgeFromBuild403JSONResponse) VisitDeleteForgeFromBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteForgeFromBuild404JSONResponse Notification
+type DeleteForgeFromBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteForgeFromBuild404JSONResponse) VisitDeleteForgeFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9056,7 +9799,7 @@ func (response DeleteForgeFromBuild404JSONResponse) VisitDeleteForgeFromBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteForgeFromBuild412JSONResponse Notification
+type DeleteForgeFromBuild412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeleteForgeFromBuild412JSONResponse) VisitDeleteForgeFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9065,7 +9808,9 @@ func (response DeleteForgeFromBuild412JSONResponse) VisitDeleteForgeFromBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteForgeFromBuild500JSONResponse Notification
+type DeleteForgeFromBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteForgeFromBuild500JSONResponse) VisitDeleteForgeFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9074,20 +9819,8 @@ func (response DeleteForgeFromBuild500JSONResponse) VisitDeleteForgeFromBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteForgeFromBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteForgeFromBuilddefaultJSONResponse) VisitDeleteForgeFromBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListForgeBuildsRequestObject struct {
-	ForgeId string `json:"forge_id"`
+	ForgeID ForgeID `json:"forge_id"`
 	Params  ListForgeBuildsParams
 }
 
@@ -9095,7 +9828,9 @@ type ListForgeBuildsResponseObject interface {
 	VisitListForgeBuildsResponse(w http.ResponseWriter) error
 }
 
-type ListForgeBuilds200JSONResponse ForgeBuilds
+type ListForgeBuilds200JSONResponse struct {
+	ForgeBuildsResponseJSONResponse
+}
 
 func (response ListForgeBuilds200JSONResponse) VisitListForgeBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9104,7 +9839,7 @@ func (response ListForgeBuilds200JSONResponse) VisitListForgeBuildsResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListForgeBuilds403JSONResponse Notification
+type ListForgeBuilds403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListForgeBuilds403JSONResponse) VisitListForgeBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9113,7 +9848,7 @@ func (response ListForgeBuilds403JSONResponse) VisitListForgeBuildsResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListForgeBuilds404JSONResponse Notification
+type ListForgeBuilds404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListForgeBuilds404JSONResponse) VisitListForgeBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9122,7 +9857,9 @@ func (response ListForgeBuilds404JSONResponse) VisitListForgeBuildsResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListForgeBuilds500JSONResponse Notification
+type ListForgeBuilds500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListForgeBuilds500JSONResponse) VisitListForgeBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9131,20 +9868,8 @@ func (response ListForgeBuilds500JSONResponse) VisitListForgeBuildsResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListForgeBuildsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListForgeBuildsdefaultJSONResponse) VisitListForgeBuildsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachForgeToBuildRequestObject struct {
-	ForgeId string `json:"forge_id"`
+	ForgeID ForgeID `json:"forge_id"`
 	Body    *AttachForgeToBuildJSONRequestBody
 }
 
@@ -9152,7 +9877,7 @@ type AttachForgeToBuildResponseObject interface {
 	VisitAttachForgeToBuildResponse(w http.ResponseWriter) error
 }
 
-type AttachForgeToBuild200JSONResponse Notification
+type AttachForgeToBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachForgeToBuild200JSONResponse) VisitAttachForgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9161,7 +9886,16 @@ func (response AttachForgeToBuild200JSONResponse) VisitAttachForgeToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachForgeToBuild403JSONResponse Notification
+type AttachForgeToBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachForgeToBuild400JSONResponse) VisitAttachForgeToBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachForgeToBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachForgeToBuild403JSONResponse) VisitAttachForgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9170,7 +9904,7 @@ func (response AttachForgeToBuild403JSONResponse) VisitAttachForgeToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachForgeToBuild404JSONResponse Notification
+type AttachForgeToBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachForgeToBuild404JSONResponse) VisitAttachForgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9179,7 +9913,9 @@ func (response AttachForgeToBuild404JSONResponse) VisitAttachForgeToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachForgeToBuild412JSONResponse Notification
+type AttachForgeToBuild412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachForgeToBuild412JSONResponse) VisitAttachForgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9188,7 +9924,7 @@ func (response AttachForgeToBuild412JSONResponse) VisitAttachForgeToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachForgeToBuild422JSONResponse Notification
+type AttachForgeToBuild422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachForgeToBuild422JSONResponse) VisitAttachForgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9197,7 +9933,9 @@ func (response AttachForgeToBuild422JSONResponse) VisitAttachForgeToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachForgeToBuild500JSONResponse Notification
+type AttachForgeToBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachForgeToBuild500JSONResponse) VisitAttachForgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9206,16 +9944,1048 @@ func (response AttachForgeToBuild500JSONResponse) VisitAttachForgeToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachForgeToBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type ListGroupsRequestObject struct {
+	Params ListGroupsParams
 }
 
-func (response AttachForgeToBuilddefaultJSONResponse) VisitAttachForgeToBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
+type ListGroupsResponseObject interface {
+	VisitListGroupsResponse(w http.ResponseWriter) error
+}
 
-	return json.NewEncoder(w).Encode(response.Body)
+type ListGroups200JSONResponse struct{ GroupsResponseJSONResponse }
+
+func (response ListGroups200JSONResponse) VisitListGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroups403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response ListGroups403JSONResponse) VisitListGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroups500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response ListGroups500JSONResponse) VisitListGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateGroupRequestObject struct {
+	Body *CreateGroupJSONRequestBody
+}
+
+type CreateGroupResponseObject interface {
+	VisitCreateGroupResponse(w http.ResponseWriter) error
+}
+
+type CreateGroup200JSONResponse struct{ GroupResponseJSONResponse }
+
+func (response CreateGroup200JSONResponse) VisitCreateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response CreateGroup400JSONResponse) VisitCreateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response CreateGroup403JSONResponse) VisitCreateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateGroup422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response CreateGroup422JSONResponse) VisitCreateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response CreateGroup500JSONResponse) VisitCreateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+}
+
+type DeleteGroupResponseObject interface {
+	VisitDeleteGroupResponse(w http.ResponseWriter) error
+}
+
+type DeleteGroup200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response DeleteGroup200JSONResponse) VisitDeleteGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroup400JSONResponse struct{ ActionFailedErrorJSONResponse }
+
+func (response DeleteGroup400JSONResponse) VisitDeleteGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response DeleteGroup403JSONResponse) VisitDeleteGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response DeleteGroup404JSONResponse) VisitDeleteGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response DeleteGroup500JSONResponse) VisitDeleteGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ShowGroupRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+}
+
+type ShowGroupResponseObject interface {
+	VisitShowGroupResponse(w http.ResponseWriter) error
+}
+
+type ShowGroup200JSONResponse struct{ GroupResponseJSONResponse }
+
+func (response ShowGroup200JSONResponse) VisitShowGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ShowGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response ShowGroup403JSONResponse) VisitShowGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ShowGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response ShowGroup404JSONResponse) VisitShowGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ShowGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response ShowGroup500JSONResponse) VisitShowGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateGroupRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Body    *UpdateGroupJSONRequestBody
+}
+
+type UpdateGroupResponseObject interface {
+	VisitUpdateGroupResponse(w http.ResponseWriter) error
+}
+
+type UpdateGroup200JSONResponse struct{ GroupResponseJSONResponse }
+
+func (response UpdateGroup200JSONResponse) VisitUpdateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response UpdateGroup400JSONResponse) VisitUpdateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response UpdateGroup403JSONResponse) VisitUpdateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response UpdateGroup404JSONResponse) VisitUpdateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateGroup422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response UpdateGroup422JSONResponse) VisitUpdateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response UpdateGroup500JSONResponse) VisitUpdateGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromModRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Body    *DeleteGroupFromModJSONRequestBody
+}
+
+type DeleteGroupFromModResponseObject interface {
+	VisitDeleteGroupFromModResponse(w http.ResponseWriter) error
+}
+
+type DeleteGroupFromMod200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response DeleteGroupFromMod200JSONResponse) VisitDeleteGroupFromModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromMod400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteGroupFromMod400JSONResponse) VisitDeleteGroupFromModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromMod403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response DeleteGroupFromMod403JSONResponse) VisitDeleteGroupFromModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromMod404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response DeleteGroupFromMod404JSONResponse) VisitDeleteGroupFromModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromMod412JSONResponse struct{ NotAttachedErrorJSONResponse }
+
+func (response DeleteGroupFromMod412JSONResponse) VisitDeleteGroupFromModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromMod500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response DeleteGroupFromMod500JSONResponse) VisitDeleteGroupFromModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupModsRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Params  ListGroupModsParams
+}
+
+type ListGroupModsResponseObject interface {
+	VisitListGroupModsResponse(w http.ResponseWriter) error
+}
+
+type ListGroupMods200JSONResponse struct{ GroupModsResponseJSONResponse }
+
+func (response ListGroupMods200JSONResponse) VisitListGroupModsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupMods403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response ListGroupMods403JSONResponse) VisitListGroupModsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupMods404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response ListGroupMods404JSONResponse) VisitListGroupModsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupMods500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response ListGroupMods500JSONResponse) VisitListGroupModsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToModRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Body    *AttachGroupToModJSONRequestBody
+}
+
+type AttachGroupToModResponseObject interface {
+	VisitAttachGroupToModResponse(w http.ResponseWriter) error
+}
+
+type AttachGroupToMod200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response AttachGroupToMod200JSONResponse) VisitAttachGroupToModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToMod400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachGroupToMod400JSONResponse) VisitAttachGroupToModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToMod403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response AttachGroupToMod403JSONResponse) VisitAttachGroupToModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToMod404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response AttachGroupToMod404JSONResponse) VisitAttachGroupToModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToMod412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
+
+func (response AttachGroupToMod412JSONResponse) VisitAttachGroupToModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToMod422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response AttachGroupToMod422JSONResponse) VisitAttachGroupToModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToMod500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response AttachGroupToMod500JSONResponse) VisitAttachGroupToModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupModRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Body    *PermitGroupModJSONRequestBody
+}
+
+type PermitGroupModResponseObject interface {
+	VisitPermitGroupModResponse(w http.ResponseWriter) error
+}
+
+type PermitGroupMod200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response PermitGroupMod200JSONResponse) VisitPermitGroupModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupMod400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response PermitGroupMod400JSONResponse) VisitPermitGroupModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupMod403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response PermitGroupMod403JSONResponse) VisitPermitGroupModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupMod404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response PermitGroupMod404JSONResponse) VisitPermitGroupModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupMod412JSONResponse struct{ NotAttachedErrorJSONResponse }
+
+func (response PermitGroupMod412JSONResponse) VisitPermitGroupModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupMod422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response PermitGroupMod422JSONResponse) VisitPermitGroupModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupMod500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response PermitGroupMod500JSONResponse) VisitPermitGroupModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromPackRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Body    *DeleteGroupFromPackJSONRequestBody
+}
+
+type DeleteGroupFromPackResponseObject interface {
+	VisitDeleteGroupFromPackResponse(w http.ResponseWriter) error
+}
+
+type DeleteGroupFromPack200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response DeleteGroupFromPack200JSONResponse) VisitDeleteGroupFromPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromPack400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteGroupFromPack400JSONResponse) VisitDeleteGroupFromPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromPack403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response DeleteGroupFromPack403JSONResponse) VisitDeleteGroupFromPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromPack404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response DeleteGroupFromPack404JSONResponse) VisitDeleteGroupFromPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromPack412JSONResponse struct{ NotAttachedErrorJSONResponse }
+
+func (response DeleteGroupFromPack412JSONResponse) VisitDeleteGroupFromPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromPack500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response DeleteGroupFromPack500JSONResponse) VisitDeleteGroupFromPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupPacksRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Params  ListGroupPacksParams
+}
+
+type ListGroupPacksResponseObject interface {
+	VisitListGroupPacksResponse(w http.ResponseWriter) error
+}
+
+type ListGroupPacks200JSONResponse struct{ GroupPacksResponseJSONResponse }
+
+func (response ListGroupPacks200JSONResponse) VisitListGroupPacksResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupPacks403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response ListGroupPacks403JSONResponse) VisitListGroupPacksResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupPacks404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response ListGroupPacks404JSONResponse) VisitListGroupPacksResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupPacks500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response ListGroupPacks500JSONResponse) VisitListGroupPacksResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToPackRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Body    *AttachGroupToPackJSONRequestBody
+}
+
+type AttachGroupToPackResponseObject interface {
+	VisitAttachGroupToPackResponse(w http.ResponseWriter) error
+}
+
+type AttachGroupToPack200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response AttachGroupToPack200JSONResponse) VisitAttachGroupToPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToPack400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachGroupToPack400JSONResponse) VisitAttachGroupToPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToPack403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response AttachGroupToPack403JSONResponse) VisitAttachGroupToPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToPack404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response AttachGroupToPack404JSONResponse) VisitAttachGroupToPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToPack412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
+
+func (response AttachGroupToPack412JSONResponse) VisitAttachGroupToPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToPack422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response AttachGroupToPack422JSONResponse) VisitAttachGroupToPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToPack500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response AttachGroupToPack500JSONResponse) VisitAttachGroupToPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupPackRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Body    *PermitGroupPackJSONRequestBody
+}
+
+type PermitGroupPackResponseObject interface {
+	VisitPermitGroupPackResponse(w http.ResponseWriter) error
+}
+
+type PermitGroupPack200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response PermitGroupPack200JSONResponse) VisitPermitGroupPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupPack400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response PermitGroupPack400JSONResponse) VisitPermitGroupPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupPack403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response PermitGroupPack403JSONResponse) VisitPermitGroupPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupPack404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response PermitGroupPack404JSONResponse) VisitPermitGroupPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupPack412JSONResponse struct{ NotAttachedErrorJSONResponse }
+
+func (response PermitGroupPack412JSONResponse) VisitPermitGroupPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupPack422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response PermitGroupPack422JSONResponse) VisitPermitGroupPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupPack500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response PermitGroupPack500JSONResponse) VisitPermitGroupPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromUserRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Body    *DeleteGroupFromUserJSONRequestBody
+}
+
+type DeleteGroupFromUserResponseObject interface {
+	VisitDeleteGroupFromUserResponse(w http.ResponseWriter) error
+}
+
+type DeleteGroupFromUser200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response DeleteGroupFromUser200JSONResponse) VisitDeleteGroupFromUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteGroupFromUser400JSONResponse) VisitDeleteGroupFromUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response DeleteGroupFromUser403JSONResponse) VisitDeleteGroupFromUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromUser404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response DeleteGroupFromUser404JSONResponse) VisitDeleteGroupFromUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromUser412JSONResponse struct{ NotAttachedErrorJSONResponse }
+
+func (response DeleteGroupFromUser412JSONResponse) VisitDeleteGroupFromUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGroupFromUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response DeleteGroupFromUser500JSONResponse) VisitDeleteGroupFromUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupUsersRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Params  ListGroupUsersParams
+}
+
+type ListGroupUsersResponseObject interface {
+	VisitListGroupUsersResponse(w http.ResponseWriter) error
+}
+
+type ListGroupUsers200JSONResponse struct{ GroupUsersResponseJSONResponse }
+
+func (response ListGroupUsers200JSONResponse) VisitListGroupUsersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupUsers403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response ListGroupUsers403JSONResponse) VisitListGroupUsersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupUsers404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response ListGroupUsers404JSONResponse) VisitListGroupUsersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListGroupUsers500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response ListGroupUsers500JSONResponse) VisitListGroupUsersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToUserRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Body    *AttachGroupToUserJSONRequestBody
+}
+
+type AttachGroupToUserResponseObject interface {
+	VisitAttachGroupToUserResponse(w http.ResponseWriter) error
+}
+
+type AttachGroupToUser200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response AttachGroupToUser200JSONResponse) VisitAttachGroupToUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachGroupToUser400JSONResponse) VisitAttachGroupToUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response AttachGroupToUser403JSONResponse) VisitAttachGroupToUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToUser404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response AttachGroupToUser404JSONResponse) VisitAttachGroupToUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToUser412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
+
+func (response AttachGroupToUser412JSONResponse) VisitAttachGroupToUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToUser422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response AttachGroupToUser422JSONResponse) VisitAttachGroupToUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachGroupToUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response AttachGroupToUser500JSONResponse) VisitAttachGroupToUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupUserRequestObject struct {
+	GroupID GroupID `json:"group_id"`
+	Body    *PermitGroupUserJSONRequestBody
+}
+
+type PermitGroupUserResponseObject interface {
+	VisitPermitGroupUserResponse(w http.ResponseWriter) error
+}
+
+type PermitGroupUser200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response PermitGroupUser200JSONResponse) VisitPermitGroupUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response PermitGroupUser400JSONResponse) VisitPermitGroupUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response PermitGroupUser403JSONResponse) VisitPermitGroupUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupUser404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response PermitGroupUser404JSONResponse) VisitPermitGroupUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupUser412JSONResponse struct{ NotAttachedErrorJSONResponse }
+
+func (response PermitGroupUser412JSONResponse) VisitPermitGroupUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupUser422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response PermitGroupUser422JSONResponse) VisitPermitGroupUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitGroupUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response PermitGroupUser500JSONResponse) VisitPermitGroupUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type ListMinecraftsRequestObject struct {
@@ -9226,7 +10996,7 @@ type ListMinecraftsResponseObject interface {
 	VisitListMinecraftsResponse(w http.ResponseWriter) error
 }
 
-type ListMinecrafts200JSONResponse Minecrafts
+type ListMinecrafts200JSONResponse struct{ MinecraftsResponseJSONResponse }
 
 func (response ListMinecrafts200JSONResponse) VisitListMinecraftsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9235,7 +11005,7 @@ func (response ListMinecrafts200JSONResponse) VisitListMinecraftsResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListMinecrafts403JSONResponse Notification
+type ListMinecrafts403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListMinecrafts403JSONResponse) VisitListMinecraftsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9244,25 +11014,15 @@ func (response ListMinecrafts403JSONResponse) VisitListMinecraftsResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListMinecrafts500JSONResponse Notification
+type ListMinecrafts500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListMinecrafts500JSONResponse) VisitListMinecraftsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type ListMinecraftsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListMinecraftsdefaultJSONResponse) VisitListMinecraftsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type UpdateMinecraftRequestObject struct {
@@ -9272,7 +11032,7 @@ type UpdateMinecraftResponseObject interface {
 	VisitUpdateMinecraftResponse(w http.ResponseWriter) error
 }
 
-type UpdateMinecraft200JSONResponse Notification
+type UpdateMinecraft200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response UpdateMinecraft200JSONResponse) VisitUpdateMinecraftResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9281,7 +11041,7 @@ func (response UpdateMinecraft200JSONResponse) VisitUpdateMinecraftResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateMinecraft403JSONResponse Notification
+type UpdateMinecraft403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdateMinecraft403JSONResponse) VisitUpdateMinecraftResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9290,7 +11050,9 @@ func (response UpdateMinecraft403JSONResponse) VisitUpdateMinecraftResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateMinecraft500JSONResponse Notification
+type UpdateMinecraft500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdateMinecraft500JSONResponse) VisitUpdateMinecraftResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9299,7 +11061,9 @@ func (response UpdateMinecraft500JSONResponse) VisitUpdateMinecraftResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateMinecraft503JSONResponse Notification
+type UpdateMinecraft503JSONResponse struct {
+	RemoteUnavailableErrorJSONResponse
+}
 
 func (response UpdateMinecraft503JSONResponse) VisitUpdateMinecraftResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9308,20 +11072,8 @@ func (response UpdateMinecraft503JSONResponse) VisitUpdateMinecraftResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateMinecraftdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response UpdateMinecraftdefaultJSONResponse) VisitUpdateMinecraftResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteMinecraftFromBuildRequestObject struct {
-	MinecraftId string `json:"minecraft_id"`
+	MinecraftID MinecraftID `json:"minecraft_id"`
 	Body        *DeleteMinecraftFromBuildJSONRequestBody
 }
 
@@ -9329,7 +11081,7 @@ type DeleteMinecraftFromBuildResponseObject interface {
 	VisitDeleteMinecraftFromBuildResponse(w http.ResponseWriter) error
 }
 
-type DeleteMinecraftFromBuild200JSONResponse Notification
+type DeleteMinecraftFromBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteMinecraftFromBuild200JSONResponse) VisitDeleteMinecraftFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9338,7 +11090,16 @@ func (response DeleteMinecraftFromBuild200JSONResponse) VisitDeleteMinecraftFrom
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteMinecraftFromBuild403JSONResponse Notification
+type DeleteMinecraftFromBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteMinecraftFromBuild400JSONResponse) VisitDeleteMinecraftFromBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteMinecraftFromBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteMinecraftFromBuild403JSONResponse) VisitDeleteMinecraftFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9347,7 +11108,7 @@ func (response DeleteMinecraftFromBuild403JSONResponse) VisitDeleteMinecraftFrom
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteMinecraftFromBuild404JSONResponse Notification
+type DeleteMinecraftFromBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteMinecraftFromBuild404JSONResponse) VisitDeleteMinecraftFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9356,7 +11117,7 @@ func (response DeleteMinecraftFromBuild404JSONResponse) VisitDeleteMinecraftFrom
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteMinecraftFromBuild412JSONResponse Notification
+type DeleteMinecraftFromBuild412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeleteMinecraftFromBuild412JSONResponse) VisitDeleteMinecraftFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9365,7 +11126,9 @@ func (response DeleteMinecraftFromBuild412JSONResponse) VisitDeleteMinecraftFrom
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteMinecraftFromBuild500JSONResponse Notification
+type DeleteMinecraftFromBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteMinecraftFromBuild500JSONResponse) VisitDeleteMinecraftFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9374,20 +11137,8 @@ func (response DeleteMinecraftFromBuild500JSONResponse) VisitDeleteMinecraftFrom
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteMinecraftFromBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteMinecraftFromBuilddefaultJSONResponse) VisitDeleteMinecraftFromBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListMinecraftBuildsRequestObject struct {
-	MinecraftId string `json:"minecraft_id"`
+	MinecraftID MinecraftID `json:"minecraft_id"`
 	Params      ListMinecraftBuildsParams
 }
 
@@ -9395,7 +11146,9 @@ type ListMinecraftBuildsResponseObject interface {
 	VisitListMinecraftBuildsResponse(w http.ResponseWriter) error
 }
 
-type ListMinecraftBuilds200JSONResponse MinecraftBuilds
+type ListMinecraftBuilds200JSONResponse struct {
+	MinecraftBuildsResponseJSONResponse
+}
 
 func (response ListMinecraftBuilds200JSONResponse) VisitListMinecraftBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9404,7 +11157,7 @@ func (response ListMinecraftBuilds200JSONResponse) VisitListMinecraftBuildsRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListMinecraftBuilds403JSONResponse Notification
+type ListMinecraftBuilds403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListMinecraftBuilds403JSONResponse) VisitListMinecraftBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9413,7 +11166,7 @@ func (response ListMinecraftBuilds403JSONResponse) VisitListMinecraftBuildsRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListMinecraftBuilds404JSONResponse Notification
+type ListMinecraftBuilds404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListMinecraftBuilds404JSONResponse) VisitListMinecraftBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9422,7 +11175,9 @@ func (response ListMinecraftBuilds404JSONResponse) VisitListMinecraftBuildsRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListMinecraftBuilds500JSONResponse Notification
+type ListMinecraftBuilds500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListMinecraftBuilds500JSONResponse) VisitListMinecraftBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9431,20 +11186,8 @@ func (response ListMinecraftBuilds500JSONResponse) VisitListMinecraftBuildsRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListMinecraftBuildsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListMinecraftBuildsdefaultJSONResponse) VisitListMinecraftBuildsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachMinecraftToBuildRequestObject struct {
-	MinecraftId string `json:"minecraft_id"`
+	MinecraftID MinecraftID `json:"minecraft_id"`
 	Body        *AttachMinecraftToBuildJSONRequestBody
 }
 
@@ -9452,7 +11195,7 @@ type AttachMinecraftToBuildResponseObject interface {
 	VisitAttachMinecraftToBuildResponse(w http.ResponseWriter) error
 }
 
-type AttachMinecraftToBuild200JSONResponse Notification
+type AttachMinecraftToBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachMinecraftToBuild200JSONResponse) VisitAttachMinecraftToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9461,7 +11204,16 @@ func (response AttachMinecraftToBuild200JSONResponse) VisitAttachMinecraftToBuil
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachMinecraftToBuild403JSONResponse Notification
+type AttachMinecraftToBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachMinecraftToBuild400JSONResponse) VisitAttachMinecraftToBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachMinecraftToBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachMinecraftToBuild403JSONResponse) VisitAttachMinecraftToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9470,7 +11222,7 @@ func (response AttachMinecraftToBuild403JSONResponse) VisitAttachMinecraftToBuil
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachMinecraftToBuild404JSONResponse Notification
+type AttachMinecraftToBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachMinecraftToBuild404JSONResponse) VisitAttachMinecraftToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9479,7 +11231,9 @@ func (response AttachMinecraftToBuild404JSONResponse) VisitAttachMinecraftToBuil
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachMinecraftToBuild412JSONResponse Notification
+type AttachMinecraftToBuild412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachMinecraftToBuild412JSONResponse) VisitAttachMinecraftToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9488,7 +11242,7 @@ func (response AttachMinecraftToBuild412JSONResponse) VisitAttachMinecraftToBuil
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachMinecraftToBuild422JSONResponse Notification
+type AttachMinecraftToBuild422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachMinecraftToBuild422JSONResponse) VisitAttachMinecraftToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9497,25 +11251,15 @@ func (response AttachMinecraftToBuild422JSONResponse) VisitAttachMinecraftToBuil
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachMinecraftToBuild500JSONResponse Notification
+type AttachMinecraftToBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachMinecraftToBuild500JSONResponse) VisitAttachMinecraftToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachMinecraftToBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachMinecraftToBuilddefaultJSONResponse) VisitAttachMinecraftToBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type ListModsRequestObject struct {
@@ -9526,7 +11270,7 @@ type ListModsResponseObject interface {
 	VisitListModsResponse(w http.ResponseWriter) error
 }
 
-type ListMods200JSONResponse Mods
+type ListMods200JSONResponse struct{ ModsResponseJSONResponse }
 
 func (response ListMods200JSONResponse) VisitListModsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9535,7 +11279,7 @@ func (response ListMods200JSONResponse) VisitListModsResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListMods403JSONResponse Notification
+type ListMods403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListMods403JSONResponse) VisitListModsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9544,25 +11288,15 @@ func (response ListMods403JSONResponse) VisitListModsResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListMods500JSONResponse Notification
+type ListMods500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListMods500JSONResponse) VisitListModsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type ListModsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListModsdefaultJSONResponse) VisitListModsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type CreateModRequestObject struct {
@@ -9573,7 +11307,7 @@ type CreateModResponseObject interface {
 	VisitCreateModResponse(w http.ResponseWriter) error
 }
 
-type CreateMod200JSONResponse Mod
+type CreateMod200JSONResponse struct{ ModResponseJSONResponse }
 
 func (response CreateMod200JSONResponse) VisitCreateModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9582,7 +11316,16 @@ func (response CreateMod200JSONResponse) VisitCreateModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateMod403JSONResponse Notification
+type CreateMod400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response CreateMod400JSONResponse) VisitCreateModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateMod403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response CreateMod403JSONResponse) VisitCreateModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9591,7 +11334,7 @@ func (response CreateMod403JSONResponse) VisitCreateModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateMod422JSONResponse Notification
+type CreateMod422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response CreateMod422JSONResponse) VisitCreateModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9600,7 +11343,9 @@ func (response CreateMod422JSONResponse) VisitCreateModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateMod500JSONResponse Notification
+type CreateMod500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response CreateMod500JSONResponse) VisitCreateModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9609,27 +11354,15 @@ func (response CreateMod500JSONResponse) VisitCreateModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateModdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response CreateModdefaultJSONResponse) VisitCreateModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteModRequestObject struct {
-	ModId string `json:"mod_id"`
+	ModID ModID `json:"mod_id"`
 }
 
 type DeleteModResponseObject interface {
 	VisitDeleteModResponse(w http.ResponseWriter) error
 }
 
-type DeleteMod200JSONResponse Notification
+type DeleteMod200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteMod200JSONResponse) VisitDeleteModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9638,7 +11371,7 @@ func (response DeleteMod200JSONResponse) VisitDeleteModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteMod400JSONResponse Notification
+type DeleteMod400JSONResponse struct{ ActionFailedErrorJSONResponse }
 
 func (response DeleteMod400JSONResponse) VisitDeleteModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9647,7 +11380,7 @@ func (response DeleteMod400JSONResponse) VisitDeleteModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteMod403JSONResponse Notification
+type DeleteMod403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteMod403JSONResponse) VisitDeleteModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9656,7 +11389,7 @@ func (response DeleteMod403JSONResponse) VisitDeleteModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteMod404JSONResponse Notification
+type DeleteMod404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteMod404JSONResponse) VisitDeleteModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9665,7 +11398,9 @@ func (response DeleteMod404JSONResponse) VisitDeleteModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteMod500JSONResponse Notification
+type DeleteMod500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteMod500JSONResponse) VisitDeleteModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9674,27 +11409,15 @@ func (response DeleteMod500JSONResponse) VisitDeleteModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteModdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteModdefaultJSONResponse) VisitDeleteModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ShowModRequestObject struct {
-	ModId string `json:"mod_id"`
+	ModID ModID `json:"mod_id"`
 }
 
 type ShowModResponseObject interface {
 	VisitShowModResponse(w http.ResponseWriter) error
 }
 
-type ShowMod200JSONResponse Mod
+type ShowMod200JSONResponse struct{ ModResponseJSONResponse }
 
 func (response ShowMod200JSONResponse) VisitShowModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9703,7 +11426,7 @@ func (response ShowMod200JSONResponse) VisitShowModResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowMod403JSONResponse Notification
+type ShowMod403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ShowMod403JSONResponse) VisitShowModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9712,7 +11435,7 @@ func (response ShowMod403JSONResponse) VisitShowModResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowMod404JSONResponse Notification
+type ShowMod404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ShowMod404JSONResponse) VisitShowModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9721,7 +11444,9 @@ func (response ShowMod404JSONResponse) VisitShowModResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowMod500JSONResponse Notification
+type ShowMod500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ShowMod500JSONResponse) VisitShowModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9730,20 +11455,8 @@ func (response ShowMod500JSONResponse) VisitShowModResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowModdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ShowModdefaultJSONResponse) VisitShowModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type UpdateModRequestObject struct {
-	ModId string `json:"mod_id"`
+	ModID ModID `json:"mod_id"`
 	Body  *UpdateModJSONRequestBody
 }
 
@@ -9751,7 +11464,7 @@ type UpdateModResponseObject interface {
 	VisitUpdateModResponse(w http.ResponseWriter) error
 }
 
-type UpdateMod200JSONResponse Mod
+type UpdateMod200JSONResponse struct{ ModResponseJSONResponse }
 
 func (response UpdateMod200JSONResponse) VisitUpdateModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9760,7 +11473,16 @@ func (response UpdateMod200JSONResponse) VisitUpdateModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateMod403JSONResponse Notification
+type UpdateMod400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response UpdateMod400JSONResponse) VisitUpdateModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateMod403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdateMod403JSONResponse) VisitUpdateModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9769,7 +11491,7 @@ func (response UpdateMod403JSONResponse) VisitUpdateModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateMod404JSONResponse Notification
+type UpdateMod404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response UpdateMod404JSONResponse) VisitUpdateModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9778,7 +11500,7 @@ func (response UpdateMod404JSONResponse) VisitUpdateModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateMod422JSONResponse Notification
+type UpdateMod422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response UpdateMod422JSONResponse) VisitUpdateModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9787,7 +11509,9 @@ func (response UpdateMod422JSONResponse) VisitUpdateModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateMod500JSONResponse Notification
+type UpdateMod500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdateMod500JSONResponse) VisitUpdateModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -9796,293 +11520,390 @@ func (response UpdateMod500JSONResponse) VisitUpdateModResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateModdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type DeleteModAvatarRequestObject struct {
+	ModID ModID `json:"mod_id"`
 }
 
-func (response UpdateModdefaultJSONResponse) VisitUpdateModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
+type DeleteModAvatarResponseObject interface {
+	VisitDeleteModAvatarResponse(w http.ResponseWriter) error
 }
 
-type DeleteModFromTeamRequestObject struct {
-	ModId string `json:"mod_id"`
-	Body  *DeleteModFromTeamJSONRequestBody
-}
+type DeleteModAvatar200JSONResponse struct{ ModAvatarResponseJSONResponse }
 
-type DeleteModFromTeamResponseObject interface {
-	VisitDeleteModFromTeamResponse(w http.ResponseWriter) error
-}
-
-type DeleteModFromTeam200JSONResponse Notification
-
-func (response DeleteModFromTeam200JSONResponse) VisitDeleteModFromTeamResponse(w http.ResponseWriter) error {
+func (response DeleteModAvatar200JSONResponse) VisitDeleteModAvatarResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteModFromTeam403JSONResponse Notification
+type DeleteModAvatar400JSONResponse struct{ ActionFailedErrorJSONResponse }
 
-func (response DeleteModFromTeam403JSONResponse) VisitDeleteModFromTeamResponse(w http.ResponseWriter) error {
+func (response DeleteModAvatar400JSONResponse) VisitDeleteModAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteModAvatar403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response DeleteModAvatar403JSONResponse) VisitDeleteModAvatarResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteModFromTeam404JSONResponse Notification
+type DeleteModAvatar404JSONResponse struct{ NotFoundErrorJSONResponse }
 
-func (response DeleteModFromTeam404JSONResponse) VisitDeleteModFromTeamResponse(w http.ResponseWriter) error {
+func (response DeleteModAvatar404JSONResponse) VisitDeleteModAvatarResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteModFromTeam412JSONResponse Notification
-
-func (response DeleteModFromTeam412JSONResponse) VisitDeleteModFromTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
+type DeleteModAvatar500JSONResponse struct {
+	InternalServerErrorJSONResponse
 }
 
-type DeleteModFromTeam500JSONResponse Notification
-
-func (response DeleteModFromTeam500JSONResponse) VisitDeleteModFromTeamResponse(w http.ResponseWriter) error {
+func (response DeleteModAvatar500JSONResponse) VisitDeleteModAvatarResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteModFromTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type CreateModAvatarRequestObject struct {
+	ModID ModID `json:"mod_id"`
+	Body  *multipart.Reader
 }
 
-func (response DeleteModFromTeamdefaultJSONResponse) VisitDeleteModFromTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
+type CreateModAvatarResponseObject interface {
+	VisitCreateModAvatarResponse(w http.ResponseWriter) error
 }
 
-type ListModTeamsRequestObject struct {
-	ModId  string `json:"mod_id"`
-	Params ListModTeamsParams
-}
+type CreateModAvatar200JSONResponse struct{ ModAvatarResponseJSONResponse }
 
-type ListModTeamsResponseObject interface {
-	VisitListModTeamsResponse(w http.ResponseWriter) error
-}
-
-type ListModTeams200JSONResponse ModTeams
-
-func (response ListModTeams200JSONResponse) VisitListModTeamsResponse(w http.ResponseWriter) error {
+func (response CreateModAvatar200JSONResponse) VisitCreateModAvatarResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListModTeams403JSONResponse Notification
+type CreateModAvatar400JSONResponse struct{ BadRequestErrorJSONResponse }
 
-func (response ListModTeams403JSONResponse) VisitListModTeamsResponse(w http.ResponseWriter) error {
+func (response CreateModAvatar400JSONResponse) VisitCreateModAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateModAvatar403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response CreateModAvatar403JSONResponse) VisitCreateModAvatarResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListModTeams404JSONResponse Notification
+type CreateModAvatar404JSONResponse struct{ NotFoundErrorJSONResponse }
 
-func (response ListModTeams404JSONResponse) VisitListModTeamsResponse(w http.ResponseWriter) error {
+func (response CreateModAvatar404JSONResponse) VisitCreateModAvatarResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListModTeams500JSONResponse Notification
+type CreateModAvatar422JSONResponse struct{ ValidationErrorJSONResponse }
 
-func (response ListModTeams500JSONResponse) VisitListModTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListModTeamsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListModTeamsdefaultJSONResponse) VisitListModTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type AttachModToTeamRequestObject struct {
-	ModId string `json:"mod_id"`
-	Body  *AttachModToTeamJSONRequestBody
-}
-
-type AttachModToTeamResponseObject interface {
-	VisitAttachModToTeamResponse(w http.ResponseWriter) error
-}
-
-type AttachModToTeam200JSONResponse Notification
-
-func (response AttachModToTeam200JSONResponse) VisitAttachModToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachModToTeam403JSONResponse Notification
-
-func (response AttachModToTeam403JSONResponse) VisitAttachModToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachModToTeam404JSONResponse Notification
-
-func (response AttachModToTeam404JSONResponse) VisitAttachModToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachModToTeam412JSONResponse Notification
-
-func (response AttachModToTeam412JSONResponse) VisitAttachModToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachModToTeam422JSONResponse Notification
-
-func (response AttachModToTeam422JSONResponse) VisitAttachModToTeamResponse(w http.ResponseWriter) error {
+func (response CreateModAvatar422JSONResponse) VisitCreateModAvatarResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(422)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachModToTeam500JSONResponse Notification
+type CreateModAvatar500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
-func (response AttachModToTeam500JSONResponse) VisitAttachModToTeamResponse(w http.ResponseWriter) error {
+func (response CreateModAvatar500JSONResponse) VisitCreateModAvatarResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachModToTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type DeleteModFromGroupRequestObject struct {
+	ModID ModID `json:"mod_id"`
+	Body  *DeleteModFromGroupJSONRequestBody
 }
 
-func (response AttachModToTeamdefaultJSONResponse) VisitAttachModToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
+type DeleteModFromGroupResponseObject interface {
+	VisitDeleteModFromGroupResponse(w http.ResponseWriter) error
 }
 
-type PermitModTeamRequestObject struct {
-	ModId string `json:"mod_id"`
-	Body  *PermitModTeamJSONRequestBody
-}
+type DeleteModFromGroup200JSONResponse struct{ SuccessMessageJSONResponse }
 
-type PermitModTeamResponseObject interface {
-	VisitPermitModTeamResponse(w http.ResponseWriter) error
-}
-
-type PermitModTeam200JSONResponse Notification
-
-func (response PermitModTeam200JSONResponse) VisitPermitModTeamResponse(w http.ResponseWriter) error {
+func (response DeleteModFromGroup200JSONResponse) VisitDeleteModFromGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModTeam403JSONResponse Notification
+type DeleteModFromGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
 
-func (response PermitModTeam403JSONResponse) VisitPermitModTeamResponse(w http.ResponseWriter) error {
+func (response DeleteModFromGroup400JSONResponse) VisitDeleteModFromGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteModFromGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response DeleteModFromGroup403JSONResponse) VisitDeleteModFromGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModTeam404JSONResponse Notification
+type DeleteModFromGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
 
-func (response PermitModTeam404JSONResponse) VisitPermitModTeamResponse(w http.ResponseWriter) error {
+func (response DeleteModFromGroup404JSONResponse) VisitDeleteModFromGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModTeam412JSONResponse Notification
+type DeleteModFromGroup412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
-func (response PermitModTeam412JSONResponse) VisitPermitModTeamResponse(w http.ResponseWriter) error {
+func (response DeleteModFromGroup412JSONResponse) VisitDeleteModFromGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(412)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModTeam422JSONResponse Notification
-
-func (response PermitModTeam422JSONResponse) VisitPermitModTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
+type DeleteModFromGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
 }
 
-type PermitModTeam500JSONResponse Notification
-
-func (response PermitModTeam500JSONResponse) VisitPermitModTeamResponse(w http.ResponseWriter) error {
+func (response DeleteModFromGroup500JSONResponse) VisitDeleteModFromGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type ListModGroupsRequestObject struct {
+	ModID  ModID `json:"mod_id"`
+	Params ListModGroupsParams
 }
 
-func (response PermitModTeamdefaultJSONResponse) VisitPermitModTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
+type ListModGroupsResponseObject interface {
+	VisitListModGroupsResponse(w http.ResponseWriter) error
+}
 
-	return json.NewEncoder(w).Encode(response.Body)
+type ListModGroups200JSONResponse struct{ ModGroupsResponseJSONResponse }
+
+func (response ListModGroups200JSONResponse) VisitListModGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListModGroups403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response ListModGroups403JSONResponse) VisitListModGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListModGroups404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response ListModGroups404JSONResponse) VisitListModGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListModGroups500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response ListModGroups500JSONResponse) VisitListModGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachModToGroupRequestObject struct {
+	ModID ModID `json:"mod_id"`
+	Body  *AttachModToGroupJSONRequestBody
+}
+
+type AttachModToGroupResponseObject interface {
+	VisitAttachModToGroupResponse(w http.ResponseWriter) error
+}
+
+type AttachModToGroup200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response AttachModToGroup200JSONResponse) VisitAttachModToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachModToGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachModToGroup400JSONResponse) VisitAttachModToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachModToGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response AttachModToGroup403JSONResponse) VisitAttachModToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachModToGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response AttachModToGroup404JSONResponse) VisitAttachModToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachModToGroup412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
+
+func (response AttachModToGroup412JSONResponse) VisitAttachModToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachModToGroup422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response AttachModToGroup422JSONResponse) VisitAttachModToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachModToGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response AttachModToGroup500JSONResponse) VisitAttachModToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitModGroupRequestObject struct {
+	ModID ModID `json:"mod_id"`
+	Body  *PermitModGroupJSONRequestBody
+}
+
+type PermitModGroupResponseObject interface {
+	VisitPermitModGroupResponse(w http.ResponseWriter) error
+}
+
+type PermitModGroup200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response PermitModGroup200JSONResponse) VisitPermitModGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitModGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response PermitModGroup400JSONResponse) VisitPermitModGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitModGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response PermitModGroup403JSONResponse) VisitPermitModGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitModGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response PermitModGroup404JSONResponse) VisitPermitModGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitModGroup412JSONResponse struct{ NotAttachedErrorJSONResponse }
+
+func (response PermitModGroup412JSONResponse) VisitPermitModGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitModGroup422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response PermitModGroup422JSONResponse) VisitPermitModGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitModGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response PermitModGroup500JSONResponse) VisitPermitModGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type DeleteModFromUserRequestObject struct {
-	ModId string `json:"mod_id"`
+	ModID ModID `json:"mod_id"`
 	Body  *DeleteModFromUserJSONRequestBody
 }
 
@@ -10090,7 +11911,7 @@ type DeleteModFromUserResponseObject interface {
 	VisitDeleteModFromUserResponse(w http.ResponseWriter) error
 }
 
-type DeleteModFromUser200JSONResponse Notification
+type DeleteModFromUser200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteModFromUser200JSONResponse) VisitDeleteModFromUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10099,7 +11920,16 @@ func (response DeleteModFromUser200JSONResponse) VisitDeleteModFromUserResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteModFromUser403JSONResponse Notification
+type DeleteModFromUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteModFromUser400JSONResponse) VisitDeleteModFromUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteModFromUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteModFromUser403JSONResponse) VisitDeleteModFromUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10108,7 +11938,7 @@ func (response DeleteModFromUser403JSONResponse) VisitDeleteModFromUserResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteModFromUser404JSONResponse Notification
+type DeleteModFromUser404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteModFromUser404JSONResponse) VisitDeleteModFromUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10117,7 +11947,7 @@ func (response DeleteModFromUser404JSONResponse) VisitDeleteModFromUserResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteModFromUser412JSONResponse Notification
+type DeleteModFromUser412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeleteModFromUser412JSONResponse) VisitDeleteModFromUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10126,7 +11956,9 @@ func (response DeleteModFromUser412JSONResponse) VisitDeleteModFromUserResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteModFromUser500JSONResponse Notification
+type DeleteModFromUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteModFromUser500JSONResponse) VisitDeleteModFromUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10135,20 +11967,8 @@ func (response DeleteModFromUser500JSONResponse) VisitDeleteModFromUserResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteModFromUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteModFromUserdefaultJSONResponse) VisitDeleteModFromUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListModUsersRequestObject struct {
-	ModId  string `json:"mod_id"`
+	ModID  ModID `json:"mod_id"`
 	Params ListModUsersParams
 }
 
@@ -10156,7 +11976,7 @@ type ListModUsersResponseObject interface {
 	VisitListModUsersResponse(w http.ResponseWriter) error
 }
 
-type ListModUsers200JSONResponse ModUsers
+type ListModUsers200JSONResponse struct{ ModUsersResponseJSONResponse }
 
 func (response ListModUsers200JSONResponse) VisitListModUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10165,7 +11985,7 @@ func (response ListModUsers200JSONResponse) VisitListModUsersResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListModUsers403JSONResponse Notification
+type ListModUsers403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListModUsers403JSONResponse) VisitListModUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10174,7 +11994,7 @@ func (response ListModUsers403JSONResponse) VisitListModUsersResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListModUsers404JSONResponse Notification
+type ListModUsers404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListModUsers404JSONResponse) VisitListModUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10183,7 +12003,9 @@ func (response ListModUsers404JSONResponse) VisitListModUsersResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListModUsers500JSONResponse Notification
+type ListModUsers500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListModUsers500JSONResponse) VisitListModUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10192,20 +12014,8 @@ func (response ListModUsers500JSONResponse) VisitListModUsersResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListModUsersdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListModUsersdefaultJSONResponse) VisitListModUsersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachModToUserRequestObject struct {
-	ModId string `json:"mod_id"`
+	ModID ModID `json:"mod_id"`
 	Body  *AttachModToUserJSONRequestBody
 }
 
@@ -10213,7 +12023,7 @@ type AttachModToUserResponseObject interface {
 	VisitAttachModToUserResponse(w http.ResponseWriter) error
 }
 
-type AttachModToUser200JSONResponse Notification
+type AttachModToUser200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachModToUser200JSONResponse) VisitAttachModToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10222,7 +12032,16 @@ func (response AttachModToUser200JSONResponse) VisitAttachModToUserResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachModToUser403JSONResponse Notification
+type AttachModToUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachModToUser400JSONResponse) VisitAttachModToUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachModToUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachModToUser403JSONResponse) VisitAttachModToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10231,7 +12050,7 @@ func (response AttachModToUser403JSONResponse) VisitAttachModToUserResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachModToUser404JSONResponse Notification
+type AttachModToUser404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachModToUser404JSONResponse) VisitAttachModToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10240,7 +12059,9 @@ func (response AttachModToUser404JSONResponse) VisitAttachModToUserResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachModToUser412JSONResponse Notification
+type AttachModToUser412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachModToUser412JSONResponse) VisitAttachModToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10249,7 +12070,7 @@ func (response AttachModToUser412JSONResponse) VisitAttachModToUserResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachModToUser422JSONResponse Notification
+type AttachModToUser422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachModToUser422JSONResponse) VisitAttachModToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10258,7 +12079,9 @@ func (response AttachModToUser422JSONResponse) VisitAttachModToUserResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachModToUser500JSONResponse Notification
+type AttachModToUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachModToUser500JSONResponse) VisitAttachModToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10267,20 +12090,8 @@ func (response AttachModToUser500JSONResponse) VisitAttachModToUserResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachModToUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachModToUserdefaultJSONResponse) VisitAttachModToUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type PermitModUserRequestObject struct {
-	ModId string `json:"mod_id"`
+	ModID ModID `json:"mod_id"`
 	Body  *PermitModUserJSONRequestBody
 }
 
@@ -10288,7 +12099,7 @@ type PermitModUserResponseObject interface {
 	VisitPermitModUserResponse(w http.ResponseWriter) error
 }
 
-type PermitModUser200JSONResponse Notification
+type PermitModUser200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response PermitModUser200JSONResponse) VisitPermitModUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10297,7 +12108,16 @@ func (response PermitModUser200JSONResponse) VisitPermitModUserResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModUser403JSONResponse Notification
+type PermitModUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response PermitModUser400JSONResponse) VisitPermitModUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitModUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response PermitModUser403JSONResponse) VisitPermitModUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10306,7 +12126,7 @@ func (response PermitModUser403JSONResponse) VisitPermitModUserResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModUser404JSONResponse Notification
+type PermitModUser404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response PermitModUser404JSONResponse) VisitPermitModUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10315,7 +12135,7 @@ func (response PermitModUser404JSONResponse) VisitPermitModUserResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModUser412JSONResponse Notification
+type PermitModUser412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response PermitModUser412JSONResponse) VisitPermitModUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10324,7 +12144,7 @@ func (response PermitModUser412JSONResponse) VisitPermitModUserResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModUser422JSONResponse Notification
+type PermitModUser422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response PermitModUser422JSONResponse) VisitPermitModUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10333,7 +12153,9 @@ func (response PermitModUser422JSONResponse) VisitPermitModUserResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModUser500JSONResponse Notification
+type PermitModUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response PermitModUser500JSONResponse) VisitPermitModUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10342,20 +12164,8 @@ func (response PermitModUser500JSONResponse) VisitPermitModUserResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitModUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response PermitModUserdefaultJSONResponse) VisitPermitModUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListVersionsRequestObject struct {
-	ModId  string `json:"mod_id"`
+	ModID  ModID `json:"mod_id"`
 	Params ListVersionsParams
 }
 
@@ -10363,7 +12173,7 @@ type ListVersionsResponseObject interface {
 	VisitListVersionsResponse(w http.ResponseWriter) error
 }
 
-type ListVersions200JSONResponse Versions
+type ListVersions200JSONResponse struct{ VersionsResponseJSONResponse }
 
 func (response ListVersions200JSONResponse) VisitListVersionsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10372,7 +12182,7 @@ func (response ListVersions200JSONResponse) VisitListVersionsResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListVersions403JSONResponse Notification
+type ListVersions403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListVersions403JSONResponse) VisitListVersionsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10381,7 +12191,7 @@ func (response ListVersions403JSONResponse) VisitListVersionsResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListVersions404JSONResponse Notification
+type ListVersions404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListVersions404JSONResponse) VisitListVersionsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10390,7 +12200,9 @@ func (response ListVersions404JSONResponse) VisitListVersionsResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListVersions500JSONResponse Notification
+type ListVersions500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListVersions500JSONResponse) VisitListVersionsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10399,20 +12211,8 @@ func (response ListVersions500JSONResponse) VisitListVersionsResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListVersionsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListVersionsdefaultJSONResponse) VisitListVersionsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type CreateVersionRequestObject struct {
-	ModId string `json:"mod_id"`
+	ModID ModID `json:"mod_id"`
 	Body  *CreateVersionJSONRequestBody
 }
 
@@ -10420,7 +12220,7 @@ type CreateVersionResponseObject interface {
 	VisitCreateVersionResponse(w http.ResponseWriter) error
 }
 
-type CreateVersion200JSONResponse Version
+type CreateVersion200JSONResponse struct{ VersionResponseJSONResponse }
 
 func (response CreateVersion200JSONResponse) VisitCreateVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10429,7 +12229,16 @@ func (response CreateVersion200JSONResponse) VisitCreateVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateVersion403JSONResponse Notification
+type CreateVersion400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response CreateVersion400JSONResponse) VisitCreateVersionResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateVersion403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response CreateVersion403JSONResponse) VisitCreateVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10438,7 +12247,7 @@ func (response CreateVersion403JSONResponse) VisitCreateVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateVersion404JSONResponse Notification
+type CreateVersion404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response CreateVersion404JSONResponse) VisitCreateVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10447,7 +12256,7 @@ func (response CreateVersion404JSONResponse) VisitCreateVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateVersion422JSONResponse Notification
+type CreateVersion422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response CreateVersion422JSONResponse) VisitCreateVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10456,7 +12265,9 @@ func (response CreateVersion422JSONResponse) VisitCreateVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateVersion500JSONResponse Notification
+type CreateVersion500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response CreateVersion500JSONResponse) VisitCreateVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10465,28 +12276,16 @@ func (response CreateVersion500JSONResponse) VisitCreateVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateVersiondefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response CreateVersiondefaultJSONResponse) VisitCreateVersionResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteVersionRequestObject struct {
-	ModId     string `json:"mod_id"`
-	VersionId string `json:"version_id"`
+	ModID     ModID     `json:"mod_id"`
+	VersionID VersionID `json:"version_id"`
 }
 
 type DeleteVersionResponseObject interface {
 	VisitDeleteVersionResponse(w http.ResponseWriter) error
 }
 
-type DeleteVersion200JSONResponse Notification
+type DeleteVersion200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteVersion200JSONResponse) VisitDeleteVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10495,7 +12294,7 @@ func (response DeleteVersion200JSONResponse) VisitDeleteVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteVersion400JSONResponse Notification
+type DeleteVersion400JSONResponse struct{ ActionFailedErrorJSONResponse }
 
 func (response DeleteVersion400JSONResponse) VisitDeleteVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10504,7 +12303,7 @@ func (response DeleteVersion400JSONResponse) VisitDeleteVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteVersion403JSONResponse Notification
+type DeleteVersion403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteVersion403JSONResponse) VisitDeleteVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10513,7 +12312,7 @@ func (response DeleteVersion403JSONResponse) VisitDeleteVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteVersion404JSONResponse Notification
+type DeleteVersion404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteVersion404JSONResponse) VisitDeleteVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10522,7 +12321,9 @@ func (response DeleteVersion404JSONResponse) VisitDeleteVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteVersion500JSONResponse Notification
+type DeleteVersion500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteVersion500JSONResponse) VisitDeleteVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10531,28 +12332,16 @@ func (response DeleteVersion500JSONResponse) VisitDeleteVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteVersiondefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteVersiondefaultJSONResponse) VisitDeleteVersionResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ShowVersionRequestObject struct {
-	ModId     string `json:"mod_id"`
-	VersionId string `json:"version_id"`
+	ModID     ModID     `json:"mod_id"`
+	VersionID VersionID `json:"version_id"`
 }
 
 type ShowVersionResponseObject interface {
 	VisitShowVersionResponse(w http.ResponseWriter) error
 }
 
-type ShowVersion200JSONResponse Version
+type ShowVersion200JSONResponse struct{ VersionResponseJSONResponse }
 
 func (response ShowVersion200JSONResponse) VisitShowVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10561,7 +12350,7 @@ func (response ShowVersion200JSONResponse) VisitShowVersionResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowVersion403JSONResponse Notification
+type ShowVersion403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ShowVersion403JSONResponse) VisitShowVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10570,7 +12359,7 @@ func (response ShowVersion403JSONResponse) VisitShowVersionResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowVersion404JSONResponse Notification
+type ShowVersion404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ShowVersion404JSONResponse) VisitShowVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10579,7 +12368,9 @@ func (response ShowVersion404JSONResponse) VisitShowVersionResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowVersion500JSONResponse Notification
+type ShowVersion500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ShowVersion500JSONResponse) VisitShowVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10588,21 +12379,9 @@ func (response ShowVersion500JSONResponse) VisitShowVersionResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowVersiondefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ShowVersiondefaultJSONResponse) VisitShowVersionResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type UpdateVersionRequestObject struct {
-	ModId     string `json:"mod_id"`
-	VersionId string `json:"version_id"`
+	ModID     ModID     `json:"mod_id"`
+	VersionID VersionID `json:"version_id"`
 	Body      *UpdateVersionJSONRequestBody
 }
 
@@ -10610,7 +12389,7 @@ type UpdateVersionResponseObject interface {
 	VisitUpdateVersionResponse(w http.ResponseWriter) error
 }
 
-type UpdateVersion200JSONResponse Version
+type UpdateVersion200JSONResponse struct{ VersionResponseJSONResponse }
 
 func (response UpdateVersion200JSONResponse) VisitUpdateVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10619,7 +12398,16 @@ func (response UpdateVersion200JSONResponse) VisitUpdateVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateVersion403JSONResponse Notification
+type UpdateVersion400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response UpdateVersion400JSONResponse) VisitUpdateVersionResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateVersion403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdateVersion403JSONResponse) VisitUpdateVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10628,7 +12416,7 @@ func (response UpdateVersion403JSONResponse) VisitUpdateVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateVersion404JSONResponse Notification
+type UpdateVersion404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response UpdateVersion404JSONResponse) VisitUpdateVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10637,7 +12425,7 @@ func (response UpdateVersion404JSONResponse) VisitUpdateVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateVersion422JSONResponse Notification
+type UpdateVersion422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response UpdateVersion422JSONResponse) VisitUpdateVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10646,7 +12434,9 @@ func (response UpdateVersion422JSONResponse) VisitUpdateVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateVersion500JSONResponse Notification
+type UpdateVersion500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdateVersion500JSONResponse) VisitUpdateVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10655,21 +12445,9 @@ func (response UpdateVersion500JSONResponse) VisitUpdateVersionResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateVersiondefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response UpdateVersiondefaultJSONResponse) VisitUpdateVersionResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteVersionFromBuildRequestObject struct {
-	ModId     string `json:"mod_id"`
-	VersionId string `json:"version_id"`
+	ModID     ModID     `json:"mod_id"`
+	VersionID VersionID `json:"version_id"`
 	Body      *DeleteVersionFromBuildJSONRequestBody
 }
 
@@ -10677,7 +12455,7 @@ type DeleteVersionFromBuildResponseObject interface {
 	VisitDeleteVersionFromBuildResponse(w http.ResponseWriter) error
 }
 
-type DeleteVersionFromBuild200JSONResponse Notification
+type DeleteVersionFromBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteVersionFromBuild200JSONResponse) VisitDeleteVersionFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10686,7 +12464,16 @@ func (response DeleteVersionFromBuild200JSONResponse) VisitDeleteVersionFromBuil
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteVersionFromBuild403JSONResponse Notification
+type DeleteVersionFromBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteVersionFromBuild400JSONResponse) VisitDeleteVersionFromBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteVersionFromBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteVersionFromBuild403JSONResponse) VisitDeleteVersionFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10695,7 +12482,7 @@ func (response DeleteVersionFromBuild403JSONResponse) VisitDeleteVersionFromBuil
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteVersionFromBuild404JSONResponse Notification
+type DeleteVersionFromBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteVersionFromBuild404JSONResponse) VisitDeleteVersionFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10704,7 +12491,7 @@ func (response DeleteVersionFromBuild404JSONResponse) VisitDeleteVersionFromBuil
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteVersionFromBuild412JSONResponse Notification
+type DeleteVersionFromBuild412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeleteVersionFromBuild412JSONResponse) VisitDeleteVersionFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10713,7 +12500,9 @@ func (response DeleteVersionFromBuild412JSONResponse) VisitDeleteVersionFromBuil
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteVersionFromBuild500JSONResponse Notification
+type DeleteVersionFromBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteVersionFromBuild500JSONResponse) VisitDeleteVersionFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10722,21 +12511,9 @@ func (response DeleteVersionFromBuild500JSONResponse) VisitDeleteVersionFromBuil
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteVersionFromBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteVersionFromBuilddefaultJSONResponse) VisitDeleteVersionFromBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListVersionBuildsRequestObject struct {
-	ModId     string `json:"mod_id"`
-	VersionId string `json:"version_id"`
+	ModID     ModID     `json:"mod_id"`
+	VersionID VersionID `json:"version_id"`
 	Params    ListVersionBuildsParams
 }
 
@@ -10744,7 +12521,9 @@ type ListVersionBuildsResponseObject interface {
 	VisitListVersionBuildsResponse(w http.ResponseWriter) error
 }
 
-type ListVersionBuilds200JSONResponse VersionBuilds
+type ListVersionBuilds200JSONResponse struct {
+	VersionBuildsResponseJSONResponse
+}
 
 func (response ListVersionBuilds200JSONResponse) VisitListVersionBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10753,7 +12532,7 @@ func (response ListVersionBuilds200JSONResponse) VisitListVersionBuildsResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListVersionBuilds403JSONResponse Notification
+type ListVersionBuilds403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListVersionBuilds403JSONResponse) VisitListVersionBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10762,7 +12541,7 @@ func (response ListVersionBuilds403JSONResponse) VisitListVersionBuildsResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListVersionBuilds404JSONResponse Notification
+type ListVersionBuilds404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListVersionBuilds404JSONResponse) VisitListVersionBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10771,7 +12550,9 @@ func (response ListVersionBuilds404JSONResponse) VisitListVersionBuildsResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListVersionBuilds500JSONResponse Notification
+type ListVersionBuilds500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListVersionBuilds500JSONResponse) VisitListVersionBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10780,21 +12561,9 @@ func (response ListVersionBuilds500JSONResponse) VisitListVersionBuildsResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListVersionBuildsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListVersionBuildsdefaultJSONResponse) VisitListVersionBuildsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachVersionToBuildRequestObject struct {
-	ModId     string `json:"mod_id"`
-	VersionId string `json:"version_id"`
+	ModID     ModID     `json:"mod_id"`
+	VersionID VersionID `json:"version_id"`
 	Body      *AttachVersionToBuildJSONRequestBody
 }
 
@@ -10802,7 +12571,7 @@ type AttachVersionToBuildResponseObject interface {
 	VisitAttachVersionToBuildResponse(w http.ResponseWriter) error
 }
 
-type AttachVersionToBuild200JSONResponse Notification
+type AttachVersionToBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachVersionToBuild200JSONResponse) VisitAttachVersionToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10811,7 +12580,16 @@ func (response AttachVersionToBuild200JSONResponse) VisitAttachVersionToBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachVersionToBuild403JSONResponse Notification
+type AttachVersionToBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachVersionToBuild400JSONResponse) VisitAttachVersionToBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachVersionToBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachVersionToBuild403JSONResponse) VisitAttachVersionToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10820,7 +12598,7 @@ func (response AttachVersionToBuild403JSONResponse) VisitAttachVersionToBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachVersionToBuild404JSONResponse Notification
+type AttachVersionToBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachVersionToBuild404JSONResponse) VisitAttachVersionToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10829,7 +12607,9 @@ func (response AttachVersionToBuild404JSONResponse) VisitAttachVersionToBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachVersionToBuild412JSONResponse Notification
+type AttachVersionToBuild412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachVersionToBuild412JSONResponse) VisitAttachVersionToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10838,7 +12618,7 @@ func (response AttachVersionToBuild412JSONResponse) VisitAttachVersionToBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachVersionToBuild422JSONResponse Notification
+type AttachVersionToBuild422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachVersionToBuild422JSONResponse) VisitAttachVersionToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10847,25 +12627,15 @@ func (response AttachVersionToBuild422JSONResponse) VisitAttachVersionToBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachVersionToBuild500JSONResponse Notification
+type AttachVersionToBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachVersionToBuild500JSONResponse) VisitAttachVersionToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachVersionToBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachVersionToBuilddefaultJSONResponse) VisitAttachVersionToBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type ListNeoforgesRequestObject struct {
@@ -10876,7 +12646,7 @@ type ListNeoforgesResponseObject interface {
 	VisitListNeoforgesResponse(w http.ResponseWriter) error
 }
 
-type ListNeoforges200JSONResponse Neoforges
+type ListNeoforges200JSONResponse struct{ NeoforgesResponseJSONResponse }
 
 func (response ListNeoforges200JSONResponse) VisitListNeoforgesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10885,7 +12655,7 @@ func (response ListNeoforges200JSONResponse) VisitListNeoforgesResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListNeoforges403JSONResponse Notification
+type ListNeoforges403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListNeoforges403JSONResponse) VisitListNeoforgesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10894,25 +12664,15 @@ func (response ListNeoforges403JSONResponse) VisitListNeoforgesResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListNeoforges500JSONResponse Notification
+type ListNeoforges500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListNeoforges500JSONResponse) VisitListNeoforgesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type ListNeoforgesdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListNeoforgesdefaultJSONResponse) VisitListNeoforgesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type UpdateNeoforgeRequestObject struct {
@@ -10922,7 +12682,7 @@ type UpdateNeoforgeResponseObject interface {
 	VisitUpdateNeoforgeResponse(w http.ResponseWriter) error
 }
 
-type UpdateNeoforge200JSONResponse Notification
+type UpdateNeoforge200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response UpdateNeoforge200JSONResponse) VisitUpdateNeoforgeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10931,7 +12691,7 @@ func (response UpdateNeoforge200JSONResponse) VisitUpdateNeoforgeResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateNeoforge403JSONResponse Notification
+type UpdateNeoforge403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdateNeoforge403JSONResponse) VisitUpdateNeoforgeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10940,7 +12700,9 @@ func (response UpdateNeoforge403JSONResponse) VisitUpdateNeoforgeResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateNeoforge500JSONResponse Notification
+type UpdateNeoforge500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdateNeoforge500JSONResponse) VisitUpdateNeoforgeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10949,7 +12711,9 @@ func (response UpdateNeoforge500JSONResponse) VisitUpdateNeoforgeResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateNeoforge503JSONResponse Notification
+type UpdateNeoforge503JSONResponse struct {
+	RemoteUnavailableErrorJSONResponse
+}
 
 func (response UpdateNeoforge503JSONResponse) VisitUpdateNeoforgeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10958,20 +12722,8 @@ func (response UpdateNeoforge503JSONResponse) VisitUpdateNeoforgeResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateNeoforgedefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response UpdateNeoforgedefaultJSONResponse) VisitUpdateNeoforgeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteNeoforgeFromBuildRequestObject struct {
-	NeoforgeId string `json:"neoforge_id"`
+	NeoforgeID NeoforgeID `json:"neoforge_id"`
 	Body       *DeleteNeoforgeFromBuildJSONRequestBody
 }
 
@@ -10979,7 +12731,7 @@ type DeleteNeoforgeFromBuildResponseObject interface {
 	VisitDeleteNeoforgeFromBuildResponse(w http.ResponseWriter) error
 }
 
-type DeleteNeoforgeFromBuild200JSONResponse Notification
+type DeleteNeoforgeFromBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteNeoforgeFromBuild200JSONResponse) VisitDeleteNeoforgeFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10988,7 +12740,16 @@ func (response DeleteNeoforgeFromBuild200JSONResponse) VisitDeleteNeoforgeFromBu
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteNeoforgeFromBuild403JSONResponse Notification
+type DeleteNeoforgeFromBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteNeoforgeFromBuild400JSONResponse) VisitDeleteNeoforgeFromBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteNeoforgeFromBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteNeoforgeFromBuild403JSONResponse) VisitDeleteNeoforgeFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -10997,7 +12758,7 @@ func (response DeleteNeoforgeFromBuild403JSONResponse) VisitDeleteNeoforgeFromBu
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteNeoforgeFromBuild404JSONResponse Notification
+type DeleteNeoforgeFromBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteNeoforgeFromBuild404JSONResponse) VisitDeleteNeoforgeFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11006,7 +12767,7 @@ func (response DeleteNeoforgeFromBuild404JSONResponse) VisitDeleteNeoforgeFromBu
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteNeoforgeFromBuild412JSONResponse Notification
+type DeleteNeoforgeFromBuild412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeleteNeoforgeFromBuild412JSONResponse) VisitDeleteNeoforgeFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11015,7 +12776,9 @@ func (response DeleteNeoforgeFromBuild412JSONResponse) VisitDeleteNeoforgeFromBu
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteNeoforgeFromBuild500JSONResponse Notification
+type DeleteNeoforgeFromBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteNeoforgeFromBuild500JSONResponse) VisitDeleteNeoforgeFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11024,20 +12787,8 @@ func (response DeleteNeoforgeFromBuild500JSONResponse) VisitDeleteNeoforgeFromBu
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteNeoforgeFromBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteNeoforgeFromBuilddefaultJSONResponse) VisitDeleteNeoforgeFromBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListNeoforgeBuildsRequestObject struct {
-	NeoforgeId string `json:"neoforge_id"`
+	NeoforgeID NeoforgeID `json:"neoforge_id"`
 	Params     ListNeoforgeBuildsParams
 }
 
@@ -11045,7 +12796,9 @@ type ListNeoforgeBuildsResponseObject interface {
 	VisitListNeoforgeBuildsResponse(w http.ResponseWriter) error
 }
 
-type ListNeoforgeBuilds200JSONResponse NeoforgeBuilds
+type ListNeoforgeBuilds200JSONResponse struct {
+	NeoforgeBuildsResponseJSONResponse
+}
 
 func (response ListNeoforgeBuilds200JSONResponse) VisitListNeoforgeBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11054,7 +12807,7 @@ func (response ListNeoforgeBuilds200JSONResponse) VisitListNeoforgeBuildsRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListNeoforgeBuilds403JSONResponse Notification
+type ListNeoforgeBuilds403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListNeoforgeBuilds403JSONResponse) VisitListNeoforgeBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11063,7 +12816,7 @@ func (response ListNeoforgeBuilds403JSONResponse) VisitListNeoforgeBuildsRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListNeoforgeBuilds404JSONResponse Notification
+type ListNeoforgeBuilds404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListNeoforgeBuilds404JSONResponse) VisitListNeoforgeBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11072,7 +12825,9 @@ func (response ListNeoforgeBuilds404JSONResponse) VisitListNeoforgeBuildsRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListNeoforgeBuilds500JSONResponse Notification
+type ListNeoforgeBuilds500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListNeoforgeBuilds500JSONResponse) VisitListNeoforgeBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11081,20 +12836,8 @@ func (response ListNeoforgeBuilds500JSONResponse) VisitListNeoforgeBuildsRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListNeoforgeBuildsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListNeoforgeBuildsdefaultJSONResponse) VisitListNeoforgeBuildsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachNeoforgeToBuildRequestObject struct {
-	NeoforgeId string `json:"neoforge_id"`
+	NeoforgeID NeoforgeID `json:"neoforge_id"`
 	Body       *AttachNeoforgeToBuildJSONRequestBody
 }
 
@@ -11102,7 +12845,7 @@ type AttachNeoforgeToBuildResponseObject interface {
 	VisitAttachNeoforgeToBuildResponse(w http.ResponseWriter) error
 }
 
-type AttachNeoforgeToBuild200JSONResponse Notification
+type AttachNeoforgeToBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachNeoforgeToBuild200JSONResponse) VisitAttachNeoforgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11111,7 +12854,16 @@ func (response AttachNeoforgeToBuild200JSONResponse) VisitAttachNeoforgeToBuildR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachNeoforgeToBuild403JSONResponse Notification
+type AttachNeoforgeToBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachNeoforgeToBuild400JSONResponse) VisitAttachNeoforgeToBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachNeoforgeToBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachNeoforgeToBuild403JSONResponse) VisitAttachNeoforgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11120,7 +12872,7 @@ func (response AttachNeoforgeToBuild403JSONResponse) VisitAttachNeoforgeToBuildR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachNeoforgeToBuild404JSONResponse Notification
+type AttachNeoforgeToBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachNeoforgeToBuild404JSONResponse) VisitAttachNeoforgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11129,7 +12881,9 @@ func (response AttachNeoforgeToBuild404JSONResponse) VisitAttachNeoforgeToBuildR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachNeoforgeToBuild412JSONResponse Notification
+type AttachNeoforgeToBuild412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachNeoforgeToBuild412JSONResponse) VisitAttachNeoforgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11138,7 +12892,7 @@ func (response AttachNeoforgeToBuild412JSONResponse) VisitAttachNeoforgeToBuildR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachNeoforgeToBuild422JSONResponse Notification
+type AttachNeoforgeToBuild422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachNeoforgeToBuild422JSONResponse) VisitAttachNeoforgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11147,25 +12901,15 @@ func (response AttachNeoforgeToBuild422JSONResponse) VisitAttachNeoforgeToBuildR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachNeoforgeToBuild500JSONResponse Notification
+type AttachNeoforgeToBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachNeoforgeToBuild500JSONResponse) VisitAttachNeoforgeToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachNeoforgeToBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachNeoforgeToBuilddefaultJSONResponse) VisitAttachNeoforgeToBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type ListPacksRequestObject struct {
@@ -11176,7 +12920,7 @@ type ListPacksResponseObject interface {
 	VisitListPacksResponse(w http.ResponseWriter) error
 }
 
-type ListPacks200JSONResponse Packs
+type ListPacks200JSONResponse struct{ PacksResponseJSONResponse }
 
 func (response ListPacks200JSONResponse) VisitListPacksResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11185,7 +12929,7 @@ func (response ListPacks200JSONResponse) VisitListPacksResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPacks403JSONResponse Notification
+type ListPacks403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListPacks403JSONResponse) VisitListPacksResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11194,25 +12938,15 @@ func (response ListPacks403JSONResponse) VisitListPacksResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPacks500JSONResponse Notification
+type ListPacks500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListPacks500JSONResponse) VisitListPacksResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type ListPacksdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListPacksdefaultJSONResponse) VisitListPacksResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type CreatePackRequestObject struct {
@@ -11223,7 +12957,7 @@ type CreatePackResponseObject interface {
 	VisitCreatePackResponse(w http.ResponseWriter) error
 }
 
-type CreatePack200JSONResponse Pack
+type CreatePack200JSONResponse struct{ PackResponseJSONResponse }
 
 func (response CreatePack200JSONResponse) VisitCreatePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11232,7 +12966,16 @@ func (response CreatePack200JSONResponse) VisitCreatePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreatePack403JSONResponse Notification
+type CreatePack400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response CreatePack400JSONResponse) VisitCreatePackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreatePack403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response CreatePack403JSONResponse) VisitCreatePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11241,7 +12984,7 @@ func (response CreatePack403JSONResponse) VisitCreatePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreatePack422JSONResponse Notification
+type CreatePack422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response CreatePack422JSONResponse) VisitCreatePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11250,7 +12993,9 @@ func (response CreatePack422JSONResponse) VisitCreatePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreatePack500JSONResponse Notification
+type CreatePack500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response CreatePack500JSONResponse) VisitCreatePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11259,27 +13004,15 @@ func (response CreatePack500JSONResponse) VisitCreatePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreatePackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response CreatePackdefaultJSONResponse) VisitCreatePackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeletePackRequestObject struct {
-	PackId string `json:"pack_id"`
+	PackID PackID `json:"pack_id"`
 }
 
 type DeletePackResponseObject interface {
 	VisitDeletePackResponse(w http.ResponseWriter) error
 }
 
-type DeletePack200JSONResponse Notification
+type DeletePack200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeletePack200JSONResponse) VisitDeletePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11288,7 +13021,7 @@ func (response DeletePack200JSONResponse) VisitDeletePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePack400JSONResponse Notification
+type DeletePack400JSONResponse struct{ ActionFailedErrorJSONResponse }
 
 func (response DeletePack400JSONResponse) VisitDeletePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11297,7 +13030,7 @@ func (response DeletePack400JSONResponse) VisitDeletePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePack403JSONResponse Notification
+type DeletePack403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeletePack403JSONResponse) VisitDeletePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11306,7 +13039,7 @@ func (response DeletePack403JSONResponse) VisitDeletePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePack404JSONResponse Notification
+type DeletePack404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeletePack404JSONResponse) VisitDeletePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11315,7 +13048,9 @@ func (response DeletePack404JSONResponse) VisitDeletePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePack500JSONResponse Notification
+type DeletePack500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeletePack500JSONResponse) VisitDeletePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11324,27 +13059,15 @@ func (response DeletePack500JSONResponse) VisitDeletePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeletePackdefaultJSONResponse) VisitDeletePackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ShowPackRequestObject struct {
-	PackId string `json:"pack_id"`
+	PackID PackID `json:"pack_id"`
 }
 
 type ShowPackResponseObject interface {
 	VisitShowPackResponse(w http.ResponseWriter) error
 }
 
-type ShowPack200JSONResponse Pack
+type ShowPack200JSONResponse struct{ PackResponseJSONResponse }
 
 func (response ShowPack200JSONResponse) VisitShowPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11353,7 +13076,7 @@ func (response ShowPack200JSONResponse) VisitShowPackResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowPack403JSONResponse Notification
+type ShowPack403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ShowPack403JSONResponse) VisitShowPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11362,7 +13085,7 @@ func (response ShowPack403JSONResponse) VisitShowPackResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowPack404JSONResponse Notification
+type ShowPack404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ShowPack404JSONResponse) VisitShowPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11371,7 +13094,9 @@ func (response ShowPack404JSONResponse) VisitShowPackResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowPack500JSONResponse Notification
+type ShowPack500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ShowPack500JSONResponse) VisitShowPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11380,20 +13105,8 @@ func (response ShowPack500JSONResponse) VisitShowPackResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowPackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ShowPackdefaultJSONResponse) VisitShowPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type UpdatePackRequestObject struct {
-	PackId string `json:"pack_id"`
+	PackID PackID `json:"pack_id"`
 	Body   *UpdatePackJSONRequestBody
 }
 
@@ -11401,7 +13114,7 @@ type UpdatePackResponseObject interface {
 	VisitUpdatePackResponse(w http.ResponseWriter) error
 }
 
-type UpdatePack200JSONResponse Pack
+type UpdatePack200JSONResponse struct{ PackResponseJSONResponse }
 
 func (response UpdatePack200JSONResponse) VisitUpdatePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11410,7 +13123,16 @@ func (response UpdatePack200JSONResponse) VisitUpdatePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdatePack403JSONResponse Notification
+type UpdatePack400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response UpdatePack400JSONResponse) VisitUpdatePackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdatePack403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdatePack403JSONResponse) VisitUpdatePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11419,7 +13141,7 @@ func (response UpdatePack403JSONResponse) VisitUpdatePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdatePack404JSONResponse Notification
+type UpdatePack404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response UpdatePack404JSONResponse) VisitUpdatePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11428,7 +13150,7 @@ func (response UpdatePack404JSONResponse) VisitUpdatePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdatePack422JSONResponse Notification
+type UpdatePack422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response UpdatePack422JSONResponse) VisitUpdatePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11437,7 +13159,9 @@ func (response UpdatePack422JSONResponse) VisitUpdatePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdatePack500JSONResponse Notification
+type UpdatePack500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdatePack500JSONResponse) VisitUpdatePackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11446,20 +13170,128 @@ func (response UpdatePack500JSONResponse) VisitUpdatePackResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdatePackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type DeletePackAvatarRequestObject struct {
+	PackID PackID `json:"pack_id"`
 }
 
-func (response UpdatePackdefaultJSONResponse) VisitUpdatePackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
+type DeletePackAvatarResponseObject interface {
+	VisitDeletePackAvatarResponse(w http.ResponseWriter) error
+}
 
-	return json.NewEncoder(w).Encode(response.Body)
+type DeletePackAvatar200JSONResponse struct{ PackAvatarResponseJSONResponse }
+
+func (response DeletePackAvatar200JSONResponse) VisitDeletePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeletePackAvatar400JSONResponse struct{ ActionFailedErrorJSONResponse }
+
+func (response DeletePackAvatar400JSONResponse) VisitDeletePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeletePackAvatar403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response DeletePackAvatar403JSONResponse) VisitDeletePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeletePackAvatar404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response DeletePackAvatar404JSONResponse) VisitDeletePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeletePackAvatar500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response DeletePackAvatar500JSONResponse) VisitDeletePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreatePackAvatarRequestObject struct {
+	PackID PackID `json:"pack_id"`
+	Body   *multipart.Reader
+}
+
+type CreatePackAvatarResponseObject interface {
+	VisitCreatePackAvatarResponse(w http.ResponseWriter) error
+}
+
+type CreatePackAvatar200JSONResponse struct{ PackAvatarResponseJSONResponse }
+
+func (response CreatePackAvatar200JSONResponse) VisitCreatePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreatePackAvatar400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response CreatePackAvatar400JSONResponse) VisitCreatePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreatePackAvatar403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response CreatePackAvatar403JSONResponse) VisitCreatePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreatePackAvatar404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response CreatePackAvatar404JSONResponse) VisitCreatePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreatePackAvatar422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response CreatePackAvatar422JSONResponse) VisitCreatePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreatePackAvatar500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response CreatePackAvatar500JSONResponse) VisitCreatePackAvatarResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type ListBuildsRequestObject struct {
-	PackId string `json:"pack_id"`
+	PackID PackID `json:"pack_id"`
 	Params ListBuildsParams
 }
 
@@ -11467,7 +13299,7 @@ type ListBuildsResponseObject interface {
 	VisitListBuildsResponse(w http.ResponseWriter) error
 }
 
-type ListBuilds200JSONResponse Builds
+type ListBuilds200JSONResponse struct{ BuildsResponseJSONResponse }
 
 func (response ListBuilds200JSONResponse) VisitListBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11476,7 +13308,7 @@ func (response ListBuilds200JSONResponse) VisitListBuildsResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListBuilds403JSONResponse Notification
+type ListBuilds403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListBuilds403JSONResponse) VisitListBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11485,7 +13317,7 @@ func (response ListBuilds403JSONResponse) VisitListBuildsResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListBuilds404JSONResponse Notification
+type ListBuilds404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListBuilds404JSONResponse) VisitListBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11494,7 +13326,9 @@ func (response ListBuilds404JSONResponse) VisitListBuildsResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListBuilds500JSONResponse Notification
+type ListBuilds500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListBuilds500JSONResponse) VisitListBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11503,20 +13337,8 @@ func (response ListBuilds500JSONResponse) VisitListBuildsResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListBuildsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListBuildsdefaultJSONResponse) VisitListBuildsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type CreateBuildRequestObject struct {
-	PackId string `json:"pack_id"`
+	PackID PackID `json:"pack_id"`
 	Body   *CreateBuildJSONRequestBody
 }
 
@@ -11524,7 +13346,7 @@ type CreateBuildResponseObject interface {
 	VisitCreateBuildResponse(w http.ResponseWriter) error
 }
 
-type CreateBuild200JSONResponse Build
+type CreateBuild200JSONResponse struct{ BuildResponseJSONResponse }
 
 func (response CreateBuild200JSONResponse) VisitCreateBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11533,7 +13355,16 @@ func (response CreateBuild200JSONResponse) VisitCreateBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateBuild403JSONResponse Notification
+type CreateBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response CreateBuild400JSONResponse) VisitCreateBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response CreateBuild403JSONResponse) VisitCreateBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11542,7 +13373,7 @@ func (response CreateBuild403JSONResponse) VisitCreateBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateBuild404JSONResponse Notification
+type CreateBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response CreateBuild404JSONResponse) VisitCreateBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11551,7 +13382,7 @@ func (response CreateBuild404JSONResponse) VisitCreateBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateBuild422JSONResponse Notification
+type CreateBuild422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response CreateBuild422JSONResponse) VisitCreateBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11560,7 +13391,9 @@ func (response CreateBuild422JSONResponse) VisitCreateBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateBuild500JSONResponse Notification
+type CreateBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response CreateBuild500JSONResponse) VisitCreateBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11569,28 +13402,16 @@ func (response CreateBuild500JSONResponse) VisitCreateBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response CreateBuilddefaultJSONResponse) VisitCreateBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteBuildRequestObject struct {
-	PackId  string `json:"pack_id"`
-	BuildId string `json:"build_id"`
+	PackID  PackID  `json:"pack_id"`
+	BuildID BuildID `json:"build_id"`
 }
 
 type DeleteBuildResponseObject interface {
 	VisitDeleteBuildResponse(w http.ResponseWriter) error
 }
 
-type DeleteBuild200JSONResponse Notification
+type DeleteBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteBuild200JSONResponse) VisitDeleteBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11599,7 +13420,7 @@ func (response DeleteBuild200JSONResponse) VisitDeleteBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteBuild400JSONResponse Notification
+type DeleteBuild400JSONResponse struct{ ActionFailedErrorJSONResponse }
 
 func (response DeleteBuild400JSONResponse) VisitDeleteBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11608,7 +13429,7 @@ func (response DeleteBuild400JSONResponse) VisitDeleteBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteBuild403JSONResponse Notification
+type DeleteBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteBuild403JSONResponse) VisitDeleteBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11617,7 +13438,7 @@ func (response DeleteBuild403JSONResponse) VisitDeleteBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteBuild404JSONResponse Notification
+type DeleteBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteBuild404JSONResponse) VisitDeleteBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11626,7 +13447,9 @@ func (response DeleteBuild404JSONResponse) VisitDeleteBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteBuild500JSONResponse Notification
+type DeleteBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteBuild500JSONResponse) VisitDeleteBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11635,28 +13458,16 @@ func (response DeleteBuild500JSONResponse) VisitDeleteBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteBuilddefaultJSONResponse) VisitDeleteBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ShowBuildRequestObject struct {
-	PackId  string `json:"pack_id"`
-	BuildId string `json:"build_id"`
+	PackID  PackID  `json:"pack_id"`
+	BuildID BuildID `json:"build_id"`
 }
 
 type ShowBuildResponseObject interface {
 	VisitShowBuildResponse(w http.ResponseWriter) error
 }
 
-type ShowBuild200JSONResponse Build
+type ShowBuild200JSONResponse struct{ BuildResponseJSONResponse }
 
 func (response ShowBuild200JSONResponse) VisitShowBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11665,7 +13476,7 @@ func (response ShowBuild200JSONResponse) VisitShowBuildResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowBuild403JSONResponse Notification
+type ShowBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ShowBuild403JSONResponse) VisitShowBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11674,7 +13485,7 @@ func (response ShowBuild403JSONResponse) VisitShowBuildResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowBuild404JSONResponse Notification
+type ShowBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ShowBuild404JSONResponse) VisitShowBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11683,7 +13494,9 @@ func (response ShowBuild404JSONResponse) VisitShowBuildResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowBuild500JSONResponse Notification
+type ShowBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ShowBuild500JSONResponse) VisitShowBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11692,21 +13505,9 @@ func (response ShowBuild500JSONResponse) VisitShowBuildResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ShowBuilddefaultJSONResponse) VisitShowBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type UpdateBuildRequestObject struct {
-	PackId  string `json:"pack_id"`
-	BuildId string `json:"build_id"`
+	PackID  PackID  `json:"pack_id"`
+	BuildID BuildID `json:"build_id"`
 	Body    *UpdateBuildJSONRequestBody
 }
 
@@ -11714,7 +13515,7 @@ type UpdateBuildResponseObject interface {
 	VisitUpdateBuildResponse(w http.ResponseWriter) error
 }
 
-type UpdateBuild200JSONResponse Build
+type UpdateBuild200JSONResponse struct{ BuildResponseJSONResponse }
 
 func (response UpdateBuild200JSONResponse) VisitUpdateBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11723,7 +13524,16 @@ func (response UpdateBuild200JSONResponse) VisitUpdateBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateBuild403JSONResponse Notification
+type UpdateBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response UpdateBuild400JSONResponse) VisitUpdateBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdateBuild403JSONResponse) VisitUpdateBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11732,7 +13542,7 @@ func (response UpdateBuild403JSONResponse) VisitUpdateBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateBuild404JSONResponse Notification
+type UpdateBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response UpdateBuild404JSONResponse) VisitUpdateBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11741,7 +13551,7 @@ func (response UpdateBuild404JSONResponse) VisitUpdateBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateBuild422JSONResponse Notification
+type UpdateBuild422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response UpdateBuild422JSONResponse) VisitUpdateBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11750,7 +13560,9 @@ func (response UpdateBuild422JSONResponse) VisitUpdateBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateBuild500JSONResponse Notification
+type UpdateBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdateBuild500JSONResponse) VisitUpdateBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11759,21 +13571,9 @@ func (response UpdateBuild500JSONResponse) VisitUpdateBuildResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response UpdateBuilddefaultJSONResponse) VisitUpdateBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteBuildFromVersionRequestObject struct {
-	PackId  string `json:"pack_id"`
-	BuildId string `json:"build_id"`
+	PackID  PackID  `json:"pack_id"`
+	BuildID BuildID `json:"build_id"`
 	Body    *DeleteBuildFromVersionJSONRequestBody
 }
 
@@ -11781,7 +13581,7 @@ type DeleteBuildFromVersionResponseObject interface {
 	VisitDeleteBuildFromVersionResponse(w http.ResponseWriter) error
 }
 
-type DeleteBuildFromVersion200JSONResponse Notification
+type DeleteBuildFromVersion200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteBuildFromVersion200JSONResponse) VisitDeleteBuildFromVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11790,7 +13590,16 @@ func (response DeleteBuildFromVersion200JSONResponse) VisitDeleteBuildFromVersio
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteBuildFromVersion403JSONResponse Notification
+type DeleteBuildFromVersion400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteBuildFromVersion400JSONResponse) VisitDeleteBuildFromVersionResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteBuildFromVersion403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteBuildFromVersion403JSONResponse) VisitDeleteBuildFromVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11799,7 +13608,7 @@ func (response DeleteBuildFromVersion403JSONResponse) VisitDeleteBuildFromVersio
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteBuildFromVersion404JSONResponse Notification
+type DeleteBuildFromVersion404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteBuildFromVersion404JSONResponse) VisitDeleteBuildFromVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11808,7 +13617,7 @@ func (response DeleteBuildFromVersion404JSONResponse) VisitDeleteBuildFromVersio
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteBuildFromVersion412JSONResponse Notification
+type DeleteBuildFromVersion412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeleteBuildFromVersion412JSONResponse) VisitDeleteBuildFromVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11817,7 +13626,9 @@ func (response DeleteBuildFromVersion412JSONResponse) VisitDeleteBuildFromVersio
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteBuildFromVersion500JSONResponse Notification
+type DeleteBuildFromVersion500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteBuildFromVersion500JSONResponse) VisitDeleteBuildFromVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11826,21 +13637,9 @@ func (response DeleteBuildFromVersion500JSONResponse) VisitDeleteBuildFromVersio
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteBuildFromVersiondefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteBuildFromVersiondefaultJSONResponse) VisitDeleteBuildFromVersionResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListBuildVersionsRequestObject struct {
-	PackId  string `json:"pack_id"`
-	BuildId string `json:"build_id"`
+	PackID  PackID  `json:"pack_id"`
+	BuildID BuildID `json:"build_id"`
 	Params  ListBuildVersionsParams
 }
 
@@ -11848,7 +13647,9 @@ type ListBuildVersionsResponseObject interface {
 	VisitListBuildVersionsResponse(w http.ResponseWriter) error
 }
 
-type ListBuildVersions200JSONResponse BuildVersions
+type ListBuildVersions200JSONResponse struct {
+	BuildVersionsResponseJSONResponse
+}
 
 func (response ListBuildVersions200JSONResponse) VisitListBuildVersionsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11857,7 +13658,7 @@ func (response ListBuildVersions200JSONResponse) VisitListBuildVersionsResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListBuildVersions403JSONResponse Notification
+type ListBuildVersions403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListBuildVersions403JSONResponse) VisitListBuildVersionsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11866,7 +13667,7 @@ func (response ListBuildVersions403JSONResponse) VisitListBuildVersionsResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListBuildVersions404JSONResponse Notification
+type ListBuildVersions404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListBuildVersions404JSONResponse) VisitListBuildVersionsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11875,7 +13676,9 @@ func (response ListBuildVersions404JSONResponse) VisitListBuildVersionsResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListBuildVersions500JSONResponse Notification
+type ListBuildVersions500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListBuildVersions500JSONResponse) VisitListBuildVersionsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11884,21 +13687,9 @@ func (response ListBuildVersions500JSONResponse) VisitListBuildVersionsResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListBuildVersionsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListBuildVersionsdefaultJSONResponse) VisitListBuildVersionsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachBuildToVersionRequestObject struct {
-	PackId  string `json:"pack_id"`
-	BuildId string `json:"build_id"`
+	PackID  PackID  `json:"pack_id"`
+	BuildID BuildID `json:"build_id"`
 	Body    *AttachBuildToVersionJSONRequestBody
 }
 
@@ -11906,7 +13697,7 @@ type AttachBuildToVersionResponseObject interface {
 	VisitAttachBuildToVersionResponse(w http.ResponseWriter) error
 }
 
-type AttachBuildToVersion200JSONResponse Notification
+type AttachBuildToVersion200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachBuildToVersion200JSONResponse) VisitAttachBuildToVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11915,7 +13706,16 @@ func (response AttachBuildToVersion200JSONResponse) VisitAttachBuildToVersionRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachBuildToVersion403JSONResponse Notification
+type AttachBuildToVersion400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachBuildToVersion400JSONResponse) VisitAttachBuildToVersionResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachBuildToVersion403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachBuildToVersion403JSONResponse) VisitAttachBuildToVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11924,7 +13724,7 @@ func (response AttachBuildToVersion403JSONResponse) VisitAttachBuildToVersionRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachBuildToVersion404JSONResponse Notification
+type AttachBuildToVersion404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachBuildToVersion404JSONResponse) VisitAttachBuildToVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11933,7 +13733,9 @@ func (response AttachBuildToVersion404JSONResponse) VisitAttachBuildToVersionRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachBuildToVersion412JSONResponse Notification
+type AttachBuildToVersion412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachBuildToVersion412JSONResponse) VisitAttachBuildToVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11942,7 +13744,7 @@ func (response AttachBuildToVersion412JSONResponse) VisitAttachBuildToVersionRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachBuildToVersion422JSONResponse Notification
+type AttachBuildToVersion422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachBuildToVersion422JSONResponse) VisitAttachBuildToVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11951,7 +13753,9 @@ func (response AttachBuildToVersion422JSONResponse) VisitAttachBuildToVersionRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachBuildToVersion500JSONResponse Notification
+type AttachBuildToVersion500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachBuildToVersion500JSONResponse) VisitAttachBuildToVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -11960,293 +13764,270 @@ func (response AttachBuildToVersion500JSONResponse) VisitAttachBuildToVersionRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachBuildToVersiondefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type DeletePackFromGroupRequestObject struct {
+	PackID PackID `json:"pack_id"`
+	Body   *DeletePackFromGroupJSONRequestBody
 }
 
-func (response AttachBuildToVersiondefaultJSONResponse) VisitAttachBuildToVersionResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
+type DeletePackFromGroupResponseObject interface {
+	VisitDeletePackFromGroupResponse(w http.ResponseWriter) error
 }
 
-type DeletePackFromTeamRequestObject struct {
-	PackId string `json:"pack_id"`
-	Body   *DeletePackFromTeamJSONRequestBody
-}
+type DeletePackFromGroup200JSONResponse struct{ SuccessMessageJSONResponse }
 
-type DeletePackFromTeamResponseObject interface {
-	VisitDeletePackFromTeamResponse(w http.ResponseWriter) error
-}
-
-type DeletePackFromTeam200JSONResponse Notification
-
-func (response DeletePackFromTeam200JSONResponse) VisitDeletePackFromTeamResponse(w http.ResponseWriter) error {
+func (response DeletePackFromGroup200JSONResponse) VisitDeletePackFromGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackFromTeam403JSONResponse Notification
+type DeletePackFromGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
 
-func (response DeletePackFromTeam403JSONResponse) VisitDeletePackFromTeamResponse(w http.ResponseWriter) error {
+func (response DeletePackFromGroup400JSONResponse) VisitDeletePackFromGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeletePackFromGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response DeletePackFromGroup403JSONResponse) VisitDeletePackFromGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackFromTeam404JSONResponse Notification
+type DeletePackFromGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
 
-func (response DeletePackFromTeam404JSONResponse) VisitDeletePackFromTeamResponse(w http.ResponseWriter) error {
+func (response DeletePackFromGroup404JSONResponse) VisitDeletePackFromGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackFromTeam412JSONResponse Notification
+type DeletePackFromGroup412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
-func (response DeletePackFromTeam412JSONResponse) VisitDeletePackFromTeamResponse(w http.ResponseWriter) error {
+func (response DeletePackFromGroup412JSONResponse) VisitDeletePackFromGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(412)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackFromTeam500JSONResponse Notification
+type DeletePackFromGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
-func (response DeletePackFromTeam500JSONResponse) VisitDeletePackFromTeamResponse(w http.ResponseWriter) error {
+func (response DeletePackFromGroup500JSONResponse) VisitDeletePackFromGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackFromTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type ListPackGroupsRequestObject struct {
+	PackID PackID `json:"pack_id"`
+	Params ListPackGroupsParams
 }
 
-func (response DeletePackFromTeamdefaultJSONResponse) VisitDeletePackFromTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
+type ListPackGroupsResponseObject interface {
+	VisitListPackGroupsResponse(w http.ResponseWriter) error
 }
 
-type ListPackTeamsRequestObject struct {
-	PackId string `json:"pack_id"`
-	Params ListPackTeamsParams
-}
+type ListPackGroups200JSONResponse struct{ PackGroupsResponseJSONResponse }
 
-type ListPackTeamsResponseObject interface {
-	VisitListPackTeamsResponse(w http.ResponseWriter) error
-}
-
-type ListPackTeams200JSONResponse PackTeams
-
-func (response ListPackTeams200JSONResponse) VisitListPackTeamsResponse(w http.ResponseWriter) error {
+func (response ListPackGroups200JSONResponse) VisitListPackGroupsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPackTeams403JSONResponse Notification
+type ListPackGroups403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
-func (response ListPackTeams403JSONResponse) VisitListPackTeamsResponse(w http.ResponseWriter) error {
+func (response ListPackGroups403JSONResponse) VisitListPackGroupsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPackTeams404JSONResponse Notification
+type ListPackGroups404JSONResponse struct{ NotFoundErrorJSONResponse }
 
-func (response ListPackTeams404JSONResponse) VisitListPackTeamsResponse(w http.ResponseWriter) error {
+func (response ListPackGroups404JSONResponse) VisitListPackGroupsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPackTeams500JSONResponse Notification
+type ListPackGroups500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
-func (response ListPackTeams500JSONResponse) VisitListPackTeamsResponse(w http.ResponseWriter) error {
+func (response ListPackGroups500JSONResponse) VisitListPackGroupsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPackTeamsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type AttachPackToGroupRequestObject struct {
+	PackID PackID `json:"pack_id"`
+	Body   *AttachPackToGroupJSONRequestBody
 }
 
-func (response ListPackTeamsdefaultJSONResponse) VisitListPackTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
+type AttachPackToGroupResponseObject interface {
+	VisitAttachPackToGroupResponse(w http.ResponseWriter) error
 }
 
-type AttachPackToTeamRequestObject struct {
-	PackId string `json:"pack_id"`
-	Body   *AttachPackToTeamJSONRequestBody
-}
+type AttachPackToGroup200JSONResponse struct{ SuccessMessageJSONResponse }
 
-type AttachPackToTeamResponseObject interface {
-	VisitAttachPackToTeamResponse(w http.ResponseWriter) error
-}
-
-type AttachPackToTeam200JSONResponse Notification
-
-func (response AttachPackToTeam200JSONResponse) VisitAttachPackToTeamResponse(w http.ResponseWriter) error {
+func (response AttachPackToGroup200JSONResponse) VisitAttachPackToGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToTeam403JSONResponse Notification
+type AttachPackToGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
 
-func (response AttachPackToTeam403JSONResponse) VisitAttachPackToTeamResponse(w http.ResponseWriter) error {
+func (response AttachPackToGroup400JSONResponse) VisitAttachPackToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachPackToGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response AttachPackToGroup403JSONResponse) VisitAttachPackToGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToTeam404JSONResponse Notification
+type AttachPackToGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
 
-func (response AttachPackToTeam404JSONResponse) VisitAttachPackToTeamResponse(w http.ResponseWriter) error {
+func (response AttachPackToGroup404JSONResponse) VisitAttachPackToGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToTeam412JSONResponse Notification
+type AttachPackToGroup412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
-func (response AttachPackToTeam412JSONResponse) VisitAttachPackToTeamResponse(w http.ResponseWriter) error {
+func (response AttachPackToGroup412JSONResponse) VisitAttachPackToGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(412)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToTeam422JSONResponse Notification
+type AttachPackToGroup422JSONResponse struct{ ValidationErrorJSONResponse }
 
-func (response AttachPackToTeam422JSONResponse) VisitAttachPackToTeamResponse(w http.ResponseWriter) error {
+func (response AttachPackToGroup422JSONResponse) VisitAttachPackToGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(422)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToTeam500JSONResponse Notification
+type AttachPackToGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
-func (response AttachPackToTeam500JSONResponse) VisitAttachPackToTeamResponse(w http.ResponseWriter) error {
+func (response AttachPackToGroup500JSONResponse) VisitAttachPackToGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type PermitPackGroupRequestObject struct {
+	PackID PackID `json:"pack_id"`
+	Body   *PermitPackGroupJSONRequestBody
 }
 
-func (response AttachPackToTeamdefaultJSONResponse) VisitAttachPackToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
+type PermitPackGroupResponseObject interface {
+	VisitPermitPackGroupResponse(w http.ResponseWriter) error
 }
 
-type PermitPackTeamRequestObject struct {
-	PackId string `json:"pack_id"`
-	Body   *PermitPackTeamJSONRequestBody
-}
+type PermitPackGroup200JSONResponse struct{ SuccessMessageJSONResponse }
 
-type PermitPackTeamResponseObject interface {
-	VisitPermitPackTeamResponse(w http.ResponseWriter) error
-}
-
-type PermitPackTeam200JSONResponse Notification
-
-func (response PermitPackTeam200JSONResponse) VisitPermitPackTeamResponse(w http.ResponseWriter) error {
+func (response PermitPackGroup200JSONResponse) VisitPermitPackGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitPackTeam403JSONResponse Notification
+type PermitPackGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
 
-func (response PermitPackTeam403JSONResponse) VisitPermitPackTeamResponse(w http.ResponseWriter) error {
+func (response PermitPackGroup400JSONResponse) VisitPermitPackGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitPackGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response PermitPackGroup403JSONResponse) VisitPermitPackGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitPackTeam404JSONResponse Notification
+type PermitPackGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
 
-func (response PermitPackTeam404JSONResponse) VisitPermitPackTeamResponse(w http.ResponseWriter) error {
+func (response PermitPackGroup404JSONResponse) VisitPermitPackGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitPackTeam412JSONResponse Notification
+type PermitPackGroup412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
-func (response PermitPackTeam412JSONResponse) VisitPermitPackTeamResponse(w http.ResponseWriter) error {
+func (response PermitPackGroup412JSONResponse) VisitPermitPackGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(412)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitPackTeam422JSONResponse Notification
+type PermitPackGroup422JSONResponse struct{ ValidationErrorJSONResponse }
 
-func (response PermitPackTeam422JSONResponse) VisitPermitPackTeamResponse(w http.ResponseWriter) error {
+func (response PermitPackGroup422JSONResponse) VisitPermitPackGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(422)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitPackTeam500JSONResponse Notification
+type PermitPackGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
-func (response PermitPackTeam500JSONResponse) VisitPermitPackTeamResponse(w http.ResponseWriter) error {
+func (response PermitPackGroup500JSONResponse) VisitPermitPackGroupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitPackTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response PermitPackTeamdefaultJSONResponse) VisitPermitPackTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type DeletePackFromUserRequestObject struct {
-	PackId string `json:"pack_id"`
+	PackID PackID `json:"pack_id"`
 	Body   *DeletePackFromUserJSONRequestBody
 }
 
@@ -12254,7 +14035,7 @@ type DeletePackFromUserResponseObject interface {
 	VisitDeletePackFromUserResponse(w http.ResponseWriter) error
 }
 
-type DeletePackFromUser200JSONResponse Notification
+type DeletePackFromUser200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeletePackFromUser200JSONResponse) VisitDeletePackFromUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12263,7 +14044,16 @@ func (response DeletePackFromUser200JSONResponse) VisitDeletePackFromUserRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackFromUser403JSONResponse Notification
+type DeletePackFromUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeletePackFromUser400JSONResponse) VisitDeletePackFromUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeletePackFromUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeletePackFromUser403JSONResponse) VisitDeletePackFromUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12272,7 +14062,7 @@ func (response DeletePackFromUser403JSONResponse) VisitDeletePackFromUserRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackFromUser404JSONResponse Notification
+type DeletePackFromUser404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeletePackFromUser404JSONResponse) VisitDeletePackFromUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12281,7 +14071,7 @@ func (response DeletePackFromUser404JSONResponse) VisitDeletePackFromUserRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackFromUser412JSONResponse Notification
+type DeletePackFromUser412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeletePackFromUser412JSONResponse) VisitDeletePackFromUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12290,7 +14080,9 @@ func (response DeletePackFromUser412JSONResponse) VisitDeletePackFromUserRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackFromUser500JSONResponse Notification
+type DeletePackFromUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeletePackFromUser500JSONResponse) VisitDeletePackFromUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12299,20 +14091,8 @@ func (response DeletePackFromUser500JSONResponse) VisitDeletePackFromUserRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeletePackFromUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeletePackFromUserdefaultJSONResponse) VisitDeletePackFromUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListPackUsersRequestObject struct {
-	PackId string `json:"pack_id"`
+	PackID PackID `json:"pack_id"`
 	Params ListPackUsersParams
 }
 
@@ -12320,7 +14100,7 @@ type ListPackUsersResponseObject interface {
 	VisitListPackUsersResponse(w http.ResponseWriter) error
 }
 
-type ListPackUsers200JSONResponse PackUsers
+type ListPackUsers200JSONResponse struct{ PackUsersResponseJSONResponse }
 
 func (response ListPackUsers200JSONResponse) VisitListPackUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12329,7 +14109,7 @@ func (response ListPackUsers200JSONResponse) VisitListPackUsersResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPackUsers403JSONResponse Notification
+type ListPackUsers403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListPackUsers403JSONResponse) VisitListPackUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12338,7 +14118,7 @@ func (response ListPackUsers403JSONResponse) VisitListPackUsersResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPackUsers404JSONResponse Notification
+type ListPackUsers404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListPackUsers404JSONResponse) VisitListPackUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12347,7 +14127,9 @@ func (response ListPackUsers404JSONResponse) VisitListPackUsersResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPackUsers500JSONResponse Notification
+type ListPackUsers500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListPackUsers500JSONResponse) VisitListPackUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12356,20 +14138,8 @@ func (response ListPackUsers500JSONResponse) VisitListPackUsersResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPackUsersdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListPackUsersdefaultJSONResponse) VisitListPackUsersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachPackToUserRequestObject struct {
-	PackId string `json:"pack_id"`
+	PackID PackID `json:"pack_id"`
 	Body   *AttachPackToUserJSONRequestBody
 }
 
@@ -12377,7 +14147,7 @@ type AttachPackToUserResponseObject interface {
 	VisitAttachPackToUserResponse(w http.ResponseWriter) error
 }
 
-type AttachPackToUser200JSONResponse Notification
+type AttachPackToUser200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachPackToUser200JSONResponse) VisitAttachPackToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12386,7 +14156,16 @@ func (response AttachPackToUser200JSONResponse) VisitAttachPackToUserResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToUser403JSONResponse Notification
+type AttachPackToUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachPackToUser400JSONResponse) VisitAttachPackToUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachPackToUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachPackToUser403JSONResponse) VisitAttachPackToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12395,7 +14174,7 @@ func (response AttachPackToUser403JSONResponse) VisitAttachPackToUserResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToUser404JSONResponse Notification
+type AttachPackToUser404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachPackToUser404JSONResponse) VisitAttachPackToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12404,7 +14183,9 @@ func (response AttachPackToUser404JSONResponse) VisitAttachPackToUserResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToUser412JSONResponse Notification
+type AttachPackToUser412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachPackToUser412JSONResponse) VisitAttachPackToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12413,7 +14194,7 @@ func (response AttachPackToUser412JSONResponse) VisitAttachPackToUserResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToUser422JSONResponse Notification
+type AttachPackToUser422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachPackToUser422JSONResponse) VisitAttachPackToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12422,7 +14203,9 @@ func (response AttachPackToUser422JSONResponse) VisitAttachPackToUserResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToUser500JSONResponse Notification
+type AttachPackToUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachPackToUser500JSONResponse) VisitAttachPackToUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12431,20 +14214,8 @@ func (response AttachPackToUser500JSONResponse) VisitAttachPackToUserResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachPackToUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachPackToUserdefaultJSONResponse) VisitAttachPackToUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type PermitPackUserRequestObject struct {
-	PackId string `json:"pack_id"`
+	PackID PackID `json:"pack_id"`
 	Body   *PermitPackUserJSONRequestBody
 }
 
@@ -12452,7 +14223,7 @@ type PermitPackUserResponseObject interface {
 	VisitPermitPackUserResponse(w http.ResponseWriter) error
 }
 
-type PermitPackUser200JSONResponse Notification
+type PermitPackUser200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response PermitPackUser200JSONResponse) VisitPermitPackUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12461,7 +14232,16 @@ func (response PermitPackUser200JSONResponse) VisitPermitPackUserResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitPackUser403JSONResponse Notification
+type PermitPackUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response PermitPackUser400JSONResponse) VisitPermitPackUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitPackUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response PermitPackUser403JSONResponse) VisitPermitPackUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12470,7 +14250,7 @@ func (response PermitPackUser403JSONResponse) VisitPermitPackUserResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitPackUser404JSONResponse Notification
+type PermitPackUser404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response PermitPackUser404JSONResponse) VisitPermitPackUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12479,7 +14259,7 @@ func (response PermitPackUser404JSONResponse) VisitPermitPackUserResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitPackUser412JSONResponse Notification
+type PermitPackUser412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response PermitPackUser412JSONResponse) VisitPermitPackUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12488,7 +14268,7 @@ func (response PermitPackUser412JSONResponse) VisitPermitPackUserResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitPackUser422JSONResponse Notification
+type PermitPackUser422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response PermitPackUser422JSONResponse) VisitPermitPackUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12497,25 +14277,15 @@ func (response PermitPackUser422JSONResponse) VisitPermitPackUserResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitPackUser500JSONResponse Notification
+type PermitPackUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response PermitPackUser500JSONResponse) VisitPermitPackUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitPackUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response PermitPackUserdefaultJSONResponse) VisitPermitPackUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type ShowProfileRequestObject struct {
@@ -12525,7 +14295,7 @@ type ShowProfileResponseObject interface {
 	VisitShowProfileResponse(w http.ResponseWriter) error
 }
 
-type ShowProfile200JSONResponse Profile
+type ShowProfile200JSONResponse struct{ ProfileResponseJSONResponse }
 
 func (response ShowProfile200JSONResponse) VisitShowProfileResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12534,7 +14304,7 @@ func (response ShowProfile200JSONResponse) VisitShowProfileResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowProfile403JSONResponse Notification
+type ShowProfile403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ShowProfile403JSONResponse) VisitShowProfileResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12543,25 +14313,15 @@ func (response ShowProfile403JSONResponse) VisitShowProfileResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowProfile500JSONResponse Notification
+type ShowProfile500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ShowProfile500JSONResponse) VisitShowProfileResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type ShowProfiledefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ShowProfiledefaultJSONResponse) VisitShowProfileResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type UpdateProfileRequestObject struct {
@@ -12572,7 +14332,7 @@ type UpdateProfileResponseObject interface {
 	VisitUpdateProfileResponse(w http.ResponseWriter) error
 }
 
-type UpdateProfile200JSONResponse Profile
+type UpdateProfile200JSONResponse struct{ ProfileResponseJSONResponse }
 
 func (response UpdateProfile200JSONResponse) VisitUpdateProfileResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12581,7 +14341,16 @@ func (response UpdateProfile200JSONResponse) VisitUpdateProfileResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateProfile403JSONResponse Notification
+type UpdateProfile400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response UpdateProfile400JSONResponse) VisitUpdateProfileResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateProfile403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdateProfile403JSONResponse) VisitUpdateProfileResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12590,7 +14359,7 @@ func (response UpdateProfile403JSONResponse) VisitUpdateProfileResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateProfile422JSONResponse Notification
+type UpdateProfile422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response UpdateProfile422JSONResponse) VisitUpdateProfileResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12599,25 +14368,15 @@ func (response UpdateProfile422JSONResponse) VisitUpdateProfileResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateProfile500JSONResponse Notification
+type UpdateProfile500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdateProfile500JSONResponse) VisitUpdateProfileResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type UpdateProfiledefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response UpdateProfiledefaultJSONResponse) VisitUpdateProfileResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type TokenProfileRequestObject struct {
@@ -12627,7 +14386,7 @@ type TokenProfileResponseObject interface {
 	VisitTokenProfileResponse(w http.ResponseWriter) error
 }
 
-type TokenProfile200JSONResponse AuthToken
+type TokenProfile200JSONResponse struct{ TokenResponseJSONResponse }
 
 func (response TokenProfile200JSONResponse) VisitTokenProfileResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12636,7 +14395,7 @@ func (response TokenProfile200JSONResponse) VisitTokenProfileResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type TokenProfile403JSONResponse Notification
+type TokenProfile403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response TokenProfile403JSONResponse) VisitTokenProfileResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12645,25 +14404,15 @@ func (response TokenProfile403JSONResponse) VisitTokenProfileResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type TokenProfile500JSONResponse Notification
+type TokenProfile500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response TokenProfile500JSONResponse) VisitTokenProfileResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type TokenProfiledefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response TokenProfiledefaultJSONResponse) VisitTokenProfileResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type ListQuiltsRequestObject struct {
@@ -12674,7 +14423,7 @@ type ListQuiltsResponseObject interface {
 	VisitListQuiltsResponse(w http.ResponseWriter) error
 }
 
-type ListQuilts200JSONResponse Quilts
+type ListQuilts200JSONResponse struct{ QuiltsResponseJSONResponse }
 
 func (response ListQuilts200JSONResponse) VisitListQuiltsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12683,7 +14432,7 @@ func (response ListQuilts200JSONResponse) VisitListQuiltsResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListQuilts403JSONResponse Notification
+type ListQuilts403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListQuilts403JSONResponse) VisitListQuiltsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12692,25 +14441,15 @@ func (response ListQuilts403JSONResponse) VisitListQuiltsResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListQuilts500JSONResponse Notification
+type ListQuilts500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListQuilts500JSONResponse) VisitListQuiltsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type ListQuiltsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListQuiltsdefaultJSONResponse) VisitListQuiltsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type UpdateQuiltRequestObject struct {
@@ -12720,7 +14459,7 @@ type UpdateQuiltResponseObject interface {
 	VisitUpdateQuiltResponse(w http.ResponseWriter) error
 }
 
-type UpdateQuilt200JSONResponse Notification
+type UpdateQuilt200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response UpdateQuilt200JSONResponse) VisitUpdateQuiltResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12729,7 +14468,7 @@ func (response UpdateQuilt200JSONResponse) VisitUpdateQuiltResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateQuilt403JSONResponse Notification
+type UpdateQuilt403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdateQuilt403JSONResponse) VisitUpdateQuiltResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12738,7 +14477,9 @@ func (response UpdateQuilt403JSONResponse) VisitUpdateQuiltResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateQuilt500JSONResponse Notification
+type UpdateQuilt500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdateQuilt500JSONResponse) VisitUpdateQuiltResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12747,7 +14488,9 @@ func (response UpdateQuilt500JSONResponse) VisitUpdateQuiltResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateQuilt503JSONResponse Notification
+type UpdateQuilt503JSONResponse struct {
+	RemoteUnavailableErrorJSONResponse
+}
 
 func (response UpdateQuilt503JSONResponse) VisitUpdateQuiltResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12756,20 +14499,8 @@ func (response UpdateQuilt503JSONResponse) VisitUpdateQuiltResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateQuiltdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response UpdateQuiltdefaultJSONResponse) VisitUpdateQuiltResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteQuiltFromBuildRequestObject struct {
-	QuiltId string `json:"quilt_id"`
+	QuiltID QuiltID `json:"quilt_id"`
 	Body    *DeleteQuiltFromBuildJSONRequestBody
 }
 
@@ -12777,7 +14508,7 @@ type DeleteQuiltFromBuildResponseObject interface {
 	VisitDeleteQuiltFromBuildResponse(w http.ResponseWriter) error
 }
 
-type DeleteQuiltFromBuild200JSONResponse Notification
+type DeleteQuiltFromBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteQuiltFromBuild200JSONResponse) VisitDeleteQuiltFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12786,7 +14517,16 @@ func (response DeleteQuiltFromBuild200JSONResponse) VisitDeleteQuiltFromBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteQuiltFromBuild403JSONResponse Notification
+type DeleteQuiltFromBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteQuiltFromBuild400JSONResponse) VisitDeleteQuiltFromBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteQuiltFromBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteQuiltFromBuild403JSONResponse) VisitDeleteQuiltFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12795,7 +14535,7 @@ func (response DeleteQuiltFromBuild403JSONResponse) VisitDeleteQuiltFromBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteQuiltFromBuild404JSONResponse Notification
+type DeleteQuiltFromBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteQuiltFromBuild404JSONResponse) VisitDeleteQuiltFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12804,7 +14544,7 @@ func (response DeleteQuiltFromBuild404JSONResponse) VisitDeleteQuiltFromBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteQuiltFromBuild412JSONResponse Notification
+type DeleteQuiltFromBuild412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeleteQuiltFromBuild412JSONResponse) VisitDeleteQuiltFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12813,7 +14553,9 @@ func (response DeleteQuiltFromBuild412JSONResponse) VisitDeleteQuiltFromBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteQuiltFromBuild500JSONResponse Notification
+type DeleteQuiltFromBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteQuiltFromBuild500JSONResponse) VisitDeleteQuiltFromBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12822,20 +14564,8 @@ func (response DeleteQuiltFromBuild500JSONResponse) VisitDeleteQuiltFromBuildRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteQuiltFromBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteQuiltFromBuilddefaultJSONResponse) VisitDeleteQuiltFromBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListQuiltBuildsRequestObject struct {
-	QuiltId string `json:"quilt_id"`
+	QuiltID QuiltID `json:"quilt_id"`
 	Params  ListQuiltBuildsParams
 }
 
@@ -12843,7 +14573,9 @@ type ListQuiltBuildsResponseObject interface {
 	VisitListQuiltBuildsResponse(w http.ResponseWriter) error
 }
 
-type ListQuiltBuilds200JSONResponse QuiltBuilds
+type ListQuiltBuilds200JSONResponse struct {
+	QuiltBuildsResponseJSONResponse
+}
 
 func (response ListQuiltBuilds200JSONResponse) VisitListQuiltBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12852,7 +14584,7 @@ func (response ListQuiltBuilds200JSONResponse) VisitListQuiltBuildsResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListQuiltBuilds403JSONResponse Notification
+type ListQuiltBuilds403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListQuiltBuilds403JSONResponse) VisitListQuiltBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12861,7 +14593,7 @@ func (response ListQuiltBuilds403JSONResponse) VisitListQuiltBuildsResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListQuiltBuilds404JSONResponse Notification
+type ListQuiltBuilds404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListQuiltBuilds404JSONResponse) VisitListQuiltBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12870,7 +14602,9 @@ func (response ListQuiltBuilds404JSONResponse) VisitListQuiltBuildsResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListQuiltBuilds500JSONResponse Notification
+type ListQuiltBuilds500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListQuiltBuilds500JSONResponse) VisitListQuiltBuildsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12879,20 +14613,8 @@ func (response ListQuiltBuilds500JSONResponse) VisitListQuiltBuildsResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListQuiltBuildsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListQuiltBuildsdefaultJSONResponse) VisitListQuiltBuildsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachQuiltToBuildRequestObject struct {
-	QuiltId string `json:"quilt_id"`
+	QuiltID QuiltID `json:"quilt_id"`
 	Body    *AttachQuiltToBuildJSONRequestBody
 }
 
@@ -12900,7 +14622,7 @@ type AttachQuiltToBuildResponseObject interface {
 	VisitAttachQuiltToBuildResponse(w http.ResponseWriter) error
 }
 
-type AttachQuiltToBuild200JSONResponse Notification
+type AttachQuiltToBuild200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachQuiltToBuild200JSONResponse) VisitAttachQuiltToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12909,7 +14631,16 @@ func (response AttachQuiltToBuild200JSONResponse) VisitAttachQuiltToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachQuiltToBuild403JSONResponse Notification
+type AttachQuiltToBuild400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachQuiltToBuild400JSONResponse) VisitAttachQuiltToBuildResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachQuiltToBuild403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachQuiltToBuild403JSONResponse) VisitAttachQuiltToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12918,7 +14649,7 @@ func (response AttachQuiltToBuild403JSONResponse) VisitAttachQuiltToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachQuiltToBuild404JSONResponse Notification
+type AttachQuiltToBuild404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachQuiltToBuild404JSONResponse) VisitAttachQuiltToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12927,7 +14658,9 @@ func (response AttachQuiltToBuild404JSONResponse) VisitAttachQuiltToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachQuiltToBuild412JSONResponse Notification
+type AttachQuiltToBuild412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachQuiltToBuild412JSONResponse) VisitAttachQuiltToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12936,7 +14669,7 @@ func (response AttachQuiltToBuild412JSONResponse) VisitAttachQuiltToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachQuiltToBuild422JSONResponse Notification
+type AttachQuiltToBuild422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachQuiltToBuild422JSONResponse) VisitAttachQuiltToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -12945,1134 +14678,15 @@ func (response AttachQuiltToBuild422JSONResponse) VisitAttachQuiltToBuildRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachQuiltToBuild500JSONResponse Notification
+type AttachQuiltToBuild500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachQuiltToBuild500JSONResponse) VisitAttachQuiltToBuildResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachQuiltToBuilddefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachQuiltToBuilddefaultJSONResponse) VisitAttachQuiltToBuildResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type ListTeamsRequestObject struct {
-	Params ListTeamsParams
-}
-
-type ListTeamsResponseObject interface {
-	VisitListTeamsResponse(w http.ResponseWriter) error
-}
-
-type ListTeams200JSONResponse Teams
-
-func (response ListTeams200JSONResponse) VisitListTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeams403JSONResponse Notification
-
-func (response ListTeams403JSONResponse) VisitListTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeams500JSONResponse Notification
-
-func (response ListTeams500JSONResponse) VisitListTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListTeamsdefaultJSONResponse) VisitListTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type CreateTeamRequestObject struct {
-	Body *CreateTeamJSONRequestBody
-}
-
-type CreateTeamResponseObject interface {
-	VisitCreateTeamResponse(w http.ResponseWriter) error
-}
-
-type CreateTeam200JSONResponse Team
-
-func (response CreateTeam200JSONResponse) VisitCreateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreateTeam403JSONResponse Notification
-
-func (response CreateTeam403JSONResponse) VisitCreateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreateTeam422JSONResponse Notification
-
-func (response CreateTeam422JSONResponse) VisitCreateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreateTeam500JSONResponse Notification
-
-func (response CreateTeam500JSONResponse) VisitCreateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreateTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response CreateTeamdefaultJSONResponse) VisitCreateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type DeleteTeamRequestObject struct {
-	TeamId string `json:"team_id"`
-}
-
-type DeleteTeamResponseObject interface {
-	VisitDeleteTeamResponse(w http.ResponseWriter) error
-}
-
-type DeleteTeam200JSONResponse Notification
-
-func (response DeleteTeam200JSONResponse) VisitDeleteTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeam400JSONResponse Notification
-
-func (response DeleteTeam400JSONResponse) VisitDeleteTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeam403JSONResponse Notification
-
-func (response DeleteTeam403JSONResponse) VisitDeleteTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeam404JSONResponse Notification
-
-func (response DeleteTeam404JSONResponse) VisitDeleteTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeam500JSONResponse Notification
-
-func (response DeleteTeam500JSONResponse) VisitDeleteTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteTeamdefaultJSONResponse) VisitDeleteTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type ShowTeamRequestObject struct {
-	TeamId string `json:"team_id"`
-}
-
-type ShowTeamResponseObject interface {
-	VisitShowTeamResponse(w http.ResponseWriter) error
-}
-
-type ShowTeam200JSONResponse Team
-
-func (response ShowTeam200JSONResponse) VisitShowTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ShowTeam403JSONResponse Notification
-
-func (response ShowTeam403JSONResponse) VisitShowTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ShowTeam404JSONResponse Notification
-
-func (response ShowTeam404JSONResponse) VisitShowTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ShowTeam500JSONResponse Notification
-
-func (response ShowTeam500JSONResponse) VisitShowTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ShowTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ShowTeamdefaultJSONResponse) VisitShowTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type UpdateTeamRequestObject struct {
-	TeamId string `json:"team_id"`
-	Body   *UpdateTeamJSONRequestBody
-}
-
-type UpdateTeamResponseObject interface {
-	VisitUpdateTeamResponse(w http.ResponseWriter) error
-}
-
-type UpdateTeam200JSONResponse Team
-
-func (response UpdateTeam200JSONResponse) VisitUpdateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type UpdateTeam403JSONResponse Notification
-
-func (response UpdateTeam403JSONResponse) VisitUpdateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type UpdateTeam404JSONResponse Notification
-
-func (response UpdateTeam404JSONResponse) VisitUpdateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type UpdateTeam422JSONResponse Notification
-
-func (response UpdateTeam422JSONResponse) VisitUpdateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type UpdateTeam500JSONResponse Notification
-
-func (response UpdateTeam500JSONResponse) VisitUpdateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type UpdateTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response UpdateTeamdefaultJSONResponse) VisitUpdateTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type DeleteTeamFromModRequestObject struct {
-	TeamId string `json:"team_id"`
-	Body   *DeleteTeamFromModJSONRequestBody
-}
-
-type DeleteTeamFromModResponseObject interface {
-	VisitDeleteTeamFromModResponse(w http.ResponseWriter) error
-}
-
-type DeleteTeamFromMod200JSONResponse Notification
-
-func (response DeleteTeamFromMod200JSONResponse) VisitDeleteTeamFromModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromMod403JSONResponse Notification
-
-func (response DeleteTeamFromMod403JSONResponse) VisitDeleteTeamFromModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromMod404JSONResponse Notification
-
-func (response DeleteTeamFromMod404JSONResponse) VisitDeleteTeamFromModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromMod412JSONResponse Notification
-
-func (response DeleteTeamFromMod412JSONResponse) VisitDeleteTeamFromModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromMod500JSONResponse Notification
-
-func (response DeleteTeamFromMod500JSONResponse) VisitDeleteTeamFromModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromModdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteTeamFromModdefaultJSONResponse) VisitDeleteTeamFromModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type ListTeamModsRequestObject struct {
-	TeamId string `json:"team_id"`
-	Params ListTeamModsParams
-}
-
-type ListTeamModsResponseObject interface {
-	VisitListTeamModsResponse(w http.ResponseWriter) error
-}
-
-type ListTeamMods200JSONResponse TeamMods
-
-func (response ListTeamMods200JSONResponse) VisitListTeamModsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamMods403JSONResponse Notification
-
-func (response ListTeamMods403JSONResponse) VisitListTeamModsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamMods404JSONResponse Notification
-
-func (response ListTeamMods404JSONResponse) VisitListTeamModsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamMods500JSONResponse Notification
-
-func (response ListTeamMods500JSONResponse) VisitListTeamModsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamModsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListTeamModsdefaultJSONResponse) VisitListTeamModsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type AttachTeamToModRequestObject struct {
-	TeamId string `json:"team_id"`
-	Body   *AttachTeamToModJSONRequestBody
-}
-
-type AttachTeamToModResponseObject interface {
-	VisitAttachTeamToModResponse(w http.ResponseWriter) error
-}
-
-type AttachTeamToMod200JSONResponse Notification
-
-func (response AttachTeamToMod200JSONResponse) VisitAttachTeamToModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToMod403JSONResponse Notification
-
-func (response AttachTeamToMod403JSONResponse) VisitAttachTeamToModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToMod404JSONResponse Notification
-
-func (response AttachTeamToMod404JSONResponse) VisitAttachTeamToModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToMod412JSONResponse Notification
-
-func (response AttachTeamToMod412JSONResponse) VisitAttachTeamToModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToMod422JSONResponse Notification
-
-func (response AttachTeamToMod422JSONResponse) VisitAttachTeamToModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToMod500JSONResponse Notification
-
-func (response AttachTeamToMod500JSONResponse) VisitAttachTeamToModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToModdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachTeamToModdefaultJSONResponse) VisitAttachTeamToModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type PermitTeamModRequestObject struct {
-	TeamId string `json:"team_id"`
-	Body   *PermitTeamModJSONRequestBody
-}
-
-type PermitTeamModResponseObject interface {
-	VisitPermitTeamModResponse(w http.ResponseWriter) error
-}
-
-type PermitTeamMod200JSONResponse Notification
-
-func (response PermitTeamMod200JSONResponse) VisitPermitTeamModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamMod403JSONResponse Notification
-
-func (response PermitTeamMod403JSONResponse) VisitPermitTeamModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamMod404JSONResponse Notification
-
-func (response PermitTeamMod404JSONResponse) VisitPermitTeamModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamMod412JSONResponse Notification
-
-func (response PermitTeamMod412JSONResponse) VisitPermitTeamModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamMod422JSONResponse Notification
-
-func (response PermitTeamMod422JSONResponse) VisitPermitTeamModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamMod500JSONResponse Notification
-
-func (response PermitTeamMod500JSONResponse) VisitPermitTeamModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamModdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response PermitTeamModdefaultJSONResponse) VisitPermitTeamModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type DeleteTeamFromPackRequestObject struct {
-	TeamId string `json:"team_id"`
-	Body   *DeleteTeamFromPackJSONRequestBody
-}
-
-type DeleteTeamFromPackResponseObject interface {
-	VisitDeleteTeamFromPackResponse(w http.ResponseWriter) error
-}
-
-type DeleteTeamFromPack200JSONResponse Notification
-
-func (response DeleteTeamFromPack200JSONResponse) VisitDeleteTeamFromPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromPack403JSONResponse Notification
-
-func (response DeleteTeamFromPack403JSONResponse) VisitDeleteTeamFromPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromPack404JSONResponse Notification
-
-func (response DeleteTeamFromPack404JSONResponse) VisitDeleteTeamFromPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromPack412JSONResponse Notification
-
-func (response DeleteTeamFromPack412JSONResponse) VisitDeleteTeamFromPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromPack500JSONResponse Notification
-
-func (response DeleteTeamFromPack500JSONResponse) VisitDeleteTeamFromPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromPackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteTeamFromPackdefaultJSONResponse) VisitDeleteTeamFromPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type ListTeamPacksRequestObject struct {
-	TeamId string `json:"team_id"`
-	Params ListTeamPacksParams
-}
-
-type ListTeamPacksResponseObject interface {
-	VisitListTeamPacksResponse(w http.ResponseWriter) error
-}
-
-type ListTeamPacks200JSONResponse TeamPacks
-
-func (response ListTeamPacks200JSONResponse) VisitListTeamPacksResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamPacks403JSONResponse Notification
-
-func (response ListTeamPacks403JSONResponse) VisitListTeamPacksResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamPacks404JSONResponse Notification
-
-func (response ListTeamPacks404JSONResponse) VisitListTeamPacksResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamPacks500JSONResponse Notification
-
-func (response ListTeamPacks500JSONResponse) VisitListTeamPacksResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamPacksdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListTeamPacksdefaultJSONResponse) VisitListTeamPacksResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type AttachTeamToPackRequestObject struct {
-	TeamId string `json:"team_id"`
-	Body   *AttachTeamToPackJSONRequestBody
-}
-
-type AttachTeamToPackResponseObject interface {
-	VisitAttachTeamToPackResponse(w http.ResponseWriter) error
-}
-
-type AttachTeamToPack200JSONResponse Notification
-
-func (response AttachTeamToPack200JSONResponse) VisitAttachTeamToPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToPack403JSONResponse Notification
-
-func (response AttachTeamToPack403JSONResponse) VisitAttachTeamToPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToPack404JSONResponse Notification
-
-func (response AttachTeamToPack404JSONResponse) VisitAttachTeamToPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToPack412JSONResponse Notification
-
-func (response AttachTeamToPack412JSONResponse) VisitAttachTeamToPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToPack422JSONResponse Notification
-
-func (response AttachTeamToPack422JSONResponse) VisitAttachTeamToPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToPack500JSONResponse Notification
-
-func (response AttachTeamToPack500JSONResponse) VisitAttachTeamToPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToPackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachTeamToPackdefaultJSONResponse) VisitAttachTeamToPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type PermitTeamPackRequestObject struct {
-	TeamId string `json:"team_id"`
-	Body   *PermitTeamPackJSONRequestBody
-}
-
-type PermitTeamPackResponseObject interface {
-	VisitPermitTeamPackResponse(w http.ResponseWriter) error
-}
-
-type PermitTeamPack200JSONResponse Notification
-
-func (response PermitTeamPack200JSONResponse) VisitPermitTeamPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamPack403JSONResponse Notification
-
-func (response PermitTeamPack403JSONResponse) VisitPermitTeamPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamPack404JSONResponse Notification
-
-func (response PermitTeamPack404JSONResponse) VisitPermitTeamPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamPack412JSONResponse Notification
-
-func (response PermitTeamPack412JSONResponse) VisitPermitTeamPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamPack422JSONResponse Notification
-
-func (response PermitTeamPack422JSONResponse) VisitPermitTeamPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamPack500JSONResponse Notification
-
-func (response PermitTeamPack500JSONResponse) VisitPermitTeamPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamPackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response PermitTeamPackdefaultJSONResponse) VisitPermitTeamPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type DeleteTeamFromUserRequestObject struct {
-	TeamId string `json:"team_id"`
-	Body   *DeleteTeamFromUserJSONRequestBody
-}
-
-type DeleteTeamFromUserResponseObject interface {
-	VisitDeleteTeamFromUserResponse(w http.ResponseWriter) error
-}
-
-type DeleteTeamFromUser200JSONResponse Notification
-
-func (response DeleteTeamFromUser200JSONResponse) VisitDeleteTeamFromUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromUser403JSONResponse Notification
-
-func (response DeleteTeamFromUser403JSONResponse) VisitDeleteTeamFromUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromUser404JSONResponse Notification
-
-func (response DeleteTeamFromUser404JSONResponse) VisitDeleteTeamFromUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromUser412JSONResponse Notification
-
-func (response DeleteTeamFromUser412JSONResponse) VisitDeleteTeamFromUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromUser500JSONResponse Notification
-
-func (response DeleteTeamFromUser500JSONResponse) VisitDeleteTeamFromUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteTeamFromUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteTeamFromUserdefaultJSONResponse) VisitDeleteTeamFromUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type ListTeamUsersRequestObject struct {
-	TeamId string `json:"team_id"`
-	Params ListTeamUsersParams
-}
-
-type ListTeamUsersResponseObject interface {
-	VisitListTeamUsersResponse(w http.ResponseWriter) error
-}
-
-type ListTeamUsers200JSONResponse TeamUsers
-
-func (response ListTeamUsers200JSONResponse) VisitListTeamUsersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamUsers403JSONResponse Notification
-
-func (response ListTeamUsers403JSONResponse) VisitListTeamUsersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamUsers404JSONResponse Notification
-
-func (response ListTeamUsers404JSONResponse) VisitListTeamUsersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamUsers500JSONResponse Notification
-
-func (response ListTeamUsers500JSONResponse) VisitListTeamUsersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListTeamUsersdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListTeamUsersdefaultJSONResponse) VisitListTeamUsersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type AttachTeamToUserRequestObject struct {
-	TeamId string `json:"team_id"`
-	Body   *AttachTeamToUserJSONRequestBody
-}
-
-type AttachTeamToUserResponseObject interface {
-	VisitAttachTeamToUserResponse(w http.ResponseWriter) error
-}
-
-type AttachTeamToUser200JSONResponse Notification
-
-func (response AttachTeamToUser200JSONResponse) VisitAttachTeamToUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToUser403JSONResponse Notification
-
-func (response AttachTeamToUser403JSONResponse) VisitAttachTeamToUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToUser404JSONResponse Notification
-
-func (response AttachTeamToUser404JSONResponse) VisitAttachTeamToUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToUser412JSONResponse Notification
-
-func (response AttachTeamToUser412JSONResponse) VisitAttachTeamToUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToUser422JSONResponse Notification
-
-func (response AttachTeamToUser422JSONResponse) VisitAttachTeamToUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToUser500JSONResponse Notification
-
-func (response AttachTeamToUser500JSONResponse) VisitAttachTeamToUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachTeamToUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachTeamToUserdefaultJSONResponse) VisitAttachTeamToUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type PermitTeamUserRequestObject struct {
-	TeamId string `json:"team_id"`
-	Body   *PermitTeamUserJSONRequestBody
-}
-
-type PermitTeamUserResponseObject interface {
-	VisitPermitTeamUserResponse(w http.ResponseWriter) error
-}
-
-type PermitTeamUser200JSONResponse Notification
-
-func (response PermitTeamUser200JSONResponse) VisitPermitTeamUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamUser403JSONResponse Notification
-
-func (response PermitTeamUser403JSONResponse) VisitPermitTeamUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamUser404JSONResponse Notification
-
-func (response PermitTeamUser404JSONResponse) VisitPermitTeamUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamUser412JSONResponse Notification
-
-func (response PermitTeamUser412JSONResponse) VisitPermitTeamUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamUser422JSONResponse Notification
-
-func (response PermitTeamUser422JSONResponse) VisitPermitTeamUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamUser500JSONResponse Notification
-
-func (response PermitTeamUser500JSONResponse) VisitPermitTeamUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitTeamUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response PermitTeamUserdefaultJSONResponse) VisitPermitTeamUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type ListUsersRequestObject struct {
@@ -14083,7 +14697,7 @@ type ListUsersResponseObject interface {
 	VisitListUsersResponse(w http.ResponseWriter) error
 }
 
-type ListUsers200JSONResponse Users
+type ListUsers200JSONResponse struct{ UsersResponseJSONResponse }
 
 func (response ListUsers200JSONResponse) VisitListUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14092,7 +14706,7 @@ func (response ListUsers200JSONResponse) VisitListUsersResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListUsers403JSONResponse Notification
+type ListUsers403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListUsers403JSONResponse) VisitListUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14101,25 +14715,15 @@ func (response ListUsers403JSONResponse) VisitListUsersResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListUsers500JSONResponse Notification
+type ListUsers500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListUsers500JSONResponse) VisitListUsersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type ListUsersdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListUsersdefaultJSONResponse) VisitListUsersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type CreateUserRequestObject struct {
@@ -14130,7 +14734,7 @@ type CreateUserResponseObject interface {
 	VisitCreateUserResponse(w http.ResponseWriter) error
 }
 
-type CreateUser200JSONResponse User
+type CreateUser200JSONResponse struct{ UserResponseJSONResponse }
 
 func (response CreateUser200JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14139,7 +14743,16 @@ func (response CreateUser200JSONResponse) VisitCreateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUser403JSONResponse Notification
+type CreateUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response CreateUser400JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response CreateUser403JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14148,7 +14761,7 @@ func (response CreateUser403JSONResponse) VisitCreateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUser422JSONResponse Notification
+type CreateUser422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response CreateUser422JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14157,7 +14770,9 @@ func (response CreateUser422JSONResponse) VisitCreateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUser500JSONResponse Notification
+type CreateUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response CreateUser500JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14166,27 +14781,15 @@ func (response CreateUser500JSONResponse) VisitCreateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response CreateUserdefaultJSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteUserRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 }
 
 type DeleteUserResponseObject interface {
 	VisitDeleteUserResponse(w http.ResponseWriter) error
 }
 
-type DeleteUser200JSONResponse Notification
+type DeleteUser200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteUser200JSONResponse) VisitDeleteUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14195,7 +14798,7 @@ func (response DeleteUser200JSONResponse) VisitDeleteUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUser400JSONResponse Notification
+type DeleteUser400JSONResponse struct{ ActionFailedErrorJSONResponse }
 
 func (response DeleteUser400JSONResponse) VisitDeleteUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14204,7 +14807,7 @@ func (response DeleteUser400JSONResponse) VisitDeleteUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUser403JSONResponse Notification
+type DeleteUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteUser403JSONResponse) VisitDeleteUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14213,7 +14816,7 @@ func (response DeleteUser403JSONResponse) VisitDeleteUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUser404JSONResponse Notification
+type DeleteUser404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteUser404JSONResponse) VisitDeleteUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14222,7 +14825,9 @@ func (response DeleteUser404JSONResponse) VisitDeleteUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUser500JSONResponse Notification
+type DeleteUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteUser500JSONResponse) VisitDeleteUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14231,27 +14836,15 @@ func (response DeleteUser500JSONResponse) VisitDeleteUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteUserdefaultJSONResponse) VisitDeleteUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ShowUserRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 }
 
 type ShowUserResponseObject interface {
 	VisitShowUserResponse(w http.ResponseWriter) error
 }
 
-type ShowUser200JSONResponse User
+type ShowUser200JSONResponse struct{ UserResponseJSONResponse }
 
 func (response ShowUser200JSONResponse) VisitShowUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14260,7 +14853,7 @@ func (response ShowUser200JSONResponse) VisitShowUserResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowUser403JSONResponse Notification
+type ShowUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ShowUser403JSONResponse) VisitShowUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14269,7 +14862,7 @@ func (response ShowUser403JSONResponse) VisitShowUserResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowUser404JSONResponse Notification
+type ShowUser404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ShowUser404JSONResponse) VisitShowUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14278,7 +14871,9 @@ func (response ShowUser404JSONResponse) VisitShowUserResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowUser500JSONResponse Notification
+type ShowUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ShowUser500JSONResponse) VisitShowUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14287,20 +14882,8 @@ func (response ShowUser500JSONResponse) VisitShowUserResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ShowUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ShowUserdefaultJSONResponse) VisitShowUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type UpdateUserRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 	Body   *UpdateUserJSONRequestBody
 }
 
@@ -14308,7 +14891,7 @@ type UpdateUserResponseObject interface {
 	VisitUpdateUserResponse(w http.ResponseWriter) error
 }
 
-type UpdateUser200JSONResponse User
+type UpdateUser200JSONResponse struct{ UserResponseJSONResponse }
 
 func (response UpdateUser200JSONResponse) VisitUpdateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14317,7 +14900,16 @@ func (response UpdateUser200JSONResponse) VisitUpdateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateUser403JSONResponse Notification
+type UpdateUser400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response UpdateUser400JSONResponse) VisitUpdateUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateUser403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response UpdateUser403JSONResponse) VisitUpdateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14326,7 +14918,7 @@ func (response UpdateUser403JSONResponse) VisitUpdateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateUser404JSONResponse Notification
+type UpdateUser404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response UpdateUser404JSONResponse) VisitUpdateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14335,7 +14927,7 @@ func (response UpdateUser404JSONResponse) VisitUpdateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateUser422JSONResponse Notification
+type UpdateUser422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response UpdateUser422JSONResponse) VisitUpdateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14344,7 +14936,9 @@ func (response UpdateUser422JSONResponse) VisitUpdateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateUser500JSONResponse Notification
+type UpdateUser500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response UpdateUser500JSONResponse) VisitUpdateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14353,20 +14947,270 @@ func (response UpdateUser500JSONResponse) VisitUpdateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateUserdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
+type DeleteUserFromGroupRequestObject struct {
+	UserID UserID `json:"user_id"`
+	Body   *DeleteUserFromGroupJSONRequestBody
 }
 
-func (response UpdateUserdefaultJSONResponse) VisitUpdateUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
+type DeleteUserFromGroupResponseObject interface {
+	VisitDeleteUserFromGroupResponse(w http.ResponseWriter) error
+}
 
-	return json.NewEncoder(w).Encode(response.Body)
+type DeleteUserFromGroup200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response DeleteUserFromGroup200JSONResponse) VisitDeleteUserFromGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteUserFromGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteUserFromGroup400JSONResponse) VisitDeleteUserFromGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteUserFromGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response DeleteUserFromGroup403JSONResponse) VisitDeleteUserFromGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteUserFromGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response DeleteUserFromGroup404JSONResponse) VisitDeleteUserFromGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteUserFromGroup412JSONResponse struct{ NotAttachedErrorJSONResponse }
+
+func (response DeleteUserFromGroup412JSONResponse) VisitDeleteUserFromGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteUserFromGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response DeleteUserFromGroup500JSONResponse) VisitDeleteUserFromGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListUserGroupsRequestObject struct {
+	UserID UserID `json:"user_id"`
+	Params ListUserGroupsParams
+}
+
+type ListUserGroupsResponseObject interface {
+	VisitListUserGroupsResponse(w http.ResponseWriter) error
+}
+
+type ListUserGroups200JSONResponse struct{ UserGroupsResponseJSONResponse }
+
+func (response ListUserGroups200JSONResponse) VisitListUserGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListUserGroups403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response ListUserGroups403JSONResponse) VisitListUserGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListUserGroups404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response ListUserGroups404JSONResponse) VisitListUserGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListUserGroups500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response ListUserGroups500JSONResponse) VisitListUserGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachUserToGroupRequestObject struct {
+	UserID UserID `json:"user_id"`
+	Body   *AttachUserToGroupJSONRequestBody
+}
+
+type AttachUserToGroupResponseObject interface {
+	VisitAttachUserToGroupResponse(w http.ResponseWriter) error
+}
+
+type AttachUserToGroup200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response AttachUserToGroup200JSONResponse) VisitAttachUserToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachUserToGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachUserToGroup400JSONResponse) VisitAttachUserToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachUserToGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response AttachUserToGroup403JSONResponse) VisitAttachUserToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachUserToGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response AttachUserToGroup404JSONResponse) VisitAttachUserToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachUserToGroup412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
+
+func (response AttachUserToGroup412JSONResponse) VisitAttachUserToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachUserToGroup422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response AttachUserToGroup422JSONResponse) VisitAttachUserToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachUserToGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response AttachUserToGroup500JSONResponse) VisitAttachUserToGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitUserGroupRequestObject struct {
+	UserID UserID `json:"user_id"`
+	Body   *PermitUserGroupJSONRequestBody
+}
+
+type PermitUserGroupResponseObject interface {
+	VisitPermitUserGroupResponse(w http.ResponseWriter) error
+}
+
+type PermitUserGroup200JSONResponse struct{ SuccessMessageJSONResponse }
+
+func (response PermitUserGroup200JSONResponse) VisitPermitUserGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitUserGroup400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response PermitUserGroup400JSONResponse) VisitPermitUserGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitUserGroup403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
+
+func (response PermitUserGroup403JSONResponse) VisitPermitUserGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitUserGroup404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response PermitUserGroup404JSONResponse) VisitPermitUserGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitUserGroup412JSONResponse struct{ NotAttachedErrorJSONResponse }
+
+func (response PermitUserGroup412JSONResponse) VisitPermitUserGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(412)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitUserGroup422JSONResponse struct{ ValidationErrorJSONResponse }
+
+func (response PermitUserGroup422JSONResponse) VisitPermitUserGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(422)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitUserGroup500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response PermitUserGroup500JSONResponse) VisitPermitUserGroupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type DeleteUserFromModRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 	Body   *DeleteUserFromModJSONRequestBody
 }
 
@@ -14374,7 +15218,7 @@ type DeleteUserFromModResponseObject interface {
 	VisitDeleteUserFromModResponse(w http.ResponseWriter) error
 }
 
-type DeleteUserFromMod200JSONResponse Notification
+type DeleteUserFromMod200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteUserFromMod200JSONResponse) VisitDeleteUserFromModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14383,7 +15227,16 @@ func (response DeleteUserFromMod200JSONResponse) VisitDeleteUserFromModResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserFromMod403JSONResponse Notification
+type DeleteUserFromMod400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteUserFromMod400JSONResponse) VisitDeleteUserFromModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteUserFromMod403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteUserFromMod403JSONResponse) VisitDeleteUserFromModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14392,7 +15245,7 @@ func (response DeleteUserFromMod403JSONResponse) VisitDeleteUserFromModResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserFromMod404JSONResponse Notification
+type DeleteUserFromMod404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteUserFromMod404JSONResponse) VisitDeleteUserFromModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14401,7 +15254,7 @@ func (response DeleteUserFromMod404JSONResponse) VisitDeleteUserFromModResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserFromMod412JSONResponse Notification
+type DeleteUserFromMod412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeleteUserFromMod412JSONResponse) VisitDeleteUserFromModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14410,7 +15263,9 @@ func (response DeleteUserFromMod412JSONResponse) VisitDeleteUserFromModResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserFromMod500JSONResponse Notification
+type DeleteUserFromMod500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteUserFromMod500JSONResponse) VisitDeleteUserFromModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14419,20 +15274,8 @@ func (response DeleteUserFromMod500JSONResponse) VisitDeleteUserFromModResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserFromModdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteUserFromModdefaultJSONResponse) VisitDeleteUserFromModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListUserModsRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 	Params ListUserModsParams
 }
 
@@ -14440,7 +15283,7 @@ type ListUserModsResponseObject interface {
 	VisitListUserModsResponse(w http.ResponseWriter) error
 }
 
-type ListUserMods200JSONResponse UserMods
+type ListUserMods200JSONResponse struct{ UserModsResponseJSONResponse }
 
 func (response ListUserMods200JSONResponse) VisitListUserModsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14449,7 +15292,7 @@ func (response ListUserMods200JSONResponse) VisitListUserModsResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListUserMods403JSONResponse Notification
+type ListUserMods403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListUserMods403JSONResponse) VisitListUserModsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14458,7 +15301,7 @@ func (response ListUserMods403JSONResponse) VisitListUserModsResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListUserMods404JSONResponse Notification
+type ListUserMods404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListUserMods404JSONResponse) VisitListUserModsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14467,7 +15310,9 @@ func (response ListUserMods404JSONResponse) VisitListUserModsResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListUserMods500JSONResponse Notification
+type ListUserMods500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListUserMods500JSONResponse) VisitListUserModsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14476,20 +15321,8 @@ func (response ListUserMods500JSONResponse) VisitListUserModsResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListUserModsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListUserModsdefaultJSONResponse) VisitListUserModsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachUserToModRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 	Body   *AttachUserToModJSONRequestBody
 }
 
@@ -14497,7 +15330,7 @@ type AttachUserToModResponseObject interface {
 	VisitAttachUserToModResponse(w http.ResponseWriter) error
 }
 
-type AttachUserToMod200JSONResponse Notification
+type AttachUserToMod200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachUserToMod200JSONResponse) VisitAttachUserToModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14506,7 +15339,16 @@ func (response AttachUserToMod200JSONResponse) VisitAttachUserToModResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToMod403JSONResponse Notification
+type AttachUserToMod400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachUserToMod400JSONResponse) VisitAttachUserToModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachUserToMod403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachUserToMod403JSONResponse) VisitAttachUserToModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14515,7 +15357,7 @@ func (response AttachUserToMod403JSONResponse) VisitAttachUserToModResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToMod404JSONResponse Notification
+type AttachUserToMod404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachUserToMod404JSONResponse) VisitAttachUserToModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14524,7 +15366,9 @@ func (response AttachUserToMod404JSONResponse) VisitAttachUserToModResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToMod412JSONResponse Notification
+type AttachUserToMod412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachUserToMod412JSONResponse) VisitAttachUserToModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14533,7 +15377,7 @@ func (response AttachUserToMod412JSONResponse) VisitAttachUserToModResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToMod422JSONResponse Notification
+type AttachUserToMod422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachUserToMod422JSONResponse) VisitAttachUserToModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14542,7 +15386,9 @@ func (response AttachUserToMod422JSONResponse) VisitAttachUserToModResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToMod500JSONResponse Notification
+type AttachUserToMod500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachUserToMod500JSONResponse) VisitAttachUserToModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14551,20 +15397,8 @@ func (response AttachUserToMod500JSONResponse) VisitAttachUserToModResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToModdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachUserToModdefaultJSONResponse) VisitAttachUserToModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type PermitUserModRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 	Body   *PermitUserModJSONRequestBody
 }
 
@@ -14572,7 +15406,7 @@ type PermitUserModResponseObject interface {
 	VisitPermitUserModResponse(w http.ResponseWriter) error
 }
 
-type PermitUserMod200JSONResponse Notification
+type PermitUserMod200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response PermitUserMod200JSONResponse) VisitPermitUserModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14581,7 +15415,16 @@ func (response PermitUserMod200JSONResponse) VisitPermitUserModResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserMod403JSONResponse Notification
+type PermitUserMod400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response PermitUserMod400JSONResponse) VisitPermitUserModResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitUserMod403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response PermitUserMod403JSONResponse) VisitPermitUserModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14590,7 +15433,7 @@ func (response PermitUserMod403JSONResponse) VisitPermitUserModResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserMod404JSONResponse Notification
+type PermitUserMod404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response PermitUserMod404JSONResponse) VisitPermitUserModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14599,7 +15442,7 @@ func (response PermitUserMod404JSONResponse) VisitPermitUserModResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserMod412JSONResponse Notification
+type PermitUserMod412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response PermitUserMod412JSONResponse) VisitPermitUserModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14608,7 +15451,7 @@ func (response PermitUserMod412JSONResponse) VisitPermitUserModResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserMod422JSONResponse Notification
+type PermitUserMod422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response PermitUserMod422JSONResponse) VisitPermitUserModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14617,7 +15460,9 @@ func (response PermitUserMod422JSONResponse) VisitPermitUserModResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserMod500JSONResponse Notification
+type PermitUserMod500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response PermitUserMod500JSONResponse) VisitPermitUserModResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14626,20 +15471,8 @@ func (response PermitUserMod500JSONResponse) VisitPermitUserModResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserModdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response PermitUserModdefaultJSONResponse) VisitPermitUserModResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type DeleteUserFromPackRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 	Body   *DeleteUserFromPackJSONRequestBody
 }
 
@@ -14647,7 +15480,7 @@ type DeleteUserFromPackResponseObject interface {
 	VisitDeleteUserFromPackResponse(w http.ResponseWriter) error
 }
 
-type DeleteUserFromPack200JSONResponse Notification
+type DeleteUserFromPack200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response DeleteUserFromPack200JSONResponse) VisitDeleteUserFromPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14656,7 +15489,16 @@ func (response DeleteUserFromPack200JSONResponse) VisitDeleteUserFromPackRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserFromPack403JSONResponse Notification
+type DeleteUserFromPack400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response DeleteUserFromPack400JSONResponse) VisitDeleteUserFromPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteUserFromPack403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response DeleteUserFromPack403JSONResponse) VisitDeleteUserFromPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14665,7 +15507,7 @@ func (response DeleteUserFromPack403JSONResponse) VisitDeleteUserFromPackRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserFromPack404JSONResponse Notification
+type DeleteUserFromPack404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response DeleteUserFromPack404JSONResponse) VisitDeleteUserFromPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14674,7 +15516,7 @@ func (response DeleteUserFromPack404JSONResponse) VisitDeleteUserFromPackRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserFromPack412JSONResponse Notification
+type DeleteUserFromPack412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response DeleteUserFromPack412JSONResponse) VisitDeleteUserFromPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14683,7 +15525,9 @@ func (response DeleteUserFromPack412JSONResponse) VisitDeleteUserFromPackRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserFromPack500JSONResponse Notification
+type DeleteUserFromPack500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response DeleteUserFromPack500JSONResponse) VisitDeleteUserFromPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14692,20 +15536,8 @@ func (response DeleteUserFromPack500JSONResponse) VisitDeleteUserFromPackRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteUserFromPackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteUserFromPackdefaultJSONResponse) VisitDeleteUserFromPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type ListUserPacksRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 	Params ListUserPacksParams
 }
 
@@ -14713,7 +15545,7 @@ type ListUserPacksResponseObject interface {
 	VisitListUserPacksResponse(w http.ResponseWriter) error
 }
 
-type ListUserPacks200JSONResponse UserPacks
+type ListUserPacks200JSONResponse struct{ UserPacksResponseJSONResponse }
 
 func (response ListUserPacks200JSONResponse) VisitListUserPacksResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14722,7 +15554,7 @@ func (response ListUserPacks200JSONResponse) VisitListUserPacksResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListUserPacks403JSONResponse Notification
+type ListUserPacks403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response ListUserPacks403JSONResponse) VisitListUserPacksResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14731,7 +15563,7 @@ func (response ListUserPacks403JSONResponse) VisitListUserPacksResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListUserPacks404JSONResponse Notification
+type ListUserPacks404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response ListUserPacks404JSONResponse) VisitListUserPacksResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14740,7 +15572,9 @@ func (response ListUserPacks404JSONResponse) VisitListUserPacksResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListUserPacks500JSONResponse Notification
+type ListUserPacks500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response ListUserPacks500JSONResponse) VisitListUserPacksResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14749,20 +15583,8 @@ func (response ListUserPacks500JSONResponse) VisitListUserPacksResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListUserPacksdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListUserPacksdefaultJSONResponse) VisitListUserPacksResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type AttachUserToPackRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 	Body   *AttachUserToPackJSONRequestBody
 }
 
@@ -14770,7 +15592,7 @@ type AttachUserToPackResponseObject interface {
 	VisitAttachUserToPackResponse(w http.ResponseWriter) error
 }
 
-type AttachUserToPack200JSONResponse Notification
+type AttachUserToPack200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response AttachUserToPack200JSONResponse) VisitAttachUserToPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14779,7 +15601,16 @@ func (response AttachUserToPack200JSONResponse) VisitAttachUserToPackResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToPack403JSONResponse Notification
+type AttachUserToPack400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response AttachUserToPack400JSONResponse) VisitAttachUserToPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AttachUserToPack403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response AttachUserToPack403JSONResponse) VisitAttachUserToPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14788,7 +15619,7 @@ func (response AttachUserToPack403JSONResponse) VisitAttachUserToPackResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToPack404JSONResponse Notification
+type AttachUserToPack404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response AttachUserToPack404JSONResponse) VisitAttachUserToPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14797,7 +15628,9 @@ func (response AttachUserToPack404JSONResponse) VisitAttachUserToPackResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToPack412JSONResponse Notification
+type AttachUserToPack412JSONResponse struct {
+	AlreadyAttachedErrorJSONResponse
+}
 
 func (response AttachUserToPack412JSONResponse) VisitAttachUserToPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14806,7 +15639,7 @@ func (response AttachUserToPack412JSONResponse) VisitAttachUserToPackResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToPack422JSONResponse Notification
+type AttachUserToPack422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response AttachUserToPack422JSONResponse) VisitAttachUserToPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14815,7 +15648,9 @@ func (response AttachUserToPack422JSONResponse) VisitAttachUserToPackResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToPack500JSONResponse Notification
+type AttachUserToPack500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response AttachUserToPack500JSONResponse) VisitAttachUserToPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14824,20 +15659,8 @@ func (response AttachUserToPack500JSONResponse) VisitAttachUserToPackResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AttachUserToPackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachUserToPackdefaultJSONResponse) VisitAttachUserToPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
 type PermitUserPackRequestObject struct {
-	UserId string `json:"user_id"`
+	UserID UserID `json:"user_id"`
 	Body   *PermitUserPackJSONRequestBody
 }
 
@@ -14845,7 +15668,7 @@ type PermitUserPackResponseObject interface {
 	VisitPermitUserPackResponse(w http.ResponseWriter) error
 }
 
-type PermitUserPack200JSONResponse Notification
+type PermitUserPack200JSONResponse struct{ SuccessMessageJSONResponse }
 
 func (response PermitUserPack200JSONResponse) VisitPermitUserPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14854,7 +15677,16 @@ func (response PermitUserPack200JSONResponse) VisitPermitUserPackResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserPack403JSONResponse Notification
+type PermitUserPack400JSONResponse struct{ BadRequestErrorJSONResponse }
+
+func (response PermitUserPack400JSONResponse) VisitPermitUserPackResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PermitUserPack403JSONResponse struct{ NotAuthorizedErrorJSONResponse }
 
 func (response PermitUserPack403JSONResponse) VisitPermitUserPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14863,7 +15695,7 @@ func (response PermitUserPack403JSONResponse) VisitPermitUserPackResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserPack404JSONResponse Notification
+type PermitUserPack404JSONResponse struct{ NotFoundErrorJSONResponse }
 
 func (response PermitUserPack404JSONResponse) VisitPermitUserPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14872,7 +15704,7 @@ func (response PermitUserPack404JSONResponse) VisitPermitUserPackResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserPack412JSONResponse Notification
+type PermitUserPack412JSONResponse struct{ NotAttachedErrorJSONResponse }
 
 func (response PermitUserPack412JSONResponse) VisitPermitUserPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14881,7 +15713,7 @@ func (response PermitUserPack412JSONResponse) VisitPermitUserPackResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserPack422JSONResponse Notification
+type PermitUserPack422JSONResponse struct{ ValidationErrorJSONResponse }
 
 func (response PermitUserPack422JSONResponse) VisitPermitUserPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -14890,298 +15722,15 @@ func (response PermitUserPack422JSONResponse) VisitPermitUserPackResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PermitUserPack500JSONResponse Notification
+type PermitUserPack500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
 func (response PermitUserPack500JSONResponse) VisitPermitUserPackResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitUserPackdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response PermitUserPackdefaultJSONResponse) VisitPermitUserPackResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type DeleteUserFromTeamRequestObject struct {
-	UserId string `json:"user_id"`
-	Body   *DeleteUserFromTeamJSONRequestBody
-}
-
-type DeleteUserFromTeamResponseObject interface {
-	VisitDeleteUserFromTeamResponse(w http.ResponseWriter) error
-}
-
-type DeleteUserFromTeam200JSONResponse Notification
-
-func (response DeleteUserFromTeam200JSONResponse) VisitDeleteUserFromTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteUserFromTeam403JSONResponse Notification
-
-func (response DeleteUserFromTeam403JSONResponse) VisitDeleteUserFromTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteUserFromTeam404JSONResponse Notification
-
-func (response DeleteUserFromTeam404JSONResponse) VisitDeleteUserFromTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteUserFromTeam412JSONResponse Notification
-
-func (response DeleteUserFromTeam412JSONResponse) VisitDeleteUserFromTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteUserFromTeam500JSONResponse Notification
-
-func (response DeleteUserFromTeam500JSONResponse) VisitDeleteUserFromTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteUserFromTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response DeleteUserFromTeamdefaultJSONResponse) VisitDeleteUserFromTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type ListUserTeamsRequestObject struct {
-	UserId string `json:"user_id"`
-	Params ListUserTeamsParams
-}
-
-type ListUserTeamsResponseObject interface {
-	VisitListUserTeamsResponse(w http.ResponseWriter) error
-}
-
-type ListUserTeams200JSONResponse UserTeams
-
-func (response ListUserTeams200JSONResponse) VisitListUserTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListUserTeams403JSONResponse Notification
-
-func (response ListUserTeams403JSONResponse) VisitListUserTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListUserTeams404JSONResponse Notification
-
-func (response ListUserTeams404JSONResponse) VisitListUserTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListUserTeams500JSONResponse Notification
-
-func (response ListUserTeams500JSONResponse) VisitListUserTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ListUserTeamsdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response ListUserTeamsdefaultJSONResponse) VisitListUserTeamsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type AttachUserToTeamRequestObject struct {
-	UserId string `json:"user_id"`
-	Body   *AttachUserToTeamJSONRequestBody
-}
-
-type AttachUserToTeamResponseObject interface {
-	VisitAttachUserToTeamResponse(w http.ResponseWriter) error
-}
-
-type AttachUserToTeam200JSONResponse Notification
-
-func (response AttachUserToTeam200JSONResponse) VisitAttachUserToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachUserToTeam403JSONResponse Notification
-
-func (response AttachUserToTeam403JSONResponse) VisitAttachUserToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachUserToTeam404JSONResponse Notification
-
-func (response AttachUserToTeam404JSONResponse) VisitAttachUserToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachUserToTeam412JSONResponse Notification
-
-func (response AttachUserToTeam412JSONResponse) VisitAttachUserToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachUserToTeam422JSONResponse Notification
-
-func (response AttachUserToTeam422JSONResponse) VisitAttachUserToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachUserToTeam500JSONResponse Notification
-
-func (response AttachUserToTeam500JSONResponse) VisitAttachUserToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AttachUserToTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response AttachUserToTeamdefaultJSONResponse) VisitAttachUserToTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type PermitUserTeamRequestObject struct {
-	UserId string `json:"user_id"`
-	Body   *PermitUserTeamJSONRequestBody
-}
-
-type PermitUserTeamResponseObject interface {
-	VisitPermitUserTeamResponse(w http.ResponseWriter) error
-}
-
-type PermitUserTeam200JSONResponse Notification
-
-func (response PermitUserTeam200JSONResponse) VisitPermitUserTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitUserTeam403JSONResponse Notification
-
-func (response PermitUserTeam403JSONResponse) VisitPermitUserTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitUserTeam404JSONResponse Notification
-
-func (response PermitUserTeam404JSONResponse) VisitPermitUserTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitUserTeam412JSONResponse Notification
-
-func (response PermitUserTeam412JSONResponse) VisitPermitUserTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(412)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitUserTeam422JSONResponse Notification
-
-func (response PermitUserTeam422JSONResponse) VisitPermitUserTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(422)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitUserTeam500JSONResponse Notification
-
-func (response PermitUserTeam500JSONResponse) VisitPermitUserTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PermitUserTeamdefaultJSONResponse struct {
-	Body       Notification
-	StatusCode int
-}
-
-func (response PermitUserTeamdefaultJSONResponse) VisitPermitUserTeamResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 // StrictServerInterface represents all server handlers.
@@ -15191,19 +15740,22 @@ type StrictServerInterface interface {
 	LoginAuth(ctx context.Context, request LoginAuthRequestObject) (LoginAuthResponseObject, error)
 	// Fetch the available auth providers
 	// (GET /auth/providers)
-	ExternalProviders(ctx context.Context, request ExternalProvidersRequestObject) (ExternalProvidersResponseObject, error)
+	ListProviders(ctx context.Context, request ListProvidersRequestObject) (ListProvidersResponseObject, error)
+	// Retrieve real token after redirect
+	// (POST /auth/redirect)
+	RedirectAuth(ctx context.Context, request RedirectAuthRequestObject) (RedirectAuthResponseObject, error)
 	// Refresh an auth token before it expires
 	// (GET /auth/refresh)
 	RefreshAuth(ctx context.Context, request RefreshAuthRequestObject) (RefreshAuthResponseObject, error)
 	// Verify validity for an authentication token
 	// (GET /auth/verify)
 	VerifyAuth(ctx context.Context, request VerifyAuthRequestObject) (VerifyAuthResponseObject, error)
-	// Callback for external authentication
+	// Callback to parse the defined provider
 	// (GET /auth/{provider}/callback)
-	ExternalCallback(ctx context.Context, request ExternalCallbackRequestObject) (ExternalCallbackResponseObject, error)
-	// Initialize the external authentication
-	// (GET /auth/{provider}/initialize)
-	ExternalInitialize(ctx context.Context, request ExternalInitializeRequestObject) (ExternalInitializeResponseObject, error)
+	CallbackProvider(ctx context.Context, request CallbackProviderRequestObject) (CallbackProviderResponseObject, error)
+	// Request the redirect to defined provider
+	// (GET /auth/{provider}/request)
+	RequestProvider(ctx context.Context, request RequestProviderRequestObject) (RequestProviderResponseObject, error)
 	// Fetch the available Fabric versions
 	// (GET /fabric)
 	ListFabrics(ctx context.Context, request ListFabricsRequestObject) (ListFabricsResponseObject, error)
@@ -15234,6 +15786,57 @@ type StrictServerInterface interface {
 	// Attach a build to a Forge version
 	// (POST /forge/{forge_id}/builds)
 	AttachForgeToBuild(ctx context.Context, request AttachForgeToBuildRequestObject) (AttachForgeToBuildResponseObject, error)
+	// Fetch all available groups
+	// (GET /groups)
+	ListGroups(ctx context.Context, request ListGroupsRequestObject) (ListGroupsResponseObject, error)
+	// Create a new group
+	// (POST /groups)
+	CreateGroup(ctx context.Context, request CreateGroupRequestObject) (CreateGroupResponseObject, error)
+	// Delete a specific group
+	// (DELETE /groups/{group_id})
+	DeleteGroup(ctx context.Context, request DeleteGroupRequestObject) (DeleteGroupResponseObject, error)
+	// Fetch a specific group
+	// (GET /groups/{group_id})
+	ShowGroup(ctx context.Context, request ShowGroupRequestObject) (ShowGroupResponseObject, error)
+	// Update a specific group
+	// (PUT /groups/{group_id})
+	UpdateGroup(ctx context.Context, request UpdateGroupRequestObject) (UpdateGroupResponseObject, error)
+	// Unlink a mod from group
+	// (DELETE /groups/{group_id}/mods)
+	DeleteGroupFromMod(ctx context.Context, request DeleteGroupFromModRequestObject) (DeleteGroupFromModResponseObject, error)
+	// Fetch all mods attached to group
+	// (GET /groups/{group_id}/mods)
+	ListGroupMods(ctx context.Context, request ListGroupModsRequestObject) (ListGroupModsResponseObject, error)
+	// Attach a mod to group
+	// (POST /groups/{group_id}/mods)
+	AttachGroupToMod(ctx context.Context, request AttachGroupToModRequestObject) (AttachGroupToModResponseObject, error)
+	// Update mod perms for group
+	// (PUT /groups/{group_id}/mods)
+	PermitGroupMod(ctx context.Context, request PermitGroupModRequestObject) (PermitGroupModResponseObject, error)
+	// Unlink a pack from group
+	// (DELETE /groups/{group_id}/packs)
+	DeleteGroupFromPack(ctx context.Context, request DeleteGroupFromPackRequestObject) (DeleteGroupFromPackResponseObject, error)
+	// Fetch all packs attached to group
+	// (GET /groups/{group_id}/packs)
+	ListGroupPacks(ctx context.Context, request ListGroupPacksRequestObject) (ListGroupPacksResponseObject, error)
+	// Attach a pack to group
+	// (POST /groups/{group_id}/packs)
+	AttachGroupToPack(ctx context.Context, request AttachGroupToPackRequestObject) (AttachGroupToPackResponseObject, error)
+	// Update pack perms for group
+	// (PUT /groups/{group_id}/packs)
+	PermitGroupPack(ctx context.Context, request PermitGroupPackRequestObject) (PermitGroupPackResponseObject, error)
+	// Unlink a user from group
+	// (DELETE /groups/{group_id}/users)
+	DeleteGroupFromUser(ctx context.Context, request DeleteGroupFromUserRequestObject) (DeleteGroupFromUserResponseObject, error)
+	// Fetch all users attached to group
+	// (GET /groups/{group_id}/users)
+	ListGroupUsers(ctx context.Context, request ListGroupUsersRequestObject) (ListGroupUsersResponseObject, error)
+	// Attach a user to group
+	// (POST /groups/{group_id}/users)
+	AttachGroupToUser(ctx context.Context, request AttachGroupToUserRequestObject) (AttachGroupToUserResponseObject, error)
+	// Update user perms for group
+	// (PUT /groups/{group_id}/users)
+	PermitGroupUser(ctx context.Context, request PermitGroupUserRequestObject) (PermitGroupUserResponseObject, error)
 	// Fetch the available Minecraft versions
 	// (GET /minecraft)
 	ListMinecrafts(ctx context.Context, request ListMinecraftsRequestObject) (ListMinecraftsResponseObject, error)
@@ -15264,18 +15867,24 @@ type StrictServerInterface interface {
 	// Update a specific mod
 	// (PUT /mods/{mod_id})
 	UpdateMod(ctx context.Context, request UpdateModRequestObject) (UpdateModResponseObject, error)
-	// Unlink a team from mod
-	// (DELETE /mods/{mod_id}/teams)
-	DeleteModFromTeam(ctx context.Context, request DeleteModFromTeamRequestObject) (DeleteModFromTeamResponseObject, error)
-	// Fetch all teams attached to mod
-	// (GET /mods/{mod_id}/teams)
-	ListModTeams(ctx context.Context, request ListModTeamsRequestObject) (ListModTeamsResponseObject, error)
-	// Attach a team to mod
-	// (POST /mods/{mod_id}/teams)
-	AttachModToTeam(ctx context.Context, request AttachModToTeamRequestObject) (AttachModToTeamResponseObject, error)
-	// Update team perms for mod
-	// (PUT /mods/{mod_id}/teams)
-	PermitModTeam(ctx context.Context, request PermitModTeamRequestObject) (PermitModTeamResponseObject, error)
+	// Delete the avatar for the defined mod
+	// (DELETE /mods/{mod_id}/avatar)
+	DeleteModAvatar(ctx context.Context, request DeleteModAvatarRequestObject) (DeleteModAvatarResponseObject, error)
+	// Upload an avatar for the defined mod
+	// (POST /mods/{mod_id}/avatar)
+	CreateModAvatar(ctx context.Context, request CreateModAvatarRequestObject) (CreateModAvatarResponseObject, error)
+	// Unlink a group from mod
+	// (DELETE /mods/{mod_id}/groups)
+	DeleteModFromGroup(ctx context.Context, request DeleteModFromGroupRequestObject) (DeleteModFromGroupResponseObject, error)
+	// Fetch all groups attached to mod
+	// (GET /mods/{mod_id}/groups)
+	ListModGroups(ctx context.Context, request ListModGroupsRequestObject) (ListModGroupsResponseObject, error)
+	// Attach a group to mod
+	// (POST /mods/{mod_id}/groups)
+	AttachModToGroup(ctx context.Context, request AttachModToGroupRequestObject) (AttachModToGroupResponseObject, error)
+	// Update group perms for mod
+	// (PUT /mods/{mod_id}/groups)
+	PermitModGroup(ctx context.Context, request PermitModGroupRequestObject) (PermitModGroupResponseObject, error)
 	// Unlink a user from mod
 	// (DELETE /mods/{mod_id}/users)
 	DeleteModFromUser(ctx context.Context, request DeleteModFromUserRequestObject) (DeleteModFromUserResponseObject, error)
@@ -15342,6 +15951,12 @@ type StrictServerInterface interface {
 	// Update a specific pack
 	// (PUT /packs/{pack_id})
 	UpdatePack(ctx context.Context, request UpdatePackRequestObject) (UpdatePackResponseObject, error)
+	// Delete the avatar for the defined pack
+	// (DELETE /packs/{pack_id}/avatar)
+	DeletePackAvatar(ctx context.Context, request DeletePackAvatarRequestObject) (DeletePackAvatarResponseObject, error)
+	// Upload an avatar for the defined pack
+	// (POST /packs/{pack_id}/avatar)
+	CreatePackAvatar(ctx context.Context, request CreatePackAvatarRequestObject) (CreatePackAvatarResponseObject, error)
 	// Fetch all available builds for a pack
 	// (GET /packs/{pack_id}/builds)
 	ListBuilds(ctx context.Context, request ListBuildsRequestObject) (ListBuildsResponseObject, error)
@@ -15366,18 +15981,18 @@ type StrictServerInterface interface {
 	// Attach a version to a build
 	// (POST /packs/{pack_id}/builds/{build_id}/versions)
 	AttachBuildToVersion(ctx context.Context, request AttachBuildToVersionRequestObject) (AttachBuildToVersionResponseObject, error)
-	// Unlink a team from pack
-	// (DELETE /packs/{pack_id}/teams)
-	DeletePackFromTeam(ctx context.Context, request DeletePackFromTeamRequestObject) (DeletePackFromTeamResponseObject, error)
-	// Fetch all teams attached to pack
-	// (GET /packs/{pack_id}/teams)
-	ListPackTeams(ctx context.Context, request ListPackTeamsRequestObject) (ListPackTeamsResponseObject, error)
-	// Attach a team to pack
-	// (POST /packs/{pack_id}/teams)
-	AttachPackToTeam(ctx context.Context, request AttachPackToTeamRequestObject) (AttachPackToTeamResponseObject, error)
-	// Update team perms for pack
-	// (PUT /packs/{pack_id}/teams)
-	PermitPackTeam(ctx context.Context, request PermitPackTeamRequestObject) (PermitPackTeamResponseObject, error)
+	// Unlink a group from pack
+	// (DELETE /packs/{pack_id}/groups)
+	DeletePackFromGroup(ctx context.Context, request DeletePackFromGroupRequestObject) (DeletePackFromGroupResponseObject, error)
+	// Fetch all groups attached to pack
+	// (GET /packs/{pack_id}/groups)
+	ListPackGroups(ctx context.Context, request ListPackGroupsRequestObject) (ListPackGroupsResponseObject, error)
+	// Attach a group to pack
+	// (POST /packs/{pack_id}/groups)
+	AttachPackToGroup(ctx context.Context, request AttachPackToGroupRequestObject) (AttachPackToGroupResponseObject, error)
+	// Update group perms for pack
+	// (PUT /packs/{pack_id}/groups)
+	PermitPackGroup(ctx context.Context, request PermitPackGroupRequestObject) (PermitPackGroupResponseObject, error)
 	// Unlink a user from pack
 	// (DELETE /packs/{pack_id}/users)
 	DeletePackFromUser(ctx context.Context, request DeletePackFromUserRequestObject) (DeletePackFromUserResponseObject, error)
@@ -15414,57 +16029,6 @@ type StrictServerInterface interface {
 	// Attach a build to a Quilt version
 	// (POST /quilt/{quilt_id}/builds)
 	AttachQuiltToBuild(ctx context.Context, request AttachQuiltToBuildRequestObject) (AttachQuiltToBuildResponseObject, error)
-	// Fetch all available teams
-	// (GET /teams)
-	ListTeams(ctx context.Context, request ListTeamsRequestObject) (ListTeamsResponseObject, error)
-	// Create a new team
-	// (POST /teams)
-	CreateTeam(ctx context.Context, request CreateTeamRequestObject) (CreateTeamResponseObject, error)
-	// Delete a specific team
-	// (DELETE /teams/{team_id})
-	DeleteTeam(ctx context.Context, request DeleteTeamRequestObject) (DeleteTeamResponseObject, error)
-	// Fetch a specific team
-	// (GET /teams/{team_id})
-	ShowTeam(ctx context.Context, request ShowTeamRequestObject) (ShowTeamResponseObject, error)
-	// Update a specific team
-	// (PUT /teams/{team_id})
-	UpdateTeam(ctx context.Context, request UpdateTeamRequestObject) (UpdateTeamResponseObject, error)
-	// Unlink a mod from team
-	// (DELETE /teams/{team_id}/mods)
-	DeleteTeamFromMod(ctx context.Context, request DeleteTeamFromModRequestObject) (DeleteTeamFromModResponseObject, error)
-	// Fetch all mods attached to team
-	// (GET /teams/{team_id}/mods)
-	ListTeamMods(ctx context.Context, request ListTeamModsRequestObject) (ListTeamModsResponseObject, error)
-	// Attach a mod to team
-	// (POST /teams/{team_id}/mods)
-	AttachTeamToMod(ctx context.Context, request AttachTeamToModRequestObject) (AttachTeamToModResponseObject, error)
-	// Update mod perms for team
-	// (PUT /teams/{team_id}/mods)
-	PermitTeamMod(ctx context.Context, request PermitTeamModRequestObject) (PermitTeamModResponseObject, error)
-	// Unlink a pack from team
-	// (DELETE /teams/{team_id}/packs)
-	DeleteTeamFromPack(ctx context.Context, request DeleteTeamFromPackRequestObject) (DeleteTeamFromPackResponseObject, error)
-	// Fetch all packs attached to team
-	// (GET /teams/{team_id}/packs)
-	ListTeamPacks(ctx context.Context, request ListTeamPacksRequestObject) (ListTeamPacksResponseObject, error)
-	// Attach a pack to team
-	// (POST /teams/{team_id}/packs)
-	AttachTeamToPack(ctx context.Context, request AttachTeamToPackRequestObject) (AttachTeamToPackResponseObject, error)
-	// Update pack perms for team
-	// (PUT /teams/{team_id}/packs)
-	PermitTeamPack(ctx context.Context, request PermitTeamPackRequestObject) (PermitTeamPackResponseObject, error)
-	// Unlink a user from team
-	// (DELETE /teams/{team_id}/users)
-	DeleteTeamFromUser(ctx context.Context, request DeleteTeamFromUserRequestObject) (DeleteTeamFromUserResponseObject, error)
-	// Fetch all users attached to team
-	// (GET /teams/{team_id}/users)
-	ListTeamUsers(ctx context.Context, request ListTeamUsersRequestObject) (ListTeamUsersResponseObject, error)
-	// Attach a user to team
-	// (POST /teams/{team_id}/users)
-	AttachTeamToUser(ctx context.Context, request AttachTeamToUserRequestObject) (AttachTeamToUserResponseObject, error)
-	// Update user perms for team
-	// (PUT /teams/{team_id}/users)
-	PermitTeamUser(ctx context.Context, request PermitTeamUserRequestObject) (PermitTeamUserResponseObject, error)
 	// Fetch all available users
 	// (GET /users)
 	ListUsers(ctx context.Context, request ListUsersRequestObject) (ListUsersResponseObject, error)
@@ -15480,6 +16044,18 @@ type StrictServerInterface interface {
 	// Update a specific user
 	// (PUT /users/{user_id})
 	UpdateUser(ctx context.Context, request UpdateUserRequestObject) (UpdateUserResponseObject, error)
+	// Unlink a group from user
+	// (DELETE /users/{user_id}/groups)
+	DeleteUserFromGroup(ctx context.Context, request DeleteUserFromGroupRequestObject) (DeleteUserFromGroupResponseObject, error)
+	// Fetch all groups attached to user
+	// (GET /users/{user_id}/groups)
+	ListUserGroups(ctx context.Context, request ListUserGroupsRequestObject) (ListUserGroupsResponseObject, error)
+	// Attach a group to user
+	// (POST /users/{user_id}/groups)
+	AttachUserToGroup(ctx context.Context, request AttachUserToGroupRequestObject) (AttachUserToGroupResponseObject, error)
+	// Update group perms for user
+	// (PUT /users/{user_id}/groups)
+	PermitUserGroup(ctx context.Context, request PermitUserGroupRequestObject) (PermitUserGroupResponseObject, error)
 	// Unlink a mod from user
 	// (DELETE /users/{user_id}/mods)
 	DeleteUserFromMod(ctx context.Context, request DeleteUserFromModRequestObject) (DeleteUserFromModResponseObject, error)
@@ -15504,18 +16080,6 @@ type StrictServerInterface interface {
 	// Update pack perms for user
 	// (PUT /users/{user_id}/packs)
 	PermitUserPack(ctx context.Context, request PermitUserPackRequestObject) (PermitUserPackResponseObject, error)
-	// Unlink a team from user
-	// (DELETE /users/{user_id}/teams)
-	DeleteUserFromTeam(ctx context.Context, request DeleteUserFromTeamRequestObject) (DeleteUserFromTeamResponseObject, error)
-	// Fetch all teams attached to user
-	// (GET /users/{user_id}/teams)
-	ListUserTeams(ctx context.Context, request ListUserTeamsRequestObject) (ListUserTeamsResponseObject, error)
-	// Attach a team to user
-	// (POST /users/{user_id}/teams)
-	AttachUserToTeam(ctx context.Context, request AttachUserToTeamRequestObject) (AttachUserToTeamResponseObject, error)
-	// Update team perms for user
-	// (PUT /users/{user_id}/teams)
-	PermitUserTeam(ctx context.Context, request PermitUserTeamRequestObject) (PermitUserTeamResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -15578,23 +16142,54 @@ func (sh *strictHandler) LoginAuth(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ExternalProviders operation middleware
-func (sh *strictHandler) ExternalProviders(w http.ResponseWriter, r *http.Request) {
-	var request ExternalProvidersRequestObject
+// ListProviders operation middleware
+func (sh *strictHandler) ListProviders(w http.ResponseWriter, r *http.Request) {
+	var request ListProvidersRequestObject
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ExternalProviders(ctx, request.(ExternalProvidersRequestObject))
+		return sh.ssi.ListProviders(ctx, request.(ListProvidersRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ExternalProviders")
+		handler = middleware(handler, "ListProviders")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ExternalProvidersResponseObject); ok {
-		if err := validResponse.VisitExternalProvidersResponse(w); err != nil {
+	} else if validResponse, ok := response.(ListProvidersResponseObject); ok {
+		if err := validResponse.VisitListProvidersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RedirectAuth operation middleware
+func (sh *strictHandler) RedirectAuth(w http.ResponseWriter, r *http.Request) {
+	var request RedirectAuthRequestObject
+
+	var body RedirectAuthJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RedirectAuth(ctx, request.(RedirectAuthRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RedirectAuth")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RedirectAuthResponseObject); ok {
+		if err := validResponse.VisitRedirectAuthResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -15650,26 +16245,26 @@ func (sh *strictHandler) VerifyAuth(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ExternalCallback operation middleware
-func (sh *strictHandler) ExternalCallback(w http.ResponseWriter, r *http.Request, provider string, params ExternalCallbackParams) {
-	var request ExternalCallbackRequestObject
+// CallbackProvider operation middleware
+func (sh *strictHandler) CallbackProvider(w http.ResponseWriter, r *http.Request, provider AuthProviderParam, params CallbackProviderParams) {
+	var request CallbackProviderRequestObject
 
 	request.Provider = provider
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ExternalCallback(ctx, request.(ExternalCallbackRequestObject))
+		return sh.ssi.CallbackProvider(ctx, request.(CallbackProviderRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ExternalCallback")
+		handler = middleware(handler, "CallbackProvider")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ExternalCallbackResponseObject); ok {
-		if err := validResponse.VisitExternalCallbackResponse(w); err != nil {
+	} else if validResponse, ok := response.(CallbackProviderResponseObject); ok {
+		if err := validResponse.VisitCallbackProviderResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -15677,26 +16272,25 @@ func (sh *strictHandler) ExternalCallback(w http.ResponseWriter, r *http.Request
 	}
 }
 
-// ExternalInitialize operation middleware
-func (sh *strictHandler) ExternalInitialize(w http.ResponseWriter, r *http.Request, provider string, params ExternalInitializeParams) {
-	var request ExternalInitializeRequestObject
+// RequestProvider operation middleware
+func (sh *strictHandler) RequestProvider(w http.ResponseWriter, r *http.Request, provider AuthProviderParam) {
+	var request RequestProviderRequestObject
 
 	request.Provider = provider
-	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ExternalInitialize(ctx, request.(ExternalInitializeRequestObject))
+		return sh.ssi.RequestProvider(ctx, request.(RequestProviderRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ExternalInitialize")
+		handler = middleware(handler, "RequestProvider")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ExternalInitializeResponseObject); ok {
-		if err := validResponse.VisitExternalInitializeResponse(w); err != nil {
+	} else if validResponse, ok := response.(RequestProviderResponseObject); ok {
+		if err := validResponse.VisitRequestProviderResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -15755,10 +16349,10 @@ func (sh *strictHandler) UpdateFabric(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteFabricFromBuild operation middleware
-func (sh *strictHandler) DeleteFabricFromBuild(w http.ResponseWriter, r *http.Request, fabricId string) {
+func (sh *strictHandler) DeleteFabricFromBuild(w http.ResponseWriter, r *http.Request, fabricID FabricID) {
 	var request DeleteFabricFromBuildRequestObject
 
-	request.FabricId = fabricId
+	request.FabricID = fabricID
 
 	var body DeleteFabricFromBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -15788,10 +16382,10 @@ func (sh *strictHandler) DeleteFabricFromBuild(w http.ResponseWriter, r *http.Re
 }
 
 // ListFabricBuilds operation middleware
-func (sh *strictHandler) ListFabricBuilds(w http.ResponseWriter, r *http.Request, fabricId string, params ListFabricBuildsParams) {
+func (sh *strictHandler) ListFabricBuilds(w http.ResponseWriter, r *http.Request, fabricID FabricID, params ListFabricBuildsParams) {
 	var request ListFabricBuildsRequestObject
 
-	request.FabricId = fabricId
+	request.FabricID = fabricID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -15815,10 +16409,10 @@ func (sh *strictHandler) ListFabricBuilds(w http.ResponseWriter, r *http.Request
 }
 
 // AttachFabricToBuild operation middleware
-func (sh *strictHandler) AttachFabricToBuild(w http.ResponseWriter, r *http.Request, fabricId string) {
+func (sh *strictHandler) AttachFabricToBuild(w http.ResponseWriter, r *http.Request, fabricID FabricID) {
 	var request AttachFabricToBuildRequestObject
 
-	request.FabricId = fabricId
+	request.FabricID = fabricID
 
 	var body AttachFabricToBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -15898,10 +16492,10 @@ func (sh *strictHandler) UpdateForge(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteForgeFromBuild operation middleware
-func (sh *strictHandler) DeleteForgeFromBuild(w http.ResponseWriter, r *http.Request, forgeId string) {
+func (sh *strictHandler) DeleteForgeFromBuild(w http.ResponseWriter, r *http.Request, forgeID ForgeID) {
 	var request DeleteForgeFromBuildRequestObject
 
-	request.ForgeId = forgeId
+	request.ForgeID = forgeID
 
 	var body DeleteForgeFromBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -15931,10 +16525,10 @@ func (sh *strictHandler) DeleteForgeFromBuild(w http.ResponseWriter, r *http.Req
 }
 
 // ListForgeBuilds operation middleware
-func (sh *strictHandler) ListForgeBuilds(w http.ResponseWriter, r *http.Request, forgeId string, params ListForgeBuildsParams) {
+func (sh *strictHandler) ListForgeBuilds(w http.ResponseWriter, r *http.Request, forgeID ForgeID, params ListForgeBuildsParams) {
 	var request ListForgeBuildsRequestObject
 
-	request.ForgeId = forgeId
+	request.ForgeID = forgeID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -15958,10 +16552,10 @@ func (sh *strictHandler) ListForgeBuilds(w http.ResponseWriter, r *http.Request,
 }
 
 // AttachForgeToBuild operation middleware
-func (sh *strictHandler) AttachForgeToBuild(w http.ResponseWriter, r *http.Request, forgeId string) {
+func (sh *strictHandler) AttachForgeToBuild(w http.ResponseWriter, r *http.Request, forgeID ForgeID) {
 	var request AttachForgeToBuildRequestObject
 
-	request.ForgeId = forgeId
+	request.ForgeID = forgeID
 
 	var body AttachForgeToBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -15983,6 +16577,526 @@ func (sh *strictHandler) AttachForgeToBuild(w http.ResponseWriter, r *http.Reque
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(AttachForgeToBuildResponseObject); ok {
 		if err := validResponse.VisitAttachForgeToBuildResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListGroups operation middleware
+func (sh *strictHandler) ListGroups(w http.ResponseWriter, r *http.Request, params ListGroupsParams) {
+	var request ListGroupsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListGroups(ctx, request.(ListGroupsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListGroups")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListGroupsResponseObject); ok {
+		if err := validResponse.VisitListGroupsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateGroup operation middleware
+func (sh *strictHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
+	var request CreateGroupRequestObject
+
+	var body CreateGroupJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateGroup(ctx, request.(CreateGroupRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateGroup")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateGroupResponseObject); ok {
+		if err := validResponse.VisitCreateGroupResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteGroup operation middleware
+func (sh *strictHandler) DeleteGroup(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request DeleteGroupRequestObject
+
+	request.GroupID = groupID
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteGroup(ctx, request.(DeleteGroupRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteGroup")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteGroupResponseObject); ok {
+		if err := validResponse.VisitDeleteGroupResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ShowGroup operation middleware
+func (sh *strictHandler) ShowGroup(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request ShowGroupRequestObject
+
+	request.GroupID = groupID
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ShowGroup(ctx, request.(ShowGroupRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ShowGroup")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ShowGroupResponseObject); ok {
+		if err := validResponse.VisitShowGroupResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateGroup operation middleware
+func (sh *strictHandler) UpdateGroup(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request UpdateGroupRequestObject
+
+	request.GroupID = groupID
+
+	var body UpdateGroupJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateGroup(ctx, request.(UpdateGroupRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateGroup")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateGroupResponseObject); ok {
+		if err := validResponse.VisitUpdateGroupResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteGroupFromMod operation middleware
+func (sh *strictHandler) DeleteGroupFromMod(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request DeleteGroupFromModRequestObject
+
+	request.GroupID = groupID
+
+	var body DeleteGroupFromModJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteGroupFromMod(ctx, request.(DeleteGroupFromModRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteGroupFromMod")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteGroupFromModResponseObject); ok {
+		if err := validResponse.VisitDeleteGroupFromModResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListGroupMods operation middleware
+func (sh *strictHandler) ListGroupMods(w http.ResponseWriter, r *http.Request, groupID GroupID, params ListGroupModsParams) {
+	var request ListGroupModsRequestObject
+
+	request.GroupID = groupID
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListGroupMods(ctx, request.(ListGroupModsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListGroupMods")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListGroupModsResponseObject); ok {
+		if err := validResponse.VisitListGroupModsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AttachGroupToMod operation middleware
+func (sh *strictHandler) AttachGroupToMod(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request AttachGroupToModRequestObject
+
+	request.GroupID = groupID
+
+	var body AttachGroupToModJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AttachGroupToMod(ctx, request.(AttachGroupToModRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AttachGroupToMod")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AttachGroupToModResponseObject); ok {
+		if err := validResponse.VisitAttachGroupToModResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PermitGroupMod operation middleware
+func (sh *strictHandler) PermitGroupMod(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request PermitGroupModRequestObject
+
+	request.GroupID = groupID
+
+	var body PermitGroupModJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PermitGroupMod(ctx, request.(PermitGroupModRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PermitGroupMod")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PermitGroupModResponseObject); ok {
+		if err := validResponse.VisitPermitGroupModResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteGroupFromPack operation middleware
+func (sh *strictHandler) DeleteGroupFromPack(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request DeleteGroupFromPackRequestObject
+
+	request.GroupID = groupID
+
+	var body DeleteGroupFromPackJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteGroupFromPack(ctx, request.(DeleteGroupFromPackRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteGroupFromPack")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteGroupFromPackResponseObject); ok {
+		if err := validResponse.VisitDeleteGroupFromPackResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListGroupPacks operation middleware
+func (sh *strictHandler) ListGroupPacks(w http.ResponseWriter, r *http.Request, groupID GroupID, params ListGroupPacksParams) {
+	var request ListGroupPacksRequestObject
+
+	request.GroupID = groupID
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListGroupPacks(ctx, request.(ListGroupPacksRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListGroupPacks")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListGroupPacksResponseObject); ok {
+		if err := validResponse.VisitListGroupPacksResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AttachGroupToPack operation middleware
+func (sh *strictHandler) AttachGroupToPack(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request AttachGroupToPackRequestObject
+
+	request.GroupID = groupID
+
+	var body AttachGroupToPackJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AttachGroupToPack(ctx, request.(AttachGroupToPackRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AttachGroupToPack")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AttachGroupToPackResponseObject); ok {
+		if err := validResponse.VisitAttachGroupToPackResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PermitGroupPack operation middleware
+func (sh *strictHandler) PermitGroupPack(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request PermitGroupPackRequestObject
+
+	request.GroupID = groupID
+
+	var body PermitGroupPackJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PermitGroupPack(ctx, request.(PermitGroupPackRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PermitGroupPack")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PermitGroupPackResponseObject); ok {
+		if err := validResponse.VisitPermitGroupPackResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteGroupFromUser operation middleware
+func (sh *strictHandler) DeleteGroupFromUser(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request DeleteGroupFromUserRequestObject
+
+	request.GroupID = groupID
+
+	var body DeleteGroupFromUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteGroupFromUser(ctx, request.(DeleteGroupFromUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteGroupFromUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteGroupFromUserResponseObject); ok {
+		if err := validResponse.VisitDeleteGroupFromUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListGroupUsers operation middleware
+func (sh *strictHandler) ListGroupUsers(w http.ResponseWriter, r *http.Request, groupID GroupID, params ListGroupUsersParams) {
+	var request ListGroupUsersRequestObject
+
+	request.GroupID = groupID
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListGroupUsers(ctx, request.(ListGroupUsersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListGroupUsers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListGroupUsersResponseObject); ok {
+		if err := validResponse.VisitListGroupUsersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AttachGroupToUser operation middleware
+func (sh *strictHandler) AttachGroupToUser(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request AttachGroupToUserRequestObject
+
+	request.GroupID = groupID
+
+	var body AttachGroupToUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AttachGroupToUser(ctx, request.(AttachGroupToUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AttachGroupToUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AttachGroupToUserResponseObject); ok {
+		if err := validResponse.VisitAttachGroupToUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PermitGroupUser operation middleware
+func (sh *strictHandler) PermitGroupUser(w http.ResponseWriter, r *http.Request, groupID GroupID) {
+	var request PermitGroupUserRequestObject
+
+	request.GroupID = groupID
+
+	var body PermitGroupUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PermitGroupUser(ctx, request.(PermitGroupUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PermitGroupUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PermitGroupUserResponseObject); ok {
+		if err := validResponse.VisitPermitGroupUserResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -16041,10 +17155,10 @@ func (sh *strictHandler) UpdateMinecraft(w http.ResponseWriter, r *http.Request)
 }
 
 // DeleteMinecraftFromBuild operation middleware
-func (sh *strictHandler) DeleteMinecraftFromBuild(w http.ResponseWriter, r *http.Request, minecraftId string) {
+func (sh *strictHandler) DeleteMinecraftFromBuild(w http.ResponseWriter, r *http.Request, minecraftID MinecraftID) {
 	var request DeleteMinecraftFromBuildRequestObject
 
-	request.MinecraftId = minecraftId
+	request.MinecraftID = minecraftID
 
 	var body DeleteMinecraftFromBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16074,10 +17188,10 @@ func (sh *strictHandler) DeleteMinecraftFromBuild(w http.ResponseWriter, r *http
 }
 
 // ListMinecraftBuilds operation middleware
-func (sh *strictHandler) ListMinecraftBuilds(w http.ResponseWriter, r *http.Request, minecraftId string, params ListMinecraftBuildsParams) {
+func (sh *strictHandler) ListMinecraftBuilds(w http.ResponseWriter, r *http.Request, minecraftID MinecraftID, params ListMinecraftBuildsParams) {
 	var request ListMinecraftBuildsRequestObject
 
-	request.MinecraftId = minecraftId
+	request.MinecraftID = minecraftID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -16101,10 +17215,10 @@ func (sh *strictHandler) ListMinecraftBuilds(w http.ResponseWriter, r *http.Requ
 }
 
 // AttachMinecraftToBuild operation middleware
-func (sh *strictHandler) AttachMinecraftToBuild(w http.ResponseWriter, r *http.Request, minecraftId string) {
+func (sh *strictHandler) AttachMinecraftToBuild(w http.ResponseWriter, r *http.Request, minecraftID MinecraftID) {
 	var request AttachMinecraftToBuildRequestObject
 
-	request.MinecraftId = minecraftId
+	request.MinecraftID = minecraftID
 
 	var body AttachMinecraftToBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16191,10 +17305,10 @@ func (sh *strictHandler) CreateMod(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteMod operation middleware
-func (sh *strictHandler) DeleteMod(w http.ResponseWriter, r *http.Request, modId string) {
+func (sh *strictHandler) DeleteMod(w http.ResponseWriter, r *http.Request, modID ModID) {
 	var request DeleteModRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.DeleteMod(ctx, request.(DeleteModRequestObject))
@@ -16217,10 +17331,10 @@ func (sh *strictHandler) DeleteMod(w http.ResponseWriter, r *http.Request, modId
 }
 
 // ShowMod operation middleware
-func (sh *strictHandler) ShowMod(w http.ResponseWriter, r *http.Request, modId string) {
+func (sh *strictHandler) ShowMod(w http.ResponseWriter, r *http.Request, modID ModID) {
 	var request ShowModRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.ShowMod(ctx, request.(ShowModRequestObject))
@@ -16243,10 +17357,10 @@ func (sh *strictHandler) ShowMod(w http.ResponseWriter, r *http.Request, modId s
 }
 
 // UpdateMod operation middleware
-func (sh *strictHandler) UpdateMod(w http.ResponseWriter, r *http.Request, modId string) {
+func (sh *strictHandler) UpdateMod(w http.ResponseWriter, r *http.Request, modID ModID) {
 	var request UpdateModRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 
 	var body UpdateModJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16275,32 +17389,25 @@ func (sh *strictHandler) UpdateMod(w http.ResponseWriter, r *http.Request, modId
 	}
 }
 
-// DeleteModFromTeam operation middleware
-func (sh *strictHandler) DeleteModFromTeam(w http.ResponseWriter, r *http.Request, modId string) {
-	var request DeleteModFromTeamRequestObject
+// DeleteModAvatar operation middleware
+func (sh *strictHandler) DeleteModAvatar(w http.ResponseWriter, r *http.Request, modID ModID) {
+	var request DeleteModAvatarRequestObject
 
-	request.ModId = modId
-
-	var body DeleteModFromTeamJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
+	request.ModID = modID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteModFromTeam(ctx, request.(DeleteModFromTeamRequestObject))
+		return sh.ssi.DeleteModAvatar(ctx, request.(DeleteModAvatarRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteModFromTeam")
+		handler = middleware(handler, "DeleteModAvatar")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeleteModFromTeamResponseObject); ok {
-		if err := validResponse.VisitDeleteModFromTeamResponse(w); err != nil {
+	} else if validResponse, ok := response.(DeleteModAvatarResponseObject); ok {
+		if err := validResponse.VisitDeleteModAvatarResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -16308,26 +17415,92 @@ func (sh *strictHandler) DeleteModFromTeam(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-// ListModTeams operation middleware
-func (sh *strictHandler) ListModTeams(w http.ResponseWriter, r *http.Request, modId string, params ListModTeamsParams) {
-	var request ListModTeamsRequestObject
+// CreateModAvatar operation middleware
+func (sh *strictHandler) CreateModAvatar(w http.ResponseWriter, r *http.Request, modID ModID) {
+	var request CreateModAvatarRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
+
+	if reader, err := r.MultipartReader(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode multipart body: %w", err))
+		return
+	} else {
+		request.Body = reader
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateModAvatar(ctx, request.(CreateModAvatarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateModAvatar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateModAvatarResponseObject); ok {
+		if err := validResponse.VisitCreateModAvatarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteModFromGroup operation middleware
+func (sh *strictHandler) DeleteModFromGroup(w http.ResponseWriter, r *http.Request, modID ModID) {
+	var request DeleteModFromGroupRequestObject
+
+	request.ModID = modID
+
+	var body DeleteModFromGroupJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteModFromGroup(ctx, request.(DeleteModFromGroupRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteModFromGroup")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteModFromGroupResponseObject); ok {
+		if err := validResponse.VisitDeleteModFromGroupResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListModGroups operation middleware
+func (sh *strictHandler) ListModGroups(w http.ResponseWriter, r *http.Request, modID ModID, params ListModGroupsParams) {
+	var request ListModGroupsRequestObject
+
+	request.ModID = modID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ListModTeams(ctx, request.(ListModTeamsRequestObject))
+		return sh.ssi.ListModGroups(ctx, request.(ListModGroupsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ListModTeams")
+		handler = middleware(handler, "ListModGroups")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ListModTeamsResponseObject); ok {
-		if err := validResponse.VisitListModTeamsResponse(w); err != nil {
+	} else if validResponse, ok := response.(ListModGroupsResponseObject); ok {
+		if err := validResponse.VisitListModGroupsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -16335,13 +17508,13 @@ func (sh *strictHandler) ListModTeams(w http.ResponseWriter, r *http.Request, mo
 	}
 }
 
-// AttachModToTeam operation middleware
-func (sh *strictHandler) AttachModToTeam(w http.ResponseWriter, r *http.Request, modId string) {
-	var request AttachModToTeamRequestObject
+// AttachModToGroup operation middleware
+func (sh *strictHandler) AttachModToGroup(w http.ResponseWriter, r *http.Request, modID ModID) {
+	var request AttachModToGroupRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 
-	var body AttachModToTeamJSONRequestBody
+	var body AttachModToGroupJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -16349,18 +17522,18 @@ func (sh *strictHandler) AttachModToTeam(w http.ResponseWriter, r *http.Request,
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.AttachModToTeam(ctx, request.(AttachModToTeamRequestObject))
+		return sh.ssi.AttachModToGroup(ctx, request.(AttachModToGroupRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "AttachModToTeam")
+		handler = middleware(handler, "AttachModToGroup")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(AttachModToTeamResponseObject); ok {
-		if err := validResponse.VisitAttachModToTeamResponse(w); err != nil {
+	} else if validResponse, ok := response.(AttachModToGroupResponseObject); ok {
+		if err := validResponse.VisitAttachModToGroupResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -16368,13 +17541,13 @@ func (sh *strictHandler) AttachModToTeam(w http.ResponseWriter, r *http.Request,
 	}
 }
 
-// PermitModTeam operation middleware
-func (sh *strictHandler) PermitModTeam(w http.ResponseWriter, r *http.Request, modId string) {
-	var request PermitModTeamRequestObject
+// PermitModGroup operation middleware
+func (sh *strictHandler) PermitModGroup(w http.ResponseWriter, r *http.Request, modID ModID) {
+	var request PermitModGroupRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 
-	var body PermitModTeamJSONRequestBody
+	var body PermitModGroupJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -16382,18 +17555,18 @@ func (sh *strictHandler) PermitModTeam(w http.ResponseWriter, r *http.Request, m
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PermitModTeam(ctx, request.(PermitModTeamRequestObject))
+		return sh.ssi.PermitModGroup(ctx, request.(PermitModGroupRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PermitModTeam")
+		handler = middleware(handler, "PermitModGroup")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PermitModTeamResponseObject); ok {
-		if err := validResponse.VisitPermitModTeamResponse(w); err != nil {
+	} else if validResponse, ok := response.(PermitModGroupResponseObject); ok {
+		if err := validResponse.VisitPermitModGroupResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -16402,10 +17575,10 @@ func (sh *strictHandler) PermitModTeam(w http.ResponseWriter, r *http.Request, m
 }
 
 // DeleteModFromUser operation middleware
-func (sh *strictHandler) DeleteModFromUser(w http.ResponseWriter, r *http.Request, modId string) {
+func (sh *strictHandler) DeleteModFromUser(w http.ResponseWriter, r *http.Request, modID ModID) {
 	var request DeleteModFromUserRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 
 	var body DeleteModFromUserJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16435,10 +17608,10 @@ func (sh *strictHandler) DeleteModFromUser(w http.ResponseWriter, r *http.Reques
 }
 
 // ListModUsers operation middleware
-func (sh *strictHandler) ListModUsers(w http.ResponseWriter, r *http.Request, modId string, params ListModUsersParams) {
+func (sh *strictHandler) ListModUsers(w http.ResponseWriter, r *http.Request, modID ModID, params ListModUsersParams) {
 	var request ListModUsersRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -16462,10 +17635,10 @@ func (sh *strictHandler) ListModUsers(w http.ResponseWriter, r *http.Request, mo
 }
 
 // AttachModToUser operation middleware
-func (sh *strictHandler) AttachModToUser(w http.ResponseWriter, r *http.Request, modId string) {
+func (sh *strictHandler) AttachModToUser(w http.ResponseWriter, r *http.Request, modID ModID) {
 	var request AttachModToUserRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 
 	var body AttachModToUserJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16495,10 +17668,10 @@ func (sh *strictHandler) AttachModToUser(w http.ResponseWriter, r *http.Request,
 }
 
 // PermitModUser operation middleware
-func (sh *strictHandler) PermitModUser(w http.ResponseWriter, r *http.Request, modId string) {
+func (sh *strictHandler) PermitModUser(w http.ResponseWriter, r *http.Request, modID ModID) {
 	var request PermitModUserRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 
 	var body PermitModUserJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16528,10 +17701,10 @@ func (sh *strictHandler) PermitModUser(w http.ResponseWriter, r *http.Request, m
 }
 
 // ListVersions operation middleware
-func (sh *strictHandler) ListVersions(w http.ResponseWriter, r *http.Request, modId string, params ListVersionsParams) {
+func (sh *strictHandler) ListVersions(w http.ResponseWriter, r *http.Request, modID ModID, params ListVersionsParams) {
 	var request ListVersionsRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -16555,10 +17728,10 @@ func (sh *strictHandler) ListVersions(w http.ResponseWriter, r *http.Request, mo
 }
 
 // CreateVersion operation middleware
-func (sh *strictHandler) CreateVersion(w http.ResponseWriter, r *http.Request, modId string) {
+func (sh *strictHandler) CreateVersion(w http.ResponseWriter, r *http.Request, modID ModID) {
 	var request CreateVersionRequestObject
 
-	request.ModId = modId
+	request.ModID = modID
 
 	var body CreateVersionJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16588,11 +17761,11 @@ func (sh *strictHandler) CreateVersion(w http.ResponseWriter, r *http.Request, m
 }
 
 // DeleteVersion operation middleware
-func (sh *strictHandler) DeleteVersion(w http.ResponseWriter, r *http.Request, modId string, versionId string) {
+func (sh *strictHandler) DeleteVersion(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID) {
 	var request DeleteVersionRequestObject
 
-	request.ModId = modId
-	request.VersionId = versionId
+	request.ModID = modID
+	request.VersionID = versionID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.DeleteVersion(ctx, request.(DeleteVersionRequestObject))
@@ -16615,11 +17788,11 @@ func (sh *strictHandler) DeleteVersion(w http.ResponseWriter, r *http.Request, m
 }
 
 // ShowVersion operation middleware
-func (sh *strictHandler) ShowVersion(w http.ResponseWriter, r *http.Request, modId string, versionId string) {
+func (sh *strictHandler) ShowVersion(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID) {
 	var request ShowVersionRequestObject
 
-	request.ModId = modId
-	request.VersionId = versionId
+	request.ModID = modID
+	request.VersionID = versionID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.ShowVersion(ctx, request.(ShowVersionRequestObject))
@@ -16642,11 +17815,11 @@ func (sh *strictHandler) ShowVersion(w http.ResponseWriter, r *http.Request, mod
 }
 
 // UpdateVersion operation middleware
-func (sh *strictHandler) UpdateVersion(w http.ResponseWriter, r *http.Request, modId string, versionId string) {
+func (sh *strictHandler) UpdateVersion(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID) {
 	var request UpdateVersionRequestObject
 
-	request.ModId = modId
-	request.VersionId = versionId
+	request.ModID = modID
+	request.VersionID = versionID
 
 	var body UpdateVersionJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16676,11 +17849,11 @@ func (sh *strictHandler) UpdateVersion(w http.ResponseWriter, r *http.Request, m
 }
 
 // DeleteVersionFromBuild operation middleware
-func (sh *strictHandler) DeleteVersionFromBuild(w http.ResponseWriter, r *http.Request, modId string, versionId string) {
+func (sh *strictHandler) DeleteVersionFromBuild(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID) {
 	var request DeleteVersionFromBuildRequestObject
 
-	request.ModId = modId
-	request.VersionId = versionId
+	request.ModID = modID
+	request.VersionID = versionID
 
 	var body DeleteVersionFromBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16710,11 +17883,11 @@ func (sh *strictHandler) DeleteVersionFromBuild(w http.ResponseWriter, r *http.R
 }
 
 // ListVersionBuilds operation middleware
-func (sh *strictHandler) ListVersionBuilds(w http.ResponseWriter, r *http.Request, modId string, versionId string, params ListVersionBuildsParams) {
+func (sh *strictHandler) ListVersionBuilds(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID, params ListVersionBuildsParams) {
 	var request ListVersionBuildsRequestObject
 
-	request.ModId = modId
-	request.VersionId = versionId
+	request.ModID = modID
+	request.VersionID = versionID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -16738,11 +17911,11 @@ func (sh *strictHandler) ListVersionBuilds(w http.ResponseWriter, r *http.Reques
 }
 
 // AttachVersionToBuild operation middleware
-func (sh *strictHandler) AttachVersionToBuild(w http.ResponseWriter, r *http.Request, modId string, versionId string) {
+func (sh *strictHandler) AttachVersionToBuild(w http.ResponseWriter, r *http.Request, modID ModID, versionID VersionID) {
 	var request AttachVersionToBuildRequestObject
 
-	request.ModId = modId
-	request.VersionId = versionId
+	request.ModID = modID
+	request.VersionID = versionID
 
 	var body AttachVersionToBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16822,10 +17995,10 @@ func (sh *strictHandler) UpdateNeoforge(w http.ResponseWriter, r *http.Request) 
 }
 
 // DeleteNeoforgeFromBuild operation middleware
-func (sh *strictHandler) DeleteNeoforgeFromBuild(w http.ResponseWriter, r *http.Request, neoforgeId string) {
+func (sh *strictHandler) DeleteNeoforgeFromBuild(w http.ResponseWriter, r *http.Request, neoforgeID NeoforgeID) {
 	var request DeleteNeoforgeFromBuildRequestObject
 
-	request.NeoforgeId = neoforgeId
+	request.NeoforgeID = neoforgeID
 
 	var body DeleteNeoforgeFromBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16855,10 +18028,10 @@ func (sh *strictHandler) DeleteNeoforgeFromBuild(w http.ResponseWriter, r *http.
 }
 
 // ListNeoforgeBuilds operation middleware
-func (sh *strictHandler) ListNeoforgeBuilds(w http.ResponseWriter, r *http.Request, neoforgeId string, params ListNeoforgeBuildsParams) {
+func (sh *strictHandler) ListNeoforgeBuilds(w http.ResponseWriter, r *http.Request, neoforgeID NeoforgeID, params ListNeoforgeBuildsParams) {
 	var request ListNeoforgeBuildsRequestObject
 
-	request.NeoforgeId = neoforgeId
+	request.NeoforgeID = neoforgeID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -16882,10 +18055,10 @@ func (sh *strictHandler) ListNeoforgeBuilds(w http.ResponseWriter, r *http.Reque
 }
 
 // AttachNeoforgeToBuild operation middleware
-func (sh *strictHandler) AttachNeoforgeToBuild(w http.ResponseWriter, r *http.Request, neoforgeId string) {
+func (sh *strictHandler) AttachNeoforgeToBuild(w http.ResponseWriter, r *http.Request, neoforgeID NeoforgeID) {
 	var request AttachNeoforgeToBuildRequestObject
 
-	request.NeoforgeId = neoforgeId
+	request.NeoforgeID = neoforgeID
 
 	var body AttachNeoforgeToBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -16972,10 +18145,10 @@ func (sh *strictHandler) CreatePack(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeletePack operation middleware
-func (sh *strictHandler) DeletePack(w http.ResponseWriter, r *http.Request, packId string) {
+func (sh *strictHandler) DeletePack(w http.ResponseWriter, r *http.Request, packID PackID) {
 	var request DeletePackRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.DeletePack(ctx, request.(DeletePackRequestObject))
@@ -16998,10 +18171,10 @@ func (sh *strictHandler) DeletePack(w http.ResponseWriter, r *http.Request, pack
 }
 
 // ShowPack operation middleware
-func (sh *strictHandler) ShowPack(w http.ResponseWriter, r *http.Request, packId string) {
+func (sh *strictHandler) ShowPack(w http.ResponseWriter, r *http.Request, packID PackID) {
 	var request ShowPackRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.ShowPack(ctx, request.(ShowPackRequestObject))
@@ -17024,10 +18197,10 @@ func (sh *strictHandler) ShowPack(w http.ResponseWriter, r *http.Request, packId
 }
 
 // UpdatePack operation middleware
-func (sh *strictHandler) UpdatePack(w http.ResponseWriter, r *http.Request, packId string) {
+func (sh *strictHandler) UpdatePack(w http.ResponseWriter, r *http.Request, packID PackID) {
 	var request UpdatePackRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 
 	var body UpdatePackJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -17056,11 +18229,70 @@ func (sh *strictHandler) UpdatePack(w http.ResponseWriter, r *http.Request, pack
 	}
 }
 
+// DeletePackAvatar operation middleware
+func (sh *strictHandler) DeletePackAvatar(w http.ResponseWriter, r *http.Request, packID PackID) {
+	var request DeletePackAvatarRequestObject
+
+	request.PackID = packID
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeletePackAvatar(ctx, request.(DeletePackAvatarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeletePackAvatar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeletePackAvatarResponseObject); ok {
+		if err := validResponse.VisitDeletePackAvatarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreatePackAvatar operation middleware
+func (sh *strictHandler) CreatePackAvatar(w http.ResponseWriter, r *http.Request, packID PackID) {
+	var request CreatePackAvatarRequestObject
+
+	request.PackID = packID
+
+	if reader, err := r.MultipartReader(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode multipart body: %w", err))
+		return
+	} else {
+		request.Body = reader
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreatePackAvatar(ctx, request.(CreatePackAvatarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreatePackAvatar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreatePackAvatarResponseObject); ok {
+		if err := validResponse.VisitCreatePackAvatarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ListBuilds operation middleware
-func (sh *strictHandler) ListBuilds(w http.ResponseWriter, r *http.Request, packId string, params ListBuildsParams) {
+func (sh *strictHandler) ListBuilds(w http.ResponseWriter, r *http.Request, packID PackID, params ListBuildsParams) {
 	var request ListBuildsRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -17084,10 +18316,10 @@ func (sh *strictHandler) ListBuilds(w http.ResponseWriter, r *http.Request, pack
 }
 
 // CreateBuild operation middleware
-func (sh *strictHandler) CreateBuild(w http.ResponseWriter, r *http.Request, packId string) {
+func (sh *strictHandler) CreateBuild(w http.ResponseWriter, r *http.Request, packID PackID) {
 	var request CreateBuildRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 
 	var body CreateBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -17117,11 +18349,11 @@ func (sh *strictHandler) CreateBuild(w http.ResponseWriter, r *http.Request, pac
 }
 
 // DeleteBuild operation middleware
-func (sh *strictHandler) DeleteBuild(w http.ResponseWriter, r *http.Request, packId string, buildId string) {
+func (sh *strictHandler) DeleteBuild(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID) {
 	var request DeleteBuildRequestObject
 
-	request.PackId = packId
-	request.BuildId = buildId
+	request.PackID = packID
+	request.BuildID = buildID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.DeleteBuild(ctx, request.(DeleteBuildRequestObject))
@@ -17144,11 +18376,11 @@ func (sh *strictHandler) DeleteBuild(w http.ResponseWriter, r *http.Request, pac
 }
 
 // ShowBuild operation middleware
-func (sh *strictHandler) ShowBuild(w http.ResponseWriter, r *http.Request, packId string, buildId string) {
+func (sh *strictHandler) ShowBuild(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID) {
 	var request ShowBuildRequestObject
 
-	request.PackId = packId
-	request.BuildId = buildId
+	request.PackID = packID
+	request.BuildID = buildID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.ShowBuild(ctx, request.(ShowBuildRequestObject))
@@ -17171,11 +18403,11 @@ func (sh *strictHandler) ShowBuild(w http.ResponseWriter, r *http.Request, packI
 }
 
 // UpdateBuild operation middleware
-func (sh *strictHandler) UpdateBuild(w http.ResponseWriter, r *http.Request, packId string, buildId string) {
+func (sh *strictHandler) UpdateBuild(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID) {
 	var request UpdateBuildRequestObject
 
-	request.PackId = packId
-	request.BuildId = buildId
+	request.PackID = packID
+	request.BuildID = buildID
 
 	var body UpdateBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -17205,11 +18437,11 @@ func (sh *strictHandler) UpdateBuild(w http.ResponseWriter, r *http.Request, pac
 }
 
 // DeleteBuildFromVersion operation middleware
-func (sh *strictHandler) DeleteBuildFromVersion(w http.ResponseWriter, r *http.Request, packId string, buildId string) {
+func (sh *strictHandler) DeleteBuildFromVersion(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID) {
 	var request DeleteBuildFromVersionRequestObject
 
-	request.PackId = packId
-	request.BuildId = buildId
+	request.PackID = packID
+	request.BuildID = buildID
 
 	var body DeleteBuildFromVersionJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -17239,11 +18471,11 @@ func (sh *strictHandler) DeleteBuildFromVersion(w http.ResponseWriter, r *http.R
 }
 
 // ListBuildVersions operation middleware
-func (sh *strictHandler) ListBuildVersions(w http.ResponseWriter, r *http.Request, packId string, buildId string, params ListBuildVersionsParams) {
+func (sh *strictHandler) ListBuildVersions(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID, params ListBuildVersionsParams) {
 	var request ListBuildVersionsRequestObject
 
-	request.PackId = packId
-	request.BuildId = buildId
+	request.PackID = packID
+	request.BuildID = buildID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -17267,11 +18499,11 @@ func (sh *strictHandler) ListBuildVersions(w http.ResponseWriter, r *http.Reques
 }
 
 // AttachBuildToVersion operation middleware
-func (sh *strictHandler) AttachBuildToVersion(w http.ResponseWriter, r *http.Request, packId string, buildId string) {
+func (sh *strictHandler) AttachBuildToVersion(w http.ResponseWriter, r *http.Request, packID PackID, buildID BuildID) {
 	var request AttachBuildToVersionRequestObject
 
-	request.PackId = packId
-	request.BuildId = buildId
+	request.PackID = packID
+	request.BuildID = buildID
 
 	var body AttachBuildToVersionJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -17300,13 +18532,13 @@ func (sh *strictHandler) AttachBuildToVersion(w http.ResponseWriter, r *http.Req
 	}
 }
 
-// DeletePackFromTeam operation middleware
-func (sh *strictHandler) DeletePackFromTeam(w http.ResponseWriter, r *http.Request, packId string) {
-	var request DeletePackFromTeamRequestObject
+// DeletePackFromGroup operation middleware
+func (sh *strictHandler) DeletePackFromGroup(w http.ResponseWriter, r *http.Request, packID PackID) {
+	var request DeletePackFromGroupRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 
-	var body DeletePackFromTeamJSONRequestBody
+	var body DeletePackFromGroupJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -17314,18 +18546,18 @@ func (sh *strictHandler) DeletePackFromTeam(w http.ResponseWriter, r *http.Reque
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeletePackFromTeam(ctx, request.(DeletePackFromTeamRequestObject))
+		return sh.ssi.DeletePackFromGroup(ctx, request.(DeletePackFromGroupRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeletePackFromTeam")
+		handler = middleware(handler, "DeletePackFromGroup")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeletePackFromTeamResponseObject); ok {
-		if err := validResponse.VisitDeletePackFromTeamResponse(w); err != nil {
+	} else if validResponse, ok := response.(DeletePackFromGroupResponseObject); ok {
+		if err := validResponse.VisitDeletePackFromGroupResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -17333,26 +18565,26 @@ func (sh *strictHandler) DeletePackFromTeam(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// ListPackTeams operation middleware
-func (sh *strictHandler) ListPackTeams(w http.ResponseWriter, r *http.Request, packId string, params ListPackTeamsParams) {
-	var request ListPackTeamsRequestObject
+// ListPackGroups operation middleware
+func (sh *strictHandler) ListPackGroups(w http.ResponseWriter, r *http.Request, packID PackID, params ListPackGroupsParams) {
+	var request ListPackGroupsRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ListPackTeams(ctx, request.(ListPackTeamsRequestObject))
+		return sh.ssi.ListPackGroups(ctx, request.(ListPackGroupsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ListPackTeams")
+		handler = middleware(handler, "ListPackGroups")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ListPackTeamsResponseObject); ok {
-		if err := validResponse.VisitListPackTeamsResponse(w); err != nil {
+	} else if validResponse, ok := response.(ListPackGroupsResponseObject); ok {
+		if err := validResponse.VisitListPackGroupsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -17360,13 +18592,13 @@ func (sh *strictHandler) ListPackTeams(w http.ResponseWriter, r *http.Request, p
 	}
 }
 
-// AttachPackToTeam operation middleware
-func (sh *strictHandler) AttachPackToTeam(w http.ResponseWriter, r *http.Request, packId string) {
-	var request AttachPackToTeamRequestObject
+// AttachPackToGroup operation middleware
+func (sh *strictHandler) AttachPackToGroup(w http.ResponseWriter, r *http.Request, packID PackID) {
+	var request AttachPackToGroupRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 
-	var body AttachPackToTeamJSONRequestBody
+	var body AttachPackToGroupJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -17374,18 +18606,18 @@ func (sh *strictHandler) AttachPackToTeam(w http.ResponseWriter, r *http.Request
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.AttachPackToTeam(ctx, request.(AttachPackToTeamRequestObject))
+		return sh.ssi.AttachPackToGroup(ctx, request.(AttachPackToGroupRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "AttachPackToTeam")
+		handler = middleware(handler, "AttachPackToGroup")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(AttachPackToTeamResponseObject); ok {
-		if err := validResponse.VisitAttachPackToTeamResponse(w); err != nil {
+	} else if validResponse, ok := response.(AttachPackToGroupResponseObject); ok {
+		if err := validResponse.VisitAttachPackToGroupResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -17393,13 +18625,13 @@ func (sh *strictHandler) AttachPackToTeam(w http.ResponseWriter, r *http.Request
 	}
 }
 
-// PermitPackTeam operation middleware
-func (sh *strictHandler) PermitPackTeam(w http.ResponseWriter, r *http.Request, packId string) {
-	var request PermitPackTeamRequestObject
+// PermitPackGroup operation middleware
+func (sh *strictHandler) PermitPackGroup(w http.ResponseWriter, r *http.Request, packID PackID) {
+	var request PermitPackGroupRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 
-	var body PermitPackTeamJSONRequestBody
+	var body PermitPackGroupJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -17407,18 +18639,18 @@ func (sh *strictHandler) PermitPackTeam(w http.ResponseWriter, r *http.Request, 
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PermitPackTeam(ctx, request.(PermitPackTeamRequestObject))
+		return sh.ssi.PermitPackGroup(ctx, request.(PermitPackGroupRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PermitPackTeam")
+		handler = middleware(handler, "PermitPackGroup")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PermitPackTeamResponseObject); ok {
-		if err := validResponse.VisitPermitPackTeamResponse(w); err != nil {
+	} else if validResponse, ok := response.(PermitPackGroupResponseObject); ok {
+		if err := validResponse.VisitPermitPackGroupResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -17427,10 +18659,10 @@ func (sh *strictHandler) PermitPackTeam(w http.ResponseWriter, r *http.Request, 
 }
 
 // DeletePackFromUser operation middleware
-func (sh *strictHandler) DeletePackFromUser(w http.ResponseWriter, r *http.Request, packId string) {
+func (sh *strictHandler) DeletePackFromUser(w http.ResponseWriter, r *http.Request, packID PackID) {
 	var request DeletePackFromUserRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 
 	var body DeletePackFromUserJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -17460,10 +18692,10 @@ func (sh *strictHandler) DeletePackFromUser(w http.ResponseWriter, r *http.Reque
 }
 
 // ListPackUsers operation middleware
-func (sh *strictHandler) ListPackUsers(w http.ResponseWriter, r *http.Request, packId string, params ListPackUsersParams) {
+func (sh *strictHandler) ListPackUsers(w http.ResponseWriter, r *http.Request, packID PackID, params ListPackUsersParams) {
 	var request ListPackUsersRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -17487,10 +18719,10 @@ func (sh *strictHandler) ListPackUsers(w http.ResponseWriter, r *http.Request, p
 }
 
 // AttachPackToUser operation middleware
-func (sh *strictHandler) AttachPackToUser(w http.ResponseWriter, r *http.Request, packId string) {
+func (sh *strictHandler) AttachPackToUser(w http.ResponseWriter, r *http.Request, packID PackID) {
 	var request AttachPackToUserRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 
 	var body AttachPackToUserJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -17520,10 +18752,10 @@ func (sh *strictHandler) AttachPackToUser(w http.ResponseWriter, r *http.Request
 }
 
 // PermitPackUser operation middleware
-func (sh *strictHandler) PermitPackUser(w http.ResponseWriter, r *http.Request, packId string) {
+func (sh *strictHandler) PermitPackUser(w http.ResponseWriter, r *http.Request, packID PackID) {
 	var request PermitPackUserRequestObject
 
-	request.PackId = packId
+	request.PackID = packID
 
 	var body PermitPackUserJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -17682,10 +18914,10 @@ func (sh *strictHandler) UpdateQuilt(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteQuiltFromBuild operation middleware
-func (sh *strictHandler) DeleteQuiltFromBuild(w http.ResponseWriter, r *http.Request, quiltId string) {
+func (sh *strictHandler) DeleteQuiltFromBuild(w http.ResponseWriter, r *http.Request, quiltID QuiltID) {
 	var request DeleteQuiltFromBuildRequestObject
 
-	request.QuiltId = quiltId
+	request.QuiltID = quiltID
 
 	var body DeleteQuiltFromBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -17715,10 +18947,10 @@ func (sh *strictHandler) DeleteQuiltFromBuild(w http.ResponseWriter, r *http.Req
 }
 
 // ListQuiltBuilds operation middleware
-func (sh *strictHandler) ListQuiltBuilds(w http.ResponseWriter, r *http.Request, quiltId string, params ListQuiltBuildsParams) {
+func (sh *strictHandler) ListQuiltBuilds(w http.ResponseWriter, r *http.Request, quiltID QuiltID, params ListQuiltBuildsParams) {
 	var request ListQuiltBuildsRequestObject
 
-	request.QuiltId = quiltId
+	request.QuiltID = quiltID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -17742,10 +18974,10 @@ func (sh *strictHandler) ListQuiltBuilds(w http.ResponseWriter, r *http.Request,
 }
 
 // AttachQuiltToBuild operation middleware
-func (sh *strictHandler) AttachQuiltToBuild(w http.ResponseWriter, r *http.Request, quiltId string) {
+func (sh *strictHandler) AttachQuiltToBuild(w http.ResponseWriter, r *http.Request, quiltID QuiltID) {
 	var request AttachQuiltToBuildRequestObject
 
-	request.QuiltId = quiltId
+	request.QuiltID = quiltID
 
 	var body AttachQuiltToBuildJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -17767,526 +18999,6 @@ func (sh *strictHandler) AttachQuiltToBuild(w http.ResponseWriter, r *http.Reque
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(AttachQuiltToBuildResponseObject); ok {
 		if err := validResponse.VisitAttachQuiltToBuildResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// ListTeams operation middleware
-func (sh *strictHandler) ListTeams(w http.ResponseWriter, r *http.Request, params ListTeamsParams) {
-	var request ListTeamsRequestObject
-
-	request.Params = params
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ListTeams(ctx, request.(ListTeamsRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ListTeams")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ListTeamsResponseObject); ok {
-		if err := validResponse.VisitListTeamsResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// CreateTeam operation middleware
-func (sh *strictHandler) CreateTeam(w http.ResponseWriter, r *http.Request) {
-	var request CreateTeamRequestObject
-
-	var body CreateTeamJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.CreateTeam(ctx, request.(CreateTeamRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "CreateTeam")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(CreateTeamResponseObject); ok {
-		if err := validResponse.VisitCreateTeamResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// DeleteTeam operation middleware
-func (sh *strictHandler) DeleteTeam(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request DeleteTeamRequestObject
-
-	request.TeamId = teamId
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteTeam(ctx, request.(DeleteTeamRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteTeam")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeleteTeamResponseObject); ok {
-		if err := validResponse.VisitDeleteTeamResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// ShowTeam operation middleware
-func (sh *strictHandler) ShowTeam(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request ShowTeamRequestObject
-
-	request.TeamId = teamId
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ShowTeam(ctx, request.(ShowTeamRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ShowTeam")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ShowTeamResponseObject); ok {
-		if err := validResponse.VisitShowTeamResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// UpdateTeam operation middleware
-func (sh *strictHandler) UpdateTeam(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request UpdateTeamRequestObject
-
-	request.TeamId = teamId
-
-	var body UpdateTeamJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.UpdateTeam(ctx, request.(UpdateTeamRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "UpdateTeam")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(UpdateTeamResponseObject); ok {
-		if err := validResponse.VisitUpdateTeamResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// DeleteTeamFromMod operation middleware
-func (sh *strictHandler) DeleteTeamFromMod(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request DeleteTeamFromModRequestObject
-
-	request.TeamId = teamId
-
-	var body DeleteTeamFromModJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteTeamFromMod(ctx, request.(DeleteTeamFromModRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteTeamFromMod")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeleteTeamFromModResponseObject); ok {
-		if err := validResponse.VisitDeleteTeamFromModResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// ListTeamMods operation middleware
-func (sh *strictHandler) ListTeamMods(w http.ResponseWriter, r *http.Request, teamId string, params ListTeamModsParams) {
-	var request ListTeamModsRequestObject
-
-	request.TeamId = teamId
-	request.Params = params
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ListTeamMods(ctx, request.(ListTeamModsRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ListTeamMods")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ListTeamModsResponseObject); ok {
-		if err := validResponse.VisitListTeamModsResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// AttachTeamToMod operation middleware
-func (sh *strictHandler) AttachTeamToMod(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request AttachTeamToModRequestObject
-
-	request.TeamId = teamId
-
-	var body AttachTeamToModJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.AttachTeamToMod(ctx, request.(AttachTeamToModRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "AttachTeamToMod")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(AttachTeamToModResponseObject); ok {
-		if err := validResponse.VisitAttachTeamToModResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PermitTeamMod operation middleware
-func (sh *strictHandler) PermitTeamMod(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request PermitTeamModRequestObject
-
-	request.TeamId = teamId
-
-	var body PermitTeamModJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PermitTeamMod(ctx, request.(PermitTeamModRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PermitTeamMod")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PermitTeamModResponseObject); ok {
-		if err := validResponse.VisitPermitTeamModResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// DeleteTeamFromPack operation middleware
-func (sh *strictHandler) DeleteTeamFromPack(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request DeleteTeamFromPackRequestObject
-
-	request.TeamId = teamId
-
-	var body DeleteTeamFromPackJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteTeamFromPack(ctx, request.(DeleteTeamFromPackRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteTeamFromPack")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeleteTeamFromPackResponseObject); ok {
-		if err := validResponse.VisitDeleteTeamFromPackResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// ListTeamPacks operation middleware
-func (sh *strictHandler) ListTeamPacks(w http.ResponseWriter, r *http.Request, teamId string, params ListTeamPacksParams) {
-	var request ListTeamPacksRequestObject
-
-	request.TeamId = teamId
-	request.Params = params
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ListTeamPacks(ctx, request.(ListTeamPacksRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ListTeamPacks")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ListTeamPacksResponseObject); ok {
-		if err := validResponse.VisitListTeamPacksResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// AttachTeamToPack operation middleware
-func (sh *strictHandler) AttachTeamToPack(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request AttachTeamToPackRequestObject
-
-	request.TeamId = teamId
-
-	var body AttachTeamToPackJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.AttachTeamToPack(ctx, request.(AttachTeamToPackRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "AttachTeamToPack")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(AttachTeamToPackResponseObject); ok {
-		if err := validResponse.VisitAttachTeamToPackResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PermitTeamPack operation middleware
-func (sh *strictHandler) PermitTeamPack(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request PermitTeamPackRequestObject
-
-	request.TeamId = teamId
-
-	var body PermitTeamPackJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PermitTeamPack(ctx, request.(PermitTeamPackRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PermitTeamPack")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PermitTeamPackResponseObject); ok {
-		if err := validResponse.VisitPermitTeamPackResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// DeleteTeamFromUser operation middleware
-func (sh *strictHandler) DeleteTeamFromUser(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request DeleteTeamFromUserRequestObject
-
-	request.TeamId = teamId
-
-	var body DeleteTeamFromUserJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteTeamFromUser(ctx, request.(DeleteTeamFromUserRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteTeamFromUser")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeleteTeamFromUserResponseObject); ok {
-		if err := validResponse.VisitDeleteTeamFromUserResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// ListTeamUsers operation middleware
-func (sh *strictHandler) ListTeamUsers(w http.ResponseWriter, r *http.Request, teamId string, params ListTeamUsersParams) {
-	var request ListTeamUsersRequestObject
-
-	request.TeamId = teamId
-	request.Params = params
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ListTeamUsers(ctx, request.(ListTeamUsersRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ListTeamUsers")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ListTeamUsersResponseObject); ok {
-		if err := validResponse.VisitListTeamUsersResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// AttachTeamToUser operation middleware
-func (sh *strictHandler) AttachTeamToUser(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request AttachTeamToUserRequestObject
-
-	request.TeamId = teamId
-
-	var body AttachTeamToUserJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.AttachTeamToUser(ctx, request.(AttachTeamToUserRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "AttachTeamToUser")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(AttachTeamToUserResponseObject); ok {
-		if err := validResponse.VisitAttachTeamToUserResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PermitTeamUser operation middleware
-func (sh *strictHandler) PermitTeamUser(w http.ResponseWriter, r *http.Request, teamId string) {
-	var request PermitTeamUserRequestObject
-
-	request.TeamId = teamId
-
-	var body PermitTeamUserJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PermitTeamUser(ctx, request.(PermitTeamUserRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PermitTeamUser")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PermitTeamUserResponseObject); ok {
-		if err := validResponse.VisitPermitTeamUserResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -18352,10 +19064,10 @@ func (sh *strictHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteUser operation middleware
-func (sh *strictHandler) DeleteUser(w http.ResponseWriter, r *http.Request, userId string) {
+func (sh *strictHandler) DeleteUser(w http.ResponseWriter, r *http.Request, userID UserID) {
 	var request DeleteUserRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.DeleteUser(ctx, request.(DeleteUserRequestObject))
@@ -18378,10 +19090,10 @@ func (sh *strictHandler) DeleteUser(w http.ResponseWriter, r *http.Request, user
 }
 
 // ShowUser operation middleware
-func (sh *strictHandler) ShowUser(w http.ResponseWriter, r *http.Request, userId string) {
+func (sh *strictHandler) ShowUser(w http.ResponseWriter, r *http.Request, userID UserID) {
 	var request ShowUserRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.ShowUser(ctx, request.(ShowUserRequestObject))
@@ -18404,10 +19116,10 @@ func (sh *strictHandler) ShowUser(w http.ResponseWriter, r *http.Request, userId
 }
 
 // UpdateUser operation middleware
-func (sh *strictHandler) UpdateUser(w http.ResponseWriter, r *http.Request, userId string) {
+func (sh *strictHandler) UpdateUser(w http.ResponseWriter, r *http.Request, userID UserID) {
 	var request UpdateUserRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 
 	var body UpdateUserJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -18436,11 +19148,137 @@ func (sh *strictHandler) UpdateUser(w http.ResponseWriter, r *http.Request, user
 	}
 }
 
+// DeleteUserFromGroup operation middleware
+func (sh *strictHandler) DeleteUserFromGroup(w http.ResponseWriter, r *http.Request, userID UserID) {
+	var request DeleteUserFromGroupRequestObject
+
+	request.UserID = userID
+
+	var body DeleteUserFromGroupJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteUserFromGroup(ctx, request.(DeleteUserFromGroupRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteUserFromGroup")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteUserFromGroupResponseObject); ok {
+		if err := validResponse.VisitDeleteUserFromGroupResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListUserGroups operation middleware
+func (sh *strictHandler) ListUserGroups(w http.ResponseWriter, r *http.Request, userID UserID, params ListUserGroupsParams) {
+	var request ListUserGroupsRequestObject
+
+	request.UserID = userID
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListUserGroups(ctx, request.(ListUserGroupsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListUserGroups")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListUserGroupsResponseObject); ok {
+		if err := validResponse.VisitListUserGroupsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AttachUserToGroup operation middleware
+func (sh *strictHandler) AttachUserToGroup(w http.ResponseWriter, r *http.Request, userID UserID) {
+	var request AttachUserToGroupRequestObject
+
+	request.UserID = userID
+
+	var body AttachUserToGroupJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AttachUserToGroup(ctx, request.(AttachUserToGroupRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AttachUserToGroup")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AttachUserToGroupResponseObject); ok {
+		if err := validResponse.VisitAttachUserToGroupResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PermitUserGroup operation middleware
+func (sh *strictHandler) PermitUserGroup(w http.ResponseWriter, r *http.Request, userID UserID) {
+	var request PermitUserGroupRequestObject
+
+	request.UserID = userID
+
+	var body PermitUserGroupJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PermitUserGroup(ctx, request.(PermitUserGroupRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PermitUserGroup")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PermitUserGroupResponseObject); ok {
+		if err := validResponse.VisitPermitUserGroupResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // DeleteUserFromMod operation middleware
-func (sh *strictHandler) DeleteUserFromMod(w http.ResponseWriter, r *http.Request, userId string) {
+func (sh *strictHandler) DeleteUserFromMod(w http.ResponseWriter, r *http.Request, userID UserID) {
 	var request DeleteUserFromModRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 
 	var body DeleteUserFromModJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -18470,10 +19308,10 @@ func (sh *strictHandler) DeleteUserFromMod(w http.ResponseWriter, r *http.Reques
 }
 
 // ListUserMods operation middleware
-func (sh *strictHandler) ListUserMods(w http.ResponseWriter, r *http.Request, userId string, params ListUserModsParams) {
+func (sh *strictHandler) ListUserMods(w http.ResponseWriter, r *http.Request, userID UserID, params ListUserModsParams) {
 	var request ListUserModsRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -18497,10 +19335,10 @@ func (sh *strictHandler) ListUserMods(w http.ResponseWriter, r *http.Request, us
 }
 
 // AttachUserToMod operation middleware
-func (sh *strictHandler) AttachUserToMod(w http.ResponseWriter, r *http.Request, userId string) {
+func (sh *strictHandler) AttachUserToMod(w http.ResponseWriter, r *http.Request, userID UserID) {
 	var request AttachUserToModRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 
 	var body AttachUserToModJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -18530,10 +19368,10 @@ func (sh *strictHandler) AttachUserToMod(w http.ResponseWriter, r *http.Request,
 }
 
 // PermitUserMod operation middleware
-func (sh *strictHandler) PermitUserMod(w http.ResponseWriter, r *http.Request, userId string) {
+func (sh *strictHandler) PermitUserMod(w http.ResponseWriter, r *http.Request, userID UserID) {
 	var request PermitUserModRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 
 	var body PermitUserModJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -18563,10 +19401,10 @@ func (sh *strictHandler) PermitUserMod(w http.ResponseWriter, r *http.Request, u
 }
 
 // DeleteUserFromPack operation middleware
-func (sh *strictHandler) DeleteUserFromPack(w http.ResponseWriter, r *http.Request, userId string) {
+func (sh *strictHandler) DeleteUserFromPack(w http.ResponseWriter, r *http.Request, userID UserID) {
 	var request DeleteUserFromPackRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 
 	var body DeleteUserFromPackJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -18596,10 +19434,10 @@ func (sh *strictHandler) DeleteUserFromPack(w http.ResponseWriter, r *http.Reque
 }
 
 // ListUserPacks operation middleware
-func (sh *strictHandler) ListUserPacks(w http.ResponseWriter, r *http.Request, userId string, params ListUserPacksParams) {
+func (sh *strictHandler) ListUserPacks(w http.ResponseWriter, r *http.Request, userID UserID, params ListUserPacksParams) {
 	var request ListUserPacksRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
@@ -18623,10 +19461,10 @@ func (sh *strictHandler) ListUserPacks(w http.ResponseWriter, r *http.Request, u
 }
 
 // AttachUserToPack operation middleware
-func (sh *strictHandler) AttachUserToPack(w http.ResponseWriter, r *http.Request, userId string) {
+func (sh *strictHandler) AttachUserToPack(w http.ResponseWriter, r *http.Request, userID UserID) {
 	var request AttachUserToPackRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 
 	var body AttachUserToPackJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -18656,10 +19494,10 @@ func (sh *strictHandler) AttachUserToPack(w http.ResponseWriter, r *http.Request
 }
 
 // PermitUserPack operation middleware
-func (sh *strictHandler) PermitUserPack(w http.ResponseWriter, r *http.Request, userId string) {
+func (sh *strictHandler) PermitUserPack(w http.ResponseWriter, r *http.Request, userID UserID) {
 	var request PermitUserPackRequestObject
 
-	request.UserId = userId
+	request.UserID = userID
 
 	var body PermitUserPackJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -18688,264 +19526,130 @@ func (sh *strictHandler) PermitUserPack(w http.ResponseWriter, r *http.Request, 
 	}
 }
 
-// DeleteUserFromTeam operation middleware
-func (sh *strictHandler) DeleteUserFromTeam(w http.ResponseWriter, r *http.Request, userId string) {
-	var request DeleteUserFromTeamRequestObject
-
-	request.UserId = userId
-
-	var body DeleteUserFromTeamJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteUserFromTeam(ctx, request.(DeleteUserFromTeamRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteUserFromTeam")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeleteUserFromTeamResponseObject); ok {
-		if err := validResponse.VisitDeleteUserFromTeamResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// ListUserTeams operation middleware
-func (sh *strictHandler) ListUserTeams(w http.ResponseWriter, r *http.Request, userId string, params ListUserTeamsParams) {
-	var request ListUserTeamsRequestObject
-
-	request.UserId = userId
-	request.Params = params
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ListUserTeams(ctx, request.(ListUserTeamsRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ListUserTeams")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ListUserTeamsResponseObject); ok {
-		if err := validResponse.VisitListUserTeamsResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// AttachUserToTeam operation middleware
-func (sh *strictHandler) AttachUserToTeam(w http.ResponseWriter, r *http.Request, userId string) {
-	var request AttachUserToTeamRequestObject
-
-	request.UserId = userId
-
-	var body AttachUserToTeamJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.AttachUserToTeam(ctx, request.(AttachUserToTeamRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "AttachUserToTeam")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(AttachUserToTeamResponseObject); ok {
-		if err := validResponse.VisitAttachUserToTeamResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PermitUserTeam operation middleware
-func (sh *strictHandler) PermitUserTeam(w http.ResponseWriter, r *http.Request, userId string) {
-	var request PermitUserTeamRequestObject
-
-	request.UserId = userId
-
-	var body PermitUserTeamJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PermitUserTeam(ctx, request.(PermitUserTeamRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PermitUserTeam")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PermitUserTeamResponseObject); ok {
-		if err := validResponse.VisitPermitUserTeamResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+x9a3PbOLL2X2HxfT8qkZ3L2Vp/OsnsejdnJ1nPjjN1qqZcLpiELNokoYCgL3H5v5/C",
-	"jReJIEGKEkWxPyUWQRJodD/oftBsvLgeiVYkxjFL3LMXN/GWOELivyhly+uQ3AYx/2tFyQpTFmBxbYWS",
-	"5JFQn/9/QWiEmHuW/zhz2fMKu2duwmgQ37qvMzdNMI1RhPkNaxdfZy7FP9KAYt89+zNvOcsfeJU9kdzc",
-	"YY/xJ4ruMXKPK7qHn1YBxck171ahgz5i+A0LxLMpRv6/4/DZPWM0xes9nrlPb+I0DNFNiHWLpzckChiO",
-	"Vkzd9Dpzs/fXP259jPI246geMA0Wz5vD8ihGDPu7H1ZxttqNLLuzanA3aRAKlfFx4tFgxQISu2fuV+Lj",
-	"0GHEoXhFcYJj5siWs77H/zpzF+iGBh6///9TvHDP3P83zy1grtR/rlpl7a8Df1NzbaW5IPQWN75RNNKt",
-	"t3qfvLdREnfoAXV/SYgYTljh/htCQoxi6wdEOCL0uXsHoiDGHkUL1iTZvGHxrq0kXI1k1ndjYqUSWbvC",
-	"PVt1e4W8+6aXija8bXoTSjvpOL8/0iBsnBvZSLfeanAUeySKcOxjf4teJ2F6270P6crfEqD4mhIw/hb3",
-	"s8LAahjli0Qi8NMWTh19xzqsZrBcN1OyUfb2qpl6nfWC0NsLceYWhFM3KN0sv6N6YGuLXCaC0m1Xa1Pn",
-	"/JHJu34Kr1eIoijZnMkL/jtmmCZ8OhFjyFs6hDppHAbxfcOsRqR6igqiqR8lf0De3DQ650J2vmmQSXtF",
-	"TbbU1DZwxwhDYUnfgpj914d8WEHM8C2mBQmKHnEESKx6dF1QNvVMRCl63rR5LVqzUO2EGQYJc8jCUbdU",
-	"CrPlIDY7vysxrwulUhi5M9coDNV0Fy6lpb+1ndPQ69JyroVhkOi11FgTLlWIVzZ1FoQqSddqXSUwaT2q",
-	"RyXRSocSV+tDcqQBmTGpOL6kheLs2ojahiWdDKkooxrptEMXfc+6ZHaKqAVBmKD0POvX5jC19908+aLl",
-	"gKBRinKGCFb6xR0lzuoZ2Q51+BP2DjripY2Ykw8usde6nSNOK1aiG97k4jELpiXayFv2CzaZEIxYo3u1",
-	"McSS/TaOMm89Wj9F3nUQaPO1IE3zxGyFOtlT9o082dga0WdtoEk7Rdw1CnVj8Tqh0ZrI6oXVDpUKt+0V",
-	"mcpCMaHT12LvNodM7Ch5SQeUB4dStiS0u7n3gWqljnftiE9ixPDOKfftoHVrSjYJ/C1ePzQ1OnMf8U0S",
-	"dJ+mokkQ32AL1wyjqCsjFxHf4fdvGMoK00g+bYHSkA88TTB1Zy6O00jvm7kzF/lRwOeTPMaYFvbQchmI",
-	"xzcuG6LVVWm8ziVGUd06ocae2KKBI1sbeMda2CK+Hoo91ol50XeurSLd1gMlE6M0+JxsowlqTnelCaKh",
-	"1Xb6uiZ8TzBt0AR+m70myNZbaEKLRTLrmZXWiDms1JrXTZmYpNHSGSB+pSxaLOv9annlsIqbkI1DyxoD",
-	"fcp/+paLwyjXrcIK/ZB9RxV6YI1BRXmUSSsl2nVI0WV7vZNplaVVK6d2CJLftddooiQQE1Z+K/Rtc7iE",
-	"BYvAQ6xyY/ofOMY08ByKkxWJEyxUHVNKaOKg2HceUBj44t7Ngctm1kPJH1UZdOIkQbcGNKlwfBliaVJo",
-	"rYXc4GR+K0qjQlraVi2QQZjrmrlYbrtd36i9t16w2mveVBcvFQ3twT0kt8TquaLhAURSRxQLXUjtqlTP",
-	"65s2Ourw1reUpHFF7h6JGY7Z9Xb84D53XvyP22RaseWYI+10FRK0RTJWSsOeNNP5XNSpaiXVqGSnpKI1",
-	"qCeoZy/q+cUzL+7XelmzU0zRGhQTFLMXxfxValO1Ym5DcgpdPUiWU4y7gebMhp/YG2Y10dkq76091Znd",
-	"2gcLlEnGLJNt2E4hpYOkO8XAG/jObPgtVKKa8dxVxmkHzrNafV4rJGOUSTvSQt5RJRH7nveu89Vjo2QR",
-	"hHbMp267sfPpseCh7vsoHVG+at22a5qyZcuJ5re4r8a1Scpwn34CjlAQbvG1VBqG20X3to5KG0q+uI/Q",
-	"i6TbGUbJpHt6f5svOK2fmptWx/ShVgulEIvwAvoSSy9OoPFb1/aeXAY/VSj2EPhyTWyEMQ4STnbHOpj5",
-	"QbIK0bOV1fg0eJAvtSYLrbd27HdgLvKhGAXTbvkqSWhzHePNeCesVzLdwd5Ws0LXNoacfWvXOFzZErbx",
-	"+E+/KVlUi3OrDTzxhH3v3onxNG7dFQaX2KvMrjft2n0t2smCCuIxC6YdaKhb9rpLlwvB5Nn/pnu1MUQd",
-	"VjcOsDK8Hw1KHNBHvJdSkJUzcW2beskbV+Zf9jEj9lk6ETF+99s/89PEj2RCNPSol1lcJ5vkN79KDlfl",
-	"WXYMOYV6prtyK8bJN33g29dcVHwOXDHkmpVGjzxppeRb5k7Vpgm20a0uS4wWilkc1nv+QhyVG/99GH2r",
-	"ShBiiw3sPhPEuhWYNtCzCd/K9Ct1wOAo7sz4xfuqxt1k/vY8YjbYbUnEevZ8LxBgpB5F37Zh2oWUDpJp",
-	"FwNvYNqz4bdQiWqmfTfz2Ilpz15j8sczyRhl0i7qqN6Oar/F1Bs3YdxY0prUOLRKjc459o5ZWhnx3vV+",
-	"YOP3xsYfKB99YHzw96Sa88x1z9baBOG5G9+yQExvXBT2syu3rSgl55McX7WobCNvIamJRN59qboNTmYT",
-	"YVNuSzesirzFVBsibz3TXX0t4+QPG3nrIdf4WXrkSSsl3zLyNn9q1d4Fs9Oh102hmMVhHXkLcUwo8h6B",
-	"3VdE3irSqI68swnfyvQPMvLOxt1k/vaRdzbYbSPvmsSjfUGAMfLOQzVrkexsE+QYWbOdY4Du/rotmHZY",
-	"sgnfCgMOMs81G3cTBthzC9lgtyUWaiiRfWFALR3RjmoxkE87JZRquSQjjVT44rH6w0sUOgmjqcdSivlg",
-	"kyV5LHxyqT7E3BjrIsCGZAXjV5TF/v6Rd6uq0y1qGJvq3PZSFF5xBBa1gq9F21ZZhpZB3sQ/aSwqjblw",
-	"sp6F+uScBmRXDzGcMrCr9BxdMLkpQac0xKSNbfSZpGMuVzzbUWGPtjW7Xw2irRWqdeK3Fmll9jd8lAUf",
-	"ZbWlbrWOnhvyeVvVSdf+ibFS+k5NtEUdBoua5+Zq51x7sJfSgD3/zh8oh/YZJXKhEy8RS534Jbt9ydiK",
-	"v/EzRlT6kHlL+dNG018IuQ+EKQdc4kuMZHKxXJP15XwQq+BfWEDhP2VL043/++bTxZc3vO3GvXx0Qbwg",
-	"Gk+QJ1Rc7de49yEOEobpfz/im2WwWgX4rY/zB/9LXXaVeoqRJGfzub7vLU43quO5ny6+OD5eBHEgXL4F",
-	"oY5+0MyJUIxusajnJMJ+cblYQzMMPBwnQkqqF59WyFviN+/enpT6cTafPz4+vkXi6ltCb+fq1mT+65df",
-	"/v7t97/zW94uWRS6BUXQXXH+vcLxp4svhdMHztzTtydvT96gcLVEp/wmssIxWgXumfueX3ElTAkFmaOU",
-	"Lef5yVVEnlPDzUN4ol9898z9lV9WewR89cYJ+0z85wK6iy3I1SpUFTzmd4lcnKRuN2l+4fQsMdXlibhc",
-	"Ysej2McxC1AovZSULfmfHmLYLXoU2fkmsmqKGOK7k5N+eypPpKroqYwdGPYd0cR5DNjSkedrORyF+Vx8",
-	"ODntrTelEjIV/fkey6KTwU/sy848UhLfFqXJu/SxRwE1del3EmGHoySNeZCF6QNWdW2kBSqSYJ+9EW93",
-	"0pjiUM2dw5bYWaLYD1XIrJHVPfvzauYmaRQh+sxtuqCHDoolM3DzXBLwzGXoNuHOrthFvOLPk1ZX+vji",
-	"FlcY3t+fpKCKHzTsTLfz7lRI6pPjkTDEnsDCzU9AQIu20KJzzLylaI0eUCC8pM1PbExKRPGC4mRpVKH/",
-	"yOsZeg8CjKoTBwOM5ygI5RzdKsiW7I6jRgDabKHNmf6q2eUAKNRWzvENXhCKnYCpia5T4vwQx0od/kNc",
-	"3osKq55UyOUrZshHDImssiUuDHXQZT2IQXM7a65ULGn7AXsWXrzSYrWs8+VOitasvS8ap1/nHgpDXQas",
-	"dkX/RTfkvrgm4NyzP9fj2U+xEwhXYhFgcXBHrnuFT1RFPCWohyzoKVwtu8ezgrQ3wv+nN/gJRSsRYtwG",
-	"bJneuK+zjT7xtydM+t7i1T9STJ/zd+trxhcZnukR3/RIdcn8xKs1ZHh/8pdNduA/2A8o9pggCAhhmS3n",
-	"OimN+cPelFa7dsVpDhInje9j8ih7c/pugIVRxL0oDH5ip/h97th8K21nsn6mMr41A7cz7Vwgjcb9JW86",
-	"TfNubYylmSkpHNhiZos/sdCOMZtjbhnillYGmR/7Vml8vwYJy88xq7W63zGi3tLRal2p46KJa21N/0OW",
-	"sfM3gt0N3e/TRdXnx1kE6OoovoyFFqb0fn8+aiJtJyayoIb0VsE/beefVjED52sTm9uKMpArscNdYSHf",
-	"xf5Qdp7lzrS0EWZDFMROknoeThJHp0aAgm4o6Mc9yuPLwqE4Igw7CUmphzPZaMUbh8VIHW9vMvkCM39R",
-	"554G/uu8mFcQYllCumxUfxO/yzecUxLpk8jr3T4NzwVHg1BHbP9WuntZl1r7e3qBekfwk/dMyWNyendy",
-	"Q04Cdpeqxar/DZ2qk3ENOzvyFGtBrDCikk72uqUzcrTap3+s7IhQNWu8NwtRbXrPrrFMC9LyEClL4Fy0",
-	"hkqZ4IXUZC4oiRy0hpXV3kWD/51lFo0DA2d7DQ8230YoC+Jb7r6nUWx6H6Gs9LY8nVqCrGiXJ1WXflQw",
-	"LJMe1QciSszi/6JZVcZ1cQSikbn3hBaoirXO62tVvUeJV+i2/Iu/obE/otFmfy7QLe9OGEQBM3RHX6vo",
-	"zunJSVUqT+G9pycnxpeSxSLBprdmFyte2/TSkz0ElTqF0mbvVwGuTqGEtXB9LYRlqEuMK9UpVy9GLNej",
-	"6qylT+I58v5LAn75Nn65nBPwy8Evt/PLUUgx8p9LvvmHd0Nw5+qrHewoewJ4bgfPEkWzKMESkwWdog8W",
-	"NIcL2cF9x8nWy+HZkPXiaETg6o+Oqy/Pa8FQhG00MfXq3FRYYoGonwhR32Qv2boyf5Fn6rYi6fkdbTh6",
-	"0RvrUED1p3MkcBeEz+jn04+bv3oP0cMtvbv9uNpdJLB57jIQ9OMPBITGAj9/zPx8ESIrPYp6d9uanD8E",
-	"8ANqHqj5SVPz+SoNzHwfiyCsP/0R840LUS0tz1vZs/LgiQMlD544MPKAywZGvgGMX2fuPMrKU9Rx8lkR",
-	"i+Pl5aN8iBY+VdYa+Pmj4+e/bs5tbju5vTTw9MW6L7D2Alc/Da7e2nZKa8/8JftvK+4+e1sL/j5HbtvI",
-	"odi3ztEDWnhP0TvyiO4WbHnz/NebH6e7ix7yHgOXf1wRRG5fwOcfMZ+/AaNGD6TZZbfl9g8KGIHjB45/",
-	"yhz/2goOPH9fCySsTb1x/faLVB3nnz3FmvcHDx72AMCDh30AwGzLfQBboBacjDqwzhxXEH/YTYDenfU1",
-	"N10tI+pX5aGDJz5ZT5zYed+yHTDrY3VzURgWeGx1mGeGksSvcWR/EceQyDNUd+IMEt/k+UUk9/vkaSh7",
-	"9ftqeqbOZpHVz3kXD8jdA89mhGYqrcxBTowf1aHCZfPU7sv8RZ5y/GqxgURs4k3i20ea8nzlzvU3/7q8",
-	"R8FPnz4+r+gH/Hi3+sDS3eY9bBG6nQxgRXI+hZqo43cmGEISILU6w4g0fAc5yQp7/NmVWGLYWPl9SR4B",
-	"M+qW/QV3prAvHRPMUBAmYKRgpN1c8iYbrUu/GpGVDhYxyLMBDyViUCcVAnRsQAcELKNM7ZAJcg0othG1",
-	"zAtnjjfELueUROr09gkjXemM+hrU480gzW00CEjkcfrD7Y5xy4L0tp7S28RUiuy2FuGW2m+6xPKg74PH",
-	"uNnRboTB/teE97+upUditwnmqMbguMNS0XEbTmhQKdnMEP7XpZUR/5KAb2zjG5f8YkgeA7/Y0i+GpLGj",
-	"SxoTimXG2yq69QLTKNBeOoBtK7AdgH8FsD0OEgKAdsSUsFCpFaZRIk53taOF00RgqiUtzE1o4mjMBWZB",
-	"C2cJakALjwSRxYwNhsglUQAtvB0tLKayIy38XQAi0MK7poX5HK1Rw8WfIhSE7sxdpGGofkJ+FPD3II8F",
-	"D8AdT5s7lm6LJXesGgN3DOtJR+5YaFAf3DE40DYOdMl5Bu4YnGdLUQB3fHTcsVCsjtwxgG1rsAXuGMC2",
-	"I1MBQDti7lioVFvuOCvGWVfZ4Y+8YidQKnvNtINaE8CXcNDIa4k30yWHV3cc2JIRF7zQ6iQWFdSKNJEf",
-	"5v+RlRaaqheviysZvHd1echyHQ091CU7ij0FeAGX+ThKhmitNgOc2W+ev6j/2ZUVGREWzjY7pQVl27Fc",
-	"NN07R5cfb8gteyCLOCJPt+HzHY2g7kl13ZMMxaeIzMq0HBn6gg/YXxmUZnysKYoCiHf4iNfg/enKLZn3",
-	"N+USDAAzOyrkYoMyNWVdAGd6xJnBQ+AB9rAaeqhr0AAINoAgBMTHUZKmt6jY+tA2pVVtjmwDLB8Oy60O",
-	"oNDCgKPkxoPuwvhm2dRVgjycJncMp8lVnPrQ9HmFAmnrs+MAoesQGrIVIFvhaLMVWpxQV3ITIKgCZqmX",
-	"JIaKw+nMK17ddx9qauwPooNVb5RxCXynAnEJnJEHn6wUz8gzrRivM3ceY7Ig9BbXZk9/U42GPRxvpxkT",
-	"2QgtXD3d+ADzVMFUuhwBnKeKftuY2txoMlNp2MfTz3BhzT18Nf24R3l8WTgUR4RhJyEp9XAmG61+4yr0",
-	"1MVwikvO/EX/r9Uei35Ti02WDLBtA4dCxzqfqU2W935I7vx3ybvl6ib1o7/4P3cWOGQdbn+kNuxkHHLE",
-	"kNnVAZ2oDbsYfe9irKOnyeto9NBtNzUOCBFHvoEgAXdtG6H0o4JkuaXAZ8a7v1aCFv+HQwgmvdVQXrqt",
-	"AtCMDp7yZkPDygiLUpdIuGK/wX51qtt/0M+w3oAAn73GZweWH3x2YPiB4Q9bIfTrzJ1zj7O+VMqFaDEk",
-	"0b/Pw78g12fyDrg0CQu3WzUEEv04yoKsFNBppOR/N5YC4ejo7sYfFO83uH/82pDVNer6pktrZH08IK8P",
-	"PJyxl7ZYSYNbM9LMlZm/CA7NqnSFst2GwFOosW3QqV7eOeDEPotufj7+ZKl/7y+XCxwtfagNUV0bQmLQ",
-	"FANKrrjAbvVXDqIaU2pKQAByNPgAusCC9AGm/GEx2GqvNRVMplqTfzUuYx0wjhigREFd33R9AsCQTQyB",
-	"QOY4ShJYRzOFdDgjU2ub7HEAUAdfiR4nc7w3rnhAftg+L2PK6Rjg9/bNT6tcDFm9xugH13DVlpkWx+sJ",
-	"CwnaZVQMwKnX9k6T6rKXqingCvjCR0Hqq+TnGmQzu8TzF5kvZUX5jwcCKz53l1Ky7ZaWSud+xe/xPfbf",
-	"nT7fPD0sHt/9DN59TGEvonovYsKALFPKCJVGAx5fb7sSzaBYs0MBQHfIQFfr6um9E+WQTpn4BGzZzS6K",
-	"DbTU7KgAuPQCLoMGuANs9tT2Tu/2AOrVoR7Eusex79NTwFs67NQi8j2nJLI+VgDgexD4vtZF32w+ANs4",
-	"ZQCKNxx+PcyZmrxqhN/j12C6PifUcOinhkN2wICs4nCj3GS7qD3bwbc/mxoQ2ojQkGAACQajTjC4bnNA",
-	"dskZgKgJuKI+Mg+yY7KL1R+Ma1pdsQcxNZcEIo8jjjygBAVEHp0iD6hEcXSVKDQ2iFoUhhWjit9imMOO",
-	"1Xeb55RElxhFU/+w45rLrAGwhQR4O6CJxpPiRqicssEgmlsXMEM9MUNiKgUt1CqTQ9ffuRTACB92DFkZ",
-	"CAoCTbkg0LX0TSyrAjmqNSRow4rRlX4RKlTiXtp98yG9cbF6EPCU7TzlkpMMjAY4ybZOMpAYR0diCMWq",
-	"Q92q/MgLTKMgc9kBcltC7gBJiQC5R8JLANyOODVSqNQK00h+32yfEpkmAlptKWNuSJNHZS4zG8qYtwPK",
-	"eFTQLKZsMGguyQIo4+0oYzGV3Snj7wIYgTLeOWXM52mNNi7+FKEgdGfuIg1D9RPyo4C/B3kseABeeeK8",
-	"snRgbHll1Rp4ZVhWuvLKQoV64pXBnbZzp0ueNPDK4EnbygJ45aPjlYVideeVAXI7QC7wygC5XckLgNsR",
-	"88pCpax4ZUoWQYjnCQ4XxiLL4ugH2dDdZVyoXmEqBZlSimPmqGaHVysD9LRtXLY2lTzcFyfcYJoQPi7k",
-	"eSSNWVF1lY40nX1Q0NYdrMX1ipqNasDzBep7mB0xcKimBIvPiBefZ5JShzzGmXoF8YLQSL6oypSLCxEj",
-	"9zg2rkSX/OoeliKujdeyKxWS+QeOeaeEOO5x7MRYTNTTKtBRAixIY9Pd/2BGA/yAHRSLPd8o4LdwecpJ",
-	"NirujzSQAzNuS/3GWwx7lPAu6fwfcngWVL5oeYCf64OdtHXc+PW8Qv9v5XnNLUXaRoOvJu52gZI4fO38",
-	"uEd5fFk4FEeEYSchKfVwJhutdePK82pnL9m6Mn8R/6ydhFSf8yWefk5JZFmuVKKyLWmq+9OZNWXpz/j9",
-	"HfLCH6vTx4ckTu/f3+yMNZW9lVUebKo7QNbXGIhTaT+EqkkbjDqVpXcg8aufxC9VG1TWkCtBZKVHUe9u",
-	"254JdxDgN/JMMAmva7lgpR8VAMsybjO58aakLP4PHxpPOiGssEpbxZFZEs+UD5qrWwRh/ekS0KqD5oop",
-	"YjYLUV26mLj7koAn3tkTh6wx8MRbeOKQOHZ0iWNStazA+HXm5sXUjAGCVVUhqN8DbvXI3Wrr0j0HVrUH",
-	"UHK7A5OZwjeNjvzvxkOSVd2GXbh+4v02ZRAGOHy4rm/67OGsj5AfAy5Nb2f/Mmlwa0aaeTDzF1FExOp0",
-	"X7uaK0KNbYNL9fLWsWW2jPMHvDmFc3Orz82VsDPFiPFyo4gKIMg2p+VWw0jNCblTBYu6lV4fPStX+imf",
-	"wQjm2euBsybrrEmHOnj7HDBAGCCTvq5vOo0eYGMTNiBCOY4TW63DlHlEbLLTuKacUxJ9Jf4EUe46Ir5N",
-	"YciIQC7aiJCPUDFjg21/fSWQhtZXGhqfSJGE1iqy0vtKX4lN1tkwuHa8Z1TAEaGw2aVWV+sNL0c2Bm8d",
-	"VoquW25cg0rpYsZwvyZFjE/GJQF32NYdhoQwcIft3GHIBTu6XDCuVnU4a64hppxzAFk7zgEKhwHIduIc",
-	"AGBHzPtyhcqrhtlTv+J0Cnvu90KWI5scEItv3SyQWFSxBPp3TFA87LHyopIkEMD9EMBiKrszwBcCC4EC",
-	"BgoYKOABKGDpithywKo1kMCwWnQlgYUK9cQCg2PcwjEGIhgcY1vHGKjgo6OChWJ154IBattwEEAHA9R2",
-	"5CAAZkdMCAuV6sIIW55PrBlhu9N9jg+NLQ70EYOGI4lHh8ZwJPERHknciRG2PJIYGGE4hRjY4v2yxdan",
-	"EGerMLDFwBb3egpxd7YYnOYWTjOwxeA0w+nDkz99uCNbDFDbhp8AthigFk4dnvypw2a2OGOHjbyJFWcC",
-	"VEWx69nDgK44QrrCmqk4MJICYHS7Yr6pAkKNovzvxmK+yl3dhVso3m+qh1X0Agco5lvXN13MN+sjFPMF",
-	"n6e3Yr6pNLg1I81cnfmLCKSsivnahZpCjW1DTfXy7qHmnb/rQ4THW8pXgs4UI8nvGxEk4Mc2pXyrQaSm",
-	"lO80oaJuldeFfOUqP+WKnGCcvRbyNdlmTSHfA7fOAUODAQji2r6pMr4AGpugAbHJcZTxtQ5QLMv4ck2x",
-	"LuN7ZBhnUVBHjBiK+I4K96CI7xEW8W0VU+mNJ7sivkOgGtRvOOqM3L1tag28kWVdqFevo+CPQxDfZ6Fe",
-	"Yzhfk3TLJ8OyUC84vJBvCw4vlOmdeJneVqSpTLZV7jdArA2nAHm2ALFQpHfaRXrtiV3LIr2a2bUrkHNs",
-	"MGxRHkdmOUOJ3rEBMZToPcISvZ34XcsSvUDwAsELBG/3ddSe4Z1wGV6geHdVhrc7xwuur7XrCzQvuL5Q",
-	"hHfyRXg7Mr0AtPYcA5C9ALRQgnfyJXjt+V5Rktee772U1RomhsWqJnojFosqN8D3jgmL2UbJwn1isSiz",
-	"A3xvP3yvmMrufO+lQELge/fK9wLNOwGaV/oYtjSvag00LywEXWleoUI90bzg8Vp7vEDzgsdr6/ECzXt0",
-	"NK9QrO40LwCtPbUANC8AbUdqAUB2xDSvPHSxiebld2IvpQF7Fhj6T4x4KHz25xUPKT9jRAt/oSTw9B+/",
-	"EHIfYPHXFX8Gl5KE4ZSG7pm7ZGyVnM3njD6/vQ9xkDBM3+J0jlbB/OHUfb16/b8AAAD//znZxd0FiwIA",
+	"H4sIAAAAAAAC/+w9227cuJK/Imj3adFOJzM5i4Wf1smM5wRnnDhXLDAwBrTEdnMiiT0UZcfH8L8veJXU",
+	"EiWKUlvdbT4lbvFSrCpWFYtVxYcwwukGZzCjeXj6EG4AASmkkPC/zgq6fotjeMl+ZT/EMI8I2lCEs/CU",
+	"fw4iHMNwESL2w98FJPfhIsxACsPTUH7KozVMAetO7zfs95wSlN2Ej48LPsQlwbcohsQ0SxagGGYUrRAk",
+	"wQqTgK5hANjcG9lTzb8BdF1OX/lK4N8FIjAOTykpYAdIi/DHCfwB0k3Cfr1BdF1chxLOzxTQTlTkrIEB",
+	"F+pbFzLeFCiJTRME1+xrFRWYBHlS3LQvnrf+E8Xui+cjnLwK2a83+ESOy2F89wtrfA6uCYqM8K74Z2uA",
+	"RfNREIshGiALOCXMmNxAM8jsqz3ErPU4gNkITXjZrwLc3wguNkZwb9hXa3B561Hg8hEa4HIYBbgXKIMR",
+	"AStqBDlVLazB1j1Gga5HaYCvYZZLwOYdmGL7/Zficbsvxc29d4HlznsP8aqTkTPZwBpc1WEUzGqQBuAK",
+	"XgH9JYi+GyHfgOi7NdSs8SiI2QANaBl8CtIblN38jlJk4mjRIkhYE4PkV99KkGK4AkVCw9NXL18uFIAo",
+	"o/AGki0IX718qeH4sFrlsAcQzNsYINEfW0DpA4SB8bFAiXlr/82+WpOOtx5FOz5Cg3gcRkG9zxCQaP2R",
+	"4cAAtGgRKDS16m3epEdxf8aEvsVJkWamiTChjDwRb2SaChNqMdEHYraV1DyYVKyibS6Q31qYIAR5FC5C",
+	"mBVpePqH/IvNEF4tuonBGz0uwq+52Y4LihwSawZhjUfxx18xhlvMwaATvPENkhzhzAjqrfhuDa1sPwpg",
+	"OUaDpSWsDPBHMTjM6RscI8iNdG6RyTZvcHzPfotwRmFG2X/BZpOgCLCVLf/K2fIeKgBtCN5AQuVQKY6b",
+	"UDJgsiJJwDWDUqzoxwlOEYXpht6Lnx4XCnzXAR6rePuDg1KOWbIfvv4LRjR8ZO3rRPuyhtJGVsSLAQUB",
+	"xUFEIKCQETCGCeRmeJ1Ej4vwLW/DcTkSiaUh24qJFrvUFsNaQ/cNLHWt7bh/gVvgTvcEUJjTSv9rjBMI",
+	"MusBUphicu8OQM1C7EFN1dqzHV90dYWualn1AFcxk2xH3xTXCYpGIF/r4R7YlF61HZfACKcpzGIYO0P3",
+	"OGjX13e7eY/z88rIPT6OJbgacReTVjgRZ0NbnFzgsVIPFHSNiTtOaitwHgRnbJnue3UUWUfvxRzFM3HV",
+	"IryD1zlyx50tW7IjtC1TsnPYrPt0PEEPgST8xG1LE2ZBj5UUEUW3sHbuEEtwRDKIU5TVhluBJHcfD6YA",
+	"Je5UWxVJMpLtQJ7fYcL15gqTFFB+3JA/LhxHZeepMXDZshM/5Nmy0zTHlpl3ebFJMKhTi63/pCCJI7Vs",
+	"cd1+0GlDtzhrTHG84cbWGOaOvk90RORDLSRAtidEeSvRZjKyA2KxiU0YZJa5R6C8IxmOP252X+D4F4I3",
+	"u3BTtDkQrgYZy1XbpMgSlH3vWsclJOlO1rEIN5CkdguUbd3Xybpz73T7OpkJNgHB2nm2lR2HLaVmu/TQ",
+	"jF87jCeaYS22VJN7zoFstbX20I2ZaRPQjeny/iXxVsPWUjMSeujGXcoT0K2dPIshi3SiW22tZrr9jm9Q",
+	"dlbQ9Wj+HGI9dhqGbTjgLSs2qi0uIgK5Kx0kOcMDKOia/RkZtIX203mNW7kzH651L3B8dgsoaDu0pUVC",
+	"0QYQumR8csKGZT/DLMIxWyFjIJTASq8v8oYwBTdw+V/hIlxDEMtYIdnkJEb5BudIOXLMt1l8tUYnupxY",
+	"c/A1ygC/xWqyqLXjAXBMcJEjTPZ2hHGpM4H05Nu/f1eJZlcD1lH37ZnFp1rLBNLTtBZbtSf6D5SfzbWa",
+	"xecFjvdX6bGFWKo8uY7DVHiNdZrppe46vHwvg3WGi3dm03r5rr2YNgKeoWyvJTxfia2I16s5VBnfslqz",
+	"0GCr3V8pz5diKebVSg5TzjdXaqYZvzj2Ul6Gxw0X8Z9gjAiM6ARHQ4q/w6yfI0Qz23URCV/Au9mc7b7y",
+	"tfpQGx9q40NtDjvUxiy1xB5/jqE2fTjxoTY+1ObJQ236mNKH2jx9qE0vTQhmp+SRZPHRLOMoJohgTbRJ",
+	"46PGBkT5AKjZA6D6+MUHQE0aANWB7hySvXb7cbaxdfvp1Ryq269ltWYXElvtnkYO8XXYBQ7JVRxi3FBj",
+	"ld202t+oIb4Qy6AhtZLDjBlqrtRMM6WEvJNW6ROTm9aUP8jnzjc4ywUaziI26DlACYx/JUSc1q1R+p8E",
+	"rsLT8D+WZW2WpfiaL99jilaya9sqxJwMavgDRgWFAeCw8MIpBOa4IBHkFU0SAkF8f0YpiNZPDeUnCUiA",
+	"8gAIQAIgIWHAvQHx2zJg6Glh+5oJBwv6N4yDO0TXwR3B2U01gkmC+Emk4s5F4A0gOQxkPnCo6sd8knw4",
+	"GUB8VNOGiSEFKMk5dwGxbTQkUqzkThAZxIoFoAtZcaFqjqKM/vfrsK3EgayJYNdYiacuKJjKYG0ppiCx",
+	"HFeKHb5UJtRyq6VK/IalsQwIAfct9zkMkoUuRKHLQOhpbcTjWRDhJIFCmOBVXVTmmuiTUXsgMppYODg+",
+	"sCWbRI8L0fQGreSD7BPFxIVeX3cB/E4pvFdUq+as5CX1piDcHiDQQfyVDDCD4BPUyMNaTtBebSIGVS8K",
+	"eaPns4XKALuScs94Aynqz7F/OOrDSirVFHTQXqyuZfMJhzJ9igdsSrWktn058+7h63AhmM4ay8NqLtV+",
+	"U22wPTeQxtq82yLy9HQTwLkTTvRXlJv8eCipY3M8vFGE1HldR8RDQ+R1kcugait+085+d4EtJnTnIdFf",
+	"UW4yqg3cc096xpt+I8slO1OBE+BdRiHJQPIZkltIntb19BmnMEASgCDnEASQg8AhuwUJir/g7zCbyyV2",
+	"AzNIpK+WQ8P+L+JZVYrl5ALwrKDrL2KKJmi/SYBiGR7L/YnwxwYRHlMAw0au46E6UHRoaN9sermHfaLY",
+	"ysrMa5R8vieLGnVnOF1osuRhNf118l2vR7Yzfcr007CSmDmXIjUcUAaeiixQdNhaV+efKl7aBRdZ809Y",
+	"Zoc+tXiZndguJnMrk+/eYFY5sIpnZqDVAGl9XJ4K5aOoJRcfqkGlsll6rWPV7qDNqXoSdI2Kz9eYqpJ2",
+	"BltK0URQA9P5Y0UyTGtxIgwoHazxxGEivJi9BEnDIIE6x0U2F5oYQCs2f1grEDC57VIObWfCVDL0w2rm",
+	"+lxGsMmDe6RRAyPs4DJHP1eU2wk32fNRWEmh32v1sKuIoeHmcDu7794e1rUCNO/sPcHsEXsIt0D6/kcm",
+	"lE2/dcW4xspvBSEwo2UqldjNEiL+Qt8UHKFe+xtAPPU+4C4IWILjQrPa64YcVWUZjWcRYcdz5fvA4jjZ",
+	"u5NMpdBHSbnne4YpifT0BxhOCk6ET3BFYL5+2ssfOWnn5c8nmGIKv2bgFiCe4PDUpwY2fVA5YSEaaFj4",
+	"K2pFFME8v4B5Dm7gkwF2mQCUBbmYPEjl7I+LkGN73ku8DPKLT0ZImcejr+hnOMx0hAfsUbiDzSqe5DBT",
+	"Zh7mYZmVt9deWqM3+6Bo5uzVVdmHeVjJyjuiQ4T5dDY3ydwPHTr9UBNtcpEtl9LvMcg4NAqOo7HEhrsA",
+	"5jj+65P/NxGOg/BswUE6IKiSMvcNErS634k5IYZuA+kCUsBzS/GqfMteRylVs3HnOusZU8sWh3ZvXHmV",
+	"tAsMveAnOCA2M+fk7JOzYbkqC7/qbUnzCTM3D5Nd7LfLXiRhhmWpZZF+rk8zzXpQ/PiZ/wnodr0WeEJR",
+	"KnLbQfwhS+633mUbmMqvi412D2dbfHQRVmRqY1UiQz/e/aqqRYSGLUz3bFvbG5XfvKUocAwTproI3BCY",
+	"w0z6lYR/ccr1O+Re7rj4qnUK065KtYoR+9mmnEE8LX4sJV4HRXoeRmHYIfEWOy4mO+BecJrCs9Z+2n0u",
+	"U7sIRYWvMZKO6SZE+Yv7b6QwbZfH30rT0U4sa3W8GFW+gre2IADvIGTOFPJ/PGaHW9u6h8VyZSe24C3V",
+	"qhFWG+5qi87BN02dBr3Pte7rpbRUk7vQwK4aZ5xwnHRHnSvsNFGsBHA/hnnLfUJwTSfOUe94WhpJ/DZI",
+	"9JvKpOwlka75tyMS7Zrnx1ULnpQav0lUtlPjAsf2BAlkab/JiTIsxZa3thDovIPcYNYn/xTbqMYLLBWj",
+	"KrCn3wZX753ArEgrz5+ImrmLEN9ltRdfplSPbXUzhdaSi7ra4orgAsdGzriUFqQla6gagofHG4NMZRB9",
+	"txidNT8k/lDLajDIpaBqg0Muqgqrl0NK9XY8Vo3otRcS/qKC3ialLAV8m2gf+xCEDMa2z3Sc5qCxF+9P",
+	"zMOVB/1uxRQHxAkeWlC7ql03ltxquatUSsIuRN/8+C5I0qcMv3763Qn7wZlCXIMI7yv+tl4aaOecP1K3",
+	"qo/3JX6aiK5efjeQzePWUBSo0sT8oo/X68gDkMXqQpzfPm0jXzSzvwbTQ7XdGadl8GAToS1iigJa5JXW",
+	"6oKuhylr2GjBlrXJ3Gos22nLalbU4oBZeOYHefZL15jM7AqxbdnKqxsXdcMQ3aFvVAaKFRFk24Xx2R3D",
+	"KtUGqL6wY9G0oOthUVpnBV2Hj0ZkC6FqS9Qp2Gr294DGBERPgkVbp6RrVO8kQLoHnU40/S4ebdqUO3tG",
+	"qTbBy1FKkGnp0ybERDqajRSrJYg1ZFmM8k0C7i2CVBZhTNCtmLTfEolwZtXQPkKmghe1lAZiPqrr616s",
+	"iItuf45oRfFHiZwGfr/mlkynngrfr+fqvIYdr2FtFZwX8jZC/mveLsg079luNi7mdyLPNhVl0/jIt8/D",
+	"jq44qkgKzsT6WjFlfxtdpnQd6A1X3yWUuHVa1C+jrnYUw2OfRiTaWqyVNW+J21G9K0i72mIQ4+24sp6t",
+	"+WNXd+PP4up6Hq5oXotznjB4/vWJxpoldnYn/myurOfhi5brcM4YJjddxTnd7iMHSZBTUkS0IJDxSb7G",
+	"dxXvuPSZN1hlhWDS/hKn0eFd1YAVsNqAHhB9aoo7nSQtQFpmFvGc50iUDHAOs7MWpbM/eDyhIdQRllrF",
+	"6wA+CFodnDKB689xkRGTqMz4H71a8Jd/DPA8CZP6UO/Ed+U0l9wTnLc6nNjSYVQQRO8/s80lmOQNyMXO",
+	"4BuO7w3+i+6+ppSbuW8gIELyly3FT42m/4RAnjTYOT9ciz/VJg7/7+Ts8t3Jv+B92RNsEPubJ8ChbIUV",
+	"+4KIo1kel8PvCUQ5heR/7+D1Gm02CL6IYTnwv+TnUKKYA5SfLpeq3wtYhM0Uu8t3QQxXKEP62VQ10CJI",
+	"QQZuIA8b4O5W/rka35OgCMqESQnF2QZEa3jy04uXNThOl8u7u7sXgH99gcnNUnbNl7+/e/vr+8+/si4v",
+	"1jRNwgpNFSjBhw3Mzi7fhZWY+/DVi5cvXp6AZLMGr3iW5AZmYIPC0/Bn9iUUW4XTeclOlssE3wjXywaL",
+	"nCMmL7hGeheHp+K9BHlEkznT6nngNhldNkFsFaoz77L9QO5PL1+ah5HtlvX3Gh4X4WubXtsPs/J+r6z6",
+	"Nd6cfVyE/7CZs+1VjuoOC0//uFqEeZGmgNwzpijomk0UAQpVgYLg+r72xuwipOAmZ5YP9wJcsfEE2Wql",
+	"zm5gG+VQTnVxtdAF983SbF3rOYc0WotcdlU7aLuGmXk5BMaIQLG12xnxk2zhyovV/u7sWK88tGt2bD6n",
+	"sitm/AQpQfAWBgSCRJY4AismZDRluojHa1wZOVHWwNKUG4r07cJdM6KvgjAOE9u4ZemG4BquMIEBorLE",
+	"VxfL3+o85lakiTRnZ5xtFbXYB5QJkMSZCtF7VZgFlHKQKVuR/G1G24MSJ4/LCCTJtTxmt+LwrWxQuVna",
+	"AAJSSLng/KN9TWUTXsNDdb5kP4ePC6tOnymgcFCPtzhWHa62CP7zy//Zqr5A4Q+65HZBrezC9gGjo4qZ",
+	"qlxW1hx5/fL1RLMojNXLUL9+9dNE45flXLiFBhL0b1hehJYMO8FU79pfuuqQpIrnytfZKS+zsUIZjKvX",
+	"tRYMrorUmAUr/z4le++O95QCZohhKKkSbNe8NydDSCLxNZMKDuxYoqzIYDTy5EvQg6n/GQISrT8WkNwb",
+	"iG+labYfoubk/Lm/X0vd/ul0TZsxKgANdLGVEt8SyVfcL9SC5a/8hK/zWofjaKuA5lwoYn1/trG3WuuR",
+	"1jEscDIcxSVTLx90+ZDHZVmhKoYJFBGbdSL8wn8XM5wTnKrE/WFML/pX+X3gOaLyar77MaKNH1zPEc58",
+	"JIVub9fKQxalGu+fsPZQyHQ7+2uWoOx7AGS5hRXBaQC2GK99a/cIUFFsbRxDLRyErkUfTOhbnBRpNqjL",
+	"BzLEar0ENyi7+R2liA7s84GXsRqvQraq3c3B3JNrHyHW9Hs1TO/bMWu7E0RsKtH/C/YScH8l4FlCIIjv",
+	"G1Lw9U8WnbfrZE7HmQIeLT0t2ZHrbJXMZRaj4p2ouczQ+jNh+2uF8hfO2iwkjuA+G1RmgXkT1GiC9uFX",
+	"M/PyQRX3GmB+sh4jrE/WfYzo1S8aesm7P7ZnleNaN3S3yHQ1PCu85O1Od53xfMzOXj7tNDpZK2eb08s9",
+	"b3FWLM4eTmQqukz4M0pP8drKBAanF4XLrZdr9sh8BklSMe9uFM0Vz4jIfLP0esuD1VQM+WDJU+nuLnp4",
+	"92miBtwlz7xiQOAxAEEG73SexjYNy32/fFDpAI/9Rrki7jAxICuouW8ZR4Vyxiu3izvM+VTKRGQVBAhA",
+	"kG9ghFYoMtLWYAV/XuO7mejXsisP2e6zokGHa2EiKgyUr5W5D1y+ull280pl6UGxYJ1W0bxUxQ4s5PM5",
+	"wanI2nlaBlMlVH8heOMPD3M6TVIsXSYDVYQ29S+wg5ukyj/eTeKuKGsPJB6+skwS/pxgzUXSoTY7HCMc",
+	"O1/wnLLtEpLUy7ZDdYwwudjNfW1GG6M50nLRs97BqNX9MPl4+hIkqUhfGmb16SpTlmafzMmdgUHZzN7w",
+	"m9vw4zUPR1l+/LVfb/rNZPrV31o+CttPZG5OZvzNK+G8Dj5k828jk0Xc7T/Pfd4CHG4Bcr5zNQH1w+OW",
+	"JqAshzYDi7KZvQk4twnIk9tHmYD83X5vAs5kAnLsH5cJyEXYdCbgvBLOK+FDNgG5dBxlAnru8ybgcBNQ",
+	"VEC0MgFrz58aNbUugzRbGkgJwf6ngmhY29IVSoT3xG1US0/5tBBTWog1rmvMvnyoPmpvnyaiZ3NPFdFD",
+	"jBDQegwfOr1fKSMNbjRu/H5R65g+ss1f/nQ0Tt88mzQSe97tOjXpUVxTSrx89OenltQSW+7kal5GL5pl",
+	"rEvAmReTbWJyuuixHSaXpILeml9w3JtYImJvHNNKLvAIoXOBY59SolNKxNMOdcqpPb58EK8IWKSSuIRS",
+	"XeDYp5FMnUbSRs+OFJIZ6NbYf0eSPNKO+S4HxHjcOyWNHLr0PI6EESvBuwSVF3J75K9+4vWpd7OYeDBX",
+	"HKMglr4zCgh3DFcrmBrEQ7eJNA1Nh57u1LyjpIQjV3hZEX7dJBjEvMSzPSs1RUdZCKBXdJwTnLqlMY7m",
+	"ND6tjzOZ28vKmUV4WQdYkPKs71hPouQd70N11b2Tlp/YkwATIbhq3tMhylP6SXH8Bc8p0/zd/iF7RoU8",
+	"NHOeOaxE0d+znQ8pGXAyFAxXxpTY2XiW4cTSxHMKdhrNlj6QeL8CiYfbd24hxN68G2/ePYvwYUfjbj5p",
+	"5nXsMQQNu1h2nue8XTcqVNjOrNOhll1BFt/KeEyvmJ9UMSvMH5diLsM5FPuJlwYdbi7KZ7mfUlLW5naX",
+	"lXIAf3MxMrJEP6huZCKz4Fs+yP/ZRZ+M57d+4SHn8BErU0es9PNJR/zKgVC+VaYcSdyLDf06omBmoqBT",
+	"5IzXLfsUQTOZgrFOT5LkG5Gc9KRMq9jVB+nvVRJTS4B9nxO2Ssn8CbnOHxDHqPtjS21ip8SW1CYzP3f5",
+	"cCWOnNOYvCT1nl/3dCcTzzKLIYO4/9HG97LRbAn7GoD9z9dXoLalkGtk9xwT1Bg+Wb8jWd8S0VUmXz6o",
+	"/w2yhNVM7qawGmGEVFZDeLG8XwbuNhuatnuvcHW0d7dYyxuxoxTMs0nQt2XbLqtWjeFq1nqp6I3VhrFq",
+	"x5hMq+sK80bR6lYR3AvIFmJOWd57h7e5G0lxxTLs794bXFka2fEOlvV2lzyst8/Q1/eoG0GKLfLp3b58",
+	"YP/Y3ZM6Fbzmtar9refEt57tVO246ZyFds2teCSXlib0d3ggJiGA07Xj4YvT47hwtJbE1mn7jDaOOd5T",
+	"bG2fuW+Tub9FdpsAuAnpOlBilDOPkxg+fX9n6fut/NQmRUpnrPE45+ghqzCZ9445ic9jvNstz4zSPyYi",
+	"a4y2UocAdPN+jZR9landhR/v7uXeyEOrvA/o4B+zwFs+8H/tjrSjGa1fZPAp/Al46hNwP4t0nIYPgewt",
+	"kuRITs82pOs4Sc9BPKeDt1cl+3L0nkif1DLrLBTLOcGpa4D6k/Ir7z86PN1HQoyPhNBR6SIW4lrKOjvV",
+	"po90zsmdzlznz4HuSv44E0J1Gmg1TMLIz11RERxJX7CXpD564omiJ5QU5vETBp5tsxhsi2YylnSvmjmB",
+	"j9fXzdy3upmDzrAqFMexdKb3304RvPNMimcO89+KLcPQ41o/cyrp5kveHEUFzUEOIlFpSbOA5z1fbmlU",
+	"GU17X5FlKU1l+DlVApuAO301zf2qpulk9bkV1PRG3xRG37Moqelu8s0p17zSPYa6mo72nmc8b+2NLK7Z",
+	"YewRvEIJXOYwWRnj6XiUvWjolGUu++5jRpBcfxBDClCSB3jFIxI3kOQ4A0kAoggXGa0iTyKiLyi+gi+3",
+	"2HYxwIhg1TasP7eEIbkf7nFBAnyXaXqjbIVJyqdspW11b1D8HWbGzfGFfR2zO/gA+7U3PkFKELyFAciC",
+	"IkuYSQrjABR0HQhkmFD2d4ES2hmX+5G1mK02iJh9/wuDcDjbilUIBPfIHt7b1wPpqAfSi1/NzMsH/s+g",
+	"GiB8dPcCILz7COON9/dJ7vtV+qPGca0bultkOuYzVHnJ+0bcdcazqfXRz6ddrhLe27XEh5d73ldSKe7R",
+	"x4lMReu7CaPwdPMoe0HYQsYpHcQ7TNEqJMUVv7C/e9OypJPNMbOK9XaXOay3L+uhM6QKQYot8undvnxg",
+	"/9jlQDm5Trnf0yc1TZzU1E7VjkSmWWjX3IpHkphkQn+HF2ESAji5Pg9fnB5HbpG1JLaODma0cY8OHstc",
+	"OSQ+OnjfooMHKQZl0TtGB1cYyDtDnBXkM4kONqrMDv8HQ49rdPBU0s3f2R9FdPAgi01Ei2gW8Lzn40VG",
+	"RQfbW34pjgfYfRc4noM3L3Dsbb65bb4UxyMsvgsce3tvHnuPof64rD0mtCay9eaTaF7XHrKdx6Shu5Xn",
+	"uc5beMMsPMZvLvadfjjBzsBzqgU9AWeyeb2JN7eJx5hlhI3n9gSHN/KmMPKmfLNjT6w8LromMvPmlGte",
+	"5R6yocdlorul5xnP23pDbT3Ocr3GHusJo4Iges956p8QxJCEp39cMdXzBgJS+QvkKOJ/XLFebH7BiAVJ",
+	"wtNwTekmP10uKbl/8T2BKKeQvIDFEmzQ8vZV+Hj1+P8BAAD//6tq0HwTugEA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

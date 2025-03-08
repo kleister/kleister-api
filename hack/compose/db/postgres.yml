@@ -6,7 +6,12 @@ volumes:
 services:
   api:
     environment:
-      - KLEISTER_API_DATABASE_DSN=postgres://kleister:kleister@db:5432/kleister
+      - KLEISTER_API_DATABASE_DRIVER=postgres
+      - KLEISTER_API_DATABASE_ADDRESS=db
+      - KLEISTER_API_DATABASE_PORT=5432
+      - KLEISTER_API_DATABASE_USERNAME=kleister
+      - KLEISTER_API_DATABASE_PASSWORD=kleister
+      - KLEISTER_API_DATABASE_NAME=kleister
     depends_on:
       - db
 

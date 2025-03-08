@@ -10,7 +10,7 @@ import (
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gorm.io/gorm"
+	"github.com/uptrace/bun"
 )
 
 var (
@@ -34,7 +34,7 @@ func New(opts ...Option) *Scim {
 type Scim struct {
 	root   string
 	config config.Scim
-	store  *gorm.DB
+	store  *bun.DB
 	logger zerolog.Logger
 }
 

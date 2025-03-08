@@ -1,35 +1,43 @@
 package v1
 
 import (
-	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/render"
+	"github.com/kleister/kleister-api/pkg/internal/fabric"
 	"github.com/kleister/kleister-api/pkg/middleware/current"
 	"github.com/kleister/kleister-api/pkg/model"
-	"github.com/kleister/kleister-api/pkg/service/fabric"
+	"github.com/kleister/kleister-api/pkg/store"
+	"github.com/rs/zerolog/log"
 )
 
 // ListFabrics implements the v1.ServerInterface.
-func (a *API) ListFabrics(ctx context.Context, request ListFabricsRequestObject) (ListFabricsResponseObject, error) {
-	params := model.ListParams{}
+func (a *API) ListFabrics(w http.ResponseWriter, r *http.Request, params ListFabricsParams) {
+	ctx := r.Context()
 
-	if request.Params.Search != nil {
-		params.Search = FromPtr(request.Params.Search)
-	}
-
-	records, count, err := a.fabric.WithPrincipal(
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).List(
+	).Fabric.List(
 		ctx,
-		params,
+		model.ListParams{
+			Search: fromSearch(params.Search),
+		},
 	)
 
 	if err != nil {
-		return ListFabrics500JSONResponse{
-			Message: ToPtr("Failed to load fabric versions"),
+		log.Error().
+			Err(err).
+			Str("action", "ListFabrics").
+			Msg("Failed to load fabrics")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load fabrics"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
 	payload := make([]Fabric, len(records))
@@ -37,189 +45,287 @@ func (a *API) ListFabrics(ctx context.Context, request ListFabricsRequestObject)
 		payload[id] = a.convertFabric(record)
 	}
 
-	return ListFabrics200JSONResponse{
-		Total:    ToPtr(count),
-		Versions: ToPtr(payload),
-	}, nil
+	render.JSON(w, r, FabricsResponse{
+		Total:    count,
+		Versions: payload,
+	})
 }
 
 // UpdateFabric implements the v1.ServerInterface.
-func (a *API) UpdateFabric(ctx context.Context, _ UpdateFabricRequestObject) (UpdateFabricResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return UpdateFabric403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
-
+func (a *API) UpdateFabric(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	versions, err := fabric.FetchRemote()
 
 	if err != nil {
-		return UpdateFabric500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("action", "UpdateFabric").
+			Msg("Failed to fetch versions")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to fetch versions"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+			Status:  ToPtr(http.StatusServiceUnavailable),
+		})
 	}
 
-	if err := a.fabric.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Sync(
+	).Fabric.Sync(
 		ctx,
 		versions,
 	); err != nil {
-		return UpdateFabric500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("action", "UpdateFabric").
+			Msg("Failed to sync versions")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to sync versions"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
 	}
 
-	return UpdateFabric200JSONResponse{
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully synced versions"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // ListFabricBuilds implements the v1.ServerInterface.
-func (a *API) ListFabricBuilds(ctx context.Context, request ListFabricBuildsRequestObject) (ListFabricBuildsResponseObject, error) {
-	record, err := a.fabric.WithPrincipal(
+func (a *API) ListFabricBuilds(w http.ResponseWriter, r *http.Request, _ FabricID, params ListFabricBuildsParams) {
+	ctx := r.Context()
+	record := a.FabricFromContext(ctx)
+	sort, order, limit, offset, search := listFabricBuildsSorting(params)
+
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.FabricId,
-	)
-
-	if err != nil {
-		if errors.Is(err, fabric.ErrNotFound) {
-			return ListFabricBuilds404JSONResponse{
-				Message: ToPtr("Failed to find fabric"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ListFabricBuilds500JSONResponse{
-			Message: ToPtr("Failed to load fabric"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	records, count, err := a.fabric.WithPrincipal(
-		current.GetUser(ctx),
-	).ListBuilds(
+	).Fabric.ListBuilds(
 		ctx,
 		model.FabricBuildParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
-			FabricID: request.FabricId,
+			ListParams: model.ListParams{
+				Sort:   sort,
+				Order:  order,
+				Limit:  limit,
+				Offset: offset,
+				Search: search,
+			},
+			FabricID: record.ID,
 		},
 	)
 
 	if err != nil {
-		return ListFabricBuilds500JSONResponse{
-			Message: ToPtr("Failed to load builds"),
+		log.Error().
+			Err(err).
+			Str("fabric", record.ID).
+			Str("action", "ListFabricBuilds").
+			Msg("Failed to load fabric builds")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load fabric builds"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
 	payload := make([]Build, len(records))
 	for id, record := range records {
-		payload[id] = a.convertBuildWithPack(record)
+		payload[id] = a.convertBuild(record)
 	}
 
-	return ListFabricBuilds200JSONResponse{
-		Total:  ToPtr(count),
+	render.JSON(w, r, FabricBuildsResponse{
+		Total:  count,
+		Limit:  limit,
+		Offset: offset,
 		Fabric: ToPtr(a.convertFabric(record)),
-		Builds: ToPtr(payload),
-	}, nil
+		Builds: payload,
+	})
 }
 
 // AttachFabricToBuild implements the v1.ServerInterface.
-func (a *API) AttachFabricToBuild(ctx context.Context, request AttachFabricToBuildRequestObject) (AttachFabricToBuildResponseObject, error) {
-	if err := a.fabric.WithPrincipal(
-		current.GetUser(ctx),
-	).AttachBuild(
-		ctx,
-		model.FabricBuildParams{
-			FabricID: request.FabricId,
-			PackID:   request.Body.Pack,
-			BuildID:  request.Body.Build,
-		},
-	); err != nil {
-		if errors.Is(err, fabric.ErrNotFound) {
-			return AttachFabricToBuild404JSONResponse{
-				Message: ToPtr("Failed to find fabric or build"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+func (a *API) AttachFabricToBuild(w http.ResponseWriter, r *http.Request, _ FabricID) {
+	ctx := r.Context()
+	record := a.FabricFromContext(ctx)
+	body := &FabricBuildBody{}
 
-		if errors.Is(err, fabric.ErrAlreadyAssigned) {
-			return AttachFabricToBuild412JSONResponse{
-				Message: ToPtr("Build is already attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("fabric", record.ID).
+			Str("action", "AttachFabricToBuild").
+			Msg("Failed to decode request body")
 
-		return AttachFabricToBuild500JSONResponse{
-			Message: ToPtr("Failed to attach fabric to build"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return AttachFabricToBuild200JSONResponse{
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Fabric.AttachBuild(
+		ctx,
+		model.FabricBuildParams{
+			FabricID: record.ID,
+			PackID:   body.Pack,
+			BuildID:  body.Build,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrFabricNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find fabric"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrBuildNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find build"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrAlreadyAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Fabric is already attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("fabric", record.ID).
+			Str("pack", body.Pack).
+			Str("build", body.Build).
+			Str("action", "AttachFabricToBuild").
+			Msg("Failed to attach fabric to build")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to attach fabric to build"),
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully attached fabric to build"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // DeleteFabricFromBuild implements the v1.ServerInterface.
-func (a *API) DeleteFabricFromBuild(ctx context.Context, request DeleteFabricFromBuildRequestObject) (DeleteFabricFromBuildResponseObject, error) {
-	if err := a.fabric.WithPrincipal(
-		current.GetUser(ctx),
-	).DropBuild(
-		ctx,
-		model.FabricBuildParams{
-			FabricID: request.FabricId,
-			PackID:   request.Body.Pack,
-			BuildID:  request.Body.Build,
-		},
-	); err != nil {
-		if errors.Is(err, fabric.ErrNotFound) {
-			return DeleteFabricFromBuild404JSONResponse{
-				Message: ToPtr("Failed to find fabric or build"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+func (a *API) DeleteFabricFromBuild(w http.ResponseWriter, r *http.Request, _ FabricID) {
+	ctx := r.Context()
+	record := a.FabricFromContext(ctx)
+	body := &FabricBuildBody{}
 
-		if errors.Is(err, fabric.ErrNotAssigned) {
-			return DeleteFabricFromBuild412JSONResponse{
-				Message: ToPtr("Build is not attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "DeleteFabricFromBuild").
+			Msg("Failed to decode request body")
 
-		return DeleteFabricFromBuild500JSONResponse{
-			Message: ToPtr("Failed to drop fabric from build"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return DeleteFabricFromBuild200JSONResponse{
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Fabric.DropBuild(
+		ctx,
+		model.FabricBuildParams{
+			FabricID: record.ID,
+			PackID:   body.Pack,
+			BuildID:  body.Build,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrFabricNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find fabric"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrBuildNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find build"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Fabric is not attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("fabric", record.ID).
+			Str("pack", body.Pack).
+			Str("build", body.Build).
+			Str("action", "DeleteFabricFromBuild").
+			Msg("Failed to drop fabric from build")
+
+		a.RenderNotify(w, r, Notification{
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+			Message: ToPtr("Failed to drop fabric from build"),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully dropped fabric from build"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 func (a *API) convertFabric(record *model.Fabric) Fabric {
 	result := Fabric{
-		Id:        ToPtr(record.ID),
+		ID:        ToPtr(record.ID),
 		Name:      ToPtr(record.Name),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
 
 	return result
+}
+
+func listFabricBuildsSorting(request ListFabricBuildsParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
 }

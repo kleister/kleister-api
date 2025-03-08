@@ -1,9 +1,13 @@
 package upload
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 )
+
+//go:generate go tool github.com/golang/mock/mockgen -source upload.go -destination mock.go -package upload
 
 var (
 	// ErrUnknownDriver defines a named error for unknown upload drivers.
@@ -15,7 +19,7 @@ type Upload interface {
 	Info() map[string]interface{}
 	Prepare() (Upload, error)
 	Close() error
-	Upload(string, string, []byte) error
-	Delete(string) error
+	Upload(context.Context, string, *bytes.Buffer) error
+	Delete(context.Context, string, bool) error
 	Handler(string) http.Handler
 }

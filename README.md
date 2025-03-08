@@ -2,6 +2,10 @@
 
 [![General Workflow](https://github.com/kleister/kleister-api/actions/workflows/general.yml/badge.svg)](https://github.com/kleister/kleister-api/actions/workflows/general.yml) [![Join the Matrix chat at https://matrix.to/#/#kleister:matrix.org](https://img.shields.io/badge/matrix-%23kleister-7bc9a4.svg)](https://matrix.to/#/#kleister:matrix.org) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c4d0c564f786486c93e37d62db312746)](https://app.codacy.com/gh/kleister/kleister-api/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![Go Reference](https://pkg.go.dev/badge/github.com/kleister/kleister-api.svg)](https://pkg.go.dev/github.com/kleister/kleister-api) [![GitHub Repo](https://img.shields.io/badge/github-repo-yellowgreen)](https://github.com/kleister/kleister-api)
 
+> [!CAUTION]
+> This project is in active development and does not provide any stable release
+> yet, you can expect breaking changes until our first real release!
+
 Kleister is a web UI to manage mod packs for the Minecraft, initially focused on
 the Technic Launcher and MCUpdater. Even if there is an upstream version
 available the Technic Launcher at [TechnicPack/TechnicSolder][solder] I prefered
@@ -22,14 +26,13 @@ guidance how to install this take a look at our [documentation][docs].
 
 Make sure you have a working Go environment, for further reference or a guide
 take a look at the [install instructions][golang]. This project requires
-Go >= v1.23.1, at least that's the version we are using.
+Go >= v1.24, at least that's the version we are using.
 
 ```console
 git clone https://github.com/kleister/kleister-api.git
 cd kleister-api
 
 make generate build
-
 ./bin/kleister-api -h
 ```
 

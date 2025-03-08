@@ -2,9 +2,11 @@ package token
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/dchest/authcookie"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var (
@@ -68,4 +70,76 @@ func Parse(cookie, secret string) (*Token, error) {
 		Text:      login,
 		ExpiresAt: expires,
 	}, nil
+}
+
+// Claims defines all required custom claims.
+type Claims struct {
+	Ident string `json:"ident"`
+	Login string `json:"login"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
+	Admin bool   `json:"admin"`
+	jwt.RegisteredClaims
+}
+
+// Authed generates a new authenticated token.
+func Authed(
+	secret string,
+	exp time.Duration,
+	ident string,
+	login string,
+	email string,
+	name string,
+	admin bool,
+) (string, error) {
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		Claims{
+			Ident: ident,
+			Login: login,
+			Email: email,
+			Name:  name,
+			Admin: admin,
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(exp)),
+				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+				Issuer:    "kleister",
+			},
+		},
+	)
+
+	signed, err := token.SignedString(
+		[]byte(secret),
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return signed, nil
+}
+
+// Verify simply tries to verify a given token.
+func Verify(secret, token string) (*Claims, error) {
+	result, err := jwt.ParseWithClaims(
+		token,
+		&Claims{},
+		func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+			}
+
+			return []byte(secret), nil
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := result.Claims.(*Claims); ok && result.Valid {
+		return claims, nil
+	}
+
+	return nil, fmt.Errorf("invalid token")
 }

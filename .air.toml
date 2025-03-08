@@ -8,13 +8,12 @@ bin = "bin/kleister-api-debug"
 args_bin = [
   "--log-pretty",
   "--log-color",
-  "--log-level",
-  "debug",
+  "--log-level=debug",
   "server",
-  "--session-secret",
-  "TxHrYxMAg01rBeEWrHn1BjOP",
-  "--admin-email",
-  "kleister@webhippie.de"
+  "--token-secret=TxHrYxMAg01rBeEWrHn1BjOP",
+  "--admin-username=admin",
+  "--admin-password=p455w0rd",
+  "--admin-email=kleister@webhippie.de"
 ]
 
 exclude_dir = [

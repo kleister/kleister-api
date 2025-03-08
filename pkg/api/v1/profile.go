@@ -1,9 +1,11 @@
 package v1
 
 import (
-	"context"
+	"encoding/json"
 	"net/http"
+	"time"
 
+	"github.com/go-chi/render"
 	"github.com/kleister/kleister-api/pkg/middleware/current"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/token"
@@ -12,69 +14,95 @@ import (
 )
 
 // TokenProfile implements the v1.ServerInterface.
-func (a *API) TokenProfile(ctx context.Context, _ TokenProfileRequestObject) (TokenProfileResponseObject, error) {
+func (a *API) TokenProfile(w http.ResponseWriter, r *http.Request) {
 	principal := current.GetUser(
-		ctx,
+		r.Context(),
 	)
 
-	result, err := token.New(
+	result, err := token.Authed(
+		a.config.Token.Secret,
+		10*365*24*time.Hour,
+		principal.ID,
 		principal.Username,
-	).Unlimited(
-		a.config.Session.Secret,
+		principal.Email,
+		principal.Fullname,
+		principal.Admin,
 	)
 
 	if err != nil {
 		log.Error().
 			Err(err).
+			Str("action", "TokenProfile").
 			Str("username", principal.Username).
+			Str("uid", principal.ID).
 			Msg("Failed to generate a token")
 
-		return TokenProfile500JSONResponse{
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to generate a token"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	return TokenProfile200JSONResponse(
+	render.JSON(w, r, TokenResponse(
 		a.convertAuthToken(result),
-	), nil
+	))
 }
 
 // ShowProfile implements the v1.ServerInterface.
-func (a *API) ShowProfile(ctx context.Context, _ ShowProfileRequestObject) (ShowProfileResponseObject, error) {
+func (a *API) ShowProfile(w http.ResponseWriter, r *http.Request) {
 	record := current.GetUser(
-		ctx,
+		r.Context(),
 	)
 
-	return ShowProfile200JSONResponse(
-		a.convertProfile(record),
-	), nil
+	render.JSON(w, r, ProfileResponse(
+		a.convertProfile(
+			record,
+		),
+	))
 }
 
 // UpdateProfile implements the v1.ServerInterface.
-func (a *API) UpdateProfile(ctx context.Context, request UpdateProfileRequestObject) (UpdateProfileResponseObject, error) {
+func (a *API) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	body := &UpdateProfileBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("action", "UpdateProfile").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
+	}
+
 	record := current.GetUser(
-		ctx,
+		r.Context(),
 	)
 
-	if request.Body.Username != nil {
-		record.Username = FromPtr(request.Body.Username)
+	if body.Username != nil {
+		record.Username = FromPtr(body.Username)
 	}
 
-	if request.Body.Password != nil {
-		record.Password = FromPtr(request.Body.Password)
+	if body.Password != nil {
+		record.Password = FromPtr(body.Password)
 	}
 
-	if request.Body.Email != nil {
-		record.Email = FromPtr(request.Body.Email)
+	if body.Email != nil {
+		record.Email = FromPtr(body.Email)
 	}
 
-	if request.Body.Fullname != nil {
-		record.Fullname = FromPtr(request.Body.Fullname)
+	if body.Fullname != nil {
+		record.Fullname = FromPtr(body.Fullname)
 	}
 
-	if err := a.users.Update(
-		ctx,
+	if err := a.storage.Users.Update(
+		r.Context(),
 		record,
 	); err != nil {
 		if v, ok := err.(validate.Errors); ok {
@@ -90,27 +118,39 @@ func (a *API) UpdateProfile(ctx context.Context, request UpdateProfileRequestObj
 				)
 			}
 
-			return UpdateProfile422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate profile"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return UpdateProfile500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "UpdateProfile").
+			Msg("Failed to update profile")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to update profile"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	return UpdateProfile200JSONResponse(
-		a.convertProfile(record),
-	), nil
+	render.JSON(w, r, ProfileResponse(
+		a.convertProfile(
+			record,
+		),
+	))
 }
 
 func (a *API) convertProfile(record *model.User) Profile {
 	result := Profile{
-		Id:        ToPtr(record.ID),
+		ID:        ToPtr(record.ID),
 		Username:  ToPtr(record.Username),
 		Email:     ToPtr(record.Email),
 		Fullname:  ToPtr(record.Fullname),
@@ -121,49 +161,57 @@ func (a *API) convertProfile(record *model.User) Profile {
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
 
-	auths := make([]UserAuth, 0)
+	if len(record.Auths) > 0 {
+		auths := make([]UserAuth, 0)
 
-	for _, auth := range record.Auths {
-		auths = append(
-			auths,
-			a.convertUserAuth(auth),
-		)
+		for _, auth := range record.Auths {
+			auths = append(
+				auths,
+				a.convertUserAuth(auth),
+			)
+		}
+
+		result.Auths = ToPtr(auths)
 	}
 
-	result.Auths = ToPtr(auths)
+	if len(record.Groups) > 0 {
+		groups := make([]UserGroup, 0)
 
-	teams := make([]UserTeam, 0)
+		for _, group := range record.Groups {
+			groups = append(
+				groups,
+				a.convertUserGroup(group),
+			)
+		}
 
-	for _, team := range record.Teams {
-		teams = append(
-			teams,
-			a.convertUserTeam(team),
-		)
+		result.Groups = ToPtr(groups)
 	}
 
-	result.Teams = ToPtr(teams)
+	if len(record.Mods) > 0 {
+		mods := make([]UserMod, 0)
 
-	packs := make([]UserPack, 0)
+		for _, mod := range record.Mods {
+			mods = append(
+				mods,
+				a.convertUserMod(mod),
+			)
+		}
 
-	for _, pack := range record.Packs {
-		packs = append(
-			packs,
-			a.convertUserPack(pack),
-		)
+		result.Mods = ToPtr(mods)
 	}
 
-	result.Packs = ToPtr(packs)
+	if len(record.Packs) > 0 {
+		packs := make([]UserPack, 0)
 
-	mods := make([]UserMod, 0)
+		for _, pack := range record.Packs {
+			packs = append(
+				packs,
+				a.convertUserPack(pack),
+			)
+		}
 
-	for _, mod := range record.Mods {
-		mods = append(
-			mods,
-			a.convertUserMod(mod),
-		)
+		result.Packs = ToPtr(packs)
 	}
-
-	result.Mods = ToPtr(mods)
 
 	return result
 }

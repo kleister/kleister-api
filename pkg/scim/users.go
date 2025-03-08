@@ -1,19 +1,21 @@
 package scim
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/elimity-com/scim"
-	"github.com/elimity-com/scim/errors"
+	serrors "github.com/elimity-com/scim/errors"
 	"github.com/elimity-com/scim/optional"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/secret"
 	"github.com/rs/zerolog"
 	"github.com/scim2/filter-parser/v2"
-	"gorm.io/gorm"
+	"github.com/uptrace/bun"
 )
 
 var (
@@ -27,7 +29,7 @@ var (
 
 type userHandlers struct {
 	config config.Scim
-	store  *gorm.DB
+	store  *bun.DB
 	logger zerolog.Logger
 }
 
@@ -38,15 +40,11 @@ func (us *userHandlers) GetAll(r *http.Request, params scim.ListRequestParams) (
 		Resources:    []scim.Resource{},
 	}
 
-	q := us.store.WithContext(
-		r.Context(),
-	).Model(
-		&model.User{},
-	).Order(
-		"username ASC",
-	).Where(
-		"scim != ''",
-	)
+	records := make([]*model.User, 0)
+
+	q := us.store.NewSelect().
+		Model(&records).
+		Order("username ASC")
 
 	if params.FilterValidator != nil {
 		validator := params.FilterValidator
@@ -61,15 +59,21 @@ func (us *userHandlers) GetAll(r *http.Request, params scim.ListRequestParams) (
 		)
 	}
 
-	counter := int64(0)
+	counter, err := q.Count(r.Context())
 
-	if err := q.Count(
-		&counter,
-	).Error; err != nil {
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return result, nil
+		}
+
+		us.logger.Error().
+			Err(err).
+			Msg("Failed to count all")
+
 		return result, err
 	}
 
-	result.TotalResults = int(counter)
+	result.TotalResults = counter
 
 	if params.Count > 0 {
 		q = q.Limit(
@@ -86,11 +90,15 @@ func (us *userHandlers) GetAll(r *http.Request, params scim.ListRequestParams) (
 			)
 		}
 
-		records := make([]*model.User, 0)
+		if err := q.Scan(r.Context()); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return result, nil
+			}
 
-		if err := q.Find(
-			&records,
-		).Error; err != nil {
+			us.logger.Error().
+				Err(err).
+				Msg("Failed to fetch all")
+
 			return result, err
 		}
 
@@ -121,21 +129,18 @@ func (us *userHandlers) GetAll(r *http.Request, params scim.ListRequestParams) (
 func (us *userHandlers) Get(r *http.Request, id string) (scim.Resource, error) {
 	record := &model.User{}
 
-	if err := us.store.WithContext(
-		r.Context(),
-	).Model(
-		&model.User{},
-	).Where(
-		"scim != ''",
-	).Where(
-		"id = ?",
-		id,
-	).First(
-		record,
-	).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return scim.Resource{}, errors.ScimErrorResourceNotFound(id)
+	if err := us.store.NewSelect().
+		Model(record).
+		Where("id = ?", id).
+		Scan(r.Context()); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return scim.Resource{}, serrors.ScimErrorResourceNotFound(id)
 		}
+
+		us.logger.Error().
+			Err(err).
+			Str("id", id).
+			Msg("Failed to fetch user")
 
 		return scim.Resource{}, err
 	}
@@ -159,35 +164,33 @@ func (us *userHandlers) Get(r *http.Request, id string) (scim.Resource, error) {
 
 // Create implements the SCIM v2 server interface for users.
 func (us *userHandlers) Create(r *http.Request, attributes scim.ResourceAttributes) (scim.Resource, error) {
-	tx := us.store.WithContext(
-		r.Context(),
-	).Begin()
-	defer tx.Rollback()
-
-	record := &model.User{}
-
+	externalID := ""
 	if val, ok := attributes["externalId"]; ok {
-		record.Scim = val.(string)
+		externalID = val.(string)
 	}
 
+	userName := ""
 	if val, ok := attributes["userName"]; ok {
-		record.Username = val.(string)
+		userName = val.(string)
 	}
 
+	displayName := ""
 	if val, ok := attributes["displayName"]; ok {
-		record.Fullname = val.(string)
+		displayName = val.(string)
 	}
 
+	active := false
 	if val, ok := attributes["active"]; ok {
-		record.Active = val.(bool)
+		active = val.(bool)
 	}
 
+	email := ""
 	if val, ok := attributes["emails"]; ok {
 		if is, ok := val.([]interface{}); ok {
 			for _, i := range is {
 				if vs, ok := i.(map[string]interface{}); ok {
 					if p, ok := vs["primary"]; ok && p.(bool) {
-						record.Email = vs["value"].(string)
+						email = vs["value"].(string)
 					}
 				} else {
 					us.logger.Error().
@@ -204,25 +207,55 @@ func (us *userHandlers) Create(r *http.Request, attributes scim.ResourceAttribut
 		}
 	}
 
-	if err := tx.Where(
-		model.User{
-			Username: record.Username,
-		},
-	).Attrs(model.User{
-		Password: secret.Generate(32),
-	}).Assign(
-		model.User{
-			Scim:     record.Scim,
-			Fullname: record.Fullname,
-			Active:   record.Active,
-			Email:    record.Email,
-		},
-	).FirstOrCreate(record).Error; err != nil {
+	record := &model.User{}
+
+	if err := us.store.NewSelect().
+		Model(record).
+		Where("username = ? OR scim = ?", userName, externalID).
+		Scan(r.Context()); err != nil && err != sql.ErrNoRows {
+		us.logger.Error().
+			Err(err).
+			Str("user", userName).
+			Msg("Failed to check if user exists")
+
 		return scim.Resource{}, err
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return scim.Resource{}, err
+	record.Scim = externalID
+	record.Username = userName
+	record.Fullname = displayName
+	record.Active = active
+	record.Email = email
+
+	if record.ID == "" {
+		record.Password = secret.Generate(32)
+
+		us.logger.Debug().
+			Str("user", record.Username).
+			Msg("Creating new user")
+
+		if _, err := us.store.NewInsert().
+			Model(record).
+			Exec(r.Context()); err != nil {
+			us.logger.Error().
+				Err(err).
+				Str("user", record.Username).
+				Msg("Failed to create user")
+
+			return scim.Resource{}, err
+		}
+	} else {
+		if _, err := us.store.NewUpdate().
+			Model(record).
+			Where("id = ?", record.ID).
+			Exec(r.Context()); err != nil {
+			us.logger.Error().
+				Err(err).
+				Str("user", record.Username).
+				Msg("Failed to update user")
+
+			return scim.Resource{}, err
+		}
 	}
 
 	result := scim.Resource{
@@ -244,75 +277,82 @@ func (us *userHandlers) Create(r *http.Request, attributes scim.ResourceAttribut
 
 // Replace implements the SCIM v2 server interface for users.
 func (us *userHandlers) Replace(r *http.Request, id string, attributes scim.ResourceAttributes) (scim.Resource, error) {
-	record := &model.User{}
-
-	if err := us.store.WithContext(
-		r.Context(),
-	).Model(
-		&model.User{},
-	).Where(
-		"scim != ''",
-	).Where(
-		"id = ?",
-		id,
-	).First(
-		record,
-	).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return scim.Resource{}, errors.ScimErrorResourceNotFound(id)
-		}
-
-		return scim.Resource{}, err
-	}
-
+	externalID := ""
 	if val, ok := attributes["externalId"]; ok {
-		record.Scim = val.(string)
+		externalID = val.(string)
 	}
 
+	userName := ""
 	if val, ok := attributes["userName"]; ok {
-		record.Username = val.(string)
+		userName = val.(string)
 	}
 
+	displayName := ""
 	if val, ok := attributes["displayName"]; ok {
-		record.Fullname = val.(string)
+		displayName = val.(string)
 	}
 
+	active := false
 	if val, ok := attributes["active"]; ok {
-		record.Active = val.(bool)
+		active = val.(bool)
 	}
 
+	email := ""
 	if val, ok := attributes["emails"]; ok {
 		if is, ok := val.([]interface{}); ok {
 			for _, i := range is {
 				if vs, ok := i.(map[string]interface{}); ok {
 					if p, ok := vs["primary"]; ok && p.(bool) {
-						record.Email = vs["value"].(string)
+						email = vs["value"].(string)
 					}
 				} else {
 					us.logger.Error().
-						Str("method", "update").
+						Str("method", "create").
 						Str("path", "emails").
 						Msgf("Failed to convert email: %v", i)
 				}
 			}
 		} else {
 			us.logger.Error().
-				Str("method", "update").
+				Str("method", "create").
 				Str("path", "emails").
 				Msgf("Failed to convert interface: %v", val)
 		}
 	}
 
-	tx := us.store.WithContext(
-		r.Context(),
-	).Begin()
-	defer tx.Rollback()
+	record := &model.User{}
 
-	if err := tx.Save(record).Error; err != nil {
+	if err := us.store.NewSelect().
+		Model(record).
+		Where("id = ? OR scim = ?", id, externalID).
+		Scan(r.Context()); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return scim.Resource{}, serrors.ScimErrorResourceNotFound(id)
+		}
+
+		us.logger.Error().
+			Err(err).
+			Str("id", id).
+			Msg("Failed to fetch user")
+
 		return scim.Resource{}, err
 	}
 
-	if err := tx.Commit().Error; err != nil {
+	record.Scim = externalID
+	record.Username = userName
+	record.Fullname = displayName
+	record.Active = active
+	record.Email = email
+
+	if _, err := us.store.NewUpdate().
+		Model(record).
+		Where("id = ?", record.ID).
+		Exec(r.Context()); err != nil {
+		us.logger.Error().
+			Err(err).
+			Str("id", id).
+			Msg("Failed to update user")
+
 		return scim.Resource{}, err
 	}
 
@@ -337,29 +377,21 @@ func (us *userHandlers) Replace(r *http.Request, id string, attributes scim.Reso
 func (us *userHandlers) Patch(r *http.Request, id string, operations []scim.PatchOperation) (scim.Resource, error) {
 	record := &model.User{}
 
-	if err := us.store.WithContext(
-		r.Context(),
-	).Model(
-		&model.User{},
-	).Where(
-		"scim != ''",
-	).Where(
-		"id = ?",
-		id,
-	).First(
-		record,
-	).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return scim.Resource{}, errors.ScimErrorResourceNotFound(id)
+	if err := us.store.NewSelect().
+		Model(record).
+		Where("id = ?", id).
+		Scan(r.Context()); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return scim.Resource{}, serrors.ScimErrorResourceNotFound(id)
 		}
+
+		us.logger.Error().
+			Err(err).
+			Str("id", id).
+			Msg("Failed to fetch user")
 
 		return scim.Resource{}, err
 	}
-
-	tx := us.store.WithContext(
-		r.Context(),
-	).Begin()
-	defer tx.Rollback()
 
 	for _, operation := range operations {
 		switch op := operation.Op; op {
@@ -375,10 +407,6 @@ func (us *userHandlers) Patch(r *http.Request, id string, operations []scim.Patc
 				op,
 			)
 		}
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return scim.Resource{}, err
 	}
 
 	result := scim.Resource{
@@ -400,26 +428,22 @@ func (us *userHandlers) Patch(r *http.Request, id string, operations []scim.Patc
 
 // Delete implements the SCIM v2 server interface for users.
 func (us *userHandlers) Delete(r *http.Request, id string) error {
-	tx := us.store.WithContext(
-		r.Context(),
-	).Begin()
-	defer tx.Rollback()
+	if _, err := us.store.NewDelete().
+		Model((*model.User)(nil)).
+		Where("id = ?", id).
+		Exec(r.Context()); err != nil {
+		us.logger.Error().
+			Err(err).
+			Str("id", id).
+			Msg("Failed to delete user")
 
-	if err := tx.Where(
-		"scim != ''",
-	).Where(
-		"id = ?",
-		id,
-	).Delete(
-		&model.User{},
-	).Error; err != nil {
 		return err
 	}
 
-	return tx.Commit().Error
+	return nil
 }
 
-func (us *userHandlers) filter(expr filter.Expression, db *gorm.DB) *gorm.DB {
+func (us *userHandlers) filter(expr filter.Expression, db *bun.SelectQuery) *bun.SelectQuery {
 	switch e := expr.(type) {
 	case *filter.AttributeExpression:
 		return us.handleAttributeExpression(e, db)
@@ -432,7 +456,7 @@ func (us *userHandlers) filter(expr filter.Expression, db *gorm.DB) *gorm.DB {
 	return db
 }
 
-func (us *userHandlers) handleAttributeExpression(e *filter.AttributeExpression, db *gorm.DB) *gorm.DB {
+func (us *userHandlers) handleAttributeExpression(e *filter.AttributeExpression, db *bun.SelectQuery) *bun.SelectQuery {
 	scimAttr := e.AttributePath.String()
 	column, ok := userAttributeMapping[scimAttr]
 
@@ -448,23 +472,23 @@ func (us *userHandlers) handleAttributeExpression(e *filter.AttributeExpression,
 
 	switch operator := strings.ToLower(string(e.Operator)); operator {
 	case "eq":
-		return db.Where(fmt.Sprintf("%s = ?", column), value)
+		return db.Where("? = ?", bun.Ident(column), value)
 	case "ne":
-		return db.Where(fmt.Sprintf("%s <> ?", column), value)
+		return db.Where("? <> ?", bun.Ident(column), value)
 	case "co":
-		return db.Where(fmt.Sprintf("%s LIKE ?", column), "%"+fmt.Sprintf("%v", value)+"%")
+		return db.Where("? LIKE ?", bun.Ident(column), "%"+fmt.Sprintf("%v", value)+"%")
 	case "sw":
-		return db.Where(fmt.Sprintf("%s LIKE ?", column), fmt.Sprintf("%v", value)+"%")
+		return db.Where("? LIKE ?", bun.Ident(column), fmt.Sprintf("%v", value)+"%")
 	case "ew":
-		return db.Where(fmt.Sprintf("%s LIKE ?", column), "%"+fmt.Sprintf("%v", value))
+		return db.Where("? LIKE ?", bun.Ident(column), "%"+fmt.Sprintf("%v", value))
 	case "gt":
-		return db.Where(fmt.Sprintf("%s > ?", column), value)
+		return db.Where("? > ?", bun.Ident(column), value)
 	case "ge":
-		return db.Where(fmt.Sprintf("%s >= ?", column), value)
+		return db.Where("? >= ?", bun.Ident(column), value)
 	case "lt":
-		return db.Where(fmt.Sprintf("%s < ?", column), value)
+		return db.Where("? < ?", bun.Ident(column), value)
 	case "le":
-		return db.Where(fmt.Sprintf("%s <= ?", column), value)
+		return db.Where("? <= ?", bun.Ident(column), value)
 	default:
 		us.logger.Error().
 			Str("operator", operator).

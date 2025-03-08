@@ -1,46 +1,48 @@
 package v1
 
 import (
-	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/render"
 	"github.com/kleister/kleister-api/pkg/middleware/current"
 	"github.com/kleister/kleister-api/pkg/model"
-	usermods "github.com/kleister/kleister-api/pkg/service/user_mods"
-	userpacks "github.com/kleister/kleister-api/pkg/service/user_packs"
-	userteams "github.com/kleister/kleister-api/pkg/service/user_teams"
-	"github.com/kleister/kleister-api/pkg/service/users"
+	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/kleister/kleister-api/pkg/validate"
+	"github.com/rs/zerolog/log"
 )
 
 // ListUsers implements the v1.ServerInterface.
-func (a *API) ListUsers(ctx context.Context, request ListUsersRequestObject) (ListUsersResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return ListUsers403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
+func (a *API) ListUsers(w http.ResponseWriter, r *http.Request, params ListUsersParams) {
+	ctx := r.Context()
+	sort, order, limit, offset, search := listUsersSorting(params)
 
-	records, count, err := a.users.WithPrincipal(
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).List(
+	).Users.List(
 		ctx,
-		toListParams(
-			string(FromPtr(request.Params.Sort)),
-			string(FromPtr(request.Params.Order)),
-			request.Params.Limit,
-			request.Params.Offset,
-			request.Params.Search,
-		),
+		model.ListParams{
+			Sort:   sort,
+			Order:  order,
+			Limit:  limit,
+			Offset: offset,
+			Search: search,
+		},
 	)
 
 	if err != nil {
-		return ListUsers500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("action", "ListUsers").
+			Msg("Failed to load users")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to load users"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
 	payload := make([]User, len(records))
@@ -48,85 +50,72 @@ func (a *API) ListUsers(ctx context.Context, request ListUsersRequestObject) (Li
 		payload[id] = a.convertUser(record)
 	}
 
-	return ListUsers200JSONResponse{
-		Total: ToPtr(count),
-		Users: ToPtr(payload),
-	}, nil
+	render.JSON(w, r, UsersResponse{
+		Total:  count,
+		Limit:  limit,
+		Offset: offset,
+		Users:  payload,
+	})
 }
 
 // ShowUser implements the v1.ServerInterface.
-func (a *API) ShowUser(ctx context.Context, request ShowUserRequestObject) (ShowUserResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return ShowUser403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
+func (a *API) ShowUser(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
 
-	record, err := a.users.WithPrincipal(
-		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.UserId,
-	)
-
-	if err != nil {
-		if errors.Is(err, users.ErrNotFound) {
-			return ShowUser404JSONResponse{
-				Message: ToPtr("Failed to find user"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ShowUser500JSONResponse{
-			Message: ToPtr("Failed to load user"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	return ShowUser200JSONResponse(
+	render.JSON(w, r, UserResponse(
 		a.convertUser(record),
-	), nil
+	))
 }
 
 // CreateUser implements the v1.ServerInterface.
-func (a *API) CreateUser(ctx context.Context, request CreateUserRequestObject) (CreateUserResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return CreateUser403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+func (a *API) CreateUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	body := &CreateUserBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("action", "CreateUser").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
 	record := &model.User{}
 
-	if request.Body.Username != nil {
-		record.Username = FromPtr(request.Body.Username)
+	if body.Username != nil {
+		record.Username = FromPtr(body.Username)
 	}
 
-	if request.Body.Password != nil {
-		record.Password = FromPtr(request.Body.Password)
+	if body.Password != nil {
+		record.Password = FromPtr(body.Password)
 	}
 
-	if request.Body.Email != nil {
-		record.Email = FromPtr(request.Body.Email)
+	if body.Email != nil {
+		record.Email = FromPtr(body.Email)
 	}
 
-	if request.Body.Fullname != nil {
-		record.Fullname = FromPtr(request.Body.Fullname)
+	if body.Fullname != nil {
+		record.Fullname = FromPtr(body.Fullname)
 	}
 
-	if request.Body.Admin != nil {
-		record.Admin = FromPtr(request.Body.Admin)
+	if body.Admin != nil {
+		record.Admin = FromPtr(body.Admin)
 	}
 
-	if request.Body.Active != nil {
-		record.Active = FromPtr(request.Body.Active)
+	if body.Active != nil {
+		record.Active = FromPtr(body.Active)
 	}
 
-	if err := a.users.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Create(
+	).Users.Create(
 		ctx,
 		record,
 	); err != nil {
@@ -143,81 +132,81 @@ func (a *API) CreateUser(ctx context.Context, request CreateUserRequestObject) (
 				)
 			}
 
-			return CreateUser422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate user"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return CreateUser500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("action", "CreateUser").
+			Msg("Failed to create user")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to create user"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	return CreateUser200JSONResponse(
+	render.JSON(w, r, UserResponse(
 		a.convertUser(record),
-	), nil
+	))
 }
 
 // UpdateUser implements the v1.ServerInterface.
-func (a *API) UpdateUser(ctx context.Context, request UpdateUserRequestObject) (UpdateUserResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return UpdateUser403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+func (a *API) UpdateUser(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	body := &UpdateUserBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "UpdateUser").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	record, err := a.users.WithPrincipal(
+	if body.Username != nil {
+		record.Username = FromPtr(body.Username)
+	}
+
+	if body.Password != nil {
+		record.Password = FromPtr(body.Password)
+	}
+
+	if body.Email != nil {
+		record.Email = FromPtr(body.Email)
+	}
+
+	if body.Fullname != nil {
+		record.Fullname = FromPtr(body.Fullname)
+	}
+
+	if body.Admin != nil {
+		record.Admin = FromPtr(body.Admin)
+	}
+
+	if body.Active != nil {
+		record.Active = FromPtr(body.Active)
+	}
+
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.UserId,
-	)
-
-	if err != nil {
-		if errors.Is(err, users.ErrNotFound) {
-			return UpdateUser404JSONResponse{
-				Message: ToPtr("Failed to find user"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return UpdateUser500JSONResponse{
-			Message: ToPtr("Failed to load user"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	if request.Body.Username != nil {
-		record.Username = FromPtr(request.Body.Username)
-	}
-
-	if request.Body.Password != nil {
-		record.Password = FromPtr(request.Body.Password)
-	}
-
-	if request.Body.Email != nil {
-		record.Email = FromPtr(request.Body.Email)
-	}
-
-	if request.Body.Fullname != nil {
-		record.Fullname = FromPtr(request.Body.Fullname)
-	}
-
-	if request.Body.Admin != nil {
-		record.Admin = FromPtr(request.Body.Admin)
-	}
-
-	if request.Body.Active != nil {
-		record.Active = FromPtr(request.Body.Active)
-	}
-
-	if err := a.users.WithPrincipal(
-		current.GetUser(ctx),
-	).Update(
+	).Users.Update(
 		ctx,
 		record,
 	); err != nil {
@@ -234,407 +223,172 @@ func (a *API) UpdateUser(ctx context.Context, request UpdateUserRequestObject) (
 				)
 			}
 
-			return UpdateUser422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate user"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return UpdateUser500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "UpdateUser").
+			Msg("Failed to update user")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to update user"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	return UpdateUser200JSONResponse(
+	render.JSON(w, r, UserResponse(
 		a.convertUser(record),
-	), nil
+	))
 }
 
 // DeleteUser implements the v1.ServerInterface.
-func (a *API) DeleteUser(ctx context.Context, request DeleteUserRequestObject) (DeleteUserResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return DeleteUser403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
+func (a *API) DeleteUser(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
 
-	record, err := a.users.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.UserId,
-	)
-
-	if err != nil {
-		if errors.Is(err, users.ErrNotFound) {
-			return DeleteUser404JSONResponse{
-				Message: ToPtr("Failed to find user"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return DeleteUser500JSONResponse{
-			Message: ToPtr("Failed to load user"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	if err := a.users.WithPrincipal(
-		current.GetUser(ctx),
-	).Delete(
+	).Users.Delete(
 		ctx,
 		record.ID,
 	); err != nil {
-		return DeleteUser400JSONResponse{
-			Status:  ToPtr(http.StatusBadRequest),
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "DeleteUser").
+			Msg("Failed to delete user")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to delete user"),
-		}, nil
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return DeleteUser200JSONResponse{
-		Status:  ToPtr(http.StatusOK),
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully deleted user"),
-	}, nil
+		Status:  ToPtr(http.StatusOK),
+	})
 }
 
-// ListUserTeams implements the v1.ServerInterface.
-func (a *API) ListUserTeams(ctx context.Context, request ListUserTeamsRequestObject) (ListUserTeamsResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return ListUserTeams403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
+// ListUserGroups implements the v1.ServerInterface.
+func (a *API) ListUserGroups(w http.ResponseWriter, r *http.Request, _ UserID, params ListUserGroupsParams) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	sort, order, limit, offset, search := listUserGroupsSorting(params)
 
-	record, err := a.users.WithPrincipal(
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
+	).Users.ListGroups(
 		ctx,
-		request.UserId,
-	)
-
-	if err != nil {
-		if errors.Is(err, users.ErrNotFound) {
-			return ListUserTeams404JSONResponse{
-				Message: ToPtr("Failed to find user"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ListUserTeams500JSONResponse{
-			Message: ToPtr("Failed to load user"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	records, count, err := a.userteams.WithPrincipal(
-		current.GetUser(ctx),
-	).List(
-		ctx,
-		model.UserTeamParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
+		model.UserGroupParams{
+			ListParams: model.ListParams{
+				Sort:   sort,
+				Order:  order,
+				Limit:  limit,
+				Offset: offset,
+				Search: search,
+			},
 			UserID: record.ID,
 		},
 	)
 
 	if err != nil {
-		return ListUserTeams500JSONResponse{
-			Message: ToPtr("Failed to load teams"),
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "ListUserGroups").
+			Msg("Failed to load user groups")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load user groups"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	payload := make([]UserTeam, len(records))
+	payload := make([]UserGroup, len(records))
 	for id, record := range records {
-		payload[id] = a.convertUserTeam(record)
+		payload[id] = a.convertUserGroup(record)
 	}
 
-	return ListUserTeams200JSONResponse{
-		Total: ToPtr(count),
-		User:  ToPtr(a.convertUser(record)),
-		Teams: ToPtr(payload),
-	}, nil
+	render.JSON(w, r, UserGroupsResponse{
+		Total:  count,
+		Limit:  limit,
+		Offset: offset,
+		User:   ToPtr(a.convertUser(record)),
+		Groups: payload,
+	})
 }
 
-// AttachUserToTeam implements the v1.ServerInterface.
-func (a *API) AttachUserToTeam(ctx context.Context, request AttachUserToTeamRequestObject) (AttachUserToTeamResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return AttachUserToTeam403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+// AttachUserToGroup implements the v1.ServerInterface.
+func (a *API) AttachUserToGroup(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	body := &UserGroupPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "AttachUserToGroup").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.userteams.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Attach(
+	).Users.AttachGroup(
 		ctx,
-		model.UserTeamParams{
-			UserID: request.UserId,
-			TeamID: request.Body.Team,
-			Perm:   string(FromPtr(request.Body.Perm)),
+		model.UserGroupParams{
+			UserID:  record.ID,
+			GroupID: body.Group,
+			Perm:    body.Perm,
 		},
 	); err != nil {
-		if errors.Is(err, userteams.ErrNotFound) {
-			return AttachUserToTeam404JSONResponse{
-				Message: ToPtr("Failed to find user or team"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		if errors.Is(err, userteams.ErrAlreadyAssigned) {
-			return AttachUserToTeam412JSONResponse{
-				Message: ToPtr("Team is already attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
-
-		if v, ok := err.(validate.Errors); ok {
-			errors := make([]Validation, 0)
-
-			for _, verr := range v.Errors {
-				errors = append(
-					errors,
-					Validation{
-						Field:   ToPtr(verr.Field),
-						Message: ToPtr(verr.Error.Error()),
-					},
-				)
-			}
-
-			return AttachUserToTeam422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
-				Message: ToPtr("Failed to validate user team"),
-				Errors:  ToPtr(errors),
-			}, nil
-		}
-
-		return AttachUserToTeam500JSONResponse{
-			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to attach user to team"),
-		}, nil
-	}
-
-	return AttachUserToTeam200JSONResponse{
-		Message: ToPtr("Successfully attached user to team"),
-		Status:  ToPtr(http.StatusOK),
-	}, nil
-}
-
-// PermitUserTeam implements the v1.ServerInterface.
-func (a *API) PermitUserTeam(ctx context.Context, request PermitUserTeamRequestObject) (PermitUserTeamResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return PermitUserTeam403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
-
-	if err := a.userteams.WithPrincipal(
-		current.GetUser(ctx),
-	).Permit(
-		ctx,
-		model.UserTeamParams{
-			UserID: request.UserId,
-			TeamID: request.Body.Team,
-			Perm:   string(FromPtr(request.Body.Perm)),
-		},
-	); err != nil {
-		if errors.Is(err, userteams.ErrNotFound) {
-			return PermitUserTeam404JSONResponse{
-				Message: ToPtr("Failed to find user or team"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		if errors.Is(err, userteams.ErrNotAssigned) {
-			return PermitUserTeam412JSONResponse{
-				Message: ToPtr("Team is not attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
-
-		if v, ok := err.(validate.Errors); ok {
-			errors := make([]Validation, 0)
-
-			for _, verr := range v.Errors {
-				errors = append(
-					errors,
-					Validation{
-						Field:   ToPtr(verr.Field),
-						Message: ToPtr(verr.Error.Error()),
-					},
-				)
-			}
-
-			return PermitUserTeam422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
-				Message: ToPtr("Failed to validate user team"),
-				Errors:  ToPtr(errors),
-			}, nil
-		}
-
-		return PermitUserTeam500JSONResponse{
-			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to update user team perms"),
-		}, nil
-	}
-
-	return PermitUserTeam200JSONResponse{
-		Message: ToPtr("Successfully updated user team perms"),
-		Status:  ToPtr(http.StatusOK),
-	}, nil
-}
-
-// DeleteUserFromTeam implements the v1.ServerInterface.
-func (a *API) DeleteUserFromTeam(ctx context.Context, request DeleteUserFromTeamRequestObject) (DeleteUserFromTeamResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return DeleteUserFromTeam403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
-
-	if err := a.userteams.WithPrincipal(
-		current.GetUser(ctx),
-	).Drop(
-		ctx,
-		model.UserTeamParams{
-			UserID: request.UserId,
-			TeamID: request.Body.Team,
-		},
-	); err != nil {
-		if errors.Is(err, userteams.ErrNotFound) {
-			return DeleteUserFromTeam404JSONResponse{
-				Message: ToPtr("Failed to find user or team"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
-
-		if errors.Is(err, userteams.ErrNotAssigned) {
-			return DeleteUserFromTeam412JSONResponse{
-				Message: ToPtr("Team is not attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
-
-		return DeleteUserFromTeam500JSONResponse{
-			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to drop user from team"),
-		}, nil
-	}
-
-	return DeleteUserFromTeam200JSONResponse{
-		Message: ToPtr("Successfully dropped user from team"),
-		Status:  ToPtr(http.StatusOK),
-	}, nil
-}
-
-// ListUserPacks implements the v1.ServerInterface.
-func (a *API) ListUserPacks(ctx context.Context, request ListUserPacksRequestObject) (ListUserPacksResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return ListUserPacks403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
-
-	record, err := a.users.WithPrincipal(
-		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.UserId,
-	)
-
-	if err != nil {
-		if errors.Is(err, users.ErrNotFound) {
-			return ListUserPacks404JSONResponse{
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to find user"),
 				Status:  ToPtr(http.StatusNotFound),
-			}, nil
+			})
+
+			return
 		}
 
-		return ListUserPacks500JSONResponse{
-			Message: ToPtr("Failed to load user"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	records, count, err := a.userpacks.WithPrincipal(
-		current.GetUser(ctx),
-	).List(
-		ctx,
-		model.UserPackParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
-			UserID: record.ID,
-		},
-	)
-
-	if err != nil {
-		return ListUserPacks500JSONResponse{
-			Message: ToPtr("Failed to load packs"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	payload := make([]UserPack, len(records))
-	for id, record := range records {
-		payload[id] = a.convertUserPack(record)
-	}
-
-	return ListUserPacks200JSONResponse{
-		Total: ToPtr(count),
-		User:  ToPtr(a.convertUser(record)),
-		Packs: ToPtr(payload),
-	}, nil
-}
-
-// AttachUserToPack implements the v1.ServerInterface.
-func (a *API) AttachUserToPack(ctx context.Context, request AttachUserToPackRequestObject) (AttachUserToPackResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return AttachUserToPack403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
-
-	if err := a.userpacks.WithPrincipal(
-		current.GetUser(ctx),
-	).Attach(
-		ctx,
-		model.UserPackParams{
-			UserID: request.UserId,
-			PackID: request.Body.Pack,
-			Perm:   string(FromPtr(request.Body.Perm)),
-		},
-	); err != nil {
-		if errors.Is(err, userpacks.ErrNotFound) {
-			return AttachUserToPack404JSONResponse{
-				Message: ToPtr("Failed to find user or pack"),
+		if errors.Is(err, store.ErrGroupNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find group"),
 				Status:  ToPtr(http.StatusNotFound),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, userpacks.ErrAlreadyAssigned) {
-			return AttachUserToPack412JSONResponse{
-				Message: ToPtr("Pack is already attached"),
+		if errors.Is(err, store.ErrAlreadyAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Group is already attached"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
 		if v, ok := err.(validate.Errors); ok {
@@ -650,56 +404,92 @@ func (a *API) AttachUserToPack(ctx context.Context, request AttachUserToPackRequ
 				)
 			}
 
-			return AttachUserToPack422JSONResponse{
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to validate user group"),
 				Status:  ToPtr(http.StatusUnprocessableEntity),
-				Message: ToPtr("Failed to validate user pack"),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return AttachUserToPack500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("group", body.Group).
+			Str("action", "AttachUserToGroup").
+			Msg("Failed to attach user to group")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to attach user to group"),
 			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to attach user to pack"),
-		}, nil
+		})
+
+		return
 	}
 
-	return AttachUserToPack200JSONResponse{
-		Message: ToPtr("Successfully attached user to pack"),
+	a.RenderNotify(w, r, Notification{
+		Message: ToPtr("Successfully attached user to group"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
-// PermitUserPack implements the v1.ServerInterface.
-func (a *API) PermitUserPack(ctx context.Context, request PermitUserPackRequestObject) (PermitUserPackResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return PermitUserPack403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+// PermitUserGroup implements the v1.ServerInterface.
+func (a *API) PermitUserGroup(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	body := &UserGroupPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "PermitUserGroup").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.userpacks.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Permit(
+	).Users.PermitGroup(
 		ctx,
-		model.UserPackParams{
-			UserID: request.UserId,
-			PackID: request.Body.Pack,
-			Perm:   string(FromPtr(request.Body.Perm)),
+		model.UserGroupParams{
+			UserID:  record.ID,
+			GroupID: body.Group,
+			Perm:    body.Perm,
 		},
 	); err != nil {
-		if errors.Is(err, userpacks.ErrNotFound) {
-			return PermitUserPack404JSONResponse{
-				Message: ToPtr("Failed to find user or pack"),
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
 				Status:  ToPtr(http.StatusNotFound),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, userpacks.ErrNotAssigned) {
-			return PermitUserPack412JSONResponse{
-				Message: ToPtr("Pack is not attached"),
+		if errors.Is(err, store.ErrGroupNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find group"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Group is not attached"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
 		if v, ok := err.(validate.Errors); ok {
@@ -715,120 +505,149 @@ func (a *API) PermitUserPack(ctx context.Context, request PermitUserPackRequestO
 				)
 			}
 
-			return PermitUserPack422JSONResponse{
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to validate user group"),
 				Status:  ToPtr(http.StatusUnprocessableEntity),
-				Message: ToPtr("Failed to validate user pack"),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return PermitUserPack500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("group", body.Group).
+			Str("action", "PermitUserGroup").
+			Msg("Failed to update user group perms")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to update user group perms"),
 			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to update user pack perms"),
-		}, nil
+		})
+
+		return
 	}
 
-	return PermitUserPack200JSONResponse{
-		Message: ToPtr("Successfully updated user pack perms"),
+	a.RenderNotify(w, r, Notification{
+		Message: ToPtr("Successfully updated user group perms"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
-// DeleteUserFromPack implements the v1.ServerInterface.
-func (a *API) DeleteUserFromPack(ctx context.Context, request DeleteUserFromPackRequestObject) (DeleteUserFromPackResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return DeleteUserFromPack403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+// DeleteUserFromGroup implements the v1.ServerInterface.
+func (a *API) DeleteUserFromGroup(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	body := &UserGroupPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "DeleteUserFromGroup").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.userpacks.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Drop(
+	).Users.DropGroup(
 		ctx,
-		model.UserPackParams{
-			UserID: request.UserId,
-			PackID: request.Body.Pack,
+		model.UserGroupParams{
+			UserID:  record.ID,
+			GroupID: body.Group,
 		},
 	); err != nil {
-		if errors.Is(err, userpacks.ErrNotFound) {
-			return DeleteUserFromPack404JSONResponse{
-				Message: ToPtr("Failed to find user or pack"),
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, userpacks.ErrNotAssigned) {
-			return DeleteUserFromPack412JSONResponse{
-				Message: ToPtr("Pack is not attached"),
+		if errors.Is(err, store.ErrGroupNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find group"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
-		return DeleteUserFromPack500JSONResponse{
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Group is not attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("group", body.Group).
+			Str("action", "DeleteUserFromGroup").
+			Msg("Failed to drop user from group")
+
+		a.RenderNotify(w, r, Notification{
 			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to drop user from pack"),
-		}, nil
+			Message: ToPtr("Failed to drop user from group"),
+		})
+
+		return
 	}
 
-	return DeleteUserFromPack200JSONResponse{
-		Message: ToPtr("Successfully dropped user from pack"),
+	a.RenderNotify(w, r, Notification{
+		Message: ToPtr("Successfully dropped user from group"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // ListUserMods implements the v1.ServerInterface.
-func (a *API) ListUserMods(ctx context.Context, request ListUserModsRequestObject) (ListUserModsResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return ListUserMods403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
+func (a *API) ListUserMods(w http.ResponseWriter, r *http.Request, _ UserID, params ListUserModsParams) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	sort, order, limit, offset, search := listUserModsSorting(params)
 
-	record, err := a.users.WithPrincipal(
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.UserId,
-	)
-
-	if err != nil {
-		if errors.Is(err, users.ErrNotFound) {
-			return ListUserMods404JSONResponse{
-				Message: ToPtr("Failed to find user"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ListUserMods500JSONResponse{
-			Message: ToPtr("Failed to load user"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	records, count, err := a.usermods.WithPrincipal(
-		current.GetUser(ctx),
-	).List(
+	).Users.ListMods(
 		ctx,
 		model.UserModParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
+			ListParams: model.ListParams{
+				Sort:   sort,
+				Order:  order,
+				Limit:  limit,
+				Offset: offset,
+				Search: search,
+			},
 			UserID: record.ID,
 		},
 	)
 
 	if err != nil {
-		return ListUserMods500JSONResponse{
-			Message: ToPtr("Failed to load mods"),
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "ListUserMods").
+			Msg("Failed to load user mods")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load user mods"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
 	payload := make([]UserMod, len(records))
@@ -836,44 +655,71 @@ func (a *API) ListUserMods(ctx context.Context, request ListUserModsRequestObjec
 		payload[id] = a.convertUserMod(record)
 	}
 
-	return ListUserMods200JSONResponse{
-		Total: ToPtr(count),
-		User:  ToPtr(a.convertUser(record)),
-		Mods:  ToPtr(payload),
-	}, nil
+	render.JSON(w, r, UserModsResponse{
+		Total:  count,
+		Limit:  limit,
+		Offset: offset,
+		User:   ToPtr(a.convertUser(record)),
+		Mods:   payload,
+	})
 }
 
 // AttachUserToMod implements the v1.ServerInterface.
-func (a *API) AttachUserToMod(ctx context.Context, request AttachUserToModRequestObject) (AttachUserToModResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return AttachUserToMod403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+func (a *API) AttachUserToMod(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	body := &UserModPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "AttachUserToMod").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.usermods.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Attach(
+	).Users.AttachMod(
 		ctx,
 		model.UserModParams{
-			UserID: request.UserId,
-			ModID:  request.Body.Mod,
-			Perm:   string(FromPtr(request.Body.Perm)),
+			UserID: record.ID,
+			ModID:  body.Mod,
+			Perm:   body.Perm,
 		},
 	); err != nil {
-		if errors.Is(err, usermods.ErrNotFound) {
-			return AttachUserToMod404JSONResponse{
-				Message: ToPtr("Failed to find user or mod"),
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
 				Status:  ToPtr(http.StatusNotFound),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, usermods.ErrAlreadyAssigned) {
-			return AttachUserToMod412JSONResponse{
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrAlreadyAssigned) {
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Mod is already attached"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
 		if v, ok := err.(validate.Errors); ok {
@@ -889,56 +735,92 @@ func (a *API) AttachUserToMod(ctx context.Context, request AttachUserToModReques
 				)
 			}
 
-			return AttachUserToMod422JSONResponse{
+			a.RenderNotify(w, r, Notification{
 				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Message: ToPtr("Failed to validate user mod"),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return AttachUserToMod500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("mod", body.Mod).
+			Str("action", "AttachUserToMod").
+			Msg("Failed to attach user to mod")
+
+		a.RenderNotify(w, r, Notification{
 			Status:  ToPtr(http.StatusUnprocessableEntity),
 			Message: ToPtr("Failed to attach user to mod"),
-		}, nil
+		})
+
+		return
 	}
 
-	return AttachUserToMod200JSONResponse{
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully attached user to mod"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // PermitUserMod implements the v1.ServerInterface.
-func (a *API) PermitUserMod(ctx context.Context, request PermitUserModRequestObject) (PermitUserModResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return PermitUserMod403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+func (a *API) PermitUserMod(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	body := &UserModPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "PermitUserMod").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.usermods.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Permit(
+	).Users.PermitMod(
 		ctx,
 		model.UserModParams{
-			UserID: request.UserId,
-			ModID:  request.Body.Mod,
-			Perm:   string(FromPtr(request.Body.Perm)),
+			UserID: record.ID,
+			ModID:  body.Mod,
+			Perm:   body.Perm,
 		},
 	); err != nil {
-		if errors.Is(err, usermods.ErrNotFound) {
-			return PermitUserMod404JSONResponse{
-				Message: ToPtr("Failed to find user or mod"),
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
 				Status:  ToPtr(http.StatusNotFound),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, usermods.ErrNotAssigned) {
-			return PermitUserMod412JSONResponse{
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Mod is not attached"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
 		if v, ok := err.(validate.Errors); ok {
@@ -954,72 +836,448 @@ func (a *API) PermitUserMod(ctx context.Context, request PermitUserModRequestObj
 				)
 			}
 
-			return PermitUserMod422JSONResponse{
+			a.RenderNotify(w, r, Notification{
 				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Message: ToPtr("Failed to validate user mod"),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return PermitUserMod500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("mod", body.Mod).
+			Str("action", "PermitUserMod").
+			Msg("Failed to update user mod perms")
+
+		a.RenderNotify(w, r, Notification{
 			Status:  ToPtr(http.StatusUnprocessableEntity),
 			Message: ToPtr("Failed to update user mod perms"),
-		}, nil
+		})
+
+		return
 	}
 
-	return PermitUserMod200JSONResponse{
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully updated user mod perms"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // DeleteUserFromMod implements the v1.ServerInterface.
-func (a *API) DeleteUserFromMod(ctx context.Context, request DeleteUserFromModRequestObject) (DeleteUserFromModResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return DeleteUserFromMod403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+func (a *API) DeleteUserFromMod(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	body := &UserModPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "DeleteUserFromMod").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.usermods.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Drop(
+	).Users.DropMod(
 		ctx,
 		model.UserModParams{
-			UserID: request.UserId,
-			ModID:  request.Body.Mod,
+			UserID: record.ID,
+			ModID:  body.Mod,
 		},
 	); err != nil {
-		if errors.Is(err, usermods.ErrNotFound) {
-			return DeleteUserFromMod404JSONResponse{
-				Message: ToPtr("Failed to find user or mod"),
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, usermods.ErrNotAssigned) {
-			return DeleteUserFromMod412JSONResponse{
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Mod is not attached"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
-		return DeleteUserFromMod500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("mod", body.Mod).
+			Str("action", "DeleteUserFromMod").
+			Msg("Failed to drop user from mod")
+
+		a.RenderNotify(w, r, Notification{
 			Status:  ToPtr(http.StatusUnprocessableEntity),
 			Message: ToPtr("Failed to drop user from mod"),
-		}, nil
+		})
+
+		return
 	}
 
-	return DeleteUserFromMod200JSONResponse{
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully dropped user from mod"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
+}
+
+// ListUserPacks implements the v1.ServerInterface.
+func (a *API) ListUserPacks(w http.ResponseWriter, r *http.Request, _ UserID, params ListUserPacksParams) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	sort, order, limit, offset, search := listUserPacksSorting(params)
+
+	records, count, err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Users.ListPacks(
+		ctx,
+		model.UserPackParams{
+			ListParams: model.ListParams{
+				Sort:   sort,
+				Order:  order,
+				Limit:  limit,
+				Offset: offset,
+				Search: search,
+			},
+			UserID: record.ID,
+		},
+	)
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "ListUserPacks").
+			Msg("Failed to load user packs")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load user packs"),
+			Status:  ToPtr(http.StatusInternalServerError),
+		})
+
+		return
+	}
+
+	payload := make([]UserPack, len(records))
+	for id, record := range records {
+		payload[id] = a.convertUserPack(record)
+	}
+
+	render.JSON(w, r, UserPacksResponse{
+		Total:  count,
+		Limit:  limit,
+		Offset: offset,
+		User:   ToPtr(a.convertUser(record)),
+		Packs:  payload,
+	})
+}
+
+// AttachUserToPack implements the v1.ServerInterface.
+func (a *API) AttachUserToPack(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	body := &UserPackPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "AttachUserToPack").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
+	}
+
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Users.AttachPack(
+		ctx,
+		model.UserPackParams{
+			UserID: record.ID,
+			PackID: body.Pack,
+			Perm:   body.Perm,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrPackNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find pack"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrAlreadyAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Pack is already attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		if v, ok := err.(validate.Errors); ok {
+			errors := make([]Validation, 0)
+
+			for _, verr := range v.Errors {
+				errors = append(
+					errors,
+					Validation{
+						Field:   ToPtr(verr.Field),
+						Message: ToPtr(verr.Error.Error()),
+					},
+				)
+			}
+
+			a.RenderNotify(w, r, Notification{
+				Status:  ToPtr(http.StatusUnprocessableEntity),
+				Message: ToPtr("Failed to validate user pack"),
+				Errors:  ToPtr(errors),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("pack", body.Pack).
+			Str("action", "AttachUserToPack").
+			Msg("Failed to attach user to pack")
+
+		a.RenderNotify(w, r, Notification{
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+			Message: ToPtr("Failed to attach user to pack"),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
+		Message: ToPtr("Successfully attached user to pack"),
+		Status:  ToPtr(http.StatusOK),
+	})
+}
+
+// PermitUserPack implements the v1.ServerInterface.
+func (a *API) PermitUserPack(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	body := &UserPackPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "PermitUserPack").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
+	}
+
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Users.PermitPack(
+		ctx,
+		model.UserPackParams{
+			UserID: record.ID,
+			PackID: body.Pack,
+			Perm:   body.Perm,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrPackNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find pack"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Pack is not attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		if v, ok := err.(validate.Errors); ok {
+			errors := make([]Validation, 0)
+
+			for _, verr := range v.Errors {
+				errors = append(
+					errors,
+					Validation{
+						Field:   ToPtr(verr.Field),
+						Message: ToPtr(verr.Error.Error()),
+					},
+				)
+			}
+
+			a.RenderNotify(w, r, Notification{
+				Status:  ToPtr(http.StatusUnprocessableEntity),
+				Message: ToPtr("Failed to validate user pack"),
+				Errors:  ToPtr(errors),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("pack", body.Pack).
+			Str("action", "PermitUserPack").
+			Msg("Failed to update user pack perms")
+
+		a.RenderNotify(w, r, Notification{
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+			Message: ToPtr("Failed to update user pack perms"),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
+		Message: ToPtr("Successfully updated user pack perms"),
+		Status:  ToPtr(http.StatusOK),
+	})
+}
+
+// DeleteUserFromPack implements the v1.ServerInterface.
+func (a *API) DeleteUserFromPack(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.UserFromContext(ctx)
+	body := &UserPackPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "DeleteUserFromPack").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
+	}
+
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Users.DropPack(
+		ctx,
+		model.UserPackParams{
+			UserID: record.ID,
+			PackID: body.Pack,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrPackNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find pack"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Pack is not attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("pack", body.Pack).
+			Str("action", "DeleteUserFromPack").
+			Msg("Failed to drop user from pack")
+
+		a.RenderNotify(w, r, Notification{
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+			Message: ToPtr("Failed to drop user from pack"),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
+		Message: ToPtr("Successfully dropped user from pack"),
+		Status:  ToPtr(http.StatusOK),
+	})
 }
 
 func (a *API) convertUser(record *model.User) User {
 	result := User{
-		Id:        ToPtr(record.ID),
+		ID:        ToPtr(record.ID),
 		Username:  ToPtr(record.Username),
 		Email:     ToPtr(record.Email),
 		Fullname:  ToPtr(record.Fullname),
@@ -1055,25 +1313,12 @@ func (a *API) convertUserAuth(record *model.UserAuth) UserAuth {
 	return result
 }
 
-func (a *API) convertUserTeam(record *model.UserTeam) UserTeam {
-	result := UserTeam{
-		TeamId:    record.TeamID,
-		Team:      ToPtr(a.convertTeam(record.Team)),
-		UserId:    record.UserID,
-		Perm:      ToPtr(UserTeamPerm(record.Perm)),
-		CreatedAt: ToPtr(record.CreatedAt),
-		UpdatedAt: ToPtr(record.UpdatedAt),
-	}
-
-	return result
-}
-
-func (a *API) convertUserPack(record *model.UserPack) UserPack {
-	result := UserPack{
-		PackId:    record.PackID,
-		Pack:      ToPtr(a.convertPack(record.Pack)),
-		UserId:    record.UserID,
-		Perm:      ToPtr(UserPackPerm(record.Perm)),
+func (a *API) convertUserGroup(record *model.UserGroup) UserGroup {
+	result := UserGroup{
+		UserID:    record.UserID,
+		GroupID:   record.GroupID,
+		Group:     ToPtr(a.convertGroup(record.Group)),
+		Perm:      ToPtr(UserGroupPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
@@ -1083,13 +1328,94 @@ func (a *API) convertUserPack(record *model.UserPack) UserPack {
 
 func (a *API) convertUserMod(record *model.UserMod) UserMod {
 	result := UserMod{
-		ModId:     record.ModID,
+		UserID:    record.UserID,
+		ModID:     record.ModID,
 		Mod:       ToPtr(a.convertMod(record.Mod)),
-		UserId:    record.UserID,
 		Perm:      ToPtr(UserModPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
 
 	return result
+}
+
+func (a *API) convertUserPack(record *model.UserPack) UserPack {
+	result := UserPack{
+		UserID:    record.UserID,
+		PackID:    record.PackID,
+		Pack:      ToPtr(a.convertPack(record.Pack)),
+		Perm:      ToPtr(UserPackPerm(record.Perm)),
+		CreatedAt: ToPtr(record.CreatedAt),
+		UpdatedAt: ToPtr(record.UpdatedAt),
+	}
+
+	return result
+}
+
+func listUsersSorting(request ListUsersParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
+}
+
+func listUserGroupsSorting(request ListUserGroupsParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
+}
+
+func listUserModsSorting(request ListUserModsParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
+}
+
+func listUserPacksSorting(request ListUserPacksParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
 }

@@ -6,6 +6,7 @@ volumes:
 services:
   api:
     environment:
-      - KLEISTER_API_DATABASE_DSN=sqlite:///var/lib/database/kleister.sqlite3
+      - KLEISTER_API_DATABASE_DRIVER=sqlite3
+      - KLEISTER_API_DATABASE_NAME=/var/lib/database/kleister.sqlite3
     volumes:
       - sqlite:/var/lib/database

@@ -6,7 +6,12 @@ volumes:
 services:
   api:
     environment:
-      - KLEISTER_API_UPLOAD_DSN=minio://minioadmin:minioadmin@minio:9000/kleister
+      - KLEISTER_API_UPLOAD_DRIVER=s3
+      - KLEISTER_API_UPLOAD_ENDPOINT=minio:9000
+      - KLEISTER_API_UPLOAD_BUCKET=kleister
+      - KLEISTER_API_UPLOAD_REGION=us-east-1
+      - KLEISTER_API_UPLOAD_ACCESS=minioadmin
+      - KLEISTER_API_UPLOAD_SECRET=minioadmin
     depends_on:
       - minio
 

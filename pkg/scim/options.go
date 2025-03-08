@@ -2,7 +2,7 @@ package scim
 
 import (
 	"github.com/kleister/kleister-api/pkg/config"
-	"gorm.io/gorm"
+	"github.com/uptrace/bun"
 )
 
 // Option defines a single option function.
@@ -12,7 +12,7 @@ type Option func(o *Options)
 type Options struct {
 	Root   string
 	Config config.Scim
-	Store  *gorm.DB
+	Store  *bun.DB
 }
 
 // newOptions initializes the available default options.
@@ -41,7 +41,7 @@ func WithConfig(v config.Scim) Option {
 }
 
 // WithStore provides a function to set the store option.
-func WithStore(v *gorm.DB) Option {
+func WithStore(v *bun.DB) Option {
 	return func(o *Options) {
 		o.Store = v
 	}

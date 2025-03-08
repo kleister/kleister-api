@@ -1,31 +1,49 @@
 package model
 
 import (
+	"context"
 	"strings"
 	"time"
 
 	"github.com/dchest/uniuri"
-	"github.com/vincent-petithory/dataurl"
-	"gorm.io/gorm"
+	"github.com/uptrace/bun"
 )
 
-// VersionFile within Kleister.
+var (
+	_ bun.BeforeAppendModelHook = (*VersionFile)(nil)
+)
+
+// VersionFile defines the model for version_files table.
 type VersionFile struct {
-	ID          string `gorm:"primaryKey;length:20"`
-	Version     *Version
-	VersionID   string `gorm:"index;length:20"`
-	Slug        string `gorm:"unique;length:255"`
-	ContentType string
-	MD5         string           `gorm:"column:md5"`
-	Upload      *dataurl.DataURL `json:"-" gorm:"-"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	bun.BaseModel `bun:"table:version_files"`
+
+	ID          string    `bun:",pk,type:varchar(20)"`
+	Version     *Version  `bun:"rel:belongs-to,join:version_id=id"`
+	VersionID   string    `bun:"type:varchar(20)"`
+	Slug        string    `bun:"type:varchar(255)"`
+	ContentType string    `bun:"type:varchar(255)"`
+	MD5         string    `bun:"column:md5,type:varchar(255)"`
+	URL         string    `bun:"-"`
+	CreatedAt   time.Time `bun:",nullzero,notnull,default:current_timestamp"`
+	UpdatedAt   time.Time `bun:",nullzero,notnull,default:current_timestamp"`
 }
 
-// BeforeSave defines the hook executed before every save.
-func (m *VersionFile) BeforeSave(_ *gorm.DB) error {
-	if m.ID == "" {
-		m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
+// BeforeAppendModel implements the bun hook interface.
+func (m *VersionFile) BeforeAppendModel(_ context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if m.ID == "" {
+			m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
+		}
+
+		m.CreatedAt = time.Now()
+		m.UpdatedAt = time.Now()
+	case *bun.UpdateQuery:
+		if m.ID == "" {
+			m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
+		}
+
+		m.UpdatedAt = time.Now()
 	}
 
 	return nil

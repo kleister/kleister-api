@@ -5,8 +5,8 @@ type ListParams struct {
 	Search string
 	Sort   string
 	Order  string
-	Limit  int
-	Offset int
+	Limit  int64
+	Offset int64
 }
 
 // BuildParams defines parameters for builds.
@@ -36,31 +36,31 @@ type BuildVersionParams struct {
 	Perm      string
 }
 
-// TeamModParams defines parameters for team mods.
-type TeamModParams struct {
+// GroupModParams defines parameters for group mods.
+type GroupModParams struct {
 	ListParams
 
-	TeamID string
-	ModID  string
-	Perm   string
+	GroupID string
+	ModID   string
+	Perm    string
 }
 
-// TeamPackParams defines parameters for team packs.
-type TeamPackParams struct {
+// GroupPackParams defines parameters for group packs.
+type GroupPackParams struct {
 	ListParams
 
-	TeamID string
-	PackID string
-	Perm   string
+	GroupID string
+	PackID  string
+	Perm    string
 }
 
-// UserTeamParams defines parameters for user teams.
-type UserTeamParams struct {
+// UserGroupParams defines parameters for user groups.
+type UserGroupParams struct {
 	ListParams
 
-	UserID string
-	TeamID string
-	Perm   string
+	UserID  string
+	GroupID string
+	Perm    string
 }
 
 // UserModParams defines parameters for user mods.

@@ -21,18 +21,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
 
-      - name: Setup ruby
-        uses: ruby/setup-ruby@v1
+      - name: Setup yq
+        uses: chrisdickinson/setup-yq@v1.0.1
         with:
-          ruby-version: head
-
-      - name: Copy spec
-        run: |
-          mkdir dist
-          cp openapi/v1.yml dist/$(ruby -ryaml -e "puts YAML::load(open('openapi/v1.yml').read)['info']['version']").yml
+          yq-version: v4.45.1
 
       - name: Upload spec
         run: |
-          aws s3 sync dist/ s3://dl.kleister.eu/openapi/
+          aws s3 cp openapi/v1.yml s3://dl.kleister.eu/openapi/$(yq -r .info.version openapi/v1.yml).yml
 
 ...

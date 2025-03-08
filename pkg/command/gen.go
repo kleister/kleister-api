@@ -33,7 +33,7 @@ var (
 		Args:  cobra.NoArgs,
 	}
 
-	defaultCertGenCertHosts  = []string{"kleister-api"}
+	defaultCertGenCertHosts  = []string{"kleister"}
 	defaultCertGenCertOrg    = "Kleister"
 	defaultCertGenCertName   = "API"
 	defaultCertGenEcdsaCurve = ""

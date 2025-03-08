@@ -1,26 +1,45 @@
 package model
 
 import (
+	"context"
 	"strings"
 	"time"
 
 	"github.com/dchest/uniuri"
-	"gorm.io/gorm"
+	"github.com/uptrace/bun"
 )
 
-// Neoforge within Kleister.
+var (
+	_ bun.BeforeAppendModelHook = (*Neoforge)(nil)
+)
+
+// Neoforge defines the model for neoforges table.
 type Neoforge struct {
-	ID        string `gorm:"primaryKey;length:20"`
-	Name      string `gorm:"unique;length:64"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Builds    []*Build
+	bun.BaseModel `bun:"table:neoforges"`
+
+	ID        string    `bun:",pk,type:varchar(20)"`
+	Name      string    `bun:",unique,type:varchar(64)"`
+	CreatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp"`
+	Builds    []*Build  `bun:"rel:has-many,join:id=neoforge_id"`
 }
 
-// BeforeCreate defines the hook executed before every create.
-func (m *Neoforge) BeforeCreate(_ *gorm.DB) error {
-	if m.ID == "" {
-		m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
+// BeforeAppendModel implements the bun hook interface.
+func (m *Neoforge) BeforeAppendModel(_ context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		if m.ID == "" {
+			m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
+		}
+
+		m.CreatedAt = time.Now()
+		m.UpdatedAt = time.Now()
+	case *bun.UpdateQuery:
+		if m.ID == "" {
+			m.ID = strings.ToLower(uniuri.NewLen(uniuri.UUIDLen))
+		}
+
+		m.UpdatedAt = time.Now()
 	}
 
 	return nil

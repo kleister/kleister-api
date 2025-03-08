@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/drexedam/gravatar"
-	"github.com/kleister/kleister-api/pkg/model"
 )
 
 func gravatarFor(email string) string {
@@ -16,27 +15,40 @@ func gravatarFor(email string) string {
 		AvatarURL()
 }
 
-func toListParams(sort, order string, limit, offset *int, search *string) model.ListParams {
-	result := model.ListParams{
-		Sort:  sort,
-		Order: order,
+func fromSearch(val *string) string {
+	if val == nil {
+		return ""
 	}
+
+	return FromPtr(val)
+}
+
+func toPageParams(sort *SortColumnParam, limit *PagingLimitParam, offset *PagingOffsetParam, search *SearchQueryParam) (string, int64, int64, string) {
+	sortResult := ""
+
+	if sort != nil {
+		sortResult = string(FromPtr(sort))
+	}
+
+	limitResult := int64(100)
 
 	if limit != nil {
-		result.Limit = FromPtr(limit)
-	} else {
-		result.Limit = 50
+		limitResult = int64(FromPtr(limit))
 	}
+
+	offsetResult := int64(0)
 
 	if offset != nil {
-		result.Offset = FromPtr(offset)
+		offsetResult = int64(FromPtr(offset))
 	}
+
+	searchResult := ""
 
 	if search != nil {
-		result.Search = FromPtr(search)
+		searchResult = string(FromPtr(search))
 	}
 
-	return result
+	return sortResult, limitResult, offsetResult, searchResult
 }
 
 // ToPtr transform input to a pointer.

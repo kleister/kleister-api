@@ -1,5 +1,3 @@
-include .bingo/Variables.mk
-
 SHELL := bash
 NAME := kleister-api
 IMPORT := github.com/kleister/$(NAME)
@@ -68,102 +66,16 @@ vet:
 	go vet $(PACKAGES)
 
 .PHONY: golangci
-golangci: $(GOLANGCI_LINT)
-	$(GOLANGCI_LINT) run ./...
-
-.PHONY: staticcheck
-staticcheck: $(STATICCHECK)
-	$(STATICCHECK) -tags '$(TAGS)' $(PACKAGES)
+golangci:
+	go tool github.com/golangci/golangci-lint/cmd/golangci-lint run ./...
 
 .PHONY: lint
-lint: $(REVIVE)
-	for PKG in $(PACKAGES); do $(REVIVE) -config revive.toml -set_exit_status $$PKG || exit 1; done;
+lint:
+	for PKG in $(PACKAGES); do go tool github.com/mgechev/revive -config revive.toml -set_exit_status $$PKG || exit 1; done;
 
 .PHONY: generate
-generate: openapi mocks
+generate:
 	go generate $(PACKAGES)
-
-.PHONY: openapi
-openapi: $(OAPI_CODEGEN)
-	$(OAPI_CODEGEN) --config=pkg/api/v1/config.yml openapi/v1.yml
-
-.PHONY: mocks
-mocks: \
-	pkg/upload/mock.go pkg/store/mock.go \
-	pkg/service/build_versions/mock.go \
-	pkg/service/builds/mock.go \
-	pkg/service/mods/mock.go \
-	pkg/service/packs/mock.go \
-	pkg/service/team_mods/mock.go \
-	pkg/service/team_packs/mock.go \
-	pkg/service/teams/mock.go \
-	pkg/service/user_mods/mock.go \
-	pkg/service/user_packs/mock.go \
-	pkg/service/user_teams/mock.go \
-	pkg/service/users/mock.go \
-	pkg/service/versions/mock.go \
-	pkg/service/minecraft/mock.go \
-	pkg/service/forge/mock.go \
-	pkg/service/neoforge/mock.go \
-	pkg/service/quilt/mock.go \
-	pkg/service/fabric/mock.go
-
-pkg/upload/mock.go: pkg/upload/upload.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package upload
-
-pkg/store/mock.go: pkg/store/store.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package store
-
-pkg/service/build_versions/mock.go: pkg/service/build_versions/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package buildversions
-
-pkg/service/builds/mock.go: pkg/service/builds/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package builds
-
-pkg/service/mods/mock.go: pkg/service/mods/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package mods
-
-pkg/service/packs/mock.go: pkg/service/packs/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package packs
-
-pkg/service/team_mods/mock.go: pkg/service/team_mods/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package teammods
-
-pkg/service/team_packs/mock.go: pkg/service/team_packs/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package teampacks
-
-pkg/service/teams/mock.go: pkg/service/teams/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package teams
-
-pkg/service/user_mods/mock.go: pkg/service/user_mods/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package usermods
-
-pkg/service/user_packs/mock.go: pkg/service/user_packs/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package userpacks
-
-pkg/service/user_teams/mock.go: pkg/service/user_teams/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package userteams
-
-pkg/service/users/mock.go: pkg/service/users/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package users
-
-pkg/service/versions/mock.go: pkg/service/versions/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package versions
-
-pkg/service/minecraft/mock.go: pkg/service/minecraft/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package minecraft
-
-pkg/service/forge/mock.go: pkg/service/forge/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package forge
-
-pkg/service/neoforge/mock.go: pkg/service/neoforge/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package neoforge
-
-pkg/service/quilt/mock.go: pkg/service/quilt/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package quilt
-
-pkg/service/fabric/mock.go: pkg/service/fabric/service.go $(MOCKGEN)
-	$(MOCKGEN) -source $< -destination $@ -package fabric
 
 .PHONY: test
 test: test
@@ -235,3 +147,11 @@ release-checksum:
 
 .PHONY: release-finish
 release-finish: release-reduce release-checksum
+
+.PHONY: watch
+watch:
+	go tool github.com/air-verse/air -c .air.toml
+
+.PHONY: posting
+posting:
+	posting default --collection posting

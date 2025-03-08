@@ -357,9 +357,9 @@ func oidcProvider(cfg config.AuthProvider) (*openidConnect.Provider, error) {
 		Str("name", cfg.Name).
 		Msg("Registering auth provider")
 
-	if cfg.Endpoints.Discovery == "" {
-		return nil, ErrMissingDiscoveryEndpoint
-	}
+	// if cfg.Endpoints.Discovery == "" {
+	// 	return nil, ErrMissingDiscoveryEndpoint
+	// }
 
 	clientID, err := config.Value(cfg.ClientID)
 	if err != nil {
@@ -376,7 +376,7 @@ func oidcProvider(cfg config.AuthProvider) (*openidConnect.Provider, error) {
 		clientID,
 		clientSecret,
 		cfg.Callback,
-		cfg.Endpoints.Discovery,
+		"", //cfg.Endpoints.Discovery,
 		cfg.Scopes...,
 	)
 

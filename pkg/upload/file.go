@@ -1,20 +1,24 @@
 package upload
 
 import (
+	"bytes"
+	"context"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/kleister/kleister-api/pkg/config"
-	"github.com/rs/zerolog/log"
 )
 
 // FileUpload implements the Upload interface.
 type FileUpload struct {
 	path  string
 	perms fs.FileMode
+	root  *os.Root
 }
 
 // Info prepares some informational message about the handler.
@@ -34,32 +38,84 @@ func (u *FileUpload) Prepare() (Upload, error) {
 		}
 	}
 
+	{
+		root, err := os.OpenRoot(u.path)
+
+		if err != nil {
+			return nil, err
+		}
+
+		u.root = root
+	}
+
 	return u, nil
 }
 
 // Close simply closes the upload handler.
 func (u *FileUpload) Close() error {
-	return nil
+	return u.root.Close()
 }
 
 // Upload stores an attachment within the defined S3 bucket.
-func (u *FileUpload) Upload(path, ctype string, content []byte) error {
-	log.Debug().
-		Str("path", path).
-		Str("ctype", ctype).
-		Bytes("content", content).
-		Msg("Upload")
+func (u *FileUpload) Upload(_ context.Context, path string, content *bytes.Buffer) error {
+	parent := filepath.Dir(
+		path,
+	)
+
+	if _, err := u.root.Stat(parent); os.IsNotExist(err) {
+		if err := os.MkdirAll(
+			filepath.Join(
+				u.root.Name(),
+				parent,
+			),
+			u.perms,
+		); err != nil {
+			return err
+		}
+	}
+
+	file, err := u.root.OpenFile(
+		path,
+		os.O_CREATE|os.O_TRUNC|os.O_RDWR,
+		u.mode(),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	if _, err = file.Write(
+		content.Bytes(),
+	); err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // Delete removes an attachment from the defined S3 bucket.
-func (u *FileUpload) Delete(path string) error {
-	log.Debug().
-		Str("path", path).
-		Msg("Delete")
+func (u *FileUpload) Delete(_ context.Context, path string, recursive bool) error {
+	if recursive {
+		fullPath := filepath.Join(
+			u.root.Name(),
+			path,
+		)
 
-	return nil
+		relPath, err := filepath.Rel(
+			u.root.Name(),
+			fullPath,
+		)
+
+		if err != nil || relPath == ".." || relPath[:3] == "../" {
+			return fmt.Errorf("denied to delete unsafe path")
+		}
+
+		return os.RemoveAll(fullPath)
+	}
+
+	return u.root.Remove(path)
 }
 
 // Handler implements an HTTP handler for asset uploads.
@@ -71,9 +127,17 @@ func (u *FileUpload) Handler(root string) http.Handler {
 	return http.StripPrefix(
 		root,
 		http.FileServer(
-			http.Dir(u.path),
+			http.FS(
+				u.root.FS(),
+			),
 		),
 	)
+}
+
+func (u *FileUpload) mode() os.FileMode {
+	mode := u.perms &^ 0111
+	mode &^= os.ModeDir
+	return mode
 }
 
 // NewFileUpload initializes a new file handler.

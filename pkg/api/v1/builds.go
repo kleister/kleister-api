@@ -1,53 +1,51 @@
 package v1
 
 import (
-	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/render"
 	"github.com/kleister/kleister-api/pkg/middleware/current"
 	"github.com/kleister/kleister-api/pkg/model"
-	buildversions "github.com/kleister/kleister-api/pkg/service/build_versions"
-	"github.com/kleister/kleister-api/pkg/service/builds"
-	"github.com/kleister/kleister-api/pkg/service/fabric"
-	"github.com/kleister/kleister-api/pkg/service/forge"
-	"github.com/kleister/kleister-api/pkg/service/minecraft"
-	"github.com/kleister/kleister-api/pkg/service/neoforge"
-	"github.com/kleister/kleister-api/pkg/service/packs"
-	"github.com/kleister/kleister-api/pkg/service/quilt"
+	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/kleister/kleister-api/pkg/validate"
+	"github.com/rs/zerolog/log"
 )
 
 // ListBuilds implements the v1.ServerInterface.
-func (a *API) ListBuilds(ctx context.Context, request ListBuildsRequestObject) (ListBuildsResponseObject, error) {
-	records, count, err := a.builds.WithPrincipal(
+func (a *API) ListBuilds(w http.ResponseWriter, r *http.Request, _ PackID, params ListBuildsParams) {
+	ctx := r.Context()
+	pack := a.PackFromContext(ctx)
+	sort, order, limit, offset, search := listBuildsSorting(params)
+
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).List(
+	).Builds.List(
 		ctx,
-		model.BuildParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
-			PackID: request.PackId,
+		pack,
+		model.ListParams{
+			Sort:   sort,
+			Order:  order,
+			Limit:  limit,
+			Offset: offset,
+			Search: search,
 		},
 	)
 
 	if err != nil {
-		if errors.Is(err, packs.ErrNotFound) {
-			return ListBuilds404JSONResponse{
-				Message: ToPtr("Failed to find pack"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("action", "ListBuilds").
+			Msg("Failed to load builds")
 
-		return ListBuilds500JSONResponse{
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to load builds"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
 	payload := make([]Build, len(records))
@@ -55,194 +53,101 @@ func (a *API) ListBuilds(ctx context.Context, request ListBuildsRequestObject) (
 		payload[id] = a.convertBuild(record)
 	}
 
-	return ListBuilds200JSONResponse{
-		Total:  ToPtr(count),
-		Builds: ToPtr(payload),
-	}, nil
+	render.JSON(w, r, BuildsResponse{
+		Total:  count,
+		Limit:  limit,
+		Offset: offset,
+		Pack:   ToPtr(a.convertPack(pack)),
+		Builds: payload,
+	})
 }
 
 // ShowBuild implements the v1.ServerInterface.
-func (a *API) ShowBuild(ctx context.Context, request ShowBuildRequestObject) (ShowBuildResponseObject, error) {
-	record, err := a.builds.WithPrincipal(
-		current.GetUser(ctx),
-	).Show(
-		ctx,
-		model.BuildParams{
-			PackID:  request.PackId,
-			BuildID: request.BuildId,
-		},
-	)
+func (a *API) ShowBuild(w http.ResponseWriter, r *http.Request, _ PackID, _ BuildID) {
+	ctx := r.Context()
+	record := a.BuildFromContext(ctx)
 
-	if err != nil {
-		if errors.Is(err, packs.ErrNotFound) {
-			return ShowBuild404JSONResponse{
-				Message: ToPtr("Failed to find pack"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		if errors.Is(err, builds.ErrNotFound) {
-			return ShowBuild404JSONResponse{
-				Message: ToPtr("Failed to find build"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ShowBuild500JSONResponse{
-			Message: ToPtr("Failed to load build"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	return ShowBuild200JSONResponse(
+	render.JSON(w, r, BuildResponse(
 		a.convertBuild(record),
-	), nil
+	))
 }
 
 // CreateBuild implements the v1.ServerInterface.
-func (a *API) CreateBuild(ctx context.Context, request CreateBuildRequestObject) (CreateBuildResponseObject, error) {
-	record := &model.Build{}
+func (a *API) CreateBuild(w http.ResponseWriter, r *http.Request, _ PackID) {
+	ctx := r.Context()
+	pack := a.PackFromContext(ctx)
+	body := &CreateBuildBody{}
 
-	if request.Body.MinecraftId != nil {
-		ref, err := a.minecraft.Show(ctx, FromPtr(request.Body.MinecraftId))
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("action", "CreateBuild").
+			Msg("Failed to decode request body")
 
-		if err != nil {
-			if errors.Is(err, minecraft.ErrNotFound) {
-				return CreateBuild404JSONResponse{
-					Message: ToPtr("Failed to find minecraft"),
-					Status:  ToPtr(http.StatusNotFound),
-				}, nil
-			}
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
 
-			return CreateBuild500JSONResponse{
-				Message: ToPtr("Failed to load minecraft"),
-				Status:  ToPtr(http.StatusInternalServerError),
-			}, nil
-		}
-
-		record.MinecraftID = ToPtr(ref.ID)
+		return
 	}
 
-	if request.Body.ForgeId != nil {
-		ref, err := a.forge.Show(ctx, FromPtr(request.Body.ForgeId))
-
-		if err != nil {
-			if errors.Is(err, forge.ErrNotFound) {
-				return CreateBuild404JSONResponse{
-					Message: ToPtr("Failed to find forge"),
-					Status:  ToPtr(http.StatusNotFound),
-				}, nil
-			}
-
-			return CreateBuild500JSONResponse{
-				Message: ToPtr("Failed to load forge"),
-				Status:  ToPtr(http.StatusInternalServerError),
-			}, nil
-		}
-
-		record.ForgeID = ToPtr(ref.ID)
+	record := &model.Build{
+		PackID: pack.ID,
 	}
 
-	if request.Body.NeoforgeId != nil {
-		ref, err := a.neoforge.Show(ctx, FromPtr(request.Body.NeoforgeId))
-
-		if err != nil {
-			if errors.Is(err, neoforge.ErrNotFound) {
-				return CreateBuild404JSONResponse{
-					Message: ToPtr("Failed to find neoforge"),
-					Status:  ToPtr(http.StatusNotFound),
-				}, nil
-			}
-
-			return CreateBuild500JSONResponse{
-				Message: ToPtr("Failed to load neoforge"),
-				Status:  ToPtr(http.StatusInternalServerError),
-			}, nil
-		}
-
-		record.NeoforgeID = ToPtr(ref.ID)
+	if body.MinecraftID != nil {
+		record.MinecraftID = body.MinecraftID
 	}
 
-	if request.Body.QuiltId != nil {
-		ref, err := a.quilt.Show(ctx, FromPtr(request.Body.QuiltId))
-
-		if err != nil {
-			if errors.Is(err, quilt.ErrNotFound) {
-				return CreateBuild404JSONResponse{
-					Message: ToPtr("Failed to find quilt"),
-					Status:  ToPtr(http.StatusNotFound),
-				}, nil
-			}
-
-			return CreateBuild500JSONResponse{
-				Message: ToPtr("Failed to load quilt"),
-				Status:  ToPtr(http.StatusInternalServerError),
-			}, nil
-		}
-
-		record.QuiltID = ToPtr(ref.ID)
+	if body.ForgeID != nil {
+		record.ForgeID = body.ForgeID
 	}
 
-	if request.Body.FabricId != nil {
-		ref, err := a.fabric.Show(ctx, FromPtr(request.Body.FabricId))
-
-		if err != nil {
-			if errors.Is(err, fabric.ErrNotFound) {
-				return CreateBuild404JSONResponse{
-					Message: ToPtr("Failed to find fabric"),
-					Status:  ToPtr(http.StatusNotFound),
-				}, nil
-			}
-
-			return CreateBuild500JSONResponse{
-				Message: ToPtr("Failed to load fabric"),
-				Status:  ToPtr(http.StatusInternalServerError),
-			}, nil
-		}
-
-		record.FabricID = ToPtr(ref.ID)
+	if body.NeoforgeID != nil {
+		record.NeoforgeID = body.NeoforgeID
 	}
 
-	if request.Body.Name != nil {
-		record.Name = FromPtr(request.Body.Name)
+	if body.QuiltID != nil {
+		record.QuiltID = body.QuiltID
 	}
 
-	if request.Body.Java != nil {
-		record.Java = FromPtr(request.Body.Java)
+	if body.FabricID != nil {
+		record.FabricID = body.FabricID
 	}
 
-	if request.Body.Memory != nil {
-		record.Memory = FromPtr(request.Body.Memory)
+	if body.Name != nil {
+		record.Name = FromPtr(body.Name)
 	}
 
-	if request.Body.Latest != nil {
-		record.Latest = FromPtr(request.Body.Latest)
+	if body.Java != nil {
+		record.Java = FromPtr(body.Java)
 	}
 
-	if request.Body.Recommended != nil {
-		record.Recommended = FromPtr(request.Body.Recommended)
+	if body.Memory != nil {
+		record.Memory = FromPtr(body.Memory)
 	}
 
-	if request.Body.Public != nil {
-		record.Public = FromPtr(request.Body.Public)
+	if body.Latest != nil {
+		record.Latest = FromPtr(body.Latest)
 	}
 
-	if err := a.builds.WithPrincipal(
+	if body.Recommended != nil {
+		record.Recommended = FromPtr(body.Recommended)
+	}
+
+	if body.Public != nil {
+		record.Public = FromPtr(body.Public)
+	}
+
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Create(
+	).Builds.Create(
 		ctx,
-		model.BuildParams{
-			PackID: request.PackId,
-		},
+		pack,
 		record,
 	); err != nil {
-		if errors.Is(err, packs.ErrNotFound) {
-			return CreateBuild404JSONResponse{
-				Message: ToPtr("Failed to find pack"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
 		if v, ok := err.(validate.Errors); ok {
 			errors := make([]Validation, 0)
 
@@ -256,189 +161,106 @@ func (a *API) CreateBuild(ctx context.Context, request CreateBuildRequestObject)
 				)
 			}
 
-			return CreateBuild422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate build"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return CreateBuild500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("action", "CreateBuild").
+			Msg("Failed to create build")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to create build"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	return CreateBuild200JSONResponse(
+	render.JSON(w, r, BuildResponse(
 		a.convertBuild(record),
-	), nil
+	))
 }
 
 // UpdateBuild implements the v1.ServerInterface.
-func (a *API) UpdateBuild(ctx context.Context, request UpdateBuildRequestObject) (UpdateBuildResponseObject, error) {
-	record, err := a.builds.WithPrincipal(
+func (a *API) UpdateBuild(w http.ResponseWriter, r *http.Request, _ PackID, _ BuildID) {
+	ctx := r.Context()
+	pack := a.PackFromContext(ctx)
+	record := a.BuildFromContext(ctx)
+	body := &UpdateBuildBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("build", record.ID).
+			Str("action", "UpdateBuild").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
+	}
+
+	if body.MinecraftID != nil {
+		record.MinecraftID = body.MinecraftID
+	}
+
+	if body.ForgeID != nil {
+		record.ForgeID = body.ForgeID
+	}
+
+	if body.NeoforgeID != nil {
+		record.NeoforgeID = body.NeoforgeID
+	}
+
+	if body.QuiltID != nil {
+		record.QuiltID = body.QuiltID
+	}
+
+	if body.FabricID != nil {
+		record.FabricID = body.FabricID
+	}
+
+	if body.Name != nil {
+		record.Name = FromPtr(body.Name)
+	}
+
+	if body.Java != nil {
+		record.Java = FromPtr(body.Java)
+	}
+
+	if body.Memory != nil {
+		record.Memory = FromPtr(body.Memory)
+	}
+
+	if body.Latest != nil {
+		record.Latest = FromPtr(body.Latest)
+	}
+
+	if body.Recommended != nil {
+		record.Recommended = FromPtr(body.Recommended)
+	}
+
+	if body.Public != nil {
+		record.Public = FromPtr(body.Public)
+	}
+
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
+	).Builds.Update(
 		ctx,
-		model.BuildParams{
-			PackID:  request.PackId,
-			BuildID: request.BuildId,
-		},
-	)
-
-	if err != nil {
-		if errors.Is(err, packs.ErrNotFound) {
-			return UpdateBuild404JSONResponse{
-				Message: ToPtr("Failed to find pack"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		if errors.Is(err, builds.ErrNotFound) {
-			return UpdateBuild404JSONResponse{
-				Message: ToPtr("Failed to find build"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return UpdateBuild500JSONResponse{
-			Message: ToPtr("Failed to load build"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	if request.Body.MinecraftId != nil {
-		ref, err := a.minecraft.Show(ctx, FromPtr(request.Body.MinecraftId))
-
-		if err != nil {
-			if errors.Is(err, minecraft.ErrNotFound) {
-				return UpdateBuild404JSONResponse{
-					Message: ToPtr("Failed to find minecraft"),
-					Status:  ToPtr(http.StatusNotFound),
-				}, nil
-			}
-
-			return UpdateBuild500JSONResponse{
-				Message: ToPtr("Failed to load minecraft"),
-				Status:  ToPtr(http.StatusInternalServerError),
-			}, nil
-		}
-
-		record.MinecraftID = ToPtr(ref.ID)
-	}
-
-	if request.Body.ForgeId != nil {
-		ref, err := a.forge.Show(ctx, FromPtr(request.Body.ForgeId))
-
-		if err != nil {
-			if errors.Is(err, forge.ErrNotFound) {
-				return UpdateBuild404JSONResponse{
-					Message: ToPtr("Failed to find forge"),
-					Status:  ToPtr(http.StatusNotFound),
-				}, nil
-			}
-
-			return UpdateBuild500JSONResponse{
-				Message: ToPtr("Failed to load forge"),
-				Status:  ToPtr(http.StatusInternalServerError),
-			}, nil
-		}
-
-		record.ForgeID = ToPtr(ref.ID)
-	}
-
-	if request.Body.NeoforgeId != nil {
-		ref, err := a.neoforge.Show(ctx, FromPtr(request.Body.NeoforgeId))
-
-		if err != nil {
-			if errors.Is(err, neoforge.ErrNotFound) {
-				return UpdateBuild404JSONResponse{
-					Message: ToPtr("Failed to find neoforge"),
-					Status:  ToPtr(http.StatusNotFound),
-				}, nil
-			}
-
-			return UpdateBuild500JSONResponse{
-				Message: ToPtr("Failed to load neoforge"),
-				Status:  ToPtr(http.StatusInternalServerError),
-			}, nil
-		}
-
-		record.NeoforgeID = ToPtr(ref.ID)
-	}
-
-	if request.Body.QuiltId != nil {
-		ref, err := a.quilt.Show(ctx, FromPtr(request.Body.QuiltId))
-
-		if err != nil {
-			if errors.Is(err, quilt.ErrNotFound) {
-				return UpdateBuild404JSONResponse{
-					Message: ToPtr("Failed to find quilt"),
-					Status:  ToPtr(http.StatusNotFound),
-				}, nil
-			}
-
-			return UpdateBuild500JSONResponse{
-				Message: ToPtr("Failed to load quilt"),
-				Status:  ToPtr(http.StatusInternalServerError),
-			}, nil
-		}
-
-		record.QuiltID = ToPtr(ref.ID)
-	}
-
-	if request.Body.FabricId != nil {
-		ref, err := a.fabric.Show(ctx, FromPtr(request.Body.FabricId))
-
-		if err != nil {
-			if errors.Is(err, fabric.ErrNotFound) {
-				return UpdateBuild404JSONResponse{
-					Message: ToPtr("Failed to find fabric"),
-					Status:  ToPtr(http.StatusNotFound),
-				}, nil
-			}
-
-			return UpdateBuild500JSONResponse{
-				Message: ToPtr("Failed to load fabric"),
-				Status:  ToPtr(http.StatusInternalServerError),
-			}, nil
-		}
-
-		record.FabricID = ToPtr(ref.ID)
-	}
-
-	if request.Body.Name != nil {
-		record.Name = FromPtr(request.Body.Name)
-	}
-
-	if request.Body.Java != nil {
-		record.Java = FromPtr(request.Body.Java)
-	}
-
-	if request.Body.Memory != nil {
-		record.Memory = FromPtr(request.Body.Memory)
-	}
-
-	if request.Body.Latest != nil {
-		record.Latest = FromPtr(request.Body.Latest)
-	}
-
-	if request.Body.Recommended != nil {
-		record.Recommended = FromPtr(request.Body.Recommended)
-	}
-
-	if request.Body.Public != nil {
-		record.Public = FromPtr(request.Body.Public)
-	}
-
-	if err := a.builds.WithPrincipal(
-		current.GetUser(ctx),
-	).Update(
-		ctx,
-		model.BuildParams{
-			PackID:  record.PackID,
-			BuildID: record.ID,
-		},
+		pack,
 		record,
 	); err != nil {
 		if v, ok := err.(validate.Errors); ok {
@@ -454,133 +276,105 @@ func (a *API) UpdateBuild(ctx context.Context, request UpdateBuildRequestObject)
 				)
 			}
 
-			return UpdateBuild422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate build"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return UpdateBuild500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("build", record.ID).
+			Str("action", "UpdateBuild").
+			Msg("Failed to update build")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to update build"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	return UpdateBuild200JSONResponse(
+	render.JSON(w, r, BuildResponse(
 		a.convertBuild(record),
-	), nil
+	))
 }
 
 // DeleteBuild implements the v1.ServerInterface.
-func (a *API) DeleteBuild(ctx context.Context, request DeleteBuildRequestObject) (DeleteBuildResponseObject, error) {
-	record, err := a.builds.WithPrincipal(
+func (a *API) DeleteBuild(w http.ResponseWriter, r *http.Request, _ PackID, _ BuildID) {
+	ctx := r.Context()
+	pack := a.PackFromContext(ctx)
+	record := a.BuildFromContext(ctx)
+
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
+	).Builds.Delete(
 		ctx,
-		model.BuildParams{
-			PackID:  request.PackId,
-			BuildID: request.BuildId,
-		},
-	)
-
-	if err != nil {
-		if errors.Is(err, packs.ErrNotFound) {
-			return DeleteBuild404JSONResponse{
-				Message: ToPtr("Failed to find pack"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		if errors.Is(err, builds.ErrNotFound) {
-			return DeleteBuild404JSONResponse{
-				Message: ToPtr("Failed to find build"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return DeleteBuild500JSONResponse{
-			Message: ToPtr("Failed to load build"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	if err := a.builds.WithPrincipal(
-		current.GetUser(ctx),
-	).Delete(
-		ctx,
-		model.BuildParams{
-			PackID:  record.PackID,
-			BuildID: record.ID,
-		},
+		pack,
+		record.ID,
 	); err != nil {
-		return DeleteBuild400JSONResponse{
-			Status:  ToPtr(http.StatusBadRequest),
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("build", record.ID).
+			Str("action", "DeleteBuild").
+			Msg("Failed to delete build")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to delete build"),
-		}, nil
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return DeleteBuild200JSONResponse{
-		Status:  ToPtr(http.StatusOK),
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully deleted build"),
-	}, nil
+		Status:  ToPtr(http.StatusOK),
+	})
 }
 
 // ListBuildVersions implements the v1.ServerInterface.
-func (a *API) ListBuildVersions(ctx context.Context, request ListBuildVersionsRequestObject) (ListBuildVersionsResponseObject, error) {
-	record, err := a.builds.WithPrincipal(
+func (a *API) ListBuildVersions(w http.ResponseWriter, r *http.Request, _ PackID, _ BuildID, params ListBuildVersionsParams) {
+	ctx := r.Context()
+	pack := a.PackFromContext(ctx)
+	record := a.BuildFromContext(ctx)
+	sort, order, limit, offset, search := listBuildVersionsSorting(params)
+
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
+	).Builds.ListVersions(
 		ctx,
-		model.BuildParams{
-			PackID:  request.PackId,
-			BuildID: request.BuildId,
+		pack,
+		record,
+		model.ListParams{
+			Sort:   sort,
+			Order:  order,
+			Limit:  limit,
+			Offset: offset,
+			Search: search,
 		},
 	)
 
 	if err != nil {
-		if errors.Is(err, packs.ErrNotFound) {
-			return ListBuildVersions404JSONResponse{
-				Message: ToPtr("Failed to find pack"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("build", record.ID).
+			Str("action", "ListBuildVersions").
+			Msg("Failed to load build versions")
 
-		if errors.Is(err, builds.ErrNotFound) {
-			return ListBuildVersions404JSONResponse{
-				Message: ToPtr("Failed to find build"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ListBuildVersions500JSONResponse{
-			Message: ToPtr("Failed to load build"),
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load build versions"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
+		})
 
-	records, count, err := a.buildversions.WithPrincipal(
-		current.GetUser(ctx),
-	).List(
-		ctx,
-		model.BuildVersionParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
-			PackID:  record.PackID,
-			BuildID: record.ID,
-		},
-	)
-
-	if err != nil {
-		return ListBuildVersions500JSONResponse{
-			Message: ToPtr("Failed to load versions"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		return
 	}
 
 	payload := make([]BuildVersion, len(records))
@@ -588,95 +382,211 @@ func (a *API) ListBuildVersions(ctx context.Context, request ListBuildVersionsRe
 		payload[id] = a.convertBuildVersion(record)
 	}
 
-	return ListBuildVersions200JSONResponse{
-		Total:    ToPtr(count),
-		Pack:     ToPtr(a.convertPack(record.Pack)),
+	render.JSON(w, r, BuildVersionsResponse{
+		Total:    count,
+		Limit:    limit,
+		Offset:   offset,
+		Pack:     ToPtr(a.convertPack(pack)),
 		Build:    ToPtr(a.convertBuild(record)),
-		Versions: ToPtr(payload),
-	}, nil
+		Versions: payload,
+	})
 }
 
 // AttachBuildToVersion implements the v1.ServerInterface.
-func (a *API) AttachBuildToVersion(ctx context.Context, request AttachBuildToVersionRequestObject) (AttachBuildToVersionResponseObject, error) {
-	if err := a.buildversions.WithPrincipal(
-		current.GetUser(ctx),
-	).Attach(
-		ctx,
-		model.BuildVersionParams{
-			PackID:    request.PackId,
-			BuildID:   request.BuildId,
-			ModID:     request.Body.Mod,
-			VersionID: request.Body.Version,
-		},
-	); err != nil {
-		if errors.Is(err, buildversions.ErrNotFound) {
-			return AttachBuildToVersion404JSONResponse{
-				Message: ToPtr("Failed to find build or version"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+func (a *API) AttachBuildToVersion(w http.ResponseWriter, r *http.Request, _ PackID, _ BuildID) {
+	ctx := r.Context()
+	pack := a.PackFromContext(ctx)
+	record := a.BuildFromContext(ctx)
+	body := &BuildVersionBody{}
 
-		if errors.Is(err, buildversions.ErrAlreadyAssigned) {
-			return AttachBuildToVersion412JSONResponse{
-				Message: ToPtr("Version is already attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("build", record.ID).
+			Str("action", "AttachBuildToVersion").
+			Msg("Failed to decode request body")
 
-		return AttachBuildToVersion500JSONResponse{
-			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to attach build to version"),
-		}, nil
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return AttachBuildToVersion200JSONResponse{
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Builds.AttachVersion(
+		ctx,
+		pack,
+		record,
+		model.BuildVersionParams{
+			ModID:     body.Mod,
+			VersionID: body.Version,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrVersionNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find version"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrAlreadyAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Version is already attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("build", record.ID).
+			Str("mod", body.Mod).
+			Str("version", body.Version).
+			Str("action", "AttachBuildToVersion").
+			Msg("Failed to attach build to version")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to attach build to version"),
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully attached build to version"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // DeleteBuildFromVersion implements the v1.ServerInterface.
-func (a *API) DeleteBuildFromVersion(ctx context.Context, request DeleteBuildFromVersionRequestObject) (DeleteBuildFromVersionResponseObject, error) {
-	if err := a.buildversions.WithPrincipal(
-		current.GetUser(ctx),
-	).Drop(
-		ctx,
-		model.BuildVersionParams{
-			PackID:    request.PackId,
-			BuildID:   request.BuildId,
-			ModID:     request.Body.Mod,
-			VersionID: request.Body.Version,
-		},
-	); err != nil {
-		if errors.Is(err, buildversions.ErrNotFound) {
-			return DeleteBuildFromVersion404JSONResponse{
-				Message: ToPtr("Failed to find build or version"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
+func (a *API) DeleteBuildFromVersion(w http.ResponseWriter, r *http.Request, _ PackID, _ BuildID) {
+	ctx := r.Context()
+	pack := a.PackFromContext(ctx)
+	record := a.BuildFromContext(ctx)
+	body := &BuildVersionBody{}
 
-		if errors.Is(err, buildversions.ErrNotAssigned) {
-			return DeleteBuildFromVersion412JSONResponse{
-				Message: ToPtr("Version is not attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("build", record.ID).
+			Str("action", "DeleteBuildFromVersion").
+			Msg("Failed to decode request body")
 
-		return DeleteBuildFromVersion500JSONResponse{
-			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to drop build from version"),
-		}, nil
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return DeleteBuildFromVersion200JSONResponse{
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Builds.DropVersion(
+		ctx,
+		pack,
+		record,
+		model.BuildVersionParams{
+			ModID:     body.Mod,
+			VersionID: body.Version,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrVersionNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find version"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Version is not attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("pack", pack.ID).
+			Str("build", record.ID).
+			Str("mod", body.Mod).
+			Str("version", body.Version).
+			Str("action", "DeleteBuildFromVersion").
+			Msg("Failed to drop build from version")
+
+		a.RenderNotify(w, r, Notification{
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+			Message: ToPtr("Failed to drop build from version"),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully dropped build from version"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
+}
+
+// AllowCreateBuild defines a middleware to check permissions.
+func (a *API) AllowCreateBuild(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// AllowShowBuild defines a middleware to check permissions.
+func (a *API) AllowShowBuild(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// AllowManageBuild defines a middleware to check permissions.
+func (a *API) AllowManageBuild(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func (a *API) convertBuild(record *model.Build) Build {
 	result := Build{
-		Id:        ToPtr(record.ID),
+		ID:        ToPtr(record.ID),
 		Name:      ToPtr(record.Name),
 		Java:      ToPtr(record.Java),
 		Memory:    ToPtr(record.Memory),
@@ -690,48 +600,75 @@ func (a *API) convertBuild(record *model.Build) Build {
 	}
 
 	if record.MinecraftID != nil {
-		result.MinecraftId = record.MinecraftID
+		result.MinecraftID = record.MinecraftID
 		result.Minecraft = ToPtr(a.convertMinecraft(record.Minecraft))
 	}
 
 	if record.ForgeID != nil {
-		result.ForgeId = record.ForgeID
+		result.ForgeID = record.ForgeID
 		result.Forge = ToPtr(a.convertForge(record.Forge))
 	}
 
 	if record.NeoforgeID != nil {
-		result.NeoforgeId = record.NeoforgeID
+		result.NeoforgeID = record.NeoforgeID
 		result.Neoforge = ToPtr(a.convertNeoforge(record.Neoforge))
 	}
 
 	if record.QuiltID != nil {
-		result.QuiltId = record.QuiltID
+		result.QuiltID = record.QuiltID
 		result.Quilt = ToPtr(a.convertQuilt(record.Quilt))
 	}
 
 	if record.FabricID != nil {
-		result.FabricId = record.FabricID
+		result.FabricID = record.FabricID
 		result.Fabric = ToPtr(a.convertFabric(record.Fabric))
 	}
 
 	return result
 }
 
-func (a *API) convertBuildWithPack(record *model.Build) Build {
-	result := a.convertBuild(record)
-	result.Pack = ToPtr(a.convertPack(record.Pack))
-
-	return result
-}
-
 func (a *API) convertBuildVersion(record *model.BuildVersion) BuildVersion {
 	result := BuildVersion{
-		BuildId:   record.BuildID,
-		VersionId: record.VersionID,
+		BuildID:   record.BuildID,
+		VersionID: record.VersionID,
 		Version:   ToPtr(a.convertVersion(record.Version)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
 
 	return result
+}
+
+func listBuildsSorting(request ListBuildsParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
+}
+
+func listBuildVersionsSorting(request ListBuildVersionsParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
 }

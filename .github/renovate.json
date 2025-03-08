@@ -2,16 +2,5 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "github>kleister/.github//renovate/preset"
-  ],
-  "packageRules": [
-    {
-      "matchManagers": [
-        "gomod"
-      ],
-      "matchDepTypes": [
-        "golang"
-      ],
-      "enabled": false
-    }
   ]
 }

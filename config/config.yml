@@ -3,8 +3,10 @@ server:
   addr: 0.0.0.0:8080
   host: http://localhost:8080
   root: "/"
+  frontend: http://localhost:8081
   cert: ~
   key: ~
+  templates: ~
   docs: true
 
 metrics:
@@ -16,6 +18,10 @@ logs:
   level: info
   pretty: true
   color: true
+
+cleanup:
+  enabled: true
+  interval: 30m
 
 auth:
   config: ~
@@ -38,16 +44,16 @@ upload:
   bucket: ~
   region: us-east-1
   perms: "0755"
+  pathstyle: false
+  proxy: true
 
-session:
-  name: kleister
+token:
   secret: TxHrYxMAg01rBeEWrHn1BjOP
-  expire: 24h0m0s
-  secure: false
+  expire: 1h0m0s
 
 scim:
   enabled: false
-  token:
+  token: ~
 
 admin:
   create: true

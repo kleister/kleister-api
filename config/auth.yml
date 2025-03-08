@@ -1,5 +1,16 @@
 ---
 providers:
+  - driver: entraid
+    name: entraid
+    display: Sign in with EntraID
+    icon: fa-brands fa-microsoft
+    callback: http://localhost:8080/api/v1/auth/entraid/callback
+    client_id: your-client-id # altneratively file://path/to/client_id
+    client_secret: your-client-secret # altneratively file://path/to/client_secret
+    admins:
+      emails:
+        - *@webhippie.de
+
   - driver: google
     name: google
     display: Sign in with Google
@@ -7,19 +18,6 @@ providers:
     callback: http://localhost:8080/api/v1/auth/google/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes: []
-    admins:
-      emails:
-        - *@webhippie.de
-
-  - driver: azuread
-    name: azuread
-    display: Sign in with EntraID
-    icon: fa-brands fa-microsoft
-    callback: http://localhost:8080/api/v1/auth/azuread/callback
-    client_id: your-client-id # altneratively file://path/to/client_id
-    client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes: []
     admins:
       emails:
         - *@webhippie.de
@@ -31,9 +29,6 @@ providers:
     callback: http://localhost:8080/api/v1/auth/github/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes:
-      - read:user
-      - user:email
     endpoints:
       auth: https://github.com/login/oauth/authorize
       token: https://github.com/login/oauth/access_token
@@ -50,7 +45,6 @@ providers:
     callback: http://localhost:8080/api/v1/auth/gitea/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes: []
     endpoints:
       auth: https://gitea.com/login/oauth/authorize
       token: https://gitea.com/login/oauth/access_token
@@ -66,7 +60,6 @@ providers:
     callback: http://localhost:8080/api/v1/auth/gitlab/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes: []
     endpoints:
       auth: https://gitlab.com/oauth/authorize
       token: https://gitlab.com/oauth/token
@@ -82,9 +75,8 @@ providers:
     callback: http://localhost:8080/api/v1/auth/keycloak/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes: []
     endpoints:
-      discovery: http://keycloak.example.com/auth/realms/example/.well-known/openid-configuration
+      discovery: http://keycloak.example.com/auth/realms/example/
     mappings:
       login: preferred_username
       name: name
@@ -101,10 +93,6 @@ providers:
     callback: http://localhost:8080/api/v1/auth/authentik/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes:
-      - openid
-      - email
-      - profile
     endpoints:
       discovery: https://authentik.example.com/application/o/kleister/
     mappings:
@@ -123,9 +111,8 @@ providers:
     callback: http://localhost:8080/api/v1/auth/kanidm/callback
     client_id: your-client-id # altneratively file://path/to/client_id
     client_secret: your-client-secret # altneratively file://path/to/client_secret
-    scopes: []
     endpoints:
-      discovery: https://kanidm.example.com/oauth2/openid/kleister/.well-known/openid-configuration
+      discovery: https://kanidm.example.com/oauth2/openid/kleister/
     mappings:
       login: preferred_username
       name: name

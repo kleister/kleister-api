@@ -1,38 +1,49 @@
 package v1
 
 import (
-	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 
+	"github.com/go-chi/render"
 	"github.com/kleister/kleister-api/pkg/middleware/current"
 	"github.com/kleister/kleister-api/pkg/model"
-	"github.com/kleister/kleister-api/pkg/service/mods"
-	teammods "github.com/kleister/kleister-api/pkg/service/team_mods"
-	usermods "github.com/kleister/kleister-api/pkg/service/user_mods"
+	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/kleister/kleister-api/pkg/validate"
+	"github.com/rs/zerolog/log"
 )
 
 // ListMods implements the v1.ServerInterface.
-func (a *API) ListMods(ctx context.Context, request ListModsRequestObject) (ListModsResponseObject, error) {
-	records, count, err := a.mods.WithPrincipal(
+func (a *API) ListMods(w http.ResponseWriter, r *http.Request, params ListModsParams) {
+	ctx := r.Context()
+	sort, order, limit, offset, search := listModsSorting(params)
+
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).List(
+	).Mods.List(
 		ctx,
-		toListParams(
-			string(FromPtr(request.Params.Sort)),
-			string(FromPtr(request.Params.Order)),
-			request.Params.Limit,
-			request.Params.Offset,
-			request.Params.Search,
-		),
+		model.ListParams{
+			Sort:   sort,
+			Order:  order,
+			Limit:  limit,
+			Offset: offset,
+			Search: search,
+		},
 	)
 
 	if err != nil {
-		return ListMods500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("action", "ListMods").
+			Msg("Failed to load mods")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to load mods"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
 	payload := make([]Mod, len(records))
@@ -40,79 +51,80 @@ func (a *API) ListMods(ctx context.Context, request ListModsRequestObject) (List
 		payload[id] = a.convertMod(record)
 	}
 
-	return ListMods200JSONResponse{
-		Total: ToPtr(count),
-		Mods:  ToPtr(payload),
-	}, nil
+	render.JSON(w, r, ModsResponse{
+		Total:  count,
+		Limit:  limit,
+		Offset: offset,
+		Mods:   payload,
+	})
 }
 
 // ShowMod implements the v1.ServerInterface.
-func (a *API) ShowMod(ctx context.Context, request ShowModRequestObject) (ShowModResponseObject, error) {
-	record, err := a.mods.WithPrincipal(
-		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.ModId,
-	)
+func (a *API) ShowMod(w http.ResponseWriter, r *http.Request, _ ModID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
 
-	if err != nil {
-		if errors.Is(err, mods.ErrNotFound) {
-			return ShowMod404JSONResponse{
-				Message: ToPtr("Failed to find mod"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ShowMod500JSONResponse{
-			Message: ToPtr("Failed to load mod"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	return ShowMod200JSONResponse(
+	render.JSON(w, r, ModResponse(
 		a.convertMod(record),
-	), nil
+	))
 }
 
 // CreateMod implements the v1.ServerInterface.
-func (a *API) CreateMod(ctx context.Context, request CreateModRequestObject) (CreateModResponseObject, error) {
+func (a *API) CreateMod(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	body := &CreateModBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("action", "CreateMod").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
+	}
+
 	record := &model.Mod{}
 
-	if request.Body.Slug != nil {
-		record.Slug = FromPtr(request.Body.Slug)
+	if body.Slug != nil {
+		record.Slug = FromPtr(body.Slug)
 	}
 
-	if request.Body.Name != nil {
-		record.Name = FromPtr(request.Body.Name)
+	if body.Name != nil {
+		record.Name = FromPtr(body.Name)
 	}
 
-	if request.Body.Side != nil {
-		record.Side = FromPtr(request.Body.Side)
+	if body.Side != nil {
+		record.Side = FromPtr(body.Side)
 	}
 
-	if request.Body.Description != nil {
-		record.Description = FromPtr(request.Body.Description)
+	if body.Description != nil {
+		record.Description = FromPtr(body.Description)
 	}
 
-	if request.Body.Author != nil {
-		record.Author = FromPtr(request.Body.Author)
+	if body.Author != nil {
+		record.Author = FromPtr(body.Author)
 	}
 
-	if request.Body.Website != nil {
-		record.Website = FromPtr(request.Body.Website)
+	if body.Website != nil {
+		record.Website = FromPtr(body.Website)
 	}
 
-	if request.Body.Donate != nil {
-		record.Donate = FromPtr(request.Body.Donate)
+	if body.Donate != nil {
+		record.Donate = FromPtr(body.Donate)
 	}
 
-	if request.Body.Public != nil {
-		record.Public = FromPtr(request.Body.Public)
+	if body.Public != nil {
+		record.Public = FromPtr(body.Public)
 	}
 
-	if err := a.mods.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Create(
+	).Mods.Create(
 		ctx,
 		record,
 	); err != nil {
@@ -129,82 +141,89 @@ func (a *API) CreateMod(ctx context.Context, request CreateModRequestObject) (Cr
 				)
 			}
 
-			return CreateMod422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate mod"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return CreateMod500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("action", "CreateMod").
+			Msg("Failed to create mod")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to create mod"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	return CreateMod200JSONResponse(
+	render.JSON(w, r, ModResponse(
 		a.convertMod(record),
-	), nil
+	))
 }
 
 // UpdateMod implements the v1.ServerInterface.
-func (a *API) UpdateMod(ctx context.Context, request UpdateModRequestObject) (UpdateModResponseObject, error) {
-	record, err := a.mods.WithPrincipal(
+func (a *API) UpdateMod(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+	body := &UpdateModBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "UpdateMod").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
+	}
+
+	if body.Slug != nil {
+		record.Slug = FromPtr(body.Slug)
+	}
+
+	if body.Name != nil {
+		record.Name = FromPtr(body.Name)
+	}
+
+	if body.Side != nil {
+		record.Side = FromPtr(body.Side)
+	}
+
+	if body.Description != nil {
+		record.Description = FromPtr(body.Description)
+	}
+
+	if body.Author != nil {
+		record.Author = FromPtr(body.Author)
+	}
+
+	if body.Website != nil {
+		record.Website = FromPtr(body.Website)
+	}
+
+	if body.Donate != nil {
+		record.Donate = FromPtr(body.Donate)
+	}
+
+	if body.Public != nil {
+		record.Public = FromPtr(body.Public)
+	}
+
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.ModId,
-	)
-
-	if err != nil {
-		if errors.Is(err, mods.ErrNotFound) {
-			return UpdateMod404JSONResponse{
-				Message: ToPtr("Failed to find mod"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return UpdateMod500JSONResponse{
-			Message: ToPtr("Failed to load mod"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	if request.Body.Slug != nil {
-		record.Slug = FromPtr(request.Body.Slug)
-	}
-
-	if request.Body.Name != nil {
-		record.Name = FromPtr(request.Body.Name)
-	}
-
-	if request.Body.Side != nil {
-		record.Side = FromPtr(request.Body.Side)
-	}
-
-	if request.Body.Description != nil {
-		record.Description = FromPtr(request.Body.Description)
-	}
-
-	if request.Body.Author != nil {
-		record.Author = FromPtr(request.Body.Author)
-	}
-
-	if request.Body.Website != nil {
-		record.Website = FromPtr(request.Body.Website)
-	}
-
-	if request.Body.Donate != nil {
-		record.Donate = FromPtr(request.Body.Donate)
-	}
-
-	if request.Body.Public != nil {
-		record.Public = FromPtr(request.Body.Public)
-	}
-
-	if err := a.mods.WithPrincipal(
-		current.GetUser(ctx),
-	).Update(
+	).Mods.Update(
 		ctx,
 		record,
 	); err != nil {
@@ -221,161 +240,287 @@ func (a *API) UpdateMod(ctx context.Context, request UpdateModRequestObject) (Up
 				)
 			}
 
-			return UpdateMod422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate mod"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return UpdateMod500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "UpdateMod").
+			Msg("Failed to update mod")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to update mod"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	return UpdateMod200JSONResponse(
+	render.JSON(w, r, ModResponse(
 		a.convertMod(record),
-	), nil
+	))
 }
 
 // DeleteMod implements the v1.ServerInterface.
-func (a *API) DeleteMod(ctx context.Context, request DeleteModRequestObject) (DeleteModResponseObject, error) {
-	record, err := a.mods.WithPrincipal(
+func (a *API) DeleteMod(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.ModId,
-	)
-
-	if err != nil {
-		if errors.Is(err, mods.ErrNotFound) {
-			return DeleteMod404JSONResponse{
-				Message: ToPtr("Failed to find mod"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return DeleteMod500JSONResponse{
-			Message: ToPtr("Failed to load mod"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	if err := a.mods.WithPrincipal(
-		current.GetUser(ctx),
-	).Delete(
+	).Mods.Delete(
 		ctx,
 		record.ID,
 	); err != nil {
-		return DeleteMod400JSONResponse{
-			Status:  ToPtr(http.StatusBadRequest),
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "DeleteMod").
+			Msg("Failed to delete mod")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to delete mod"),
-		}, nil
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return DeleteMod200JSONResponse{
-		Status:  ToPtr(http.StatusOK),
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully deleted mod"),
-	}, nil
+		Status:  ToPtr(http.StatusOK),
+	})
 }
 
-// ListModTeams implements the v1.ServerInterface.
-func (a *API) ListModTeams(ctx context.Context, request ListModTeamsRequestObject) (ListModTeamsResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return ListModTeams403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+// CreateModAvatar implements the v1.ServerInterface.
+func (a *API) CreateModAvatar(w http.ResponseWriter, r *http.Request, _ ModID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+
+	if err := r.ParseMultipartForm(5 << 20); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "CreateModAvatar").
+			Msg("Failed to parse multipart")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to parse multipart"),
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+		})
+
+		return
 	}
 
-	record, err := a.mods.WithPrincipal(
+	file, meta, err := r.FormFile("file")
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "CreateModAvatar").
+			Msg("Failed to load avatar")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load avatar"),
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+		})
+
+		return
+	}
+
+	defer file.Close()
+	buffer, err := a.resizeAvatar(file, meta)
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "CreateModAvatar").
+			Msg("Failed resize avatar")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed resize avatar"),
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+		})
+
+		return
+	}
+
+	avatar, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
+	).Mods.CreateAvatar(
 		ctx,
-		request.ModId,
+		record.ID,
+		buffer,
 	)
 
 	if err != nil {
-		if errors.Is(err, mods.ErrNotFound) {
-			return ListModTeams404JSONResponse{
-				Message: ToPtr("Failed to find mod"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "CreateModAvatar").
+			Msg("Failed store avatar")
 
-		return ListModTeams500JSONResponse{
-			Message: ToPtr("Failed to load mod"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to store avatar"),
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+		})
+
+		return
 	}
 
-	records, count, err := a.teammods.WithPrincipal(
+	render.JSON(w, r, ModAvatarResponse(
+		a.convertModAvatar(avatar),
+	))
+}
+
+// DeleteModAvatar implements the v1.ServerInterface.
+func (a *API) DeleteModAvatar(w http.ResponseWriter, r *http.Request, _ ModID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+
+	avatar, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).List(
+	).Mods.DeleteAvatar(
 		ctx,
-		model.TeamModParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
+		record.ID,
+	)
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "DeleteModAvatar").
+			Msg("Failed to delete mod avatar")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to delete mod avatar"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
+	}
+
+	render.JSON(w, r, ModAvatarResponse(
+		a.convertModAvatar(avatar),
+	))
+}
+
+// ListModGroups implements the v1.ServerInterface.
+func (a *API) ListModGroups(w http.ResponseWriter, r *http.Request, _ UserID, params ListModGroupsParams) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+	sort, order, limit, offset, search := listModGroupsSorting(params)
+
+	records, count, err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Mods.ListGroups(
+		ctx,
+		model.GroupModParams{
+			ListParams: model.ListParams{
+				Sort:   sort,
+				Order:  order,
+				Limit:  limit,
+				Offset: offset,
+				Search: search,
+			},
 			ModID: record.ID,
 		},
 	)
 
 	if err != nil {
-		return ListModTeams500JSONResponse{
-			Message: ToPtr("Failed to load teams"),
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "ListModGroups").
+			Msg("Failed to load mod groups")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load mod groups"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	payload := make([]TeamMod, len(records))
+	payload := make([]GroupMod, len(records))
 	for id, record := range records {
-		payload[id] = a.convertModTeam(record)
+		payload[id] = a.convertModGroup(record)
 	}
 
-	return ListModTeams200JSONResponse{
-		Total: ToPtr(count),
-		Mod:   ToPtr(a.convertMod(record)),
-		Teams: ToPtr(payload),
-	}, nil
+	render.JSON(w, r, ModGroupsResponse{
+		Total:  count,
+		Limit:  limit,
+		Offset: offset,
+		Mod:    ToPtr(a.convertMod(record)),
+		Groups: payload,
+	})
 }
 
-// AttachModToTeam implements the v1.ServerInterface.
-func (a *API) AttachModToTeam(ctx context.Context, request AttachModToTeamRequestObject) (AttachModToTeamResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return AttachModToTeam403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+// AttachModToGroup implements the v1.ServerInterface.
+func (a *API) AttachModToGroup(w http.ResponseWriter, r *http.Request, _ ModID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+	body := &ModGroupPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "AttachModToGroup").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.teammods.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Attach(
+	).Mods.AttachGroup(
 		ctx,
-		model.TeamModParams{
-			ModID:  request.ModId,
-			TeamID: request.Body.Team,
-			Perm:   string(FromPtr(request.Body.Perm)),
+		model.GroupModParams{
+			ModID:   record.ID,
+			GroupID: body.Group,
+			Perm:    body.Perm,
 		},
 	); err != nil {
-		if errors.Is(err, teammods.ErrNotFound) {
-			return AttachModToTeam404JSONResponse{
-				Message: ToPtr("Failed to find mod or team"),
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
 				Status:  ToPtr(http.StatusNotFound),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, teammods.ErrAlreadyAssigned) {
-			return AttachModToTeam412JSONResponse{
-				Message: ToPtr("Team is already attached"),
+		if errors.Is(err, store.ErrGroupNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find group"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrAlreadyAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Group is already attached"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
 		if v, ok := err.(validate.Errors); ok {
@@ -391,56 +536,92 @@ func (a *API) AttachModToTeam(ctx context.Context, request AttachModToTeamReques
 				)
 			}
 
-			return AttachModToTeam422JSONResponse{
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to validate mod group"),
 				Status:  ToPtr(http.StatusUnprocessableEntity),
-				Message: ToPtr("Failed to validate mod team"),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return AttachModToTeam500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("group", body.Group).
+			Str("action", "AttachModToGroup").
+			Msg("Failed to attach user to group")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to attach mod to group"),
 			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to attach mod to team"),
-		}, nil
+		})
+
+		return
 	}
 
-	return AttachModToTeam200JSONResponse{
-		Message: ToPtr("Successfully attached mod to team"),
+	a.RenderNotify(w, r, Notification{
+		Message: ToPtr("Successfully attached mod to group"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
-// PermitModTeam implements the v1.ServerInterface.
-func (a *API) PermitModTeam(ctx context.Context, request PermitModTeamRequestObject) (PermitModTeamResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return PermitModTeam403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+// PermitModGroup implements the v1.ServerInterface.
+func (a *API) PermitModGroup(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+	body := &ModGroupPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "PermitModGroup").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.teammods.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Permit(
+	).Mods.PermitGroup(
 		ctx,
-		model.TeamModParams{
-			ModID:  request.ModId,
-			TeamID: request.Body.Team,
-			Perm:   string(FromPtr(request.Body.Perm)),
+		model.GroupModParams{
+			ModID:   record.ID,
+			GroupID: body.Group,
+			Perm:    body.Perm,
 		},
 	); err != nil {
-		if errors.Is(err, teammods.ErrNotFound) {
-			return PermitModTeam404JSONResponse{
-				Message: ToPtr("Failed to find mod or team"),
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
 				Status:  ToPtr(http.StatusNotFound),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, teammods.ErrNotAssigned) {
-			return PermitModTeam412JSONResponse{
-				Message: ToPtr("Team is not attached"),
+		if errors.Is(err, store.ErrGroupNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find group"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Group is not attached"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
 		if v, ok := err.(validate.Errors); ok {
@@ -456,120 +637,149 @@ func (a *API) PermitModTeam(ctx context.Context, request PermitModTeamRequestObj
 				)
 			}
 
-			return PermitModTeam422JSONResponse{
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to validate mod group"),
 				Status:  ToPtr(http.StatusUnprocessableEntity),
-				Message: ToPtr("Failed to validate mod team"),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return PermitModTeam500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("group", body.Group).
+			Str("action", "PermitModGroup").
+			Msg("Failed to update mod group perms")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to update mod group perms"),
 			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to update mod team perms"),
-		}, nil
+		})
+
+		return
 	}
 
-	return PermitModTeam200JSONResponse{
-		Message: ToPtr("Successfully updated mod team perms"),
+	a.RenderNotify(w, r, Notification{
+		Message: ToPtr("Successfully updated mod group perms"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
-// DeleteModFromTeam implements the v1.ServerInterface.
-func (a *API) DeleteModFromTeam(ctx context.Context, request DeleteModFromTeamRequestObject) (DeleteModFromTeamResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return DeleteModFromTeam403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+// DeleteModFromGroup implements the v1.ServerInterface.
+func (a *API) DeleteModFromGroup(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+	body := &ModGroupPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "DeleteModFromGroup").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.teammods.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Drop(
+	).Mods.DropGroup(
 		ctx,
-		model.TeamModParams{
-			ModID:  request.ModId,
-			TeamID: request.Body.Team,
+		model.GroupModParams{
+			ModID:   record.ID,
+			GroupID: body.Group,
 		},
 	); err != nil {
-		if errors.Is(err, teammods.ErrNotFound) {
-			return DeleteModFromTeam404JSONResponse{
-				Message: ToPtr("Failed to find mod or team"),
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, teammods.ErrNotAssigned) {
-			return DeleteModFromTeam412JSONResponse{
-				Message: ToPtr("Team is not attached"),
+		if errors.Is(err, store.ErrGroupNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find group"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
-		return DeleteModFromTeam500JSONResponse{
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Group is not attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("group", body.Group).
+			Str("action", "DeleteModFromGroup").
+			Msg("Failed to drop mod from group")
+
+		a.RenderNotify(w, r, Notification{
 			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to drop mod from team"),
-		}, nil
+			Message: ToPtr("Failed to drop mod from group"),
+		})
+
+		return
 	}
 
-	return DeleteModFromTeam200JSONResponse{
-		Message: ToPtr("Successfully dropped mod from team"),
+	a.RenderNotify(w, r, Notification{
+		Message: ToPtr("Successfully dropped mod from group"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // ListModUsers implements the v1.ServerInterface.
-func (a *API) ListModUsers(ctx context.Context, request ListModUsersRequestObject) (ListModUsersResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return ListModUsers403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
+func (a *API) ListModUsers(w http.ResponseWriter, r *http.Request, _ UserID, params ListModUsersParams) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+	sort, order, limit, offset, search := listModUsersSorting(params)
 
-	record, err := a.mods.WithPrincipal(
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.ModId,
-	)
-
-	if err != nil {
-		if errors.Is(err, mods.ErrNotFound) {
-			return ListModUsers404JSONResponse{
-				Message: ToPtr("Failed to find mod"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ListModUsers500JSONResponse{
-			Message: ToPtr("Failed to load mod"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	records, count, err := a.usermods.WithPrincipal(
-		current.GetUser(ctx),
-	).List(
+	).Mods.ListUsers(
 		ctx,
 		model.UserModParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
+			ListParams: model.ListParams{
+				Sort:   sort,
+				Order:  order,
+				Limit:  limit,
+				Offset: offset,
+				Search: search,
+			},
 			ModID: record.ID,
 		},
 	)
 
 	if err != nil {
-		return ListModUsers500JSONResponse{
-			Message: ToPtr("Failed to load users"),
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "ListModUsers").
+			Msg("Failed to load mod users")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load mod users"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
 	payload := make([]UserMod, len(records))
@@ -577,44 +787,71 @@ func (a *API) ListModUsers(ctx context.Context, request ListModUsersRequestObjec
 		payload[id] = a.convertModUser(record)
 	}
 
-	return ListModUsers200JSONResponse{
-		Total: ToPtr(count),
-		Mod:   ToPtr(a.convertMod(record)),
-		Users: ToPtr(payload),
-	}, nil
+	render.JSON(w, r, ModUsersResponse{
+		Total:  count,
+		Limit:  limit,
+		Offset: offset,
+		Mod:    ToPtr(a.convertMod(record)),
+		Users:  payload,
+	})
 }
 
 // AttachModToUser implements the v1.ServerInterface.
-func (a *API) AttachModToUser(ctx context.Context, request AttachModToUserRequestObject) (AttachModToUserResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return AttachModToUser403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+func (a *API) AttachModToUser(w http.ResponseWriter, r *http.Request, _ ModID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+	body := &ModUserPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "AttachModToUser").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.usermods.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Attach(
+	).Mods.AttachUser(
 		ctx,
 		model.UserModParams{
-			ModID:  request.ModId,
-			UserID: request.Body.User,
-			Perm:   string(FromPtr(request.Body.Perm)),
+			ModID:  record.ID,
+			UserID: body.User,
+			Perm:   body.Perm,
 		},
 	); err != nil {
-		if errors.Is(err, usermods.ErrNotFound) {
-			return AttachModToUser404JSONResponse{
-				Message: ToPtr("Failed to find mod or user"),
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
 				Status:  ToPtr(http.StatusNotFound),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, usermods.ErrAlreadyAssigned) {
-			return AttachModToUser412JSONResponse{
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrAlreadyAssigned) {
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("User is already attached"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
 		if v, ok := err.(validate.Errors); ok {
@@ -630,56 +867,92 @@ func (a *API) AttachModToUser(ctx context.Context, request AttachModToUserReques
 				)
 			}
 
-			return AttachModToUser422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate mod user"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return AttachModToUser500JSONResponse{
-			Status:  ToPtr(http.StatusUnprocessableEntity),
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("user", body.User).
+			Str("action", "AttachModToUser").
+			Msg("Failed to attach user to user")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to attach mod to user"),
-		}, nil
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+		})
+
+		return
 	}
 
-	return AttachModToUser200JSONResponse{
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully attached mod to user"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // PermitModUser implements the v1.ServerInterface.
-func (a *API) PermitModUser(ctx context.Context, request PermitModUserRequestObject) (PermitModUserResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return PermitModUser403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+func (a *API) PermitModUser(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+	body := &ModUserPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "PermitModUser").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.usermods.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Permit(
+	).Mods.PermitUser(
 		ctx,
 		model.UserModParams{
-			ModID:  request.ModId,
-			UserID: request.Body.User,
-			Perm:   string(FromPtr(request.Body.Perm)),
+			ModID:  record.ID,
+			UserID: body.User,
+			Perm:   body.Perm,
 		},
 	); err != nil {
-		if errors.Is(err, usermods.ErrNotFound) {
-			return PermitModUser404JSONResponse{
-				Message: ToPtr("Failed to find mod or user"),
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
 				Status:  ToPtr(http.StatusNotFound),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, usermods.ErrNotAssigned) {
-			return PermitModUser412JSONResponse{
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("User is not attached"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
 		if v, ok := err.(validate.Errors); ok {
@@ -695,72 +968,141 @@ func (a *API) PermitModUser(ctx context.Context, request PermitModUserRequestObj
 				)
 			}
 
-			return PermitModUser422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate mod user"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return PermitModUser500JSONResponse{
-			Status:  ToPtr(http.StatusUnprocessableEntity),
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("user", body.User).
+			Str("action", "PermitModUser").
+			Msg("Failed to update mod user perms")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to update mod user perms"),
-		}, nil
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+		})
+
+		return
 	}
 
-	return PermitModUser200JSONResponse{
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully updated mod user perms"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // DeleteModFromUser implements the v1.ServerInterface.
-func (a *API) DeleteModFromUser(ctx context.Context, request DeleteModFromUserRequestObject) (DeleteModFromUserResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return DeleteModFromUser403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
+func (a *API) DeleteModFromUser(w http.ResponseWriter, r *http.Request, _ UserID) {
+	ctx := r.Context()
+	record := a.ModFromContext(ctx)
+	body := &ModUserPermBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("action", "DeleteModFromUser").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if err := a.usermods.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Drop(
+	).Mods.DropUser(
 		ctx,
 		model.UserModParams{
-			ModID:  request.ModId,
-			UserID: request.Body.User,
+			ModID:  record.ID,
+			UserID: body.User,
 		},
 	); err != nil {
-		if errors.Is(err, usermods.ErrNotFound) {
-			return DeleteModFromUser404JSONResponse{
-				Message: ToPtr("Failed to find mod or user"),
+		if errors.Is(err, store.ErrModNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find mod"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
-		if errors.Is(err, usermods.ErrNotAssigned) {
-			return DeleteModFromUser412JSONResponse{
+		if errors.Is(err, store.ErrUserNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find user"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("User is not attached"),
 				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
+			})
+
+			return
 		}
 
-		return DeleteModFromUser500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("mod", record.ID).
+			Str("user", body.User).
+			Str("action", "DeleteModFromUser").
+			Msg("Failed to drop mod from user")
+
+		a.RenderNotify(w, r, Notification{
 			Status:  ToPtr(http.StatusUnprocessableEntity),
 			Message: ToPtr("Failed to drop mod from user"),
-		}, nil
+		})
+
+		return
 	}
 
-	return DeleteModFromUser200JSONResponse{
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully dropped mod from user"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
+}
+
+// AllowCreateMod defines a middleware to check permissions.
+func (a *API) AllowCreateMod(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// AllowShowMod defines a middleware to check permissions.
+func (a *API) AllowShowMod(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// AllowManageMod defines a middleware to check permissions.
+func (a *API) AllowManageMod(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func (a *API) convertMod(record *model.Mod) Mod {
 	result := Mod{
-		Id:          ToPtr(record.ID),
+		ID:          ToPtr(record.ID),
 		Slug:        ToPtr(record.Slug),
 		Name:        ToPtr(record.Name),
 		Side:        ToPtr(record.Side),
@@ -773,15 +1115,45 @@ func (a *API) convertMod(record *model.Mod) Mod {
 		UpdatedAt:   ToPtr(record.UpdatedAt),
 	}
 
+	if record.Avatar != nil {
+		result.Avatar = ToPtr(a.convertModAvatar(record.Avatar))
+	}
+
 	return result
 }
 
-func (a *API) convertModTeam(record *model.TeamMod) TeamMod {
-	result := TeamMod{
-		ModId:     record.ModID,
-		TeamId:    record.TeamID,
-		Team:      ToPtr(a.convertTeam(record.Team)),
-		Perm:      ToPtr(TeamModPerm(record.Perm)),
+func (a *API) convertModAvatar(record *model.ModAvatar) ModAvatar {
+	avatar, err := url.JoinPath(
+		a.config.Server.Host,
+		a.config.Server.Root,
+		"storage",
+		"avatars",
+		record.Slug,
+	)
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("avataer", record.ID).
+			Msg("Failed to generate avatar link")
+	}
+
+	result := ModAvatar{
+		Slug:      ToPtr(record.Slug),
+		URL:       ToPtr(avatar),
+		CreatedAt: ToPtr(record.CreatedAt),
+		UpdatedAt: ToPtr(record.UpdatedAt),
+	}
+
+	return result
+}
+
+func (a *API) convertModGroup(record *model.GroupMod) GroupMod {
+	result := GroupMod{
+		ModID:     record.ModID,
+		GroupID:   record.GroupID,
+		Group:     ToPtr(a.convertGroup(record.Group)),
+		Perm:      ToPtr(GroupModPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
@@ -791,8 +1163,8 @@ func (a *API) convertModTeam(record *model.TeamMod) TeamMod {
 
 func (a *API) convertModUser(record *model.UserMod) UserMod {
 	result := UserMod{
-		ModId:     record.ModID,
-		UserId:    record.UserID,
+		ModID:     record.ModID,
+		UserID:    record.UserID,
 		User:      ToPtr(a.convertUser(record.User)),
 		Perm:      ToPtr(UserModPerm(record.Perm)),
 		CreatedAt: ToPtr(record.CreatedAt),
@@ -800,4 +1172,55 @@ func (a *API) convertModUser(record *model.UserMod) UserMod {
 	}
 
 	return result
+}
+
+func listModsSorting(request ListModsParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
+}
+
+func listModGroupsSorting(request ListModGroupsParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
+}
+
+func listModUsersSorting(request ListModUsersParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
 }

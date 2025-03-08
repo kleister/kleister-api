@@ -1,48 +1,54 @@
 package v1
 
 import (
-	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 
+	"github.com/go-chi/render"
 	"github.com/kleister/kleister-api/pkg/middleware/current"
 	"github.com/kleister/kleister-api/pkg/model"
-	buildversions "github.com/kleister/kleister-api/pkg/service/build_versions"
-	"github.com/kleister/kleister-api/pkg/service/mods"
-	"github.com/kleister/kleister-api/pkg/service/versions"
+	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/kleister/kleister-api/pkg/validate"
+	"github.com/rs/zerolog/log"
+	"github.com/vincent-petithory/dataurl"
 )
 
 // ListVersions implements the v1.ServerInterface.
-func (a *API) ListVersions(ctx context.Context, request ListVersionsRequestObject) (ListVersionsResponseObject, error) {
-	records, count, err := a.versions.WithPrincipal(
+func (a *API) ListVersions(w http.ResponseWriter, r *http.Request, _ ModID, params ListVersionsParams) {
+	ctx := r.Context()
+	mod := a.ModFromContext(ctx)
+	sort, order, limit, offset, search := listVersionsSorting(params)
+
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).List(
+	).Versions.List(
 		ctx,
-		model.VersionParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
-			ModID: request.ModId,
+		mod,
+		model.ListParams{
+			Sort:   sort,
+			Order:  order,
+			Limit:  limit,
+			Offset: offset,
+			Search: search,
 		},
 	)
 
 	if err != nil {
-		if errors.Is(err, mods.ErrNotFound) {
-			return ListVersions404JSONResponse{
-				Message: ToPtr("Failed to find mod"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("action", "ListVersions").
+			Msg("Failed to load mods")
 
-		return ListVersions500JSONResponse{
-			Message: ToPtr("Failed to load versions"),
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load mods"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
 	payload := make([]Version, len(records))
@@ -50,71 +56,86 @@ func (a *API) ListVersions(ctx context.Context, request ListVersionsRequestObjec
 		payload[id] = a.convertVersion(record)
 	}
 
-	return ListVersions200JSONResponse{
-		Total:    ToPtr(count),
-		Versions: ToPtr(payload),
-	}, nil
+	render.JSON(w, r, VersionsResponse{
+		Total:    count,
+		Limit:    limit,
+		Offset:   offset,
+		Mod:      ToPtr(a.convertMod(mod)),
+		Versions: payload,
+	})
 }
 
 // ShowVersion implements the v1.ServerInterface.
-func (a *API) ShowVersion(ctx context.Context, request ShowVersionRequestObject) (ShowVersionResponseObject, error) {
-	record, err := a.versions.WithPrincipal(
-		current.GetUser(ctx),
-	).Show(
-		ctx,
-		model.VersionParams{
-			ModID:     request.ModId,
-			VersionID: request.VersionId,
-		},
-	)
+func (a *API) ShowVersion(w http.ResponseWriter, r *http.Request, _ ModID, _ VersionID) {
+	ctx := r.Context()
+	record := a.VersionFromContext(ctx)
 
-	if err != nil {
-		if errors.Is(err, mods.ErrNotFound) {
-			return ShowVersion404JSONResponse{
-				Message: ToPtr("Failed to find mod"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		if errors.Is(err, versions.ErrNotFound) {
-			return ShowVersion404JSONResponse{
-				Message: ToPtr("Failed to find version"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ShowVersion500JSONResponse{
-			Message: ToPtr("Failed to load version"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	return ShowVersion200JSONResponse(
+	render.JSON(w, r, VersionResponse(
 		a.convertVersion(record),
-	), nil
+	))
 }
 
 // CreateVersion implements the v1.ServerInterface.
-func (a *API) CreateVersion(ctx context.Context, request CreateVersionRequestObject) (CreateVersionResponseObject, error) {
-	record := &model.Version{}
+func (a *API) CreateVersion(w http.ResponseWriter, r *http.Request, _ ModID) {
+	ctx := r.Context()
+	mod := a.ModFromContext(ctx)
+	body := &CreateVersionBody{}
 
-	if request.Body.Name != nil {
-		record.Name = FromPtr(request.Body.Name)
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("action", "CreateVersion").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	if request.Body.Public != nil {
-		record.Public = FromPtr(request.Body.Public)
+	record := &model.Version{
+		ModID: mod.ID,
 	}
 
-	// TODO: File
+	if body.Name != nil {
+		record.Name = FromPtr(body.Name)
+	}
 
-	if err := a.versions.WithPrincipal(
+	if body.Public != nil {
+		record.Public = FromPtr(body.Public)
+	}
+
+	if body.Upload != nil {
+		data, err := dataurl.DecodeString(
+			FromPtr(body.Upload),
+		)
+
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("mod", mod.ID).
+				Str("action", "CreateVersion").
+				Msg("Failed to decode upload")
+
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to decode upload"),
+				Status:  ToPtr(http.StatusBadRequest),
+			})
+
+			return
+		}
+
+		record.FileUpload = data
+	}
+
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Create(
+	).Versions.Create(
 		ctx,
-		model.VersionParams{
-			ModID: request.ModId,
-		},
+		mod,
 		record,
 	); err != nil {
 		if v, ok := err.(validate.Errors); ok {
@@ -130,75 +151,95 @@ func (a *API) CreateVersion(ctx context.Context, request CreateVersionRequestObj
 				)
 			}
 
-			return CreateVersion422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate version"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return CreateVersion500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("action", "CreateVersion").
+			Msg("Failed to create version")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to create version"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	return CreateVersion200JSONResponse(
+	fmt.Printf("%+v\n", record.File)
+
+	render.JSON(w, r, VersionResponse(
 		a.convertVersion(record),
-	), nil
+	))
 }
 
 // UpdateVersion implements the v1.ServerInterface.
-func (a *API) UpdateVersion(ctx context.Context, request UpdateVersionRequestObject) (UpdateVersionResponseObject, error) {
-	record, err := a.versions.WithPrincipal(
-		current.GetUser(ctx),
-	).Show(
-		ctx,
-		model.VersionParams{
-			ModID:     request.ModId,
-			VersionID: request.VersionId,
-		},
-	)
+func (a *API) UpdateVersion(w http.ResponseWriter, r *http.Request, _ ModID, _ VersionID) {
+	ctx := r.Context()
+	mod := a.ModFromContext(ctx)
+	record := a.VersionFromContext(ctx)
+	body := &UpdateVersionBody{}
 
-	if err != nil {
-		if errors.Is(err, mods.ErrNotFound) {
-			return UpdateVersion404JSONResponse{
-				Message: ToPtr("Failed to find mod"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("version", record.ID).
+			Str("action", "UpdateVersion").
+			Msg("Failed to decode request body")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
+	}
+
+	if body.Name != nil {
+		record.Name = FromPtr(body.Name)
+	}
+
+	if body.Public != nil {
+		record.Public = FromPtr(body.Public)
+	}
+
+	if body.Upload != nil {
+		data, err := dataurl.DecodeString(
+			FromPtr(body.Upload),
+		)
+
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("mod", mod.ID).
+				Str("action", "CreateVersion").
+				Msg("Failed to decode upload")
+
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to decode upload"),
+				Status:  ToPtr(http.StatusBadRequest),
+			})
+
+			return
 		}
 
-		if errors.Is(err, versions.ErrNotFound) {
-			return UpdateVersion404JSONResponse{
-				Message: ToPtr("Failed to find version"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return UpdateVersion500JSONResponse{
-			Message: ToPtr("Failed to load version"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		record.FileUpload = data
 	}
 
-	if request.Body.Name != nil {
-		record.Name = FromPtr(request.Body.Name)
-	}
-
-	if request.Body.Public != nil {
-		record.Public = FromPtr(request.Body.Public)
-	}
-
-	// TODO: File
-
-	if err := a.versions.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Update(
+	).Versions.Update(
 		ctx,
-		model.VersionParams{
-			ModID:     record.ModID,
-			VersionID: record.ID,
-		},
+		mod,
 		record,
 	); err != nil {
 		if v, ok := err.(validate.Errors); ok {
@@ -214,133 +255,105 @@ func (a *API) UpdateVersion(ctx context.Context, request UpdateVersionRequestObj
 				)
 			}
 
-			return UpdateVersion422JSONResponse{
-				Status:  ToPtr(http.StatusUnprocessableEntity),
+			a.RenderNotify(w, r, Notification{
 				Message: ToPtr("Failed to validate version"),
+				Status:  ToPtr(http.StatusUnprocessableEntity),
 				Errors:  ToPtr(errors),
-			}, nil
+			})
+
+			return
 		}
 
-		return UpdateVersion500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("version", record.ID).
+			Str("action", "UpdateVersion").
+			Msg("Failed to update version")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to update version"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
-	return UpdateVersion200JSONResponse(
+	render.JSON(w, r, VersionResponse(
 		a.convertVersion(record),
-	), nil
+	))
 }
 
 // DeleteVersion implements the v1.ServerInterface.
-func (a *API) DeleteVersion(ctx context.Context, request DeleteVersionRequestObject) (DeleteVersionResponseObject, error) {
-	record, err := a.versions.WithPrincipal(
+func (a *API) DeleteVersion(w http.ResponseWriter, r *http.Request, _ ModID, _ VersionID) {
+	ctx := r.Context()
+	mod := a.ModFromContext(ctx)
+	record := a.VersionFromContext(ctx)
+
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
+	).Versions.Delete(
 		ctx,
-		model.VersionParams{
-			ModID:     request.ModId,
-			VersionID: request.VersionId,
-		},
-	)
-
-	if err != nil {
-		if errors.Is(err, mods.ErrNotFound) {
-			return DeleteVersion404JSONResponse{
-				Message: ToPtr("Failed to find mod"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		if errors.Is(err, versions.ErrNotFound) {
-			return DeleteVersion404JSONResponse{
-				Message: ToPtr("Failed to find version"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return DeleteVersion500JSONResponse{
-			Message: ToPtr("Failed to load version"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	if err := a.versions.WithPrincipal(
-		current.GetUser(ctx),
-	).Delete(
-		ctx,
-		model.VersionParams{
-			ModID:     record.ModID,
-			VersionID: record.ID,
-		},
+		mod,
+		record.ID,
 	); err != nil {
-		return DeleteVersion400JSONResponse{
-			Status:  ToPtr(http.StatusBadRequest),
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("version", record.ID).
+			Str("action", "DeleteVersion").
+			Msg("Failed to delete version")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to delete version"),
-		}, nil
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return DeleteVersion200JSONResponse{
-		Status:  ToPtr(http.StatusOK),
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully deleted version"),
-	}, nil
+		Status:  ToPtr(http.StatusOK),
+	})
 }
 
 // ListVersionBuilds implements the v1.ServerInterface.
-func (a *API) ListVersionBuilds(ctx context.Context, request ListVersionBuildsRequestObject) (ListVersionBuildsResponseObject, error) {
-	record, err := a.versions.WithPrincipal(
+func (a *API) ListVersionBuilds(w http.ResponseWriter, r *http.Request, _ ModID, _ VersionID, params ListVersionBuildsParams) {
+	ctx := r.Context()
+	mod := a.ModFromContext(ctx)
+	record := a.VersionFromContext(ctx)
+	sort, order, limit, offset, search := listVersionBuildsSorting(params)
+
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
+	).Versions.ListBuilds(
 		ctx,
-		model.VersionParams{
-			ModID:     request.ModId,
-			VersionID: request.VersionId,
+		mod,
+		record,
+		model.ListParams{
+			Sort:   sort,
+			Order:  order,
+			Limit:  limit,
+			Offset: offset,
+			Search: search,
 		},
 	)
 
 	if err != nil {
-		if errors.Is(err, mods.ErrNotFound) {
-			return ListVersionBuilds404JSONResponse{
-				Message: ToPtr("Failed to find mod"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("version", record.ID).
+			Str("action", "ListVersionBuilds").
+			Msg("Failed to load version builds")
 
-		if errors.Is(err, versions.ErrNotFound) {
-			return ListVersionBuilds404JSONResponse{
-				Message: ToPtr("Failed to find version"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ListVersionBuilds500JSONResponse{
-			Message: ToPtr("Failed to load version"),
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load version builds"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
+		})
 
-	records, count, err := a.buildversions.WithPrincipal(
-		current.GetUser(ctx),
-	).List(
-		ctx,
-		model.BuildVersionParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
-			ModID:     record.ModID,
-			VersionID: record.ID,
-		},
-	)
-
-	if err != nil {
-		return ListVersionBuilds500JSONResponse{
-			Message: ToPtr("Failed to load builds"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		return
 	}
 
 	payload := make([]BuildVersion, len(records))
@@ -348,95 +361,211 @@ func (a *API) ListVersionBuilds(ctx context.Context, request ListVersionBuildsRe
 		payload[id] = a.convertVersionBuild(record)
 	}
 
-	return ListVersionBuilds200JSONResponse{
-		Total:   ToPtr(count),
-		Mod:     ToPtr(a.convertMod(record.Mod)),
+	render.JSON(w, r, VersionBuildsResponse{
+		Total:   count,
+		Limit:   limit,
+		Offset:  offset,
+		Mod:     ToPtr(a.convertMod(mod)),
 		Version: ToPtr(a.convertVersion(record)),
-		Builds:  ToPtr(payload),
-	}, nil
+		Builds:  payload,
+	})
 }
 
 // AttachVersionToBuild implements the v1.ServerInterface.
-func (a *API) AttachVersionToBuild(ctx context.Context, request AttachVersionToBuildRequestObject) (AttachVersionToBuildResponseObject, error) {
-	if err := a.buildversions.WithPrincipal(
-		current.GetUser(ctx),
-	).Attach(
-		ctx,
-		model.BuildVersionParams{
-			ModID:     request.ModId,
-			VersionID: request.VersionId,
-			PackID:    request.Body.Pack,
-			BuildID:   request.Body.Build,
-		},
-	); err != nil {
-		if errors.Is(err, buildversions.ErrNotFound) {
-			return AttachVersionToBuild404JSONResponse{
-				Message: ToPtr("Failed to find version or build"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+func (a *API) AttachVersionToBuild(w http.ResponseWriter, r *http.Request, _ ModID, _ VersionID) {
+	ctx := r.Context()
+	mod := a.ModFromContext(ctx)
+	record := a.VersionFromContext(ctx)
+	body := &VersionBuildBody{}
 
-		if errors.Is(err, buildversions.ErrAlreadyAssigned) {
-			return AttachVersionToBuild412JSONResponse{
-				Message: ToPtr("Build is already attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("version", record.ID).
+			Str("action", "AttachVersionToBuild").
+			Msg("Failed to decode request body")
 
-		return AttachVersionToBuild500JSONResponse{
-			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to attach version to build"),
-		}, nil
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return AttachVersionToBuild200JSONResponse{
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Versions.AttachBuild(
+		ctx,
+		mod,
+		record,
+		model.BuildVersionParams{
+			PackID:  body.Pack,
+			BuildID: body.Build,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrPackNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find pack"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrBuildNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find build"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrAlreadyAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Build is already attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("version", record.ID).
+			Str("pack", body.Pack).
+			Str("build", body.Build).
+			Str("action", "AttachVersionToBuild").
+			Msg("Failed to attach version to build")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to attach version to build"),
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully attached version to build"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // DeleteVersionFromBuild implements the v1.ServerInterface.
-func (a *API) DeleteVersionFromBuild(ctx context.Context, request DeleteVersionFromBuildRequestObject) (DeleteVersionFromBuildResponseObject, error) {
-	if err := a.buildversions.WithPrincipal(
-		current.GetUser(ctx),
-	).Drop(
-		ctx,
-		model.BuildVersionParams{
-			ModID:     request.ModId,
-			VersionID: request.VersionId,
-			PackID:    request.Body.Pack,
-			BuildID:   request.Body.Build,
-		},
-	); err != nil {
-		if errors.Is(err, buildversions.ErrNotFound) {
-			return DeleteVersionFromBuild404JSONResponse{
-				Message: ToPtr("Failed to find version or build"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
+func (a *API) DeleteVersionFromBuild(w http.ResponseWriter, r *http.Request, _ ModID, _ VersionID) {
+	ctx := r.Context()
+	mod := a.ModFromContext(ctx)
+	record := a.VersionFromContext(ctx)
+	body := &VersionBuildBody{}
 
-		if errors.Is(err, buildversions.ErrNotAssigned) {
-			return DeleteVersionFromBuild412JSONResponse{
-				Message: ToPtr("Build is not attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("version", record.ID).
+			Str("action", "DeleteVersionFromBuild").
+			Msg("Failed to decode request body")
 
-		return DeleteVersionFromBuild500JSONResponse{
-			Status:  ToPtr(http.StatusUnprocessableEntity),
-			Message: ToPtr("Failed to drop version from build"),
-		}, nil
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return DeleteVersionFromBuild200JSONResponse{
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Versions.DropBuild(
+		ctx,
+		mod,
+		record,
+		model.BuildVersionParams{
+			PackID:  body.Pack,
+			BuildID: body.Build,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrPackNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find pack"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrBuildNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find build"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Build is not attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("mod", mod.ID).
+			Str("version", record.ID).
+			Str("pack", body.Pack).
+			Str("build", body.Build).
+			Str("action", "DeleteUserFromGroup").
+			Msg("Failed to drop version from build")
+
+		a.RenderNotify(w, r, Notification{
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+			Message: ToPtr("Failed to drop version from build"),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully dropped version from build"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
+}
+
+// AllowCreateVersion defines a middleware to check permissions.
+func (a *API) AllowCreateVersion(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// AllowShowVersion defines a middleware to check permissions.
+func (a *API) AllowShowVersion(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// AllowManageVersion defines a middleware to check permissions.
+func (a *API) AllowManageVersion(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func (a *API) convertVersion(record *model.Version) Version {
 	result := Version{
-		Id:        ToPtr(record.ID),
+		ID:        ToPtr(record.ID),
 		Name:      ToPtr(record.Name),
 		Public:    ToPtr(record.Public),
 		CreatedAt: ToPtr(record.CreatedAt),
@@ -447,19 +576,84 @@ func (a *API) convertVersion(record *model.Version) Version {
 		result.Mod = ToPtr(a.convertMod(record.Mod))
 	}
 
-	// TODO: File
+	if record.File != nil {
+		result.File = ToPtr(a.convertVersionFile(record.File))
+	}
+
+	return result
+}
+
+func (a *API) convertVersionFile(record *model.VersionFile) VersionFile {
+	upload, err := url.JoinPath(
+		a.config.Server.Host,
+		a.config.Server.Root,
+		"storage",
+		"versions",
+		record.Version.ModID,
+		record.Slug,
+	)
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("avataer", record.ID).
+			Msg("Failed to generate version link")
+	}
+
+	result := VersionFile{
+		Slug:        ToPtr(record.Slug),
+		ContentType: ToPtr(record.ContentType),
+		MD5:         ToPtr(record.MD5),
+		URL:         ToPtr(upload),
+		CreatedAt:   ToPtr(record.CreatedAt),
+		UpdatedAt:   ToPtr(record.UpdatedAt),
+	}
 
 	return result
 }
 
 func (a *API) convertVersionBuild(record *model.BuildVersion) BuildVersion {
 	result := BuildVersion{
-		VersionId: record.VersionID,
-		BuildId:   record.BuildID,
+		VersionID: record.VersionID,
+		BuildID:   record.BuildID,
 		Build:     ToPtr(a.convertBuild(record.Build)),
 		CreatedAt: ToPtr(record.CreatedAt),
 		UpdatedAt: ToPtr(record.UpdatedAt),
 	}
 
 	return result
+}
+
+func listVersionsSorting(request ListVersionsParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
+}
+
+func listVersionBuildsSorting(request ListVersionBuildsParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
 }

@@ -1,35 +1,43 @@
 package v1
 
 import (
-	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/render"
+	"github.com/kleister/kleister-api/pkg/internal/forge"
 	"github.com/kleister/kleister-api/pkg/middleware/current"
 	"github.com/kleister/kleister-api/pkg/model"
-	"github.com/kleister/kleister-api/pkg/service/forge"
+	"github.com/kleister/kleister-api/pkg/store"
+	"github.com/rs/zerolog/log"
 )
 
 // ListForges implements the v1.ServerInterface.
-func (a *API) ListForges(ctx context.Context, request ListForgesRequestObject) (ListForgesResponseObject, error) {
-	params := model.ListParams{}
+func (a *API) ListForges(w http.ResponseWriter, r *http.Request, params ListForgesParams) {
+	ctx := r.Context()
 
-	if request.Params.Search != nil {
-		params.Search = FromPtr(request.Params.Search)
-	}
-
-	records, count, err := a.forge.WithPrincipal(
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).List(
+	).Forge.List(
 		ctx,
-		params,
+		model.ListParams{
+			Search: fromSearch(params.Search),
+		},
 	)
 
 	if err != nil {
-		return ListForges500JSONResponse{
-			Message: ToPtr("Failed to load forge versions"),
+		log.Error().
+			Err(err).
+			Str("action", "ListForges").
+			Msg("Failed to load forges")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load forges"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
 	payload := make([]Forge, len(records))
@@ -37,185 +45,266 @@ func (a *API) ListForges(ctx context.Context, request ListForgesRequestObject) (
 		payload[id] = a.convertForge(record)
 	}
 
-	return ListForges200JSONResponse{
-		Total:    ToPtr(count),
-		Versions: ToPtr(payload),
-	}, nil
+	render.JSON(w, r, ForgesResponse{
+		Total:    count,
+		Versions: payload,
+	})
 }
 
 // UpdateForge implements the v1.ServerInterface.
-func (a *API) UpdateForge(ctx context.Context, _ UpdateForgeRequestObject) (UpdateForgeResponseObject, error) {
-	if principal := current.GetUser(ctx); principal == nil || !principal.Admin {
-		return UpdateForge403JSONResponse{
-			Message: ToPtr("Only admins can access this resource"),
-			Status:  ToPtr(http.StatusForbidden),
-		}, nil
-	}
-
+func (a *API) UpdateForge(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	versions, err := forge.FetchRemote()
 
 	if err != nil {
-		return UpdateForge500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("action", "UpdateForge").
+			Msg("Failed to fetch versions")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to fetch versions"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+			Status:  ToPtr(http.StatusServiceUnavailable),
+		})
 	}
 
-	if err := a.forge.WithPrincipal(
+	if err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Sync(
+	).Forge.Sync(
 		ctx,
 		versions,
 	); err != nil {
-		return UpdateForge500JSONResponse{
+		log.Error().
+			Err(err).
+			Str("action", "UpdateForge").
+			Msg("Failed to sync versions")
+
+		a.RenderNotify(w, r, Notification{
 			Message: ToPtr("Failed to sync versions"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
 	}
 
-	return UpdateForge200JSONResponse{
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully synced versions"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // ListForgeBuilds implements the v1.ServerInterface.
-func (a *API) ListForgeBuilds(ctx context.Context, request ListForgeBuildsRequestObject) (ListForgeBuildsResponseObject, error) {
-	record, err := a.forge.WithPrincipal(
+func (a *API) ListForgeBuilds(w http.ResponseWriter, r *http.Request, _ ForgeID, params ListForgeBuildsParams) {
+	ctx := r.Context()
+	record := a.ForgeFromContext(ctx)
+	sort, order, limit, offset, search := listForgeBuildsSorting(params)
+
+	records, count, err := a.storage.WithPrincipal(
 		current.GetUser(ctx),
-	).Show(
-		ctx,
-		request.ForgeId,
-	)
-
-	if err != nil {
-		if errors.Is(err, forge.ErrNotFound) {
-			return ListForgeBuilds404JSONResponse{
-				Message: ToPtr("Failed to find forge"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
-
-		return ListForgeBuilds500JSONResponse{
-			Message: ToPtr("Failed to load forge"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
-	}
-
-	records, count, err := a.forge.WithPrincipal(
-		current.GetUser(ctx),
-	).ListBuilds(
+	).Forge.ListBuilds(
 		ctx,
 		model.ForgeBuildParams{
-			ListParams: toListParams(
-				string(FromPtr(request.Params.Sort)),
-				string(FromPtr(request.Params.Order)),
-				request.Params.Limit,
-				request.Params.Offset,
-				request.Params.Search,
-			),
-			ForgeID: request.ForgeId,
+			ListParams: model.ListParams{
+				Sort:   sort,
+				Order:  order,
+				Limit:  limit,
+				Offset: offset,
+				Search: search,
+			},
+			ForgeID: record.ID,
 		},
 	)
 
 	if err != nil {
-		return ListForgeBuilds500JSONResponse{
-			Message: ToPtr("Failed to load builds"),
+		log.Error().
+			Err(err).
+			Str("forge", record.ID).
+			Str("action", "ListForgeBuilds").
+			Msg("Failed to load forge builds")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to load forge builds"),
 			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		})
+
+		return
 	}
 
 	payload := make([]Build, len(records))
 	for id, record := range records {
-		payload[id] = a.convertBuildWithPack(record)
+		payload[id] = a.convertBuild(record)
 	}
 
-	return ListForgeBuilds200JSONResponse{
-		Total:  ToPtr(count),
+	render.JSON(w, r, ForgeBuildsResponse{
+		Total:  count,
+		Limit:  limit,
+		Offset: offset,
 		Forge:  ToPtr(a.convertForge(record)),
-		Builds: ToPtr(payload),
-	}, nil
+		Builds: payload,
+	})
 }
 
 // AttachForgeToBuild implements the v1.ServerInterface.
-func (a *API) AttachForgeToBuild(ctx context.Context, request AttachForgeToBuildRequestObject) (AttachForgeToBuildResponseObject, error) {
-	if err := a.forge.WithPrincipal(
-		current.GetUser(ctx),
-	).AttachBuild(
-		ctx,
-		model.ForgeBuildParams{
-			ForgeID: request.ForgeId,
-			PackID:  request.Body.Pack,
-			BuildID: request.Body.Build,
-		},
-	); err != nil {
-		if errors.Is(err, forge.ErrNotFound) {
-			return AttachForgeToBuild404JSONResponse{
-				Message: ToPtr("Failed to find forge or build"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+func (a *API) AttachForgeToBuild(w http.ResponseWriter, r *http.Request, _ ForgeID) {
+	ctx := r.Context()
+	record := a.ForgeFromContext(ctx)
+	body := &ForgeBuildBody{}
 
-		if errors.Is(err, forge.ErrAlreadyAssigned) {
-			return AttachForgeToBuild412JSONResponse{
-				Message: ToPtr("Build is already attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("forge", record.ID).
+			Str("action", "AttachForgeToBuild").
+			Msg("Failed to decode request body")
 
-		return AttachForgeToBuild500JSONResponse{
-			Message: ToPtr("Failed to attach forge to build"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return AttachForgeToBuild200JSONResponse{
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Forge.AttachBuild(
+		ctx,
+		model.ForgeBuildParams{
+			ForgeID: record.ID,
+			PackID:  body.Pack,
+			BuildID: body.Build,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrForgeNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find forge"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrBuildNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find build"),
+				Status:  ToPtr(http.StatusNotFound),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrAlreadyAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Forge is already attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("forge", record.ID).
+			Str("pack", body.Pack).
+			Str("build", body.Build).
+			Str("action", "AttachForgeToBuild").
+			Msg("Failed to attach forge to build")
+
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to attach forge to build"),
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully attached forge to build"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 // DeleteForgeFromBuild implements the v1.ServerInterface.
-func (a *API) DeleteForgeFromBuild(ctx context.Context, request DeleteForgeFromBuildRequestObject) (DeleteForgeFromBuildResponseObject, error) {
-	if err := a.forge.WithPrincipal(
-		current.GetUser(ctx),
-	).DropBuild(
-		ctx,
-		model.ForgeBuildParams{
-			ForgeID: request.ForgeId,
-			PackID:  request.Body.Pack,
-			BuildID: request.Body.Build,
-		},
-	); err != nil {
-		if errors.Is(err, forge.ErrNotFound) {
-			return DeleteForgeFromBuild404JSONResponse{
-				Message: ToPtr("Failed to find forge or build"),
-				Status:  ToPtr(http.StatusNotFound),
-			}, nil
-		}
+func (a *API) DeleteForgeFromBuild(w http.ResponseWriter, r *http.Request, _ ForgeID) {
+	ctx := r.Context()
+	record := a.ForgeFromContext(ctx)
+	body := &ForgeBuildBody{}
 
-		if errors.Is(err, forge.ErrNotAssigned) {
-			return DeleteForgeFromBuild412JSONResponse{
-				Message: ToPtr("Build is not attached"),
-				Status:  ToPtr(http.StatusPreconditionFailed),
-			}, nil
-		}
+	if err := json.NewDecoder(r.Body).Decode(body); err != nil {
+		log.Error().
+			Err(err).
+			Str("user", record.ID).
+			Str("action", "DeleteForgeFromBuild").
+			Msg("Failed to decode request body")
 
-		return DeleteForgeFromBuild500JSONResponse{
-			Message: ToPtr("Failed to drop forge from build"),
-			Status:  ToPtr(http.StatusInternalServerError),
-		}, nil
+		a.RenderNotify(w, r, Notification{
+			Message: ToPtr("Failed to decode request"),
+			Status:  ToPtr(http.StatusBadRequest),
+		})
+
+		return
 	}
 
-	return DeleteForgeFromBuild200JSONResponse{
+	if err := a.storage.WithPrincipal(
+		current.GetUser(ctx),
+	).Forge.DropBuild(
+		ctx,
+		model.ForgeBuildParams{
+			ForgeID: record.ID,
+			PackID:  body.Pack,
+			BuildID: body.Build,
+		},
+	); err != nil {
+		if errors.Is(err, store.ErrForgeNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find forge"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrBuildNotFound) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Failed to find build"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		if errors.Is(err, store.ErrNotAssigned) {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Forge is not attached"),
+				Status:  ToPtr(http.StatusPreconditionFailed),
+			})
+
+			return
+		}
+
+		log.Error().
+			Err(err).
+			Str("forge", record.ID).
+			Str("pack", body.Pack).
+			Str("build", body.Build).
+			Str("action", "DeleteForgeFromBuild").
+			Msg("Failed to drop forge from build")
+
+		a.RenderNotify(w, r, Notification{
+			Status:  ToPtr(http.StatusUnprocessableEntity),
+			Message: ToPtr("Failed to drop forge from build"),
+		})
+
+		return
+	}
+
+	a.RenderNotify(w, r, Notification{
 		Message: ToPtr("Successfully dropped forge from build"),
 		Status:  ToPtr(http.StatusOK),
-	}, nil
+	})
 }
 
 func (a *API) convertForge(record *model.Forge) Forge {
 	result := Forge{
-		Id:        ToPtr(record.ID),
+		ID:        ToPtr(record.ID),
 		Name:      ToPtr(record.Name),
 		Minecraft: ToPtr(record.Minecraft),
 		CreatedAt: ToPtr(record.CreatedAt),
@@ -223,4 +312,21 @@ func (a *API) convertForge(record *model.Forge) Forge {
 	}
 
 	return result
+}
+
+func listForgeBuildsSorting(request ListForgeBuildsParams) (string, string, int64, int64, string) {
+	sort, limit, offset, search := toPageParams(
+		request.Sort,
+		request.Limit,
+		request.Offset,
+		request.Search,
+	)
+
+	order := ""
+
+	if request.Order != nil {
+		order = string(FromPtr(request.Order))
+	}
+
+	return sort, order, limit, offset, search
 }
