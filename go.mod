@@ -18,7 +18,7 @@ require (
 	github.com/drone/funcmap v0.0.0-20240227160611-7e19e9cd5a1c
 	github.com/elimity-com/scim v0.0.0-20240320110924-172bf2aee9c8
 	github.com/gabriel-vasile/mimetype v1.4.8
-	github.com/getkin/kin-openapi v0.129.0
+	github.com/getkin/kin-openapi v0.130.0
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-chi/render v1.0.3
 	github.com/go-openapi/runtime v0.28.0
