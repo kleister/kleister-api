@@ -37,7 +37,7 @@ require (
 	github.com/oklog/run v1.1.0
 	github.com/prometheus/client_golang v1.21.1
 	github.com/rrivera/identicon v0.0.0-20240116195454-d5ba35832c0d
-	github.com/rs/zerolog v1.33.0
+	github.com/rs/zerolog v1.34.0
 	github.com/scim2/filter-parser/v2 v2.2.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.0
