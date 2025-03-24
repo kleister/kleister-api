@@ -29,7 +29,9 @@ branches:
       required_status_checks:
         strict: true
         contexts:
-          - testing
+          - docker
+          - frontend
+          - backend
       enforce_admins: false
       restrictions:
         apps:
