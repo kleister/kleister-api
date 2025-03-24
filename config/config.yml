@@ -3,10 +3,10 @@ server:
   addr: 0.0.0.0:8080
   host: http://localhost:8080
   root: "/"
-  frontend: http://localhost:8081
   cert: ~
   key: ~
   templates: ~
+  frontend: ~
   docs: true
 
 metrics:
@@ -48,7 +48,7 @@ upload:
   proxy: true
 
 token:
-  secret: TxHrYxMAg01rBeEWrHn1BjOP
+  secret: hgJKKJrSzI8pOxCjCnJHvNvK
   expire: 1h0m0s
 
 scim:

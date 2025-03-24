@@ -4,4 +4,4 @@ services:
   api:
     build:
       context: ../../
-      dockerfile: docker/Dockerfile.linux.amd64
+      dockerfile: cmd/kleister-api/Dockerfile

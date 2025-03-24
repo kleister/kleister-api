@@ -4,8 +4,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
+	"path"
+	"strings"
 
 	"github.com/go-chi/render"
 	"github.com/gobwas/glob"
@@ -220,6 +221,8 @@ func (a *API) CallbackProvider(w http.ResponseWriter, r *http.Request, providerP
 				Status: http.StatusPreconditionFailed,
 			},
 		))
+
+		return
 	}
 
 	log.Info().
@@ -230,11 +233,15 @@ func (a *API) CallbackProvider(w http.ResponseWriter, r *http.Request, providerP
 
 	w.Header().Set(
 		"Location",
-		fmt.Sprintf(
-			"%s/auth/callback#%s",
-			a.config.Server.Frontend,
-			redirect.Token,
-		),
+		strings.Join([]string{
+			a.config.Server.Host,
+			path.Join(
+				a.config.Server.Root,
+				"auth",
+				"callback",
+				redirect.Token,
+			),
+		}, ""),
 	)
 
 	w.Header().Set(

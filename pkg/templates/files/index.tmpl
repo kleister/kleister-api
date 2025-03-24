@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<title>Kleister</title>
+
+		<base href="{{ .Prefix }}" />
+		{{ range .Javascripts -}}
+		<script type="module" crossorigin src="{{ $.Prefix }}{{ . }}"></script>
+		{{ end -}}
+		{{- range .Stylesheets -}}
+		<link rel="stylesheet" crossorigin href="{{ $.Prefix }}{{ . }}">
+		{{- end }}
+		<link rel="icon" type="image/x-icon" href="{{ .Prefix }}favicon.ico" />
+	</head>
+	<body>
+		<noscript>
+			<strong>
+				We're sorry but web doesn't work properly without JavaScript enabled. Please enable it to continue.
+			</strong>
+		</noscript>
+		<div id="app"></div>
+	</body>
+</html>

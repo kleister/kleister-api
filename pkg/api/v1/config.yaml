@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/HEAD/configuration-schema.json
+package: v1
+
+generate:
+  chi-server: true
+  models: true
+  embedded-spec: true
+
+compatibility:
+  apply-chi-middleware-first-to-last: true
+
+output: gen.go
+
+output-options:
+  user-templates:
+    constants.tmpl: override/constants.tmpl
+
+...

@@ -24,6 +24,7 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         inputs.devenv.flakeModule
+        inputs.git-hooks.flakeModule
       ];
 
       systems = [
@@ -80,12 +81,14 @@
                     enable = true;
                     package = pkgs.go_1_24;
                   };
+                  javascript = {
+                    enable = true;
+                    package = pkgs.nodejs_20;
+                  };
                 };
 
                 packages = with pkgs; [
-                  cosign
-                  gnumake
-                  goreleaser
+                  go-task
                   httpie
                   nixfmt-rfc-style
                   posting
@@ -100,42 +103,14 @@
                   KLEISTER_API_LOG_PRETTY = "true";
                   KLEISTER_API_LOG_COLOR = "true";
 
-                  KLEISTER_API_TOKEN_SECRET = "TxHrYxMAg01rBeEWrHn1BjOP";
+                  KLEISTER_API_TOKEN_SECRET = "hgJKKJrSzI8pOxCjCnJHvNvK";
                   KLEISTER_API_TOKEN_EXPIRE = "1h";
-
-                  KLEISTER_API_SERVER_FRONTEND = "http://localhost:5173";
-                  # KLEISTER_API_SERVER_CERT = ".devenv/state/mkcert/localhost+1.pem";
-                  # KLEISTER_API_SERVER_KEY = ".devenv/state/mkcert/localhost+1-key.pem";
 
                   KLEISTER_API_DATABASE_DRIVER = "sqlite3";
                   KLEISTER_API_DATABASE_NAME = "storage/kleister.sqlite3";
 
-                  # KLEISTER_API_DATABASE_DRIVER = "mysql";
-                  # KLEISTER_API_DATABASE_ADDRESS = "127.0.0.1";
-                  # KLEISTER_API_DATABASE_PORT = "3306";
-                  # KLEISTER_API_DATABASE_USERNAME = "kleister";
-                  # KLEISTER_API_DATABASE_PASSWORD = "p455w0rd";
-                  # KLEISTER_API_DATABASE_NAME = "kleister";
-
-                  # KLEISTER_API_DATABASE_DRIVER = "postgres";
-                  # KLEISTER_API_DATABASE_ADDRESS = "127.0.0.1";
-                  # KLEISTER_API_DATABASE_PORT = "5432";
-                  # KLEISTER_API_DATABASE_USERNAME = "kleister";
-                  # KLEISTER_API_DATABASE_PASSWORD = "p455w0rd";
-                  # KLEISTER_API_DATABASE_NAME = "kleister";
-
                   KLEISTER_API_UPLOAD_DRIVER = "file";
                   KLEISTER_API_UPLOAD_PATH = "storage/uploads/";
-
-                  # KLEISTER_API_UPLOAD_DRIVER = "s3";
-                  # KLEISTER_API_UPLOAD_ENDPOINT = "http://127.0.0.1:9000";
-                  # KLEISTER_API_UPLOAD_PROXY = "true";
-                  # KLEISTER_API_UPLOAD_PATHSTYLE = "true";
-                  # KLEISTER_API_UPLOAD_PATH = "";
-                  # KLEISTER_API_UPLOAD_BUCKET = "kleister";
-                  # KLEISTER_API_UPLOAD_REGION = "us-east-1";
-                  # KLEISTER_API_UPLOAD_ACCESS = "9VKV2OI56N1077Y9IALV";
-                  # KLEISTER_API_UPLOAD_SECRET = "bwcRkW5w6uF6CWBqotsnMbwZSIDKQopy9DSo90ab";
 
                   KLEISTER_API_CLEANUP_ENABLED = "true";
                   KLEISTER_API_CLEANUP_INTERVAL = "5m";
@@ -148,8 +123,8 @@
                 services = {
                   minio = {
                     enable = true;
-                    accessKey = "9VKV2OI56N1077Y9IALV";
-                    secretKey = "bwcRkW5w6uF6CWBqotsnMbwZSIDKQopy9DSo90ab";
+                    accessKey = "2p9FzWqUyhLrwiHpdviD";
+                    secretKey = "IpYoERy9493E1wIsfXk9wCv3vHS8o6nMf101BDpT";
                     buckets = [
                       "kleister"
                     ];
@@ -171,11 +146,34 @@
 
                 processes = {
                   kleister-server = {
-                    exec = "make watch";
+                    exec = "task watch:server";
+
+                    process-compose = {
+                      environment = [
+                        "KLEISTER_API_SERVER_HOST=http://localhost:5173"
+                      ];
+
+                      readiness_probe = {
+                        exec.command = "${pkgs.curl}/bin/curl -sSf http://localhost:8000/readyz";
+                        initial_delay_seconds = 2;
+                        period_seconds = 10;
+                        timeout_seconds = 4;
+                        success_threshold = 1;
+                        failure_threshold = 5;
+                      };
+
+                      availability = {
+                        restart = "on_failure";
+                      };
+                    };
+                  };
+
+                  kleister-webui = {
+                    exec = "task watch:frontend";
 
                     process-compose = {
                       readiness_probe = {
-                        exec.command = "${pkgs.curl}/bin/curl -sSf http://localhost:8000/readyz";
+                        exec.command = "${pkgs.curl}/bin/curl -sSf http://localhost:5173";
                         initial_delay_seconds = 2;
                         period_seconds = 10;
                         timeout_seconds = 4;

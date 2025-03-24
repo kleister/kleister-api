@@ -13,10 +13,10 @@ type Server struct {
 	Addr      string `mapstructure:"addr"`
 	Host      string `mapstructure:"host"`
 	Root      string `mapstructure:"root"`
-	Frontend  string `mapstructure:"frontend"`
 	Cert      string `mapstructure:"cert"`
 	Key       string `mapstructure:"key"`
 	Templates string `mapstructure:"templates"`
+	Frontend  string `mapstructure:"frontend"`
 	Docs      bool   `mapstructure:"docs"`
 }
 
@@ -76,18 +76,18 @@ type Token struct {
 	Expire time.Duration `mapstructure:"expire"`
 }
 
-// Scim defines the scim provisioning configuration.
-type Scim struct {
-	Enabled bool   `mapstructure:"enabled"`
-	Token   string `mapstructure:"token"`
-}
-
 // Admin defines the initial admin user configuration.
 type Admin struct {
 	Create   bool   `mapstructure:"create"`
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
 	Email    string `mapstructure:"email"`
+}
+
+// Scim defines the scim provisioning configuration.
+type Scim struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Token   string `mapstructure:"token"`
 }
 
 // Config is a combination of all available configurations.

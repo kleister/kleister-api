@@ -28,6 +28,6 @@ jobs:
 
       - name: Upload spec
         run: |
-          aws s3 cp openapi/v1.yml s3://dl.kleister.eu/openapi/$(yq -r .info.version openapi/v1.yml).yml
+          aws s3 cp openapi/v1.yaml s3://dl.kleister.eu/openapi/$(yq -r .info.version openapi/v1.yaml).yaml
 
 ...

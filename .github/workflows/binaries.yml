@@ -2,11 +2,16 @@
 name: binaries
 
 "on":
+  workflow_dispatch:
   push:
     branches:
       - master
     tags:
       - v*
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   binaries:
@@ -15,6 +20,8 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configure aws
         uses: aws-actions/configure-aws-credentials@v4
@@ -28,39 +35,71 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Run generate
-        run: make generate
+      - name: Setup nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Setup task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup signing
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GNUPG_KEY }}
+          passphrase: ${{ secrets.GNUPG_PASSWORD }}
 
       - name: Run release
-        run: make release
-
-      - name: Sign release
-        uses: actionhippie/gpgsign@v1
-        with:
-          private_key: ${{ secrets.GNUPG_KEY }}
-          passphrase: ${{ secrets.GNUPG_PASSWORD }}
-          detach_sign: true
-          files: dist/*
-          excludes: dist/*.sha256
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            task build:release
+          else
+            task build:snapshot
+          fi
 
       - name: Upload release
-        id: upload
         if: startsWith(github.ref, 'refs/tags/')
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: dist/*
+          artifacts: dist/*.tar.gz,dist/*.deb,dist/*.rpm,dist/*.asc,dist/*.sha256
 
       - name: Upload version
-        id: version
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          aws s3 sync dist/ s3://dl.kleister.eu/api/${{ github.ref_name }}/
+          aws s3 sync --exclude "*" --include "kleister-api-*" dist s3://dl.kleister.eu/api/${{ github.ref_name }}/
 
       - name: Upload testing
-        id: testing
         if: startsWith(github.ref, 'refs/heads/')
         run: |
-          aws s3 sync dist/ s3://dl.kleister.eu/api/testing/
+          aws s3 sync --exclude "*" --include "kleister-api-*" dist s3://dl.kleister.eu/api/testing/
+
+      - name: Upload packages
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          for PACKAGE in dist/kleister-*.deb; do
+            echo "> uploading $PACKAGE"
+            curl  -sSL \
+              --header "Authorization: Bearer $BALTOREPO_TOKEN" \
+              --form "package=@$PACKAGE" \
+              --form "distribution=all" \
+              https://kleister.baltorepo.com/stable/debian/upload/
+            echo "> done"
+          done
+
+          for PACKAGE in dist/kleister-*.rpm; do
+            echo "> uploading $PACKAGE"
+            curl  -sSL \
+              --header "Authorization: Bearer $BALTOREPO_TOKEN" \
+              --form "package=@$PACKAGE" \
+              --form "distribution=all" \
+              https://kleister.baltorepo.com/stable/redhat/upload/
+            echo "> done"
+          done
 
 ...

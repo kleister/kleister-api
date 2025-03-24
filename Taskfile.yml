@@ -1,0 +1,136 @@
+---
+version: "3.40"
+
+vars:
+  SOURCES:
+    sh: find . -name "*.go" -type f -not -iname mock.go -not -path "./.devenv/*" -not -path "./.direnv/*" | xargs echo
+  PACKAGES:
+    sh: go list ./... | xargs echo
+
+tasks:
+  clean:
+    desc: Remove all temporary build artifacts
+    cmds:
+      - go clean -i ./...
+      - rm -rf bin/ dist/ frontend/dist/ pkg/frontend/files/*
+
+  generate:
+    desc: Generate code like openapi clients
+    deps:
+      - be:generate
+      - fe:generate
+
+  be:fmt:
+    desc: Run standard formatter for backend
+    cmds:
+      - gofmt -s -w {{ .SOURCES }}
+
+  be:vet:
+    desc: Run vet linting for backend
+    cmds:
+      - go vet {{ .PACKAGES }}
+
+  be:lint:
+    desc: Run revive linting for backend
+    cmds:
+      - for PKG in {{ .PACKAGES }}; do go tool github.com/mgechev/revive -config revive.toml -set_exit_status $PKG || exit 1; done;
+
+  be:golangci:
+    desc: Run golangci linter for backend
+    cmds:
+      - go tool github.com/golangci/golangci-lint/cmd/golangci-lint run ./...
+
+  be:generate:
+    desc: Generate code for backend
+    cmds:
+      - go generate {{ .PACKAGES }}
+
+  be:test:
+    desc: Run tests for backend
+    cmds:
+      - go test -coverprofile coverage.out {{ .PACKAGES }}
+
+  be:build:
+    desc: Build all required binary artifacts
+    deps:
+      - build:server
+
+  fe:install:
+    desc: Install dependencies for frontend
+    cmds:
+      - npm install --ci
+
+  fe:fmt:
+    desc: Run standard formatter for frontend
+    cmds:
+      - npm run format
+
+  fe:lint:
+    desc: Run configured linters for frontend
+    cmds:
+      - npm run lint
+
+  fe:generate:
+    desc: Generate code for frontend
+    cmds:
+      - npm run openapi
+
+  fe:test:
+    desc: Run tests for frontend
+    cmds:
+      - npm run test
+
+  fe:build:
+    desc: Build entire project for frontend
+    cmds:
+      - npm run build
+
+  build:release:
+    desc: Generate a release with goreleaser
+    cmds:
+      - go tool github.com/goreleaser/goreleaser/v2 release --clean
+
+  build:snapshot:
+    desc: Generate a snapshot with goreleaser
+    cmds:
+      - go tool github.com/goreleaser/goreleaser/v2 release --clean --snapshot
+
+  build:server:
+    desc: Build server component
+    cmds:
+      - go build -v
+          -tags 'netgo'
+          -ldflags '-s -w -extldflags "-static" -X "{{ .IMPORT }}/pkg/version.String={{ .VERSION }}" -X "{{ .IMPORT }}/pkg/version.Revision={{ .REVISION }}" -X "{{ .IMPORT }}/pkg/version.Date={{ now | date "20060102" }}"'
+          -o bin/kleister-api{{if eq OS "windows"}}.exe{{end}}
+          ./cmd/kleister-api
+    env:
+      CGO_ENABLED: "0"
+    vars:
+      IMPORT: github.com/kleister/kleister-api
+      VERSION:
+        sh: if [[ -z "${CI_COMMIT_TAG}" ]]; then git rev-parse --short HEAD; else echo "${CI_COMMIT_TAG#v}"; fi
+      REVISION:
+        sh: git rev-parse --short HEAD
+
+  watch:server:
+    desc: Run reloading development server
+    cmds:
+      - task: build:server
+      - bin/kleister-api server
+    watch: true
+    method: none
+    sources:
+      - 'cmd/**/*.go'
+      - 'pkg/**/*.go'
+      - 'pkg/**/*.tmpl'
+    env:
+      KLEISTER_API_LOG_LEVEL: "{{ .KLEISTER_API_LOG_LEVEL | default \"debug\" }}"
+      KLEISTER_API_TOKEN_SECRET: "hgJKKJrSzI8pOxCjCnJHvNvK"
+
+  watch:frontend:
+    desc: Run reloading development frontend
+    cmds:
+      - task: fe:install
+      - npm run serve
+
+...

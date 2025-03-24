@@ -33,11 +33,11 @@ var (
 	defaultMetricsPprof     = false
 	defaultServerAddr       = "0.0.0.0:8080"
 	defaultServerHost       = "http://localhost:8080"
-	defaultServerRoot       = "/api"
-	defaultServerFrontend   = "http://localhost:8081"
+	defaultServerRoot       = "/"
 	defaultServerCert       = ""
 	defaultServerKey        = ""
 	defaultServerTemplates  = ""
+	defaultServerFrontend   = ""
 	defaultServerDocs       = true
 	defaultDatabaseDriver   = "sqlite3"
 	defaultDatabaseAddress  = ""
@@ -96,10 +96,6 @@ func init() {
 	viper.SetDefault("server.root", defaultServerRoot)
 	_ = viper.BindPFlag("server.root", serverCmd.PersistentFlags().Lookup("server-root"))
 
-	serverCmd.PersistentFlags().String("server-frontend", defaultServerFrontend, "Target for frontend redirects")
-	viper.SetDefault("server.frontend", defaultServerFrontend)
-	_ = viper.BindPFlag("server.frontend", serverCmd.PersistentFlags().Lookup("server-frontend"))
-
 	serverCmd.PersistentFlags().String("server-cert", defaultServerCert, "Path to SSL cert")
 	viper.SetDefault("server.cert", defaultServerCert)
 	_ = viper.BindPFlag("server.cert", serverCmd.PersistentFlags().Lookup("server-cert"))
@@ -111,6 +107,10 @@ func init() {
 	serverCmd.PersistentFlags().String("server-templates", defaultServerTemplates, "Path to custom template filrs")
 	viper.SetDefault("server.templates", defaultServerTemplates)
 	_ = viper.BindPFlag("server.templates", serverCmd.PersistentFlags().Lookup("server-templates"))
+
+	serverCmd.PersistentFlags().String("server-frontend", defaultServerFrontend, "Path to custom frontend files")
+	viper.SetDefault("server.frontend", defaultServerFrontend)
+	_ = viper.BindPFlag("server.frontend", serverCmd.PersistentFlags().Lookup("server-frontend"))
 
 	serverCmd.PersistentFlags().Bool("server-docs", defaultServerDocs, "Enable OpenAPI docs")
 	viper.SetDefault("server.docs", defaultServerDocs)

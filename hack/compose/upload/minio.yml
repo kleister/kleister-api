@@ -12,6 +12,8 @@ services:
       - KLEISTER_API_UPLOAD_REGION=us-east-1
       - KLEISTER_API_UPLOAD_ACCESS=minioadmin
       - KLEISTER_API_UPLOAD_SECRET=minioadmin
+      - KLEISTER_API_UPLOAD_PATHSTYLE=true
+      - KLEISTER_API_UPLOAD_PROXY=true
     depends_on:
       - minio
 

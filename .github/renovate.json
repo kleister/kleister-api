@@ -2,5 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "github>kleister/.github//renovate/preset"
+  ],
+  "packageRules": [
+    {
+      "matchPackagePatterns": [
+        "^github.com/uptrace/bun/"
+      ],
+      "groupName": "github.com-uptrace-bun deps"
+    }
   ]
 }

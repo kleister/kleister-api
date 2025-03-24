@@ -1090,6 +1090,7 @@ func (a *API) convertPackAvatar(record *model.PackAvatar) PackAvatar {
 	avatar, err := url.JoinPath(
 		a.config.Server.Host,
 		a.config.Server.Root,
+		"api/v1",
 		"storage",
 		"avatars",
 		record.Slug,

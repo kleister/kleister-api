@@ -1,11 +1,18 @@
 .direnv/
 .devenv/
+.task/
 
+.envrc
 coverage.out
 
 bin/
 dist/
 storage/
-tmp/
+
+pkg/frontend/files/
+
+node_modules/
+npm-debug.log*
+*.log
 
 .pre-commit-config.yaml

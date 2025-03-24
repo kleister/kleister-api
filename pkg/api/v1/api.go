@@ -24,7 +24,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-//go:generate go tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=config.yml ../../../openapi/v1.yml
+//go:generate go tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=config.yaml ../../../openapi/v1.yaml
 
 var (
 	_ ServerInterface = (*API)(nil)

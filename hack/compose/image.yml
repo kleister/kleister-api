@@ -2,4 +2,4 @@ version: '3.4'
 
 services:
   api:
-    image: quay.io/kleister/kleister-api:${KLEISTER_API_DOCKER_IMAGE:-latest}
+    image: ghcr.io/kleister/kleister-api:${KLEISTER_API_DOCKER_IMAGE:-latest}

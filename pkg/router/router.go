@@ -15,6 +15,7 @@ import (
 	v1 "github.com/kleister/kleister-api/pkg/api/v1"
 	"github.com/kleister/kleister-api/pkg/authn"
 	"github.com/kleister/kleister-api/pkg/config"
+	"github.com/kleister/kleister-api/pkg/handler"
 	"github.com/kleister/kleister-api/pkg/metrics"
 	"github.com/kleister/kleister-api/pkg/middleware/current"
 	"github.com/kleister/kleister-api/pkg/middleware/header"
@@ -66,6 +67,7 @@ func Server(
 				scim.WithRoot(
 					path.Join(
 						cfg.Server.Root,
+						"api",
 						"scim",
 						"v2",
 					),
@@ -84,10 +86,10 @@ func Server(
 					Msg("Failed to linitialize scim server")
 			}
 
-			root.Mount("/scim/v2", srv)
+			root.Mount("/api/scim/v2", srv)
 		}
 
-		root.Route("/v1", func(r chi.Router) {
+		root.Route("/api/v1", func(r chi.Router) {
 			swagger, err := v1.GetSwagger()
 
 			if err != nil {
@@ -99,8 +101,9 @@ func Server(
 
 			swagger.Servers = openapi3.Servers{
 				{
-					URL: cfg.Server.Host + path.Join(
+					URL: path.Join(
 						cfg.Server.Root,
+						"api",
 						"v1",
 					),
 				},
@@ -115,11 +118,13 @@ func Server(
 				r.Handle("/docs", oamw.SwaggerUI(oamw.SwaggerUIOpts{
 					Path: path.Join(
 						cfg.Server.Root,
+						"api",
 						"v1",
 						"docs",
 					),
-					SpecURL: cfg.Server.Host + path.Join(
+					SpecURL: path.Join(
 						cfg.Server.Root,
+						"api",
 						"v1",
 						"spec",
 					),
@@ -450,14 +455,24 @@ func Server(
 					})
 				})
 			})
+
+			r.Handle("/storage/*", uploads.Handler(
+				path.Join(
+					cfg.Server.Root,
+					"api",
+					"v1",
+					"storage",
+				),
+			))
 		})
 
-		root.Handle("/storage/*", uploads.Handler(
-			path.Join(
-				cfg.Server.Root,
-				"storage",
-			),
-		))
+		handlers := handler.New(cfg)
+		root.Get("/", handlers.Index())
+		root.Get("/favicon.svg", handlers.Favicon())
+		root.Get("/config.json", handlers.Config())
+		root.Get("/manifest.json", handlers.Manifest())
+		root.Handle("/assets/*", handlers.Assets())
+		root.NotFound(handlers.Index())
 	})
 
 	return mux

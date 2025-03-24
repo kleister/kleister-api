@@ -1126,6 +1126,7 @@ func (a *API) convertModAvatar(record *model.ModAvatar) ModAvatar {
 	avatar, err := url.JoinPath(
 		a.config.Server.Host,
 		a.config.Server.Root,
+		"api/v1",
 		"storage",
 		"avatars",
 		record.Slug,

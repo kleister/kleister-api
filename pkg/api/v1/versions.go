@@ -587,6 +587,7 @@ func (a *API) convertVersionFile(record *model.VersionFile) VersionFile {
 	upload, err := url.JoinPath(
 		a.config.Server.Host,
 		a.config.Server.Root,
+		"api/v1",
 		"storage",
 		"versions",
 		record.Version.ModID,

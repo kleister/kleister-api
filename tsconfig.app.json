@@ -1,0 +1,23 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    "baseUrl": "./frontend/",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "lib": ["ES2023", "DOM"]
+  },
+  "include": [
+    "./frontend/**/*.ts",
+    "./frontend/**/*.tsx",
+    "./frontend/**/*.vue"
+  ]
+}
