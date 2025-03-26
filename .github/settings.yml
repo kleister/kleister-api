@@ -1,7 +1,7 @@
 ---
 repository:
   name: kleister-api
-  description: "Kleister: API"
+  description: Server to manage mod packs for Minecraft
   homepage: https://kleister.eu
   topics: kleister, minecraft, api, server, golang, go
 
