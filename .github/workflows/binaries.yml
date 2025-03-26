@@ -48,6 +48,11 @@ jobs:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup goreleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          install-only: true
+
       - name: Setup signing
         uses: crazy-max/ghaction-import-gpg@v6
         with:

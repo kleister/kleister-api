@@ -88,12 +88,12 @@ tasks:
   build:release:
     desc: Generate a release with goreleaser
     cmds:
-      - go tool github.com/goreleaser/goreleaser/v2 release --clean
+      - goreleaser release --clean
 
   build:snapshot:
     desc: Generate a snapshot with goreleaser
     cmds:
-      - go tool github.com/goreleaser/goreleaser/v2 release --clean --snapshot
+      - goreleaser release --clean --snapshot
 
   build:server:
     desc: Build server component

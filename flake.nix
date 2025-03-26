@@ -89,6 +89,7 @@
 
                 packages = with pkgs; [
                   go-task
+                  goreleaser
                   httpie
                   nixfmt-rfc-style
                   posting
