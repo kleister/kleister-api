@@ -5,8 +5,8 @@
   ],
   "packageRules": [
     {
-      "matchPackagePatterns": [
-        "^github.com/uptrace/bun/"
+      "matchPackageNames": [
+        "/^github.com\/uptrace\/bun\//"
       ],
       "groupName": "github.com-uptrace-bun deps"
     }
