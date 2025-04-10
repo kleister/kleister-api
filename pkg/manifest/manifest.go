@@ -37,7 +37,7 @@ func Read(cfg *config.Config) (Manifest, error) {
 		return nil, fmt.Errorf("failed to read manifest: %w", err)
 	}
 
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	result := Manifest{}
 
 	if err := json.NewDecoder(file).Decode(&result); err != nil {

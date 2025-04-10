@@ -63,7 +63,7 @@ func (p *Provider) Claims(ctx context.Context, token *oauth2.Token) (user *User,
 			return nil, fmt.Errorf("failed to fetch userinfo: %w", err)
 		}
 
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			return nil, fmt.Errorf("bad status code returned: %d", resp.StatusCode)
@@ -111,7 +111,7 @@ func (p *Provider) Claims(ctx context.Context, token *oauth2.Token) (user *User,
 					return nil, fmt.Errorf("failed to fetch emails: %w", err)
 				}
 
-				defer resp.Body.Close()
+				defer func() { _ = resp.Body.Close() }()
 
 				var (
 					mails []struct {

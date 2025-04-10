@@ -304,7 +304,7 @@ func (a *API) CreatePackAvatar(w http.ResponseWriter, r *http.Request, _ PackID)
 		return
 	}
 
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	buffer, err := a.resizeAvatar(file, meta)
 
 	if err != nil {

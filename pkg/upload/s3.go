@@ -291,7 +291,7 @@ func (u *S3Upload) proxyHandler(root string, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	defer req.Body.Close()
+	defer func() { _ = req.Body.Close() }()
 
 	modified := time.Now()
 

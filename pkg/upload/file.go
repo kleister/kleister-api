@@ -84,7 +84,7 @@ func (u *FileUpload) Upload(_ context.Context, path string, content *bytes.Buffe
 		return err
 	}
 
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	if _, err = file.Write(
 		content.Bytes(),

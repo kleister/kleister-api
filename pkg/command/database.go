@@ -111,7 +111,7 @@ func init() {
 
 func dbCleanupAction(ccmd *cobra.Command, _ []string) {
 	storage := prepareStorage(ccmd.Context())
-	defer storage.Close()
+	defer func() { _, _ = storage.Close() }()
 
 	if err := storage.Users.CleanupRedirectTokens(
 		context.Background(),
@@ -129,7 +129,7 @@ func dbCleanupAction(ccmd *cobra.Command, _ []string) {
 
 func dbMigrateAction(ccmd *cobra.Command, _ []string) {
 	storage := prepareStorage(ccmd.Context())
-	defer storage.Close()
+	defer func() { _, _ = storage.Close() }()
 
 	group, err := storage.Migrate(ccmd.Context())
 
@@ -152,7 +152,7 @@ func dbMigrateAction(ccmd *cobra.Command, _ []string) {
 
 func dbRollbackAction(ccmd *cobra.Command, _ []string) {
 	storage := prepareStorage(ccmd.Context())
-	defer storage.Close()
+	defer func() { _, _ = storage.Close() }()
 
 	group, err := storage.Rollback(ccmd.Context())
 
@@ -175,7 +175,7 @@ func dbRollbackAction(ccmd *cobra.Command, _ []string) {
 
 func dbLockAction(ccmd *cobra.Command, _ []string) {
 	storage := prepareStorage(ccmd.Context())
-	defer storage.Close()
+	defer func() { _, _ = storage.Close() }()
 
 	migrator, err := storage.Migrator(
 		ccmd.Context(),
@@ -203,7 +203,7 @@ func dbLockAction(ccmd *cobra.Command, _ []string) {
 
 func dbUnlockAction(ccmd *cobra.Command, _ []string) {
 	storage := prepareStorage(ccmd.Context())
-	defer storage.Close()
+	defer func() { _, _ = storage.Close() }()
 
 	migrator, err := storage.Migrator(
 		ccmd.Context(),
@@ -231,7 +231,7 @@ func dbUnlockAction(ccmd *cobra.Command, _ []string) {
 
 func dbStatusAction(ccmd *cobra.Command, _ []string) {
 	storage := prepareStorage(ccmd.Context())
-	defer storage.Close()
+	defer func() { _, _ = storage.Close() }()
 
 	migrator, err := storage.Migrator(
 		ccmd.Context(),
@@ -277,7 +277,7 @@ func dbStatusAction(ccmd *cobra.Command, _ []string) {
 
 func dbCreateAction(ccmd *cobra.Command, args []string) {
 	storage := prepareStorage(ccmd.Context())
-	defer storage.Close()
+	defer func() { _, _ = storage.Close() }()
 
 	migrator, err := storage.Migrator(
 		ccmd.Context(),

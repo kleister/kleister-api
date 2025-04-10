@@ -28,7 +28,7 @@ func (h *Handler) Favicon() http.HandlerFunc {
 			return
 		}
 
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		stat, err := file.Stat()
 
 		if err != nil {

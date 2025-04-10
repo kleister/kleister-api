@@ -27,7 +27,7 @@ func Get(from string) (*Maven, error) {
 		return nil, fmt.Errorf("failed to fetch content: %w", err)
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	decoder := xml.NewDecoder(
 		resp.Body,
