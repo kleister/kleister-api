@@ -36,7 +36,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kleister/go-forge v1.0.1
-	github.com/kleister/go-minecraft v1.1.0
+	github.com/kleister/go-minecraft v1.2.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/oapi-codegen/nethttp-middleware v1.0.2
 	github.com/oapi-codegen/runtime v1.1.1
