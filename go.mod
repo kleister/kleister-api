@@ -38,7 +38,7 @@ require (
 	github.com/kleister/go-forge v1.0.1
 	github.com/kleister/go-minecraft v1.2.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
-	github.com/oapi-codegen/nethttp-middleware v1.0.2
+	github.com/oapi-codegen/nethttp-middleware v1.1.1
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/oklog/run v1.1.0
 	github.com/prometheus/client_golang v1.22.0
