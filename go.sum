@@ -378,6 +378,8 @@ github.com/kleister/go-forge v1.0.1 h1:1KygJJZOC7b4zhX1k4oCnrsmIzjDGmA9VJWfp1bR/
 github.com/kleister/go-forge v1.0.1/go.mod h1:nhm4NJXVh6zlVwAzex2j3qiC0R9P9sDzlxGWRgatlxQ=
 github.com/kleister/go-minecraft v1.2.0 h1:i0eUHkOKeF3wYz6nkkyMrHjywKJVf/2i4Gz369LPMCs=
 github.com/kleister/go-minecraft v1.2.0/go.mod h1:KbfEDMtVaHc6QMhdT1a4Wgut7nz96xlFi91DoenzdpU=
+github.com/kleister/go-minecraft v1.2.1 h1:WEo/e084Q71inyBBmZde3BiygIrFd6IYP1jjVEY2PZ4=
+github.com/kleister/go-minecraft v1.2.1/go.mod h1:HW4PxGRbtyprQwyvZXZJ5C17aVqCkyaxwg24bPFXmMU=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
