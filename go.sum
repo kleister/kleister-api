@@ -643,6 +643,8 @@ github.com/ultraware/whitespace v0.2.0 h1:TYowo2m9Nfj1baEQBjuHzvMRbp19i+RCcRYrSW
 github.com/ultraware/whitespace v0.2.0/go.mod h1:XcP1RLD81eV4BW8UhQlpaR+SDc2givTvyI8a586WjW8=
 github.com/uptrace/bun v1.2.11 h1:l9dTymsdZZAoSZ1+Qo3utms0RffgkDbIv+1UGk8N1wQ=
 github.com/uptrace/bun v1.2.11/go.mod h1:ww5G8h59UrOnCHmZ8O1I/4Djc7M/Z3E+EWFS2KLB6dQ=
+github.com/uptrace/bun v1.2.14 h1:5yFSfi/yVWEzQ2lAaHz+JfWN9AHmqYtNmlbaUbAp3rU=
+github.com/uptrace/bun v1.2.14/go.mod h1:ZS4nPaEv2Du3OFqAD/irk3WVP6xTB3/9TWqjJbgKYBU=
 github.com/uptrace/bun/dialect/mysqldialect v1.2.11 h1:4WLBf2ajPv62PaiPj7nbWF0J+kcHK6+Ro1Fg152iIKA=
 github.com/uptrace/bun/dialect/mysqldialect v1.2.11/go.mod h1:KNAV8KsVAxzOJnAF4p8C47Ig+Ma11Is0iz8+cb9QUIQ=
 github.com/uptrace/bun/dialect/pgdialect v1.2.11 h1:n0VKWm1fL1dwJK5TRxYYLaRKRe14BOg2+AQgpvqzG/M=
