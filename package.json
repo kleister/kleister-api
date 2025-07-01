@@ -61,7 +61,7 @@
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.26.1",
     "vite": "^7.0.0",
-    "vue-tsc": "^2.2.8"
+    "vue-tsc": "^3.0.0"
   },
   "browserslist": [
     "> 1%",
