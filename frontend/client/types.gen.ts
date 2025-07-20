@@ -14,7 +14,7 @@ export type AuthVerify = {
  * Profile
  * Model to represent profile
  */
-export type ProfileReadable = {
+export type Profile = {
     id?: string;
     username?: string;
     password?: string;
@@ -25,30 +25,17 @@ export type ProfileReadable = {
     readonly active?: boolean;
     readonly created_at?: string;
     readonly updated_at?: string;
-    readonly auths?: Array<UserAuthReadable>;
-    readonly groups?: Array<UserGroupReadable>;
-    readonly mods?: Array<UserModReadable>;
-    readonly packs?: Array<UserPackReadable>;
-};
-
-/**
- * Profile
- * Model to represent profile
- */
-export type ProfileWritable = {
-    id?: string;
-    username?: string;
-    password?: string;
-    email?: string;
-    fullname?: string;
-    profile?: string;
+    readonly auths?: Array<UserAuth>;
+    readonly groups?: Array<UserGroup>;
+    readonly mods?: Array<UserMod>;
+    readonly packs?: Array<UserPack>;
 };
 
 /**
  * Minecraft
  * Model to represent minecraft
  */
-export type MinecraftReadable = {
+export type Minecraft = {
     readonly id?: string;
     name?: string;
     type?: string;
@@ -57,19 +44,10 @@ export type MinecraftReadable = {
 };
 
 /**
- * Minecraft
- * Model to represent minecraft
- */
-export type MinecraftWritable = {
-    name?: string;
-    type?: string;
-};
-
-/**
  * Forge
  * Model to represent forge
  */
-export type ForgeReadable = {
+export type Forge = {
     readonly id?: string;
     name?: string;
     minecraft?: string;
@@ -78,38 +56,10 @@ export type ForgeReadable = {
 };
 
 /**
- * Forge
- * Model to represent forge
- */
-export type ForgeWritable = {
-    name?: string;
-    minecraft?: string;
-};
-
-/**
  * Neoforge
  * Model to represent neoforge
  */
-export type NeoforgeReadable = {
-    readonly id?: string;
-    name?: string;
-    readonly created_at?: string;
-    readonly updated_at?: string;
-};
-
-/**
- * Neoforge
- * Model to represent neoforge
- */
-export type NeoforgeWritable = {
-    name?: string;
-};
-
-/**
- * Quilt
- * Model to represent quilt
- */
-export type QuiltReadable = {
+export type Neoforge = {
     readonly id?: string;
     name?: string;
     readonly created_at?: string;
@@ -120,15 +70,7 @@ export type QuiltReadable = {
  * Quilt
  * Model to represent quilt
  */
-export type QuiltWritable = {
-    name?: string;
-};
-
-/**
- * Fabric
- * Model to represent fabric
- */
-export type FabricReadable = {
+export type Quilt = {
     readonly id?: string;
     name?: string;
     readonly created_at?: string;
@@ -139,17 +81,20 @@ export type FabricReadable = {
  * Fabric
  * Model to represent fabric
  */
-export type FabricWritable = {
+export type Fabric = {
+    readonly id?: string;
     name?: string;
+    readonly created_at?: string;
+    readonly updated_at?: string;
 };
 
 /**
  * Mod
  * Model to represent mod
  */
-export type ModReadable = {
+export type Mod = {
     readonly id?: string;
-    avatar?: ModAvatarReadable;
+    avatar?: ModAvatar;
     slug?: string;
     name?: string;
     side?: string;
@@ -163,26 +108,10 @@ export type ModReadable = {
 };
 
 /**
- * Mod
- * Model to represent mod
- */
-export type ModWritable = {
-    avatar?: ModAvatarWritable;
-    slug?: string;
-    name?: string;
-    side?: string;
-    description?: string;
-    author?: string;
-    website?: string;
-    donate?: string;
-    public?: boolean;
-};
-
-/**
  * Mod Avatar
  * Model to represent mod avatar
  */
-export type ModAvatarReadable = {
+export type ModAvatar = {
     slug?: string;
     url?: string;
     readonly created_at?: string;
@@ -190,44 +119,24 @@ export type ModAvatarReadable = {
 };
 
 /**
- * Mod Avatar
- * Model to represent mod avatar
- */
-export type ModAvatarWritable = {
-    slug?: string;
-    url?: string;
-};
-
-/**
  * Version
  * Model to represent version
  */
-export type VersionReadable = {
+export type Version = {
     readonly id?: string;
-    file?: VersionFileReadable;
-    mod?: ModReadable;
+    file?: VersionFile;
+    mod?: Mod;
     name?: string;
     public?: boolean;
     readonly created_at?: string;
     readonly updated_at?: string;
-};
-
-/**
- * Version
- * Model to represent version
- */
-export type VersionWritable = {
-    file?: VersionFileWritable;
-    mod?: ModWritable;
-    name?: string;
-    public?: boolean;
 };
 
 /**
  * Version File
  * Model to represent version file
  */
-export type VersionFileReadable = {
+export type VersionFile = {
     slug?: string;
     content_type?: string;
     md5?: string;
@@ -238,24 +147,12 @@ export type VersionFileReadable = {
 };
 
 /**
- * Version File
- * Model to represent version file
- */
-export type VersionFileWritable = {
-    slug?: string;
-    content_type?: string;
-    md5?: string;
-    path?: string;
-    url?: string;
-};
-
-/**
  * Pack
  * Model to represent pack
  */
-export type PackReadable = {
+export type Pack = {
     readonly id?: string;
-    avatar?: PackAvatarReadable;
+    avatar?: PackAvatar;
     slug?: string;
     name?: string;
     website?: string;
@@ -265,54 +162,33 @@ export type PackReadable = {
 };
 
 /**
- * Pack
- * Model to represent pack
- */
-export type PackWritable = {
-    avatar?: PackAvatarWritable;
-    slug?: string;
-    name?: string;
-    website?: string;
-    public?: boolean;
-};
-
-/**
  * Pack Avatar
  * Model to represent pack avatar
  */
-export type PackAvatarReadable = {
+export type PackAvatar = {
     slug?: string;
     url?: string;
     readonly created_at?: string;
     readonly updated_at?: string;
-};
-
-/**
- * Pack Avatar
- * Model to represent pack avatar
- */
-export type PackAvatarWritable = {
-    slug?: string;
-    url?: string;
 };
 
 /**
  * Build
  * Model to represent build
  */
-export type BuildReadable = {
+export type Build = {
     readonly id?: string;
-    pack?: PackReadable;
+    pack?: Pack;
     minecraft_id?: string;
-    minecraft?: MinecraftReadable;
+    minecraft?: Minecraft;
     forge_id?: string;
-    forge?: ForgeReadable;
+    forge?: Forge;
     neoforge_id?: string;
-    neoforge?: NeoforgeReadable;
+    neoforge?: Neoforge;
     quilt_id?: string;
-    quilt?: QuiltReadable;
+    quilt?: Quilt;
     fabric_id?: string;
-    fabric?: FabricReadable;
+    fabric?: Fabric;
     name?: string;
     java?: string;
     memory?: string;
@@ -324,61 +200,14 @@ export type BuildReadable = {
 };
 
 /**
- * Build
- * Model to represent build
- */
-export type BuildWritable = {
-    pack?: PackWritable;
-    minecraft_id?: string;
-    minecraft?: MinecraftWritable;
-    forge_id?: string;
-    forge?: ForgeWritable;
-    neoforge_id?: string;
-    neoforge?: NeoforgeWritable;
-    quilt_id?: string;
-    quilt?: QuiltWritable;
-    fabric_id?: string;
-    fabric?: FabricWritable;
-    name?: string;
-    java?: string;
-    memory?: string;
-    latest?: boolean;
-    recommended?: boolean;
-    public?: boolean;
-};
-
-/**
  * Build Version
  * Model to represent build version
  */
-export type BuildVersionReadable = {
+export type BuildVersion = {
     build_id: string;
-    build?: BuildReadable;
+    build?: Build;
     version_id: string;
-    version?: VersionReadable;
-    readonly created_at?: string;
-    readonly updated_at?: string;
-};
-
-/**
- * Build Version
- * Model to represent build version
- */
-export type BuildVersionWritable = {
-    build_id: string;
-    build?: BuildWritable;
-    version_id: string;
-    version?: VersionWritable;
-};
-
-/**
- * Group
- * Model to represent group
- */
-export type GroupReadable = {
-    id?: string;
-    slug?: string;
-    name?: string;
+    version?: Version;
     readonly created_at?: string;
     readonly updated_at?: string;
 };
@@ -387,22 +216,10 @@ export type GroupReadable = {
  * Group
  * Model to represent group
  */
-export type GroupWritable = {
+export type Group = {
     id?: string;
     slug?: string;
     name?: string;
-};
-
-/**
- * Group Pack
- * Model to represent group pack
- */
-export type GroupPackReadable = {
-    group_id: string;
-    group?: GroupReadable;
-    pack_id: string;
-    pack?: PackReadable;
-    perm?: 'user' | 'admin' | 'owner';
     readonly created_at?: string;
     readonly updated_at?: string;
 };
@@ -411,23 +228,11 @@ export type GroupPackReadable = {
  * Group Pack
  * Model to represent group pack
  */
-export type GroupPackWritable = {
+export type GroupPack = {
     group_id: string;
-    group?: GroupWritable;
+    group?: Group;
     pack_id: string;
-    pack?: PackWritable;
-    perm?: 'user' | 'admin' | 'owner';
-};
-
-/**
- * Group Mod
- * Model to represent group mod
- */
-export type GroupModReadable = {
-    group_id: string;
-    group?: GroupReadable;
-    mod_id: string;
-    mod?: ModReadable;
+    pack?: Pack;
     perm?: 'user' | 'admin' | 'owner';
     readonly created_at?: string;
     readonly updated_at?: string;
@@ -437,19 +242,21 @@ export type GroupModReadable = {
  * Group Mod
  * Model to represent group mod
  */
-export type GroupModWritable = {
+export type GroupMod = {
     group_id: string;
-    group?: GroupWritable;
+    group?: Group;
     mod_id: string;
-    mod?: ModWritable;
+    mod?: Mod;
     perm?: 'user' | 'admin' | 'owner';
+    readonly created_at?: string;
+    readonly updated_at?: string;
 };
 
 /**
  * User
  * Model to represent user
  */
-export type UserReadable = {
+export type User = {
     id?: string;
     username?: string;
     password?: string;
@@ -460,54 +267,16 @@ export type UserReadable = {
     active?: boolean;
     readonly created_at?: string;
     readonly updated_at?: string;
-    readonly auths?: Array<UserAuthReadable>;
-};
-
-/**
- * User
- * Model to represent user
- */
-export type UserWritable = {
-    id?: string;
-    username?: string;
-    password?: string;
-    email?: string;
-    fullname?: string;
-    profile?: string;
-    admin?: boolean;
-    active?: boolean;
+    readonly auths?: Array<UserAuth>;
 };
 
 /**
  * User Auth
  * Model to represent user auth
  */
-export type UserAuthReadable = {
+export type UserAuth = {
     provider?: string;
     ref?: string;
-    readonly created_at?: string;
-    readonly updated_at?: string;
-};
-
-/**
- * User Auth
- * Model to represent user auth
- */
-export type UserAuthWritable = {
-    provider?: string;
-    ref?: string;
-};
-
-/**
- * User Group
- * Model to represent user group
- */
-export type UserGroupReadable = {
-    user_id: string;
-    user?: UserReadable;
-    group_id: string;
-    group?: GroupReadable;
-    perm?: 'owner' | 'user' | 'admin';
     readonly created_at?: string;
     readonly updated_at?: string;
 };
@@ -516,24 +285,12 @@ export type UserGroupReadable = {
  * User Group
  * Model to represent user group
  */
-export type UserGroupWritable = {
+export type UserGroup = {
     user_id: string;
-    user?: UserWritable;
+    user?: User;
     group_id: string;
-    group?: GroupWritable;
+    group?: Group;
     perm?: 'owner' | 'user' | 'admin';
-};
-
-/**
- * User Pack
- * Model to represent user pack
- */
-export type UserPackReadable = {
-    user_id: string;
-    user?: UserReadable;
-    pack_id: string;
-    pack?: PackReadable;
-    perm?: 'user' | 'admin' | 'owner';
     readonly created_at?: string;
     readonly updated_at?: string;
 };
@@ -542,23 +299,11 @@ export type UserPackReadable = {
  * User Pack
  * Model to represent user pack
  */
-export type UserPackWritable = {
+export type UserPack = {
     user_id: string;
-    user?: UserWritable;
+    user?: User;
     pack_id: string;
-    pack?: PackWritable;
-    perm?: 'user' | 'admin' | 'owner';
-};
-
-/**
- * User Mod
- * Model to represent user mod
- */
-export type UserModReadable = {
-    user_id: string;
-    user?: UserReadable;
-    mod_id: string;
-    mod?: ModReadable;
+    pack?: Pack;
     perm?: 'user' | 'admin' | 'owner';
     readonly created_at?: string;
     readonly updated_at?: string;
@@ -568,12 +313,14 @@ export type UserModReadable = {
  * User Mod
  * Model to represent user mod
  */
-export type UserModWritable = {
+export type UserMod = {
     user_id: string;
-    user?: UserWritable;
+    user?: User;
     mod_id: string;
-    mod?: ModWritable;
+    mod?: Mod;
     perm?: 'user' | 'admin' | 'owner';
+    readonly created_at?: string;
+    readonly updated_at?: string;
 };
 
 /**
@@ -1351,7 +1098,7 @@ export type ShowProfileResponses = {
     /**
      * The current profile details
      */
-    200: ProfileReadable;
+    200: Profile;
 };
 
 export type ShowProfileResponse = ShowProfileResponses[keyof ShowProfileResponses];
@@ -1391,7 +1138,7 @@ export type UpdateProfileResponses = {
     /**
      * The current profile details
      */
-    200: ProfileReadable;
+    200: Profile;
 };
 
 export type UpdateProfileResponse = UpdateProfileResponses[keyof UpdateProfileResponses];
@@ -1429,7 +1176,7 @@ export type ListMinecraftsResponses = {
         total: number;
         limit: number;
         offset: number;
-        versions: Array<MinecraftReadable>;
+        versions: Array<Minecraft>;
     };
 };
 
@@ -1575,8 +1322,8 @@ export type ListMinecraftBuildsResponses = {
         total: number;
         limit: number;
         offset: number;
-        minecraft?: MinecraftReadable;
-        builds: Array<BuildReadable>;
+        minecraft?: Minecraft;
+        builds: Array<Build>;
     };
 };
 
@@ -1668,7 +1415,7 @@ export type ListForgesResponses = {
         total: number;
         limit: number;
         offset: number;
-        versions: Array<ForgeReadable>;
+        versions: Array<Forge>;
     };
 };
 
@@ -1814,8 +1561,8 @@ export type ListForgeBuildsResponses = {
         total: number;
         limit: number;
         offset: number;
-        forge?: ForgeReadable;
-        builds: Array<BuildReadable>;
+        forge?: Forge;
+        builds: Array<Build>;
     };
 };
 
@@ -1907,7 +1654,7 @@ export type ListNeoforgesResponses = {
         total: number;
         limit: number;
         offset: number;
-        versions: Array<NeoforgeReadable>;
+        versions: Array<Neoforge>;
     };
 };
 
@@ -2053,8 +1800,8 @@ export type ListNeoforgeBuildsResponses = {
         total: number;
         limit: number;
         offset: number;
-        neoforge?: NeoforgeReadable;
-        builds: Array<BuildReadable>;
+        neoforge?: Neoforge;
+        builds: Array<Build>;
     };
 };
 
@@ -2146,7 +1893,7 @@ export type ListQuiltsResponses = {
         total: number;
         limit: number;
         offset: number;
-        versions: Array<QuiltReadable>;
+        versions: Array<Quilt>;
     };
 };
 
@@ -2292,8 +2039,8 @@ export type ListQuiltBuildsResponses = {
         total: number;
         limit: number;
         offset: number;
-        quilt?: QuiltReadable;
-        builds: Array<BuildReadable>;
+        quilt?: Quilt;
+        builds: Array<Build>;
     };
 };
 
@@ -2385,7 +2132,7 @@ export type ListFabricsResponses = {
         total: number;
         limit: number;
         offset: number;
-        versions: Array<FabricReadable>;
+        versions: Array<Fabric>;
     };
 };
 
@@ -2531,8 +2278,8 @@ export type ListFabricBuildsResponses = {
         total: number;
         limit: number;
         offset: number;
-        fabric?: FabricReadable;
-        builds: Array<BuildReadable>;
+        fabric?: Fabric;
+        builds: Array<Build>;
     };
 };
 
@@ -2640,7 +2387,7 @@ export type ListPacksResponses = {
         total: number;
         limit: number;
         offset: number;
-        packs: Array<PackReadable>;
+        packs: Array<Pack>;
     };
 };
 
@@ -2681,7 +2428,7 @@ export type CreatePackResponses = {
     /**
      * The details for a pack
      */
-    200: PackReadable;
+    200: Pack;
 };
 
 export type CreatePackResponse = CreatePackResponses[keyof CreatePackResponses];
@@ -2761,7 +2508,7 @@ export type ShowPackResponses = {
     /**
      * The details for a pack
      */
-    200: PackReadable;
+    200: Pack;
 };
 
 export type ShowPackResponse = ShowPackResponses[keyof ShowPackResponses];
@@ -2810,7 +2557,7 @@ export type UpdatePackResponses = {
     /**
      * The details for a pack
      */
-    200: PackReadable;
+    200: Pack;
 };
 
 export type UpdatePackResponse = UpdatePackResponses[keyof UpdatePackResponses];
@@ -2852,7 +2599,7 @@ export type DeletePackAvatarResponses = {
     /**
      * The details for a pack avatar
      */
-    200: PackAvatarReadable;
+    200: PackAvatar;
 };
 
 export type DeletePackAvatarResponse = DeletePackAvatarResponses[keyof DeletePackAvatarResponses];
@@ -2901,7 +2648,7 @@ export type CreatePackAvatarResponses = {
     /**
      * The details for a pack avatar
      */
-    200: PackAvatarReadable;
+    200: PackAvatar;
 };
 
 export type CreatePackAvatarResponse = CreatePackAvatarResponses[keyof CreatePackAvatarResponses];
@@ -3013,8 +2760,8 @@ export type ListPackUsersResponses = {
         total: number;
         limit: number;
         offset: number;
-        pack?: PackReadable;
-        users: Array<UserPackReadable>;
+        pack?: Pack;
+        users: Array<UserPack>;
     };
 };
 
@@ -3233,8 +2980,8 @@ export type ListPackGroupsResponses = {
         total: number;
         limit: number;
         offset: number;
-        pack?: PackReadable;
-        groups: Array<GroupPackReadable>;
+        pack?: Pack;
+        groups: Array<GroupPack>;
     };
 };
 
@@ -3404,8 +3151,8 @@ export type ListBuildsResponses = {
         total: number;
         limit: number;
         offset: number;
-        pack?: PackReadable;
-        builds: Array<BuildReadable>;
+        pack?: Pack;
+        builds: Array<Build>;
     };
 };
 
@@ -3455,7 +3202,7 @@ export type CreateBuildResponses = {
     /**
      * The details for a build
      */
-    200: BuildReadable;
+    200: Build;
 };
 
 export type CreateBuildResponse = CreateBuildResponses[keyof CreateBuildResponses];
@@ -3543,7 +3290,7 @@ export type ShowBuildResponses = {
     /**
      * The details for a build
      */
-    200: BuildReadable;
+    200: Build;
 };
 
 export type ShowBuildResponse = ShowBuildResponses[keyof ShowBuildResponses];
@@ -3596,7 +3343,7 @@ export type UpdateBuildResponses = {
     /**
      * The details for a build
      */
-    200: BuildReadable;
+    200: Build;
 };
 
 export type UpdateBuildResponse = UpdateBuildResponses[keyof UpdateBuildResponses];
@@ -3716,9 +3463,9 @@ export type ListBuildVersionsResponses = {
         total: number;
         limit: number;
         offset: number;
-        pack?: PackReadable;
-        build?: BuildReadable;
-        versions: Array<BuildVersionReadable>;
+        pack?: Pack;
+        build?: Build;
+        versions: Array<BuildVersion>;
     };
 };
 
@@ -3830,7 +3577,7 @@ export type ListModsResponses = {
         total: number;
         limit: number;
         offset: number;
-        mods: Array<ModReadable>;
+        mods: Array<Mod>;
     };
 };
 
@@ -3871,7 +3618,7 @@ export type CreateModResponses = {
     /**
      * The details for a mod
      */
-    200: ModReadable;
+    200: Mod;
 };
 
 export type CreateModResponse = CreateModResponses[keyof CreateModResponses];
@@ -3951,7 +3698,7 @@ export type ShowModResponses = {
     /**
      * The details for a mod
      */
-    200: ModReadable;
+    200: Mod;
 };
 
 export type ShowModResponse = ShowModResponses[keyof ShowModResponses];
@@ -4000,7 +3747,7 @@ export type UpdateModResponses = {
     /**
      * The details for a mod
      */
-    200: ModReadable;
+    200: Mod;
 };
 
 export type UpdateModResponse = UpdateModResponses[keyof UpdateModResponses];
@@ -4042,7 +3789,7 @@ export type DeleteModAvatarResponses = {
     /**
      * The details for a mod avatar
      */
-    200: ModAvatarReadable;
+    200: ModAvatar;
 };
 
 export type DeleteModAvatarResponse = DeleteModAvatarResponses[keyof DeleteModAvatarResponses];
@@ -4091,7 +3838,7 @@ export type CreateModAvatarResponses = {
     /**
      * The details for a mod avatar
      */
-    200: ModAvatarReadable;
+    200: ModAvatar;
 };
 
 export type CreateModAvatarResponse = CreateModAvatarResponses[keyof CreateModAvatarResponses];
@@ -4203,8 +3950,8 @@ export type ListModUsersResponses = {
         total: number;
         limit: number;
         offset: number;
-        mod?: ModReadable;
-        users: Array<UserModReadable>;
+        mod?: Mod;
+        users: Array<UserMod>;
     };
 };
 
@@ -4423,8 +4170,8 @@ export type ListModGroupsResponses = {
         total: number;
         limit: number;
         offset: number;
-        mod?: ModReadable;
-        groups: Array<GroupModReadable>;
+        mod?: Mod;
+        groups: Array<GroupMod>;
     };
 };
 
@@ -4594,8 +4341,8 @@ export type ListVersionsResponses = {
         total: number;
         limit: number;
         offset: number;
-        mod?: ModReadable;
-        versions: Array<VersionReadable>;
+        mod?: Mod;
+        versions: Array<Version>;
     };
 };
 
@@ -4645,7 +4392,7 @@ export type CreateVersionResponses = {
     /**
      * The details for a version
      */
-    200: VersionReadable;
+    200: Version;
 };
 
 export type CreateVersionResponse = CreateVersionResponses[keyof CreateVersionResponses];
@@ -4733,7 +4480,7 @@ export type ShowVersionResponses = {
     /**
      * The details for a version
      */
-    200: VersionReadable;
+    200: Version;
 };
 
 export type ShowVersionResponse = ShowVersionResponses[keyof ShowVersionResponses];
@@ -4786,7 +4533,7 @@ export type UpdateVersionResponses = {
     /**
      * The details for a version
      */
-    200: VersionReadable;
+    200: Version;
 };
 
 export type UpdateVersionResponse = UpdateVersionResponses[keyof UpdateVersionResponses];
@@ -4906,9 +4653,9 @@ export type ListVersionBuildsResponses = {
         total: number;
         limit: number;
         offset: number;
-        mod?: ModReadable;
-        version?: VersionReadable;
-        builds: Array<BuildVersionReadable>;
+        mod?: Mod;
+        version?: Version;
+        builds: Array<BuildVersion>;
     };
 };
 
@@ -5020,7 +4767,7 @@ export type ListGroupsResponses = {
         total: number;
         limit: number;
         offset: number;
-        groups: Array<GroupReadable>;
+        groups: Array<Group>;
     };
 };
 
@@ -5061,7 +4808,7 @@ export type CreateGroupResponses = {
     /**
      * The details for a group
      */
-    200: GroupReadable;
+    200: Group;
 };
 
 export type CreateGroupResponse = CreateGroupResponses[keyof CreateGroupResponses];
@@ -5141,7 +4888,7 @@ export type ShowGroupResponses = {
     /**
      * The details for a group
      */
-    200: GroupReadable;
+    200: Group;
 };
 
 export type ShowGroupResponse = ShowGroupResponses[keyof ShowGroupResponses];
@@ -5190,7 +4937,7 @@ export type UpdateGroupResponses = {
     /**
      * The details for a group
      */
-    200: GroupReadable;
+    200: Group;
 };
 
 export type UpdateGroupResponse = UpdateGroupResponses[keyof UpdateGroupResponses];
@@ -5302,8 +5049,8 @@ export type ListGroupUsersResponses = {
         total: number;
         limit: number;
         offset: number;
-        group?: GroupReadable;
-        users: Array<UserGroupReadable>;
+        group?: Group;
+        users: Array<UserGroup>;
     };
 };
 
@@ -5522,8 +5269,8 @@ export type ListGroupModsResponses = {
         total: number;
         limit: number;
         offset: number;
-        group?: GroupReadable;
-        mods: Array<GroupModReadable>;
+        group?: Group;
+        mods: Array<GroupMod>;
     };
 };
 
@@ -5742,8 +5489,8 @@ export type ListGroupPacksResponses = {
         total: number;
         limit: number;
         offset: number;
-        group?: GroupReadable;
-        packs: Array<GroupPackReadable>;
+        group?: Group;
+        packs: Array<GroupPack>;
     };
 };
 
@@ -5904,7 +5651,7 @@ export type ListUsersResponses = {
         total: number;
         limit: number;
         offset: number;
-        users: Array<UserReadable>;
+        users: Array<User>;
     };
 };
 
@@ -5945,7 +5692,7 @@ export type CreateUserResponses = {
     /**
      * The details for an user
      */
-    200: UserReadable;
+    200: User;
 };
 
 export type CreateUserResponse = CreateUserResponses[keyof CreateUserResponses];
@@ -6025,7 +5772,7 @@ export type ShowUserResponses = {
     /**
      * The details for an user
      */
-    200: UserReadable;
+    200: User;
 };
 
 export type ShowUserResponse = ShowUserResponses[keyof ShowUserResponses];
@@ -6074,7 +5821,7 @@ export type UpdateUserResponses = {
     /**
      * The details for an user
      */
-    200: UserReadable;
+    200: User;
 };
 
 export type UpdateUserResponse = UpdateUserResponses[keyof UpdateUserResponses];
@@ -6186,8 +5933,8 @@ export type ListUserGroupsResponses = {
         total: number;
         limit: number;
         offset: number;
-        user?: UserReadable;
-        groups: Array<UserGroupReadable>;
+        user?: User;
+        groups: Array<UserGroup>;
     };
 };
 
@@ -6406,8 +6153,8 @@ export type ListUserModsResponses = {
         total: number;
         limit: number;
         offset: number;
-        user?: UserReadable;
-        mods: Array<UserModReadable>;
+        user?: User;
+        mods: Array<UserMod>;
     };
 };
 
@@ -6626,8 +6373,8 @@ export type ListUserPacksResponses = {
         total: number;
         limit: number;
         offset: number;
-        user?: UserReadable;
-        packs: Array<UserPackReadable>;
+        user?: User;
+        packs: Array<UserPack>;
     };
 };
 
