@@ -24,8 +24,8 @@
     "deps:upgrade": "ncu --upgrade"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.7.2",
-    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/fontawesome-svg-core": "^7.0.0",
+    "@fortawesome/free-brands-svg-icons": "^7.0.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@tanstack/vue-table": "^8.21.2",
     "@vee-validate/zod": "^4.15.0",
