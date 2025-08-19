@@ -8,7 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import {
   FormControl,
@@ -28,16 +27,14 @@ import { useUsers } from '../../providers'
 
 const { addUser } = useUsers()
 
-const formSchema = toTypedSchema(
-  z.object({
-    username: z.string().min(3).max(255),
-    password: z.string().min(3).max(255),
-    email: z.string().email(),
-    fullname: z.string().min(1).max(255),
-    admin: z.boolean().optional(),
-    active: z.boolean().optional(),
-  })
-)
+const formSchema = z.object({
+  username: z.string().min(3).max(255),
+  password: z.string().min(3).max(255),
+  email: z.string().email(),
+  fullname: z.string().min(1).max(255),
+  admin: z.boolean().optional(),
+  active: z.boolean().optional(),
+})
 
 const {
   handleSubmit,

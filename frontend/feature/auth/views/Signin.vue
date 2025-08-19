@@ -6,7 +6,6 @@ import OauthProviders from '../components/oauth-providers'
 import { loginAuth } from '../../../client'
 import { useAuthStore } from '../store/auth'
 import { useRouter } from 'vue-router'
-import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { useForm } from 'vee-validate'
 import {
@@ -22,12 +21,10 @@ import { toast } from '@/components/ui/toast'
 const { signInUser } = useAuthStore()
 const router = useRouter()
 
-const formSchema = toTypedSchema(
-  z.object({
-    username: z.string().min(1).max(255),
-    password: z.string().min(1).max(255),
-  })
-)
+const formSchema = z.object({
+  username: z.string().min(1).max(255),
+  password: z.string().min(1).max(255),
+})
 
 const { handleSubmit, isSubmitting, isValidating, errors, values } = useForm({
   validationSchema: formSchema,
