@@ -19,7 +19,7 @@
     "preview": "vite preview",
     "lint": "eslint ./frontend",
     "format": "eslint ./frontend --fix && prettier ./frontend --write",
-    "openapi": "openapi-ts --input openapi/v1.yaml --output ./frontend/client",
+    "openapi": "openapi-ts --input ./openapi/v1.yaml --output ./frontend/client",
     "test": "echo no tests defined so far",
     "deps:upgrade": "ncu --upgrade"
   },
