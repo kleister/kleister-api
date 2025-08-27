@@ -26,7 +26,7 @@ require (
 	github.com/elimity-com/scim v0.0.0-20240320110924-172bf2aee9c8
 	github.com/gabriel-vasile/mimetype v1.4.10
 	github.com/getkin/kin-openapi v0.133.0
-	github.com/go-chi/chi/v5 v5.2.2
+	github.com/go-chi/chi/v5 v5.2.3
 	github.com/go-chi/render v1.0.3
 	github.com/go-openapi/runtime v0.28.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
