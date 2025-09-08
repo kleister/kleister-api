@@ -84,27 +84,21 @@ jobs:
         run: |
           aws s3 sync --exclude "*" --include "kleister-api-*" dist s3://dl.kleister.eu/api/testing/
 
+      - name: Install cloudsmith
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: cloudsmith-io/cloudsmith-cli-action@v1.0.4
+        with:
+          api-key: ${{ secrets.CLOUDSMITH_API_KEY }}
+
       - name: Upload packages
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           for PACKAGE in dist/kleister-*.deb; do
-            echo "> uploading $PACKAGE"
-            curl  -sSL \
-              --header "Authorization: Bearer $BALTOREPO_TOKEN" \
-              --form "package=@$PACKAGE" \
-              --form "distribution=all" \
-              https://kleister.baltorepo.com/stable/debian/upload/
-            echo "> done"
+            cloudsmith push deb kleister/general/any-distro/any-version "${PACKAGE}"
           done
 
           for PACKAGE in dist/kleister-*.rpm; do
-            echo "> uploading $PACKAGE"
-            curl  -sSL \
-              --header "Authorization: Bearer $BALTOREPO_TOKEN" \
-              --form "package=@$PACKAGE" \
-              --form "distribution=all" \
-              https://kleister.baltorepo.com/stable/redhat/upload/
-            echo "> done"
+            cloudsmith push rpm kleister/general/any-distro/any-version "${PACKAGE}"
           done
 
 ...
