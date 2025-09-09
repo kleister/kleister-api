@@ -11,39 +11,14 @@
       "groupName": "github.com-uptrace-bun deps"
     },
     {
-      "matchPackageNames": [
-        "/^github.com\/golangci\/golangci-lint\/v2/"
+      "matchManagers": [
+        "gomod"
       ],
-      "labels": [
-        "tools",
-        "golangci"
-      ]
-    },
-    {
-      "matchPackageNames": [
-        "/^github.com\/mgechev\/revive/"
-      ],
-      "labels": [
-        "tools",
-        "revive"
-      ]
-    },
-    {
-      "matchPackageNames": [
-        "/^github.com\/golang\/mock/"
-      ],
-      "labels": [
-        "tools",
-        "mockgen"
-      ]
-    },
-    {
-      "matchPackageNames": [
-        "/^github.com\/oapi-codegen\/oapi-codegen\/v2/"
-      ],
-      "labels": [
-        "tools",
-        "codegen"
+      "ignoreDeps": [
+        "github.com/golangci/golangci-lint/v2/cmd/golangci-lint",
+        "github.com/mgechev/revive",
+        "github.com/golang/mock/mockgen",
+        "github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen"
       ]
     }
   ]

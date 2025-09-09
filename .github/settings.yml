@@ -172,18 +172,6 @@ labels:
     description: This is out of scope and outdated
   - name: tools
     color: 1d76db
-    description: Tools updates based on Renovate
-  - name: golangci
-    color: 1d76db
-    description: Tools updates for golangci-lint
-  - name: revive
-    color: 1d76db
-    description: Tools updates for revive
-  - name: mockgen
-    color: 1d76db
-    description: Tools updates for mockgen
-  - name: codegen
-    color: 1d76db
-    description: Tools updates for oapi-codegen
+    description: Tools updates used for CI and other tasks
 
 ...
