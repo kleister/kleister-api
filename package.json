@@ -28,7 +28,7 @@
     "@fortawesome/free-brands-svg-icons": "^7.0.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@tanstack/vue-table": "^8.21.2",
-    "@vueuse/core": "^13.0.0",
+    "@vueuse/core": "^14.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.546.0",
