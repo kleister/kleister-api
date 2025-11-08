@@ -31,7 +31,7 @@
     "@vueuse/core": "^14.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-vue-next": "^0.552.0",
+    "lucide-vue-next": "^0.553.0",
     "npm-check-updates": "^19.0.0",
     "pinia": "^3.0.1",
     "radix-vue": "^1.9.17",
