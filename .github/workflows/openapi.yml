@@ -7,6 +7,9 @@ name: openapi
     branches:
       - master
 
+permissions:
+  contents: read
+
 jobs:
   openapi:
     runs-on: ubuntu-latest
