@@ -674,10 +674,10 @@ github.com/ultraware/funlen v0.2.0 h1:gCHmCn+d2/1SemTdYMiKLAHFYxTYz7z9VIDRaTGyLk
 github.com/ultraware/funlen v0.2.0/go.mod h1:ZE0q4TsJ8T1SQcjmkhN/w+MceuatI6pBFSxxyteHIJA=
 github.com/ultraware/whitespace v0.2.0 h1:TYowo2m9Nfj1baEQBjuHzvMRbp19i+RCcRYrSWoFa+g=
 github.com/ultraware/whitespace v0.2.0/go.mod h1:XcP1RLD81eV4BW8UhQlpaR+SDc2givTvyI8a586WjW8=
-github.com/uptrace/bun v1.2.15 h1:Ut68XRBLDgp9qG9QBMa9ELWaZOmzHNdczHQdrOZbEFE=
-github.com/uptrace/bun v1.2.15/go.mod h1:Eghz7NonZMiTX/Z6oKYytJ0oaMEJ/eq3kEV4vSqG038=
-github.com/uptrace/bun/dialect/mysqldialect v1.2.15 h1:z/Seg0ljdqoATl0RGPBLHkod1bT0RofL5nNvqdt+UcM=
-github.com/uptrace/bun/dialect/mysqldialect v1.2.15/go.mod h1:VUi7mXAL3ttEphcdDta+dXeB7wyI/uvQiE6G8S8ipSQ=
+github.com/uptrace/bun v1.2.16 h1:QlObi6ZIK5Ao7kAALnh91HWYNZUBbVwye52fmlQM9kc=
+github.com/uptrace/bun v1.2.16/go.mod h1:jMoNg2n56ckaawi/O/J92BHaECmrz6IRjuMWqlMaMTM=
+github.com/uptrace/bun/dialect/mysqldialect v1.2.16 h1:ok06dAS094cEKvKg38SVAnXMroNHNaM5ZtpRkPE/Oz0=
+github.com/uptrace/bun/dialect/mysqldialect v1.2.16/go.mod h1:fjbFYeJZCK8z0m0ACvdgs+dbFdDIaLYWDr+jvaPLedQ=
 github.com/uptrace/bun/dialect/pgdialect v1.2.15 h1:er+/3giAIqpfrXJw+KP9B7ujyQIi5XkPnFmgjAVL6bA=
 github.com/uptrace/bun/dialect/pgdialect v1.2.15/go.mod h1:QSiz6Qpy9wlGFsfpf7UMSL6mXAL1jDJhFwuOVacCnOQ=
 github.com/uptrace/bun/dialect/sqlitedialect v1.2.15 h1:7upGMVjFRB1oI78GQw6ruNLblYn5CR+kxqcbbeBBils=
