@@ -45,7 +45,7 @@ require (
 	github.com/rrivera/identicon v0.0.0-20240116195454-d5ba35832c0d
 	github.com/rs/zerolog v1.34.0
 	github.com/scim2/filter-parser/v2 v2.2.0
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	github.com/uptrace/bun v1.2.16
