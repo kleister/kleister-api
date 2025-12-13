@@ -46,7 +46,7 @@
   "devDependencies": {
     "@hey-api/openapi-ts": "0.88.2",
     "@tailwindcss/vite": "4.1.17",
-    "@types/node": "24.10.2",
+    "@types/node": "24.10.3",
     "@vitejs/plugin-vue": "6.0.2",
     "@vue/tsconfig": "0.8.1",
     "autoprefixer": "10.4.22",
