@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.89.0",
-    "@tailwindcss/vite": "4.1.17",
+    "@tailwindcss/vite": "4.1.18",
     "@types/node": "24.10.3",
     "@vitejs/plugin-vue": "6.0.2",
     "@vue/tsconfig": "0.8.1",
@@ -55,7 +55,7 @@
     "eslint-plugin-vue": "10.6.2",
     "globals": "16.5.0",
     "prettier": "3.7.4",
-    "tailwindcss": "4.1.17",
+    "tailwindcss": "4.1.18",
     "typescript": "5.9.3",
     "typescript-eslint": "8.49.0",
     "vite": "7.2.7",
