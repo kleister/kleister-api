@@ -47,7 +47,7 @@
     "@hey-api/openapi-ts": "0.89.0",
     "@tailwindcss/vite": "4.1.18",
     "@types/node": "24.10.3",
-    "@vitejs/plugin-vue": "6.0.2",
+    "@vitejs/plugin-vue": "6.0.3",
     "@vue/tsconfig": "0.8.1",
     "autoprefixer": "10.4.22",
     "eslint": "9.39.1",
