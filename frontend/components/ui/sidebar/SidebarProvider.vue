@@ -21,6 +21,7 @@ const props = withDefaults(
   {
     defaultOpen: true,
     open: undefined,
+    class: '',
   }
 )
 

@@ -11,6 +11,7 @@ const props = withDefaults(
   }>(),
   {
     colspan: 1,
+    class: '',
   }
 )
 
