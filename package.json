@@ -19,7 +19,7 @@
     "preview": "vite preview",
     "lint": "eslint ./frontend",
     "format": "eslint ./frontend --fix && prettier ./frontend --write",
-    "openapi": "openapi-ts --input ./openapi/v1.yaml --output ./frontend/client",
+    "openapi": "rimraf frontend/client && openapi-ts --input ./openapi/v1.yaml --output ./frontend/client",
     "test": "echo no tests defined so far",
     "deps:upgrade": "ncu --upgrade"
   },
@@ -55,6 +55,7 @@
     "eslint-plugin-vue": "10.7.0",
     "globals": "17.3.0",
     "prettier": "3.8.1",
+    "rimraf": "^6.1.2",
     "tailwindcss": "4.1.18",
     "typescript": "5.9.3",
     "typescript-eslint": "8.54.0",
