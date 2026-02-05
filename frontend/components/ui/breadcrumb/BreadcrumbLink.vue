@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
-import { type RouterLinkProps } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router'
 
 const props = withDefaults(
-  defineProps<RouterLinkProps & { class?: HTMLAttributes['class'] }>(),
+  defineProps<{ to: RouteLocationRaw; class?: HTMLAttributes['class'] }>(),
   {
     class: '',
   }
