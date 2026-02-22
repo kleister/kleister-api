@@ -50,7 +50,7 @@
     "@vitejs/plugin-vue": "6.0.4",
     "@vue/tsconfig": "0.8.1",
     "autoprefixer": "10.4.24",
-    "eslint": "9.39.2",
+    "eslint": "10.0.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-vue": "10.8.0",
     "globals": "17.3.0",
