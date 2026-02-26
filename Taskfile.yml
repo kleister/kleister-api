@@ -1,12 +1,6 @@
 ---
 version: "3.40"
 
-vars:
-  SOURCES:
-    sh: find . -name "*.go" -type f -not -iname mock.go -not -path "./.devenv/*" -not -path "./.direnv/*" | xargs echo
-  PACKAGES:
-    sh: go list ./... | xargs echo
-
 tasks:
   clean:
     desc: Remove all temporary build artifacts
@@ -22,16 +16,25 @@ tasks:
 
   be:fmt:
     desc: Run standard formatter for backend
+    vars:
+      SOURCES:
+        sh: find . -name "*.go" -type f -not -iname mock.go -not -path "./.devenv/*" -not -path "./.direnv/*" | xargs echo
     cmds:
       - gofmt -s -w {{ .SOURCES }}
 
   be:vet:
     desc: Run vet linting for backend
+    vars:
+      PACKAGES:
+        sh: go list ./... | xargs echo
     cmds:
       - go vet {{ .PACKAGES }}
 
   be:lint:
     desc: Run revive linting for backend
+    vars:
+      PACKAGES:
+        sh: go list ./... | xargs echo
     cmds:
       - for PKG in {{ .PACKAGES }}; do go tool github.com/mgechev/revive -config revive.toml -set_exit_status $PKG || exit 1; done;
 
@@ -42,11 +45,17 @@ tasks:
 
   be:generate:
     desc: Generate code for backend
+    vars:
+      PACKAGES:
+        sh: go list ./... | xargs echo
     cmds:
       - go generate {{ .PACKAGES }}
 
   be:test:
     desc: Run tests for backend
+    vars:
+      PACKAGES:
+        sh: go list ./... | xargs echo
     cmds:
       - go test -coverprofile coverage.out {{ .PACKAGES }}
 
