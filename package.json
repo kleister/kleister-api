@@ -44,13 +44,14 @@
     "zod": "^4.0.17"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@hey-api/openapi-ts": "0.92.4",
     "@tailwindcss/vite": "4.2.0",
     "@types/node": "24.10.13",
     "@vitejs/plugin-vue": "6.0.4",
     "@vue/tsconfig": "0.8.1",
     "autoprefixer": "10.4.24",
-    "eslint": "9.39.3",
+    "eslint": "10.0.1",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-vue": "10.8.0",
     "globals": "17.3.0",
