@@ -51,7 +51,7 @@ jobs:
         run: task fe:build
 
       - name: Upload frontend
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: frontend
           path: pkg/frontend/files/
@@ -78,7 +78,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch frontend
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: frontend
           path: pkg/frontend/files/
