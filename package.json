@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@hey-api/openapi-ts": "0.93.0",
+    "@hey-api/openapi-ts": "0.93.1",
     "@tailwindcss/vite": "4.2.1",
     "@types/node": "24.10.15",
     "@vitejs/plugin-vue": "6.0.4",
