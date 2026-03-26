@@ -55,7 +55,7 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-vue": "10.8.0",
     "globals": "17.4.0",
-    "happy-dom": "20.8.7",
+    "happy-dom": "20.8.8",
     "npm-check-updates": "19.6.5",
     "prettier": "3.8.1",
     "rimraf": "6.1.3",
