@@ -45,7 +45,7 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@hey-api/openapi-ts": "0.94.5",
-    "@tailwindcss/vite": "0.0.0-oxide.4",
+    "@tailwindcss/vite": "4.2.2",
     "@types/node": "25.5.0",
     "@vitejs/plugin-vue": "6.0.5",
     "@vue/test-utils": "2.4.6",
