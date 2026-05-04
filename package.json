@@ -51,7 +51,7 @@
     "@vue/test-utils": "2.4.10",
     "@vue/tsconfig": "0.9.1",
     "autoprefixer": "10.5.0",
-    "eslint": "10.2.1",
+    "eslint": "10.3.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-vue": "10.9.0",
     "globals": "17.5.0",
