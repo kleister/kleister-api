@@ -22,13 +22,10 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-// contextKey provides a type for use with context.WithValue.
-type contextKey string
-
 const (
-	BasicScopes  contextKey = "Basic.Scopes"
-	BearerScopes contextKey = "Bearer.Scopes"
-	HeaderScopes contextKey = "Header.Scopes"
+	BasicScopes  basicContextKey  = "Basic.Scopes"
+	BearerScopes bearerContextKey = "Bearer.Scopes"
+	HeaderScopes headerContextKey = "Header.Scopes"
 )
 
 // Defines values for GroupModPerm.
@@ -38,12 +35,40 @@ const (
 	GroupModPermUser  GroupModPerm = "user"
 )
 
+// Valid indicates whether the value is a known member of the GroupModPerm enum.
+func (e GroupModPerm) Valid() bool {
+	switch e {
+	case GroupModPermAdmin:
+		return true
+	case GroupModPermOwner:
+		return true
+	case GroupModPermUser:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for GroupPackPerm.
 const (
 	GroupPackPermAdmin GroupPackPerm = "admin"
 	GroupPackPermOwner GroupPackPerm = "owner"
 	GroupPackPermUser  GroupPackPerm = "user"
 )
+
+// Valid indicates whether the value is a known member of the GroupPackPerm enum.
+func (e GroupPackPerm) Valid() bool {
+	switch e {
+	case GroupPackPermAdmin:
+		return true
+	case GroupPackPermOwner:
+		return true
+	case GroupPackPermUser:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for UserGroupPerm.
 const (
@@ -52,12 +77,40 @@ const (
 	UserGroupPermUser  UserGroupPerm = "user"
 )
 
+// Valid indicates whether the value is a known member of the UserGroupPerm enum.
+func (e UserGroupPerm) Valid() bool {
+	switch e {
+	case UserGroupPermAdmin:
+		return true
+	case UserGroupPermOwner:
+		return true
+	case UserGroupPermUser:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for UserModPerm.
 const (
 	UserModPermAdmin UserModPerm = "admin"
 	UserModPermOwner UserModPerm = "owner"
 	UserModPermUser  UserModPerm = "user"
 )
+
+// Valid indicates whether the value is a known member of the UserModPerm enum.
+func (e UserModPerm) Valid() bool {
+	switch e {
+	case UserModPermAdmin:
+		return true
+	case UserModPermOwner:
+		return true
+	case UserModPermUser:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for UserPackPerm.
 const (
@@ -66,11 +119,37 @@ const (
 	UserPackPermUser  UserPackPerm = "user"
 )
 
+// Valid indicates whether the value is a known member of the UserPackPerm enum.
+func (e UserPackPerm) Valid() bool {
+	switch e {
+	case UserPackPermAdmin:
+		return true
+	case UserPackPermOwner:
+		return true
+	case UserPackPermUser:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for SortOrderParam.
 const (
 	SortOrderParamAsc  SortOrderParam = "asc"
 	SortOrderParamDesc SortOrderParam = "desc"
 )
+
+// Valid indicates whether the value is a known member of the SortOrderParam enum.
+func (e SortOrderParam) Valid() bool {
+	switch e {
+	case SortOrderParamAsc:
+		return true
+	case SortOrderParamDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListFabricBuildsParamsOrder.
 const (
@@ -78,11 +157,35 @@ const (
 	ListFabricBuildsParamsOrderDesc ListFabricBuildsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListFabricBuildsParamsOrder enum.
+func (e ListFabricBuildsParamsOrder) Valid() bool {
+	switch e {
+	case ListFabricBuildsParamsOrderAsc:
+		return true
+	case ListFabricBuildsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListForgeBuildsParamsOrder.
 const (
 	ListForgeBuildsParamsOrderAsc  ListForgeBuildsParamsOrder = "asc"
 	ListForgeBuildsParamsOrderDesc ListForgeBuildsParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListForgeBuildsParamsOrder enum.
+func (e ListForgeBuildsParamsOrder) Valid() bool {
+	switch e {
+	case ListForgeBuildsParamsOrderAsc:
+		return true
+	case ListForgeBuildsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListGroupsParamsOrder.
 const (
@@ -90,11 +193,35 @@ const (
 	ListGroupsParamsOrderDesc ListGroupsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListGroupsParamsOrder enum.
+func (e ListGroupsParamsOrder) Valid() bool {
+	switch e {
+	case ListGroupsParamsOrderAsc:
+		return true
+	case ListGroupsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListGroupModsParamsOrder.
 const (
 	ListGroupModsParamsOrderAsc  ListGroupModsParamsOrder = "asc"
 	ListGroupModsParamsOrderDesc ListGroupModsParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListGroupModsParamsOrder enum.
+func (e ListGroupModsParamsOrder) Valid() bool {
+	switch e {
+	case ListGroupModsParamsOrderAsc:
+		return true
+	case ListGroupModsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListGroupPacksParamsOrder.
 const (
@@ -102,11 +229,35 @@ const (
 	ListGroupPacksParamsOrderDesc ListGroupPacksParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListGroupPacksParamsOrder enum.
+func (e ListGroupPacksParamsOrder) Valid() bool {
+	switch e {
+	case ListGroupPacksParamsOrderAsc:
+		return true
+	case ListGroupPacksParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListGroupUsersParamsOrder.
 const (
 	ListGroupUsersParamsOrderAsc  ListGroupUsersParamsOrder = "asc"
 	ListGroupUsersParamsOrderDesc ListGroupUsersParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListGroupUsersParamsOrder enum.
+func (e ListGroupUsersParamsOrder) Valid() bool {
+	switch e {
+	case ListGroupUsersParamsOrderAsc:
+		return true
+	case ListGroupUsersParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListMinecraftBuildsParamsOrder.
 const (
@@ -114,11 +265,35 @@ const (
 	ListMinecraftBuildsParamsOrderDesc ListMinecraftBuildsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListMinecraftBuildsParamsOrder enum.
+func (e ListMinecraftBuildsParamsOrder) Valid() bool {
+	switch e {
+	case ListMinecraftBuildsParamsOrderAsc:
+		return true
+	case ListMinecraftBuildsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListModsParamsOrder.
 const (
 	ListModsParamsOrderAsc  ListModsParamsOrder = "asc"
 	ListModsParamsOrderDesc ListModsParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListModsParamsOrder enum.
+func (e ListModsParamsOrder) Valid() bool {
+	switch e {
+	case ListModsParamsOrderAsc:
+		return true
+	case ListModsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListModGroupsParamsOrder.
 const (
@@ -126,11 +301,35 @@ const (
 	ListModGroupsParamsOrderDesc ListModGroupsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListModGroupsParamsOrder enum.
+func (e ListModGroupsParamsOrder) Valid() bool {
+	switch e {
+	case ListModGroupsParamsOrderAsc:
+		return true
+	case ListModGroupsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListModUsersParamsOrder.
 const (
 	ListModUsersParamsOrderAsc  ListModUsersParamsOrder = "asc"
 	ListModUsersParamsOrderDesc ListModUsersParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListModUsersParamsOrder enum.
+func (e ListModUsersParamsOrder) Valid() bool {
+	switch e {
+	case ListModUsersParamsOrderAsc:
+		return true
+	case ListModUsersParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListVersionsParamsOrder.
 const (
@@ -138,11 +337,35 @@ const (
 	ListVersionsParamsOrderDesc ListVersionsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListVersionsParamsOrder enum.
+func (e ListVersionsParamsOrder) Valid() bool {
+	switch e {
+	case ListVersionsParamsOrderAsc:
+		return true
+	case ListVersionsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListVersionBuildsParamsOrder.
 const (
 	ListVersionBuildsParamsOrderAsc  ListVersionBuildsParamsOrder = "asc"
 	ListVersionBuildsParamsOrderDesc ListVersionBuildsParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListVersionBuildsParamsOrder enum.
+func (e ListVersionBuildsParamsOrder) Valid() bool {
+	switch e {
+	case ListVersionBuildsParamsOrderAsc:
+		return true
+	case ListVersionBuildsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListNeoforgeBuildsParamsOrder.
 const (
@@ -150,11 +373,35 @@ const (
 	ListNeoforgeBuildsParamsOrderDesc ListNeoforgeBuildsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListNeoforgeBuildsParamsOrder enum.
+func (e ListNeoforgeBuildsParamsOrder) Valid() bool {
+	switch e {
+	case ListNeoforgeBuildsParamsOrderAsc:
+		return true
+	case ListNeoforgeBuildsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListPacksParamsOrder.
 const (
 	ListPacksParamsOrderAsc  ListPacksParamsOrder = "asc"
 	ListPacksParamsOrderDesc ListPacksParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListPacksParamsOrder enum.
+func (e ListPacksParamsOrder) Valid() bool {
+	switch e {
+	case ListPacksParamsOrderAsc:
+		return true
+	case ListPacksParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListBuildsParamsOrder.
 const (
@@ -162,11 +409,35 @@ const (
 	ListBuildsParamsOrderDesc ListBuildsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListBuildsParamsOrder enum.
+func (e ListBuildsParamsOrder) Valid() bool {
+	switch e {
+	case ListBuildsParamsOrderAsc:
+		return true
+	case ListBuildsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListBuildVersionsParamsOrder.
 const (
 	ListBuildVersionsParamsOrderAsc  ListBuildVersionsParamsOrder = "asc"
 	ListBuildVersionsParamsOrderDesc ListBuildVersionsParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListBuildVersionsParamsOrder enum.
+func (e ListBuildVersionsParamsOrder) Valid() bool {
+	switch e {
+	case ListBuildVersionsParamsOrderAsc:
+		return true
+	case ListBuildVersionsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListPackGroupsParamsOrder.
 const (
@@ -174,11 +445,35 @@ const (
 	ListPackGroupsParamsOrderDesc ListPackGroupsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListPackGroupsParamsOrder enum.
+func (e ListPackGroupsParamsOrder) Valid() bool {
+	switch e {
+	case ListPackGroupsParamsOrderAsc:
+		return true
+	case ListPackGroupsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListPackUsersParamsOrder.
 const (
 	ListPackUsersParamsOrderAsc  ListPackUsersParamsOrder = "asc"
 	ListPackUsersParamsOrderDesc ListPackUsersParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListPackUsersParamsOrder enum.
+func (e ListPackUsersParamsOrder) Valid() bool {
+	switch e {
+	case ListPackUsersParamsOrderAsc:
+		return true
+	case ListPackUsersParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListQuiltBuildsParamsOrder.
 const (
@@ -186,11 +481,35 @@ const (
 	ListQuiltBuildsParamsOrderDesc ListQuiltBuildsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListQuiltBuildsParamsOrder enum.
+func (e ListQuiltBuildsParamsOrder) Valid() bool {
+	switch e {
+	case ListQuiltBuildsParamsOrderAsc:
+		return true
+	case ListQuiltBuildsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListUsersParamsOrder.
 const (
 	ListUsersParamsOrderAsc  ListUsersParamsOrder = "asc"
 	ListUsersParamsOrderDesc ListUsersParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListUsersParamsOrder enum.
+func (e ListUsersParamsOrder) Valid() bool {
+	switch e {
+	case ListUsersParamsOrderAsc:
+		return true
+	case ListUsersParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for ListUserGroupsParamsOrder.
 const (
@@ -198,17 +517,53 @@ const (
 	ListUserGroupsParamsOrderDesc ListUserGroupsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListUserGroupsParamsOrder enum.
+func (e ListUserGroupsParamsOrder) Valid() bool {
+	switch e {
+	case ListUserGroupsParamsOrderAsc:
+		return true
+	case ListUserGroupsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListUserModsParamsOrder.
 const (
 	ListUserModsParamsOrderAsc  ListUserModsParamsOrder = "asc"
 	ListUserModsParamsOrderDesc ListUserModsParamsOrder = "desc"
 )
 
+// Valid indicates whether the value is a known member of the ListUserModsParamsOrder enum.
+func (e ListUserModsParamsOrder) Valid() bool {
+	switch e {
+	case ListUserModsParamsOrderAsc:
+		return true
+	case ListUserModsParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListUserPacksParamsOrder.
 const (
 	ListUserPacksParamsOrderAsc  ListUserPacksParamsOrder = "asc"
 	ListUserPacksParamsOrderDesc ListUserPacksParamsOrder = "desc"
 )
+
+// Valid indicates whether the value is a known member of the ListUserPacksParamsOrder enum.
+func (e ListUserPacksParamsOrder) Valid() bool {
+	switch e {
+	case ListUserPacksParamsOrderAsc:
+		return true
+	case ListUserPacksParamsOrderDesc:
+		return true
+	default:
+		return false
+	}
+}
 
 // AuthToken defines model for AuthToken.
 type AuthToken struct {

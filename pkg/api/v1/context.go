@@ -11,6 +11,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// contextKey provides a type for use with context.WithValue.
+type contextKey string
+
 const (
 	minecraftContext contextKey = "minecraft"
 	forgeContext     contextKey = "forge"

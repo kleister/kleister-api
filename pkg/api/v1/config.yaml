@@ -12,8 +12,4 @@ compatibility:
 
 output: gen.go
 
-output-options:
-  user-templates:
-    constants.tmpl: override/constants.tmpl
-
 ...
