@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
+version: "2"
+linters:
+  exclusions:
+    paths:
+      - node_modules/
+      - .devenv/
+      - .direnv/
+
+...
