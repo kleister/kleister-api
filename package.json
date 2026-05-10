@@ -46,7 +46,7 @@
     "@eslint/js": "10.0.1",
     "@hey-api/openapi-ts": "0.97.1",
     "@tailwindcss/vite": "4.2.4",
-    "@types/node": "25.6.0",
+    "@types/node": "25.6.1",
     "@vitejs/plugin-vue": "6.0.6",
     "@vue/test-utils": "2.4.10",
     "@vue/tsconfig": "0.9.1",
