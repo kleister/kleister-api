@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	oamw "github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/runtime/server-middleware/docui"
 	v1 "github.com/kleister/kleister-api/pkg/api/v1"
 	"github.com/kleister/kleister-api/pkg/authn"
 	"github.com/kleister/kleister-api/pkg/config"
@@ -115,20 +115,24 @@ func Server(
 					render.JSON(w, r, swagger)
 				})
 
-				r.Handle("/docs", oamw.SwaggerUI(oamw.SwaggerUIOpts{
-					Path: path.Join(
-						cfg.Server.Root,
-						"api",
-						"v1",
-						"docs",
+				r.Handle("/docs", docui.SwaggerUI(
+					nil,
+					docui.WithUIBasePath(
+						path.Join(
+							cfg.Server.Root,
+							"api",
+							"v1",
+						),
 					),
-					SpecURL: path.Join(
-						cfg.Server.Root,
-						"api",
-						"v1",
-						"spec",
+					docui.WithSpecURL(
+						path.Join(
+							cfg.Server.Root,
+							"api",
+							"v1",
+							"spec",
+						),
 					),
-				}, nil))
+				))
 			}
 
 			apiv1 := v1.New(
