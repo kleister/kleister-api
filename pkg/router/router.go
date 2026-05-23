@@ -53,7 +53,7 @@ func Server(
 
 	mux.Use(render.SetContentType(render.ContentTypeJSON))
 	mux.Use(middleware.Timeout(60 * time.Second))
-	mux.Use(middleware.RealIP)
+	mux.Use(middleware.ClientIPFromRemoteAddr)
 	mux.Use(middleware.Recoverer)
 	mux.Use(header.Version)
 	mux.Use(header.Cache)
@@ -490,7 +490,7 @@ func Metrics(
 	mux := chi.NewRouter()
 
 	mux.Use(middleware.Timeout(60 * time.Second))
-	mux.Use(middleware.RealIP)
+	mux.Use(middleware.ClientIPFromRemoteAddr)
 	mux.Use(header.Version)
 	mux.Use(header.Cache)
 	mux.Use(header.Secure)
