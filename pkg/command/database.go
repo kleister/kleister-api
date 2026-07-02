@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v6"
+	"github.com/cenkalti/backoff/v7"
 	"github.com/kleister/kleister-api/pkg/store"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
