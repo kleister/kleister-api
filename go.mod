@@ -23,7 +23,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/drexedam/gravatar v0.0.0-20210327211422-e94eea8c338e
 	github.com/drone/funcmap v0.0.0-20240227160611-7e19e9cd5a1c
-	github.com/elimity-com/scim v0.0.0-20260506142751-830e1caafcc3
+	github.com/elimity-com/scim v0.0.0-20260720213748-2ac34dc5d0d9
 	github.com/gabriel-vasile/mimetype v1.4.14
 	github.com/getkin/kin-openapi v0.143.0
 	github.com/go-chi/chi/v5 v5.3.1
@@ -133,7 +133,6 @@ require (
 	github.com/dave/dst v0.27.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/denis-tingaikin/go-header v0.5.0 // indirect
-	github.com/di-wu/xsd-datetime v1.0.0 // indirect
 	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/dprotaso/go-yit v0.0.0-20220510233725-9ba8df137936 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -234,6 +233,7 @@ require (
 	github.com/prometheus/procfs v0.21.1 // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.5.1 // indirect
 	github.com/q-uint/parser v0.3.1 // indirect
+	github.com/q-uint/xsd-datetime v1.0.0 // indirect
 	github.com/quasilyte/go-ruleguard v0.4.5 // indirect
 	github.com/quasilyte/go-ruleguard/dsl v0.3.23 // indirect
 	github.com/quasilyte/gogrep v0.5.0 // indirect
