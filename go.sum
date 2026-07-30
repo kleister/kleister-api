@@ -192,8 +192,8 @@ github.com/drone/funcmap v0.0.0-20240227160611-7e19e9cd5a1c h1:R4T5Tv7YUrKmw+tBP
 github.com/drone/funcmap v0.0.0-20240227160611-7e19e9cd5a1c/go.mod h1:nDRkX7PHq+p39AD5/usv3KZMerxZTYU/9rfLS5IDspU=
 github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
 github.com/dustin/go-humanize v1.0.1/go.mod h1:Mu1zIs6XwVuF/gI1OepvI0qD18qycQx+mFykh5fBlto=
-github.com/elimity-com/scim v0.0.0-20260720213748-2ac34dc5d0d9 h1:iylLYodhTqX/9BplS7hyDd6ifbJKqe4vn7+EVXT7FiI=
-github.com/elimity-com/scim v0.0.0-20260720213748-2ac34dc5d0d9/go.mod h1:dpiTnMjNr1HGBYKa+Rm6nljbWfApPKBFLIdOdK8fXnE=
+github.com/elimity-com/scim v0.0.0-20260728105928-2641426a1539 h1:xZWHbTeRWqbowyZgmf6NYgCa6gw94g+ekG4f8TfIp3Q=
+github.com/elimity-com/scim v0.0.0-20260728105928-2641426a1539/go.mod h1:dpiTnMjNr1HGBYKa+Rm6nljbWfApPKBFLIdOdK8fXnE=
 github.com/ettle/strcase v0.2.0 h1:fGNiVF21fHXpX1niBgk0aROov1LagYsOwV/xqKDKR/Q=
 github.com/ettle/strcase v0.2.0/go.mod h1:DajmHElDSaX76ITe3/VHVyMin4LWSJN5Z909Wp+ED1A=
 github.com/fatih/color v1.19.0 h1:Zp3PiM21/9Ld6FzSKyL5c/BULoe/ONr9KlbYVOfG8+w=
