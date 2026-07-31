@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	//go:embed files/*
+	//go:embed all:files
 	assets embed.FS
 )
 
