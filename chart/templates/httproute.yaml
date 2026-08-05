@@ -1,0 +1,45 @@
+{{- if .Values.httpRoute.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+
+metadata:
+  name: {{ include "kleister-api.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kleister-api.labels" . | nindent 4 }}
+{{- if .Values.httpRoute.labels }}
+    {{- toYaml .Values.httpRoute.labels | nindent 4 }}
+{{- end }}
+{{- if  .Values.httpRoute.annotations }}
+  annotations:
+    {{- toYaml .Values.httpRoute.annotations | nindent 4 }}
+{{- end }}
+
+spec:
+  parentRefs:
+    {{- with .Values.httpRoute.parentRefs }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.httpRoute.hostnames }}
+  hostnames:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- $servicePort := .Values.server.service.port }}
+    {{- range .Values.httpRoute.rules }}
+    {{- with .matches }}
+    - matches:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .filters }}
+      filters:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
+      backendRefs:
+        - group: ''
+          kind: Service
+          name: {{ include "kleister-api.fullname" . }}-server
+          port: {{ $servicePort }}
+          weight: 1
+    {{- end }}
+{{- end }}

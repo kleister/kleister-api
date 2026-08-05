@@ -2,8 +2,10 @@
 
 import {
   type Client,
+  type ClientMeta,
   formDataBodySerializer,
   type Options as Options2,
+  type RequestResult,
   type TDataShape,
 } from './client'
 import { client } from './client.gen'
@@ -367,7 +369,7 @@ export type Options<
    * You can pass arbitrary values through the `meta` object. This can be
    * used to access values that aren't defined as part of the SDK function.
    */
-  meta?: Record<string, unknown>
+  meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta
 }
 
 /**
@@ -375,7 +377,7 @@ export type Options<
  */
 export const requestProvider = <ThrowOnError extends boolean = false>(
   options: Options<RequestProviderData, ThrowOnError>
-) =>
+): RequestResult<unknown, RequestProviderErrors, ThrowOnError> =>
   (options.client ?? client).get<unknown, RequestProviderErrors, ThrowOnError>({
     url: '/auth/{provider}/request',
     ...options,
@@ -386,7 +388,7 @@ export const requestProvider = <ThrowOnError extends boolean = false>(
  */
 export const callbackProvider = <ThrowOnError extends boolean = false>(
   options: Options<CallbackProviderData, ThrowOnError>
-) =>
+): RequestResult<unknown, CallbackProviderErrors, ThrowOnError> =>
   (options.client ?? client).get<unknown, CallbackProviderErrors, ThrowOnError>(
     { url: '/auth/{provider}/callback', ...options }
   )
@@ -396,7 +398,7 @@ export const callbackProvider = <ThrowOnError extends boolean = false>(
  */
 export const listProviders = <ThrowOnError extends boolean = false>(
   options?: Options<ListProvidersData, ThrowOnError>
-) =>
+): RequestResult<ListProvidersResponses, unknown, ThrowOnError> =>
   (options?.client ?? client).get<
     ListProvidersResponses,
     unknown,
@@ -408,7 +410,7 @@ export const listProviders = <ThrowOnError extends boolean = false>(
  */
 export const redirectAuth = <ThrowOnError extends boolean = false>(
   options: Options<RedirectAuthData, ThrowOnError>
-) =>
+): RequestResult<RedirectAuthResponses, RedirectAuthErrors, ThrowOnError> =>
   (options.client ?? client).post<
     RedirectAuthResponses,
     RedirectAuthErrors,
@@ -427,7 +429,7 @@ export const redirectAuth = <ThrowOnError extends boolean = false>(
  */
 export const loginAuth = <ThrowOnError extends boolean = false>(
   options: Options<LoginAuthData, ThrowOnError>
-) =>
+): RequestResult<LoginAuthResponses, LoginAuthErrors, ThrowOnError> =>
   (options.client ?? client).post<
     LoginAuthResponses,
     LoginAuthErrors,
@@ -446,7 +448,7 @@ export const loginAuth = <ThrowOnError extends boolean = false>(
  */
 export const refreshAuth = <ThrowOnError extends boolean = false>(
   options?: Options<RefreshAuthData, ThrowOnError>
-) =>
+): RequestResult<RefreshAuthResponses, RefreshAuthErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     RefreshAuthResponses,
     RefreshAuthErrors,
@@ -466,7 +468,7 @@ export const refreshAuth = <ThrowOnError extends boolean = false>(
  */
 export const verifyAuth = <ThrowOnError extends boolean = false>(
   options?: Options<VerifyAuthData, ThrowOnError>
-) =>
+): RequestResult<VerifyAuthResponses, VerifyAuthErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     VerifyAuthResponses,
     VerifyAuthErrors,
@@ -486,7 +488,7 @@ export const verifyAuth = <ThrowOnError extends boolean = false>(
  */
 export const tokenProfile = <ThrowOnError extends boolean = false>(
   options?: Options<TokenProfileData, ThrowOnError>
-) =>
+): RequestResult<TokenProfileResponses, TokenProfileErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     TokenProfileResponses,
     TokenProfileErrors,
@@ -506,7 +508,7 @@ export const tokenProfile = <ThrowOnError extends boolean = false>(
  */
 export const showProfile = <ThrowOnError extends boolean = false>(
   options?: Options<ShowProfileData, ThrowOnError>
-) =>
+): RequestResult<ShowProfileResponses, ShowProfileErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     ShowProfileResponses,
     ShowProfileErrors,
@@ -526,7 +528,7 @@ export const showProfile = <ThrowOnError extends boolean = false>(
  */
 export const updateProfile = <ThrowOnError extends boolean = false>(
   options: Options<UpdateProfileData, ThrowOnError>
-) =>
+): RequestResult<UpdateProfileResponses, UpdateProfileErrors, ThrowOnError> =>
   (options.client ?? client).put<
     UpdateProfileResponses,
     UpdateProfileErrors,
@@ -550,7 +552,7 @@ export const updateProfile = <ThrowOnError extends boolean = false>(
  */
 export const listMinecrafts = <ThrowOnError extends boolean = false>(
   options?: Options<ListMinecraftsData, ThrowOnError>
-) =>
+): RequestResult<ListMinecraftsResponses, ListMinecraftsErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     ListMinecraftsResponses,
     ListMinecraftsErrors,
@@ -570,7 +572,11 @@ export const listMinecrafts = <ThrowOnError extends boolean = false>(
  */
 export const updateMinecraft = <ThrowOnError extends boolean = false>(
   options?: Options<UpdateMinecraftData, ThrowOnError>
-) =>
+): RequestResult<
+  UpdateMinecraftResponses,
+  UpdateMinecraftErrors,
+  ThrowOnError
+> =>
   (options?.client ?? client).put<
     UpdateMinecraftResponses,
     UpdateMinecraftErrors,
@@ -590,7 +596,11 @@ export const updateMinecraft = <ThrowOnError extends boolean = false>(
  */
 export const deleteMinecraftFromBuild = <ThrowOnError extends boolean = false>(
   options: Options<DeleteMinecraftFromBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteMinecraftFromBuildResponses,
+  DeleteMinecraftFromBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteMinecraftFromBuildResponses,
     DeleteMinecraftFromBuildErrors,
@@ -614,7 +624,11 @@ export const deleteMinecraftFromBuild = <ThrowOnError extends boolean = false>(
  */
 export const listMinecraftBuilds = <ThrowOnError extends boolean = false>(
   options: Options<ListMinecraftBuildsData, ThrowOnError>
-) =>
+): RequestResult<
+  ListMinecraftBuildsResponses,
+  ListMinecraftBuildsErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).get<
     ListMinecraftBuildsResponses,
     ListMinecraftBuildsErrors,
@@ -634,7 +648,11 @@ export const listMinecraftBuilds = <ThrowOnError extends boolean = false>(
  */
 export const attachMinecraftToBuild = <ThrowOnError extends boolean = false>(
   options: Options<AttachMinecraftToBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachMinecraftToBuildResponses,
+  AttachMinecraftToBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachMinecraftToBuildResponses,
     AttachMinecraftToBuildErrors,
@@ -658,7 +676,7 @@ export const attachMinecraftToBuild = <ThrowOnError extends boolean = false>(
  */
 export const listForges = <ThrowOnError extends boolean = false>(
   options?: Options<ListForgesData, ThrowOnError>
-) =>
+): RequestResult<ListForgesResponses, ListForgesErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     ListForgesResponses,
     ListForgesErrors,
@@ -678,7 +696,7 @@ export const listForges = <ThrowOnError extends boolean = false>(
  */
 export const updateForge = <ThrowOnError extends boolean = false>(
   options?: Options<UpdateForgeData, ThrowOnError>
-) =>
+): RequestResult<UpdateForgeResponses, UpdateForgeErrors, ThrowOnError> =>
   (options?.client ?? client).put<
     UpdateForgeResponses,
     UpdateForgeErrors,
@@ -698,7 +716,11 @@ export const updateForge = <ThrowOnError extends boolean = false>(
  */
 export const deleteForgeFromBuild = <ThrowOnError extends boolean = false>(
   options: Options<DeleteForgeFromBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteForgeFromBuildResponses,
+  DeleteForgeFromBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteForgeFromBuildResponses,
     DeleteForgeFromBuildErrors,
@@ -722,7 +744,11 @@ export const deleteForgeFromBuild = <ThrowOnError extends boolean = false>(
  */
 export const listForgeBuilds = <ThrowOnError extends boolean = false>(
   options: Options<ListForgeBuildsData, ThrowOnError>
-) =>
+): RequestResult<
+  ListForgeBuildsResponses,
+  ListForgeBuildsErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).get<
     ListForgeBuildsResponses,
     ListForgeBuildsErrors,
@@ -742,7 +768,11 @@ export const listForgeBuilds = <ThrowOnError extends boolean = false>(
  */
 export const attachForgeToBuild = <ThrowOnError extends boolean = false>(
   options: Options<AttachForgeToBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachForgeToBuildResponses,
+  AttachForgeToBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachForgeToBuildResponses,
     AttachForgeToBuildErrors,
@@ -766,7 +796,7 @@ export const attachForgeToBuild = <ThrowOnError extends boolean = false>(
  */
 export const listNeoforges = <ThrowOnError extends boolean = false>(
   options?: Options<ListNeoforgesData, ThrowOnError>
-) =>
+): RequestResult<ListNeoforgesResponses, ListNeoforgesErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     ListNeoforgesResponses,
     ListNeoforgesErrors,
@@ -786,7 +816,7 @@ export const listNeoforges = <ThrowOnError extends boolean = false>(
  */
 export const updateNeoforge = <ThrowOnError extends boolean = false>(
   options?: Options<UpdateNeoforgeData, ThrowOnError>
-) =>
+): RequestResult<UpdateNeoforgeResponses, UpdateNeoforgeErrors, ThrowOnError> =>
   (options?.client ?? client).put<
     UpdateNeoforgeResponses,
     UpdateNeoforgeErrors,
@@ -806,7 +836,11 @@ export const updateNeoforge = <ThrowOnError extends boolean = false>(
  */
 export const deleteNeoforgeFromBuild = <ThrowOnError extends boolean = false>(
   options: Options<DeleteNeoforgeFromBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteNeoforgeFromBuildResponses,
+  DeleteNeoforgeFromBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteNeoforgeFromBuildResponses,
     DeleteNeoforgeFromBuildErrors,
@@ -830,7 +864,11 @@ export const deleteNeoforgeFromBuild = <ThrowOnError extends boolean = false>(
  */
 export const listNeoforgeBuilds = <ThrowOnError extends boolean = false>(
   options: Options<ListNeoforgeBuildsData, ThrowOnError>
-) =>
+): RequestResult<
+  ListNeoforgeBuildsResponses,
+  ListNeoforgeBuildsErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).get<
     ListNeoforgeBuildsResponses,
     ListNeoforgeBuildsErrors,
@@ -850,7 +888,11 @@ export const listNeoforgeBuilds = <ThrowOnError extends boolean = false>(
  */
 export const attachNeoforgeToBuild = <ThrowOnError extends boolean = false>(
   options: Options<AttachNeoforgeToBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachNeoforgeToBuildResponses,
+  AttachNeoforgeToBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachNeoforgeToBuildResponses,
     AttachNeoforgeToBuildErrors,
@@ -874,7 +916,7 @@ export const attachNeoforgeToBuild = <ThrowOnError extends boolean = false>(
  */
 export const listQuilts = <ThrowOnError extends boolean = false>(
   options?: Options<ListQuiltsData, ThrowOnError>
-) =>
+): RequestResult<ListQuiltsResponses, ListQuiltsErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     ListQuiltsResponses,
     ListQuiltsErrors,
@@ -894,7 +936,7 @@ export const listQuilts = <ThrowOnError extends boolean = false>(
  */
 export const updateQuilt = <ThrowOnError extends boolean = false>(
   options?: Options<UpdateQuiltData, ThrowOnError>
-) =>
+): RequestResult<UpdateQuiltResponses, UpdateQuiltErrors, ThrowOnError> =>
   (options?.client ?? client).put<
     UpdateQuiltResponses,
     UpdateQuiltErrors,
@@ -914,7 +956,11 @@ export const updateQuilt = <ThrowOnError extends boolean = false>(
  */
 export const deleteQuiltFromBuild = <ThrowOnError extends boolean = false>(
   options: Options<DeleteQuiltFromBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteQuiltFromBuildResponses,
+  DeleteQuiltFromBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteQuiltFromBuildResponses,
     DeleteQuiltFromBuildErrors,
@@ -938,7 +984,11 @@ export const deleteQuiltFromBuild = <ThrowOnError extends boolean = false>(
  */
 export const listQuiltBuilds = <ThrowOnError extends boolean = false>(
   options: Options<ListQuiltBuildsData, ThrowOnError>
-) =>
+): RequestResult<
+  ListQuiltBuildsResponses,
+  ListQuiltBuildsErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).get<
     ListQuiltBuildsResponses,
     ListQuiltBuildsErrors,
@@ -958,7 +1008,11 @@ export const listQuiltBuilds = <ThrowOnError extends boolean = false>(
  */
 export const attachQuiltToBuild = <ThrowOnError extends boolean = false>(
   options: Options<AttachQuiltToBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachQuiltToBuildResponses,
+  AttachQuiltToBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachQuiltToBuildResponses,
     AttachQuiltToBuildErrors,
@@ -982,7 +1036,7 @@ export const attachQuiltToBuild = <ThrowOnError extends boolean = false>(
  */
 export const listFabrics = <ThrowOnError extends boolean = false>(
   options?: Options<ListFabricsData, ThrowOnError>
-) =>
+): RequestResult<ListFabricsResponses, ListFabricsErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     ListFabricsResponses,
     ListFabricsErrors,
@@ -1002,7 +1056,7 @@ export const listFabrics = <ThrowOnError extends boolean = false>(
  */
 export const updateFabric = <ThrowOnError extends boolean = false>(
   options?: Options<UpdateFabricData, ThrowOnError>
-) =>
+): RequestResult<UpdateFabricResponses, UpdateFabricErrors, ThrowOnError> =>
   (options?.client ?? client).put<
     UpdateFabricResponses,
     UpdateFabricErrors,
@@ -1022,7 +1076,11 @@ export const updateFabric = <ThrowOnError extends boolean = false>(
  */
 export const deleteFabricFromBuild = <ThrowOnError extends boolean = false>(
   options: Options<DeleteFabricFromBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteFabricFromBuildResponses,
+  DeleteFabricFromBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteFabricFromBuildResponses,
     DeleteFabricFromBuildErrors,
@@ -1046,7 +1104,11 @@ export const deleteFabricFromBuild = <ThrowOnError extends boolean = false>(
  */
 export const listFabricBuilds = <ThrowOnError extends boolean = false>(
   options: Options<ListFabricBuildsData, ThrowOnError>
-) =>
+): RequestResult<
+  ListFabricBuildsResponses,
+  ListFabricBuildsErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).get<
     ListFabricBuildsResponses,
     ListFabricBuildsErrors,
@@ -1066,7 +1128,11 @@ export const listFabricBuilds = <ThrowOnError extends boolean = false>(
  */
 export const attachFabricToBuild = <ThrowOnError extends boolean = false>(
   options: Options<AttachFabricToBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachFabricToBuildResponses,
+  AttachFabricToBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachFabricToBuildResponses,
     AttachFabricToBuildErrors,
@@ -1090,7 +1156,7 @@ export const attachFabricToBuild = <ThrowOnError extends boolean = false>(
  */
 export const listPacks = <ThrowOnError extends boolean = false>(
   options?: Options<ListPacksData, ThrowOnError>
-) =>
+): RequestResult<ListPacksResponses, ListPacksErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     ListPacksResponses,
     ListPacksErrors,
@@ -1110,7 +1176,7 @@ export const listPacks = <ThrowOnError extends boolean = false>(
  */
 export const createPack = <ThrowOnError extends boolean = false>(
   options: Options<CreatePackData, ThrowOnError>
-) =>
+): RequestResult<CreatePackResponses, CreatePackErrors, ThrowOnError> =>
   (options.client ?? client).post<
     CreatePackResponses,
     CreatePackErrors,
@@ -1134,7 +1200,7 @@ export const createPack = <ThrowOnError extends boolean = false>(
  */
 export const deletePack = <ThrowOnError extends boolean = false>(
   options: Options<DeletePackData, ThrowOnError>
-) =>
+): RequestResult<DeletePackResponses, DeletePackErrors, ThrowOnError> =>
   (options.client ?? client).delete<
     DeletePackResponses,
     DeletePackErrors,
@@ -1154,7 +1220,7 @@ export const deletePack = <ThrowOnError extends boolean = false>(
  */
 export const showPack = <ThrowOnError extends boolean = false>(
   options: Options<ShowPackData, ThrowOnError>
-) =>
+): RequestResult<ShowPackResponses, ShowPackErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ShowPackResponses,
     ShowPackErrors,
@@ -1174,7 +1240,7 @@ export const showPack = <ThrowOnError extends boolean = false>(
  */
 export const updatePack = <ThrowOnError extends boolean = false>(
   options: Options<UpdatePackData, ThrowOnError>
-) =>
+): RequestResult<UpdatePackResponses, UpdatePackErrors, ThrowOnError> =>
   (options.client ?? client).put<
     UpdatePackResponses,
     UpdatePackErrors,
@@ -1198,7 +1264,11 @@ export const updatePack = <ThrowOnError extends boolean = false>(
  */
 export const deletePackAvatar = <ThrowOnError extends boolean = false>(
   options: Options<DeletePackAvatarData, ThrowOnError>
-) =>
+): RequestResult<
+  DeletePackAvatarResponses,
+  DeletePackAvatarErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeletePackAvatarResponses,
     DeletePackAvatarErrors,
@@ -1218,7 +1288,11 @@ export const deletePackAvatar = <ThrowOnError extends boolean = false>(
  */
 export const createPackAvatar = <ThrowOnError extends boolean = false>(
   options: Options<CreatePackAvatarData, ThrowOnError>
-) =>
+): RequestResult<
+  CreatePackAvatarResponses,
+  CreatePackAvatarErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     CreatePackAvatarResponses,
     CreatePackAvatarErrors,
@@ -1243,7 +1317,11 @@ export const createPackAvatar = <ThrowOnError extends boolean = false>(
  */
 export const deletePackFromUser = <ThrowOnError extends boolean = false>(
   options: Options<DeletePackFromUserData, ThrowOnError>
-) =>
+): RequestResult<
+  DeletePackFromUserResponses,
+  DeletePackFromUserErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeletePackFromUserResponses,
     DeletePackFromUserErrors,
@@ -1267,7 +1345,7 @@ export const deletePackFromUser = <ThrowOnError extends boolean = false>(
  */
 export const listPackUsers = <ThrowOnError extends boolean = false>(
   options: Options<ListPackUsersData, ThrowOnError>
-) =>
+): RequestResult<ListPackUsersResponses, ListPackUsersErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListPackUsersResponses,
     ListPackUsersErrors,
@@ -1287,7 +1365,11 @@ export const listPackUsers = <ThrowOnError extends boolean = false>(
  */
 export const attachPackToUser = <ThrowOnError extends boolean = false>(
   options: Options<AttachPackToUserData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachPackToUserResponses,
+  AttachPackToUserErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachPackToUserResponses,
     AttachPackToUserErrors,
@@ -1311,7 +1393,7 @@ export const attachPackToUser = <ThrowOnError extends boolean = false>(
  */
 export const permitPackUser = <ThrowOnError extends boolean = false>(
   options: Options<PermitPackUserData, ThrowOnError>
-) =>
+): RequestResult<PermitPackUserResponses, PermitPackUserErrors, ThrowOnError> =>
   (options.client ?? client).put<
     PermitPackUserResponses,
     PermitPackUserErrors,
@@ -1335,7 +1417,11 @@ export const permitPackUser = <ThrowOnError extends boolean = false>(
  */
 export const deletePackFromGroup = <ThrowOnError extends boolean = false>(
   options: Options<DeletePackFromGroupData, ThrowOnError>
-) =>
+): RequestResult<
+  DeletePackFromGroupResponses,
+  DeletePackFromGroupErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeletePackFromGroupResponses,
     DeletePackFromGroupErrors,
@@ -1359,7 +1445,7 @@ export const deletePackFromGroup = <ThrowOnError extends boolean = false>(
  */
 export const listPackGroups = <ThrowOnError extends boolean = false>(
   options: Options<ListPackGroupsData, ThrowOnError>
-) =>
+): RequestResult<ListPackGroupsResponses, ListPackGroupsErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListPackGroupsResponses,
     ListPackGroupsErrors,
@@ -1379,7 +1465,11 @@ export const listPackGroups = <ThrowOnError extends boolean = false>(
  */
 export const attachPackToGroup = <ThrowOnError extends boolean = false>(
   options: Options<AttachPackToGroupData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachPackToGroupResponses,
+  AttachPackToGroupErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachPackToGroupResponses,
     AttachPackToGroupErrors,
@@ -1403,7 +1493,11 @@ export const attachPackToGroup = <ThrowOnError extends boolean = false>(
  */
 export const permitPackGroup = <ThrowOnError extends boolean = false>(
   options: Options<PermitPackGroupData, ThrowOnError>
-) =>
+): RequestResult<
+  PermitPackGroupResponses,
+  PermitPackGroupErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).put<
     PermitPackGroupResponses,
     PermitPackGroupErrors,
@@ -1427,7 +1521,7 @@ export const permitPackGroup = <ThrowOnError extends boolean = false>(
  */
 export const listBuilds = <ThrowOnError extends boolean = false>(
   options: Options<ListBuildsData, ThrowOnError>
-) =>
+): RequestResult<ListBuildsResponses, ListBuildsErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListBuildsResponses,
     ListBuildsErrors,
@@ -1447,7 +1541,7 @@ export const listBuilds = <ThrowOnError extends boolean = false>(
  */
 export const createBuild = <ThrowOnError extends boolean = false>(
   options: Options<CreateBuildData, ThrowOnError>
-) =>
+): RequestResult<CreateBuildResponses, CreateBuildErrors, ThrowOnError> =>
   (options.client ?? client).post<
     CreateBuildResponses,
     CreateBuildErrors,
@@ -1471,7 +1565,7 @@ export const createBuild = <ThrowOnError extends boolean = false>(
  */
 export const deleteBuild = <ThrowOnError extends boolean = false>(
   options: Options<DeleteBuildData, ThrowOnError>
-) =>
+): RequestResult<DeleteBuildResponses, DeleteBuildErrors, ThrowOnError> =>
   (options.client ?? client).delete<
     DeleteBuildResponses,
     DeleteBuildErrors,
@@ -1491,7 +1585,7 @@ export const deleteBuild = <ThrowOnError extends boolean = false>(
  */
 export const showBuild = <ThrowOnError extends boolean = false>(
   options: Options<ShowBuildData, ThrowOnError>
-) =>
+): RequestResult<ShowBuildResponses, ShowBuildErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ShowBuildResponses,
     ShowBuildErrors,
@@ -1511,7 +1605,7 @@ export const showBuild = <ThrowOnError extends boolean = false>(
  */
 export const updateBuild = <ThrowOnError extends boolean = false>(
   options: Options<UpdateBuildData, ThrowOnError>
-) =>
+): RequestResult<UpdateBuildResponses, UpdateBuildErrors, ThrowOnError> =>
   (options.client ?? client).put<
     UpdateBuildResponses,
     UpdateBuildErrors,
@@ -1535,7 +1629,11 @@ export const updateBuild = <ThrowOnError extends boolean = false>(
  */
 export const deleteBuildFromVersion = <ThrowOnError extends boolean = false>(
   options: Options<DeleteBuildFromVersionData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteBuildFromVersionResponses,
+  DeleteBuildFromVersionErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteBuildFromVersionResponses,
     DeleteBuildFromVersionErrors,
@@ -1559,7 +1657,11 @@ export const deleteBuildFromVersion = <ThrowOnError extends boolean = false>(
  */
 export const listBuildVersions = <ThrowOnError extends boolean = false>(
   options: Options<ListBuildVersionsData, ThrowOnError>
-) =>
+): RequestResult<
+  ListBuildVersionsResponses,
+  ListBuildVersionsErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).get<
     ListBuildVersionsResponses,
     ListBuildVersionsErrors,
@@ -1579,7 +1681,11 @@ export const listBuildVersions = <ThrowOnError extends boolean = false>(
  */
 export const attachBuildToVersion = <ThrowOnError extends boolean = false>(
   options: Options<AttachBuildToVersionData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachBuildToVersionResponses,
+  AttachBuildToVersionErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachBuildToVersionResponses,
     AttachBuildToVersionErrors,
@@ -1603,7 +1709,7 @@ export const attachBuildToVersion = <ThrowOnError extends boolean = false>(
  */
 export const listMods = <ThrowOnError extends boolean = false>(
   options?: Options<ListModsData, ThrowOnError>
-) =>
+): RequestResult<ListModsResponses, ListModsErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     ListModsResponses,
     ListModsErrors,
@@ -1623,7 +1729,7 @@ export const listMods = <ThrowOnError extends boolean = false>(
  */
 export const createMod = <ThrowOnError extends boolean = false>(
   options: Options<CreateModData, ThrowOnError>
-) =>
+): RequestResult<CreateModResponses, CreateModErrors, ThrowOnError> =>
   (options.client ?? client).post<
     CreateModResponses,
     CreateModErrors,
@@ -1647,7 +1753,7 @@ export const createMod = <ThrowOnError extends boolean = false>(
  */
 export const deleteMod = <ThrowOnError extends boolean = false>(
   options: Options<DeleteModData, ThrowOnError>
-) =>
+): RequestResult<DeleteModResponses, DeleteModErrors, ThrowOnError> =>
   (options.client ?? client).delete<
     DeleteModResponses,
     DeleteModErrors,
@@ -1667,7 +1773,7 @@ export const deleteMod = <ThrowOnError extends boolean = false>(
  */
 export const showMod = <ThrowOnError extends boolean = false>(
   options: Options<ShowModData, ThrowOnError>
-) =>
+): RequestResult<ShowModResponses, ShowModErrors, ThrowOnError> =>
   (options.client ?? client).get<ShowModResponses, ShowModErrors, ThrowOnError>(
     {
       security: [
@@ -1685,7 +1791,7 @@ export const showMod = <ThrowOnError extends boolean = false>(
  */
 export const updateMod = <ThrowOnError extends boolean = false>(
   options: Options<UpdateModData, ThrowOnError>
-) =>
+): RequestResult<UpdateModResponses, UpdateModErrors, ThrowOnError> =>
   (options.client ?? client).put<
     UpdateModResponses,
     UpdateModErrors,
@@ -1709,7 +1815,11 @@ export const updateMod = <ThrowOnError extends boolean = false>(
  */
 export const deleteModAvatar = <ThrowOnError extends boolean = false>(
   options: Options<DeleteModAvatarData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteModAvatarResponses,
+  DeleteModAvatarErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteModAvatarResponses,
     DeleteModAvatarErrors,
@@ -1729,7 +1839,11 @@ export const deleteModAvatar = <ThrowOnError extends boolean = false>(
  */
 export const createModAvatar = <ThrowOnError extends boolean = false>(
   options: Options<CreateModAvatarData, ThrowOnError>
-) =>
+): RequestResult<
+  CreateModAvatarResponses,
+  CreateModAvatarErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     CreateModAvatarResponses,
     CreateModAvatarErrors,
@@ -1754,7 +1868,11 @@ export const createModAvatar = <ThrowOnError extends boolean = false>(
  */
 export const deleteModFromUser = <ThrowOnError extends boolean = false>(
   options: Options<DeleteModFromUserData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteModFromUserResponses,
+  DeleteModFromUserErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteModFromUserResponses,
     DeleteModFromUserErrors,
@@ -1778,7 +1896,7 @@ export const deleteModFromUser = <ThrowOnError extends boolean = false>(
  */
 export const listModUsers = <ThrowOnError extends boolean = false>(
   options: Options<ListModUsersData, ThrowOnError>
-) =>
+): RequestResult<ListModUsersResponses, ListModUsersErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListModUsersResponses,
     ListModUsersErrors,
@@ -1798,7 +1916,11 @@ export const listModUsers = <ThrowOnError extends boolean = false>(
  */
 export const attachModToUser = <ThrowOnError extends boolean = false>(
   options: Options<AttachModToUserData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachModToUserResponses,
+  AttachModToUserErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachModToUserResponses,
     AttachModToUserErrors,
@@ -1822,7 +1944,7 @@ export const attachModToUser = <ThrowOnError extends boolean = false>(
  */
 export const permitModUser = <ThrowOnError extends boolean = false>(
   options: Options<PermitModUserData, ThrowOnError>
-) =>
+): RequestResult<PermitModUserResponses, PermitModUserErrors, ThrowOnError> =>
   (options.client ?? client).put<
     PermitModUserResponses,
     PermitModUserErrors,
@@ -1846,7 +1968,11 @@ export const permitModUser = <ThrowOnError extends boolean = false>(
  */
 export const deleteModFromGroup = <ThrowOnError extends boolean = false>(
   options: Options<DeleteModFromGroupData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteModFromGroupResponses,
+  DeleteModFromGroupErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteModFromGroupResponses,
     DeleteModFromGroupErrors,
@@ -1870,7 +1996,7 @@ export const deleteModFromGroup = <ThrowOnError extends boolean = false>(
  */
 export const listModGroups = <ThrowOnError extends boolean = false>(
   options: Options<ListModGroupsData, ThrowOnError>
-) =>
+): RequestResult<ListModGroupsResponses, ListModGroupsErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListModGroupsResponses,
     ListModGroupsErrors,
@@ -1890,7 +2016,11 @@ export const listModGroups = <ThrowOnError extends boolean = false>(
  */
 export const attachModToGroup = <ThrowOnError extends boolean = false>(
   options: Options<AttachModToGroupData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachModToGroupResponses,
+  AttachModToGroupErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachModToGroupResponses,
     AttachModToGroupErrors,
@@ -1914,7 +2044,7 @@ export const attachModToGroup = <ThrowOnError extends boolean = false>(
  */
 export const permitModGroup = <ThrowOnError extends boolean = false>(
   options: Options<PermitModGroupData, ThrowOnError>
-) =>
+): RequestResult<PermitModGroupResponses, PermitModGroupErrors, ThrowOnError> =>
   (options.client ?? client).put<
     PermitModGroupResponses,
     PermitModGroupErrors,
@@ -1938,7 +2068,7 @@ export const permitModGroup = <ThrowOnError extends boolean = false>(
  */
 export const listVersions = <ThrowOnError extends boolean = false>(
   options: Options<ListVersionsData, ThrowOnError>
-) =>
+): RequestResult<ListVersionsResponses, ListVersionsErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListVersionsResponses,
     ListVersionsErrors,
@@ -1958,7 +2088,7 @@ export const listVersions = <ThrowOnError extends boolean = false>(
  */
 export const createVersion = <ThrowOnError extends boolean = false>(
   options: Options<CreateVersionData, ThrowOnError>
-) =>
+): RequestResult<CreateVersionResponses, CreateVersionErrors, ThrowOnError> =>
   (options.client ?? client).post<
     CreateVersionResponses,
     CreateVersionErrors,
@@ -1982,7 +2112,7 @@ export const createVersion = <ThrowOnError extends boolean = false>(
  */
 export const deleteVersion = <ThrowOnError extends boolean = false>(
   options: Options<DeleteVersionData, ThrowOnError>
-) =>
+): RequestResult<DeleteVersionResponses, DeleteVersionErrors, ThrowOnError> =>
   (options.client ?? client).delete<
     DeleteVersionResponses,
     DeleteVersionErrors,
@@ -2002,7 +2132,7 @@ export const deleteVersion = <ThrowOnError extends boolean = false>(
  */
 export const showVersion = <ThrowOnError extends boolean = false>(
   options: Options<ShowVersionData, ThrowOnError>
-) =>
+): RequestResult<ShowVersionResponses, ShowVersionErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ShowVersionResponses,
     ShowVersionErrors,
@@ -2022,7 +2152,7 @@ export const showVersion = <ThrowOnError extends boolean = false>(
  */
 export const updateVersion = <ThrowOnError extends boolean = false>(
   options: Options<UpdateVersionData, ThrowOnError>
-) =>
+): RequestResult<UpdateVersionResponses, UpdateVersionErrors, ThrowOnError> =>
   (options.client ?? client).put<
     UpdateVersionResponses,
     UpdateVersionErrors,
@@ -2046,7 +2176,11 @@ export const updateVersion = <ThrowOnError extends boolean = false>(
  */
 export const deleteVersionFromBuild = <ThrowOnError extends boolean = false>(
   options: Options<DeleteVersionFromBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteVersionFromBuildResponses,
+  DeleteVersionFromBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteVersionFromBuildResponses,
     DeleteVersionFromBuildErrors,
@@ -2070,7 +2204,11 @@ export const deleteVersionFromBuild = <ThrowOnError extends boolean = false>(
  */
 export const listVersionBuilds = <ThrowOnError extends boolean = false>(
   options: Options<ListVersionBuildsData, ThrowOnError>
-) =>
+): RequestResult<
+  ListVersionBuildsResponses,
+  ListVersionBuildsErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).get<
     ListVersionBuildsResponses,
     ListVersionBuildsErrors,
@@ -2090,7 +2228,11 @@ export const listVersionBuilds = <ThrowOnError extends boolean = false>(
  */
 export const attachVersionToBuild = <ThrowOnError extends boolean = false>(
   options: Options<AttachVersionToBuildData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachVersionToBuildResponses,
+  AttachVersionToBuildErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachVersionToBuildResponses,
     AttachVersionToBuildErrors,
@@ -2114,7 +2256,7 @@ export const attachVersionToBuild = <ThrowOnError extends boolean = false>(
  */
 export const listGroups = <ThrowOnError extends boolean = false>(
   options?: Options<ListGroupsData, ThrowOnError>
-) =>
+): RequestResult<ListGroupsResponses, ListGroupsErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     ListGroupsResponses,
     ListGroupsErrors,
@@ -2134,7 +2276,7 @@ export const listGroups = <ThrowOnError extends boolean = false>(
  */
 export const createGroup = <ThrowOnError extends boolean = false>(
   options: Options<CreateGroupData, ThrowOnError>
-) =>
+): RequestResult<CreateGroupResponses, CreateGroupErrors, ThrowOnError> =>
   (options.client ?? client).post<
     CreateGroupResponses,
     CreateGroupErrors,
@@ -2158,7 +2300,7 @@ export const createGroup = <ThrowOnError extends boolean = false>(
  */
 export const deleteGroup = <ThrowOnError extends boolean = false>(
   options: Options<DeleteGroupData, ThrowOnError>
-) =>
+): RequestResult<DeleteGroupResponses, DeleteGroupErrors, ThrowOnError> =>
   (options.client ?? client).delete<
     DeleteGroupResponses,
     DeleteGroupErrors,
@@ -2178,7 +2320,7 @@ export const deleteGroup = <ThrowOnError extends boolean = false>(
  */
 export const showGroup = <ThrowOnError extends boolean = false>(
   options: Options<ShowGroupData, ThrowOnError>
-) =>
+): RequestResult<ShowGroupResponses, ShowGroupErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ShowGroupResponses,
     ShowGroupErrors,
@@ -2198,7 +2340,7 @@ export const showGroup = <ThrowOnError extends boolean = false>(
  */
 export const updateGroup = <ThrowOnError extends boolean = false>(
   options: Options<UpdateGroupData, ThrowOnError>
-) =>
+): RequestResult<UpdateGroupResponses, UpdateGroupErrors, ThrowOnError> =>
   (options.client ?? client).put<
     UpdateGroupResponses,
     UpdateGroupErrors,
@@ -2222,7 +2364,11 @@ export const updateGroup = <ThrowOnError extends boolean = false>(
  */
 export const deleteGroupFromUser = <ThrowOnError extends boolean = false>(
   options: Options<DeleteGroupFromUserData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteGroupFromUserResponses,
+  DeleteGroupFromUserErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteGroupFromUserResponses,
     DeleteGroupFromUserErrors,
@@ -2246,7 +2392,7 @@ export const deleteGroupFromUser = <ThrowOnError extends boolean = false>(
  */
 export const listGroupUsers = <ThrowOnError extends boolean = false>(
   options: Options<ListGroupUsersData, ThrowOnError>
-) =>
+): RequestResult<ListGroupUsersResponses, ListGroupUsersErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListGroupUsersResponses,
     ListGroupUsersErrors,
@@ -2266,7 +2412,11 @@ export const listGroupUsers = <ThrowOnError extends boolean = false>(
  */
 export const attachGroupToUser = <ThrowOnError extends boolean = false>(
   options: Options<AttachGroupToUserData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachGroupToUserResponses,
+  AttachGroupToUserErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachGroupToUserResponses,
     AttachGroupToUserErrors,
@@ -2290,7 +2440,11 @@ export const attachGroupToUser = <ThrowOnError extends boolean = false>(
  */
 export const permitGroupUser = <ThrowOnError extends boolean = false>(
   options: Options<PermitGroupUserData, ThrowOnError>
-) =>
+): RequestResult<
+  PermitGroupUserResponses,
+  PermitGroupUserErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).put<
     PermitGroupUserResponses,
     PermitGroupUserErrors,
@@ -2314,7 +2468,11 @@ export const permitGroupUser = <ThrowOnError extends boolean = false>(
  */
 export const deleteGroupFromMod = <ThrowOnError extends boolean = false>(
   options: Options<DeleteGroupFromModData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteGroupFromModResponses,
+  DeleteGroupFromModErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteGroupFromModResponses,
     DeleteGroupFromModErrors,
@@ -2338,7 +2496,7 @@ export const deleteGroupFromMod = <ThrowOnError extends boolean = false>(
  */
 export const listGroupMods = <ThrowOnError extends boolean = false>(
   options: Options<ListGroupModsData, ThrowOnError>
-) =>
+): RequestResult<ListGroupModsResponses, ListGroupModsErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListGroupModsResponses,
     ListGroupModsErrors,
@@ -2358,7 +2516,11 @@ export const listGroupMods = <ThrowOnError extends boolean = false>(
  */
 export const attachGroupToMod = <ThrowOnError extends boolean = false>(
   options: Options<AttachGroupToModData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachGroupToModResponses,
+  AttachGroupToModErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachGroupToModResponses,
     AttachGroupToModErrors,
@@ -2382,7 +2544,7 @@ export const attachGroupToMod = <ThrowOnError extends boolean = false>(
  */
 export const permitGroupMod = <ThrowOnError extends boolean = false>(
   options: Options<PermitGroupModData, ThrowOnError>
-) =>
+): RequestResult<PermitGroupModResponses, PermitGroupModErrors, ThrowOnError> =>
   (options.client ?? client).put<
     PermitGroupModResponses,
     PermitGroupModErrors,
@@ -2406,7 +2568,11 @@ export const permitGroupMod = <ThrowOnError extends boolean = false>(
  */
 export const deleteGroupFromPack = <ThrowOnError extends boolean = false>(
   options: Options<DeleteGroupFromPackData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteGroupFromPackResponses,
+  DeleteGroupFromPackErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteGroupFromPackResponses,
     DeleteGroupFromPackErrors,
@@ -2430,7 +2596,7 @@ export const deleteGroupFromPack = <ThrowOnError extends boolean = false>(
  */
 export const listGroupPacks = <ThrowOnError extends boolean = false>(
   options: Options<ListGroupPacksData, ThrowOnError>
-) =>
+): RequestResult<ListGroupPacksResponses, ListGroupPacksErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListGroupPacksResponses,
     ListGroupPacksErrors,
@@ -2450,7 +2616,11 @@ export const listGroupPacks = <ThrowOnError extends boolean = false>(
  */
 export const attachGroupToPack = <ThrowOnError extends boolean = false>(
   options: Options<AttachGroupToPackData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachGroupToPackResponses,
+  AttachGroupToPackErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachGroupToPackResponses,
     AttachGroupToPackErrors,
@@ -2474,7 +2644,11 @@ export const attachGroupToPack = <ThrowOnError extends boolean = false>(
  */
 export const permitGroupPack = <ThrowOnError extends boolean = false>(
   options: Options<PermitGroupPackData, ThrowOnError>
-) =>
+): RequestResult<
+  PermitGroupPackResponses,
+  PermitGroupPackErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).put<
     PermitGroupPackResponses,
     PermitGroupPackErrors,
@@ -2498,7 +2672,7 @@ export const permitGroupPack = <ThrowOnError extends boolean = false>(
  */
 export const listUsers = <ThrowOnError extends boolean = false>(
   options?: Options<ListUsersData, ThrowOnError>
-) =>
+): RequestResult<ListUsersResponses, ListUsersErrors, ThrowOnError> =>
   (options?.client ?? client).get<
     ListUsersResponses,
     ListUsersErrors,
@@ -2518,7 +2692,7 @@ export const listUsers = <ThrowOnError extends boolean = false>(
  */
 export const createUser = <ThrowOnError extends boolean = false>(
   options: Options<CreateUserData, ThrowOnError>
-) =>
+): RequestResult<CreateUserResponses, CreateUserErrors, ThrowOnError> =>
   (options.client ?? client).post<
     CreateUserResponses,
     CreateUserErrors,
@@ -2542,7 +2716,7 @@ export const createUser = <ThrowOnError extends boolean = false>(
  */
 export const deleteUser = <ThrowOnError extends boolean = false>(
   options: Options<DeleteUserData, ThrowOnError>
-) =>
+): RequestResult<DeleteUserResponses, DeleteUserErrors, ThrowOnError> =>
   (options.client ?? client).delete<
     DeleteUserResponses,
     DeleteUserErrors,
@@ -2562,7 +2736,7 @@ export const deleteUser = <ThrowOnError extends boolean = false>(
  */
 export const showUser = <ThrowOnError extends boolean = false>(
   options: Options<ShowUserData, ThrowOnError>
-) =>
+): RequestResult<ShowUserResponses, ShowUserErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ShowUserResponses,
     ShowUserErrors,
@@ -2582,7 +2756,7 @@ export const showUser = <ThrowOnError extends boolean = false>(
  */
 export const updateUser = <ThrowOnError extends boolean = false>(
   options: Options<UpdateUserData, ThrowOnError>
-) =>
+): RequestResult<UpdateUserResponses, UpdateUserErrors, ThrowOnError> =>
   (options.client ?? client).put<
     UpdateUserResponses,
     UpdateUserErrors,
@@ -2606,7 +2780,11 @@ export const updateUser = <ThrowOnError extends boolean = false>(
  */
 export const deleteUserFromGroup = <ThrowOnError extends boolean = false>(
   options: Options<DeleteUserFromGroupData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteUserFromGroupResponses,
+  DeleteUserFromGroupErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteUserFromGroupResponses,
     DeleteUserFromGroupErrors,
@@ -2630,7 +2808,7 @@ export const deleteUserFromGroup = <ThrowOnError extends boolean = false>(
  */
 export const listUserGroups = <ThrowOnError extends boolean = false>(
   options: Options<ListUserGroupsData, ThrowOnError>
-) =>
+): RequestResult<ListUserGroupsResponses, ListUserGroupsErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListUserGroupsResponses,
     ListUserGroupsErrors,
@@ -2650,7 +2828,11 @@ export const listUserGroups = <ThrowOnError extends boolean = false>(
  */
 export const attachUserToGroup = <ThrowOnError extends boolean = false>(
   options: Options<AttachUserToGroupData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachUserToGroupResponses,
+  AttachUserToGroupErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachUserToGroupResponses,
     AttachUserToGroupErrors,
@@ -2674,7 +2856,11 @@ export const attachUserToGroup = <ThrowOnError extends boolean = false>(
  */
 export const permitUserGroup = <ThrowOnError extends boolean = false>(
   options: Options<PermitUserGroupData, ThrowOnError>
-) =>
+): RequestResult<
+  PermitUserGroupResponses,
+  PermitUserGroupErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).put<
     PermitUserGroupResponses,
     PermitUserGroupErrors,
@@ -2698,7 +2884,11 @@ export const permitUserGroup = <ThrowOnError extends boolean = false>(
  */
 export const deleteUserFromMod = <ThrowOnError extends boolean = false>(
   options: Options<DeleteUserFromModData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteUserFromModResponses,
+  DeleteUserFromModErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteUserFromModResponses,
     DeleteUserFromModErrors,
@@ -2722,7 +2912,7 @@ export const deleteUserFromMod = <ThrowOnError extends boolean = false>(
  */
 export const listUserMods = <ThrowOnError extends boolean = false>(
   options: Options<ListUserModsData, ThrowOnError>
-) =>
+): RequestResult<ListUserModsResponses, ListUserModsErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListUserModsResponses,
     ListUserModsErrors,
@@ -2742,7 +2932,11 @@ export const listUserMods = <ThrowOnError extends boolean = false>(
  */
 export const attachUserToMod = <ThrowOnError extends boolean = false>(
   options: Options<AttachUserToModData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachUserToModResponses,
+  AttachUserToModErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachUserToModResponses,
     AttachUserToModErrors,
@@ -2766,7 +2960,7 @@ export const attachUserToMod = <ThrowOnError extends boolean = false>(
  */
 export const permitUserMod = <ThrowOnError extends boolean = false>(
   options: Options<PermitUserModData, ThrowOnError>
-) =>
+): RequestResult<PermitUserModResponses, PermitUserModErrors, ThrowOnError> =>
   (options.client ?? client).put<
     PermitUserModResponses,
     PermitUserModErrors,
@@ -2790,7 +2984,11 @@ export const permitUserMod = <ThrowOnError extends boolean = false>(
  */
 export const deleteUserFromPack = <ThrowOnError extends boolean = false>(
   options: Options<DeleteUserFromPackData, ThrowOnError>
-) =>
+): RequestResult<
+  DeleteUserFromPackResponses,
+  DeleteUserFromPackErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).delete<
     DeleteUserFromPackResponses,
     DeleteUserFromPackErrors,
@@ -2814,7 +3012,7 @@ export const deleteUserFromPack = <ThrowOnError extends boolean = false>(
  */
 export const listUserPacks = <ThrowOnError extends boolean = false>(
   options: Options<ListUserPacksData, ThrowOnError>
-) =>
+): RequestResult<ListUserPacksResponses, ListUserPacksErrors, ThrowOnError> =>
   (options.client ?? client).get<
     ListUserPacksResponses,
     ListUserPacksErrors,
@@ -2834,7 +3032,11 @@ export const listUserPacks = <ThrowOnError extends boolean = false>(
  */
 export const attachUserToPack = <ThrowOnError extends boolean = false>(
   options: Options<AttachUserToPackData, ThrowOnError>
-) =>
+): RequestResult<
+  AttachUserToPackResponses,
+  AttachUserToPackErrors,
+  ThrowOnError
+> =>
   (options.client ?? client).post<
     AttachUserToPackResponses,
     AttachUserToPackErrors,
@@ -2858,7 +3060,7 @@ export const attachUserToPack = <ThrowOnError extends boolean = false>(
  */
 export const permitUserPack = <ThrowOnError extends boolean = false>(
   options: Options<PermitUserPackData, ThrowOnError>
-) =>
+): RequestResult<PermitUserPackResponses, PermitUserPackErrors, ThrowOnError> =>
   (options.client ?? client).put<
     PermitUserPackResponses,
     PermitUserPackErrors,

@@ -1,0 +1,349 @@
+---
+# -- (string) Override the name
+nameOverride: ""
+
+# -- (string) Override the fullname
+fullnameOverride: ""
+
+# yaml-language-server: $schema=https://json-schema.org/draft-07/schema#
+serviceAccount:
+  # -- Create a new service account
+  create: true
+
+  # -- (string) Optional name for an existing service account
+  name: ""
+
+  # -- Define annotations for the service account
+  annotations: {}
+
+# -- Update strategy for deployment
+updateStrategy:
+  type: RollingUpdate
+
+# -- Define additional labels
+labels: {}
+
+# -- Define additional annotations
+annotations: {}
+
+httpRoute:
+  # -- Enable http route from gateway API
+  enabled: false
+
+  # -- Additional annotations for the http route
+  annotations: {}
+
+  # -- Additional labels for the http route
+  labels: {}
+
+  # -- Parent refs to attach the http route
+  parentRefs: []
+
+  # -- Hostnames used for the http route
+  hostnames:
+    - gopad.cluster.local
+
+  # -- Rules used to define routing rules
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+# -- Optional name of pull secret if using a private registry
+pullSecrets: []
+
+server:
+  # -- (int) Replicas for the deployment
+  replicas: 1
+
+  image:
+    # -- Image repository used by deployment
+    repository: ghcr.io/gopad/gopad-api
+
+    # -- (string) Optional tag for the repository
+    tag: ~
+
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+
+  # -- List of extra init containers
+  extraInitContainers: []
+
+  # -- List of extra sidecar containers
+  extraSidecarContainers: []
+
+  # -- List of extra volumes
+  extraVolumes: []
+    # - name: extra
+    #   emptyDir: {}
+
+  # -- List of extra volume mounts
+  extraVolumeMounts: []
+    # - name: extra
+    #   mountPath: /usr/local/share
+    #   readOnly: true
+
+  service:
+    # -- Type of the service
+    type: ClusterIP
+
+    # -- Additional annotations for the service
+    annotations: {}
+
+    # -- Additional labels for the service
+    labels: {}
+
+    # -- Port of the service
+    port: 8080
+
+  metrics:
+    # -- Enable metrics
+    enabled: true
+
+    # -- (int) Metrics port of the service
+    port: 8000
+
+    # -- (int) Internal metrics port of the service
+    internalPort: 8000
+
+    serviceMonitor:
+      # -- Enable service monitor
+      enabled: false
+
+      # -- (string) Namespace for ServiceMonitor, defaults to release namespace
+      namespace:
+
+      # -- (string) Optional job label for the target service in Prometheus
+      jobLabel:
+
+      # -- (string) Interval at which metrics should be scraped
+      interval:
+
+      # -- (string) Timeout after which the scrape is ended
+      scrapeTimeout:
+
+      # -- HonorLabels chooses the metric’s labels on collisions with target labels
+      honorLabels: false
+
+      # -- List of metric relabel configs to apply to samples before ingestion
+      metricRelabelings: []
+
+      # -- List of relabel configs to apply to samples before scraping
+      relabelings: []
+
+      # -- Additional annotations for the service monitor
+      annotations: {}
+
+      # -- Additional labels for the service monitor
+      labels: {}
+
+  # -- Extra environment variables for driver
+  extraEnvVariables: []
+
+  # -- Resources for the deployment
+  resources:
+    limits: {}
+    requests: {}
+
+  # -- Annotations specific for the pod
+  podAnnotations: {}
+
+  # -- Security context for the pod
+  podSecurityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  # -- Security context for the deployment
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1337
+    seccompProfile:
+      type: RuntimeDefault
+
+cleanup:
+  # -- Schedule for the cronjob
+  schedule: "0 * * * *"
+
+  # -- Additional annotations for the cronjob
+  annotations: {}
+
+  # -- Additional labels for the cronjob
+  labels: {}
+
+  image:
+    # -- Image repository used by deployment
+    repository: ghcr.io/gopad/gopad-api
+
+    # -- (string) Optional tag for the repository
+    tag: ~
+
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+
+  # -- Resources for the deployment
+  resources:
+    limits: {}
+    requests: {}
+
+  # -- Security context for the pod
+  podSecurityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  # -- Security context for the deployment
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1337
+    seccompProfile:
+      type: RuntimeDefault
+
+config:
+  server:
+    # -- Hostname for the server
+    host: http://localhost
+
+    # -- Root for the server address
+    root: /
+
+    # -- Enable OpenAPI docs for the server
+    docs: true
+
+  metrics:
+    # -- Enable pprof for the server
+    pprof: false
+
+  log:
+    # -- Log level for the server
+    level: info
+
+  database:
+    # -- Database driver
+    driver: mariadb
+
+    # -- Database address
+    address: mariadb
+
+    # -- Database port
+    port: 3306
+
+    # -- Database name
+    name: gopad
+
+    # -- Database username
+    username: gopad
+
+    # -- Database password
+    password:
+
+    # -- Key within secret to use
+    passwordKey: password
+
+    # -- Existing secret to use
+    existingSecret:
+
+  upload:
+    # -- Upload driver
+    driver: file
+
+    # -- Upload endpoint
+    endpoint: ~
+
+    # -- Upload path style
+    pathstyle: false
+
+    # -- Upload path
+    path: /var/lib/gopad/uploads
+
+    # -- Upload bucket
+    bucket: ~
+
+    # -- Upload region
+    region: us-east-1
+
+    # -- Upload permission
+    perms: "0755"
+
+    # -- Upload proxy
+    proxy: true
+
+    # -- Upload access
+    access:
+
+    # --  Key within secret to use
+    accessKey: access
+
+    # -- Upload secret
+    secret:
+
+    # -- Key within secret to use
+    secretKey: secret
+
+    # -- Existing secret to use
+    existingSecret:
+
+  token:
+    # -- Token expiration duration
+    expire: 24h
+
+    # -- Secret value
+    secret:
+
+    # -- Key within secret to use
+    secretKey: secret
+
+    # -- Existing secret to use for token
+    existingSecret:
+
+  admin:
+    # -- Create an initial admin user
+    create: false
+
+    # -- Username for admin user
+    username: admin
+
+    # -- Key within secret to use
+    usernameKey: username
+
+    # -- Password for admin user
+    password:
+
+    # -- Key within secret to use
+    passwordKey: password
+
+    # -- Email for admin user
+    email: admin@localhost
+
+    # -- Key within secret to use
+    emailKey: email
+
+    # -- Existing secret to use for admin
+    existingSecret:
+
+    # -- List of usernames promoted to be admin
+    users: []
+
+  scim:
+    # -- Enable SCIM provisioning
+    enabled: false
+
+    # -- Token for SCIM secret
+    token:
+
+    # -- Key within secret to use
+    tokenKey: token
+
+    # -- Existing secret to use
+    existingSecret:
+
+auth:
+  # -- List of authentication providers
+  providers: []
+
+...

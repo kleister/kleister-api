@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: {{ include "kleister-api.fullname" . }}-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kleister-api.labels" . | nindent 4 }}
+{{- if .Values.server.service.labels }}
+    {{- toYaml .Values.server.service.labels | nindent 4 }}
+{{- end }}
+{{- if  .Values.server.service.annotations }}
+  annotations:
+    {{- toYaml .Values.server.service.annotations | nindent 4 }}
+{{- end }}
+
+spec:
+  type: {{ .Values.server.service.type }}
+
+  ports:
+    - name: http
+      port: {{ .Values.server.service.port }}
+      targetPort: http
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.server.metrics.port }}
+      targetPort: metrics
+      protocol: TCP
+
+  selector:
+    {{- include "kleister-api.server.selectorLabels" . | nindent 4 }}

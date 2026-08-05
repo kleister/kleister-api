@@ -1,0 +1,41 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+
+[tools]
+1password = "2.38.1"
+cosign = "3.1.2"
+go = "1.26.5"
+golangci-lint = "2.11.4"
+goreleaser = "2.17.1"
+helm = "4.2.3"
+node = "24"
+pipx = "1.16.5"
+pre-commit = "4.6.1"
+s5cmd = "2.3.0"
+sqlite = "3.53.3"
+task = "3.52.0"
+yq = "4.53.3"
+
+"github:cloudsmith-io/cloudsmith-cli" = "1.20.2"
+"pipx:httpie" = "3.2.4"
+"pipx:posting" = "2.10.0"
+
+[env]
+KLEISTER_API_LOG_LEVEL = "debug"
+KLEISTER_API_LOG_PRETTY = "true"
+KLEISTER_API_LOG_COLOR = "true"
+
+KLEISTER_API_TOKEN_SECRET = "hgJKKJrSzI8pOxCjCnJHvNvK"
+KLEISTER_API_TOKEN_EXPIRE = "1h"
+
+KLEISTER_API_DATABASE_DRIVER = "sqlite3"
+KLEISTER_API_DATABASE_NAME = "storage/kleister.sqlite3"
+
+KLEISTER_API_UPLOAD_DRIVER = "file"
+KLEISTER_API_UPLOAD_PATH = "storage/uploads/"
+
+KLEISTER_API_CLEANUP_ENABLED = "true"
+KLEISTER_API_CLEANUP_INTERVAL = "5m"
+
+KLEISTER_API_ADMIN_USERNAME = "admin"
+KLEISTER_API_ADMIN_PASSWORD = "p455w0rd"
+KLEISTER_API_ADMIN_EMAIL = "kleister@webhippie.de"

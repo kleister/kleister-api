@@ -1,0 +1,57 @@
+---
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+name: cleanup
+
+"on":
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        package:
+          - kleister-api
+          - charts/kleister-api
+
+    steps:
+      - name: Install deps
+        uses: alexellis/arkade-get@master
+        with:
+          gh: latest
+          jq: latest
+
+      - name: Delete tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: kleister
+          PACKAGE: ${{ matrix.package }}
+        run: |
+          set -euo pipefail
+          cutoff="$(date -u -d '14 days ago' +%s)"
+          versions="$(gh api -H 'Accept: application/vnd.github+json' --paginate "/orgs/${OWNER}/packages/container/${PACKAGE//\//%2F}/versions?per_page=100")"
+          ids="$(echo "$versions" | jq -r --arg cutoff "$cutoff" '
+            map(select(.metadata.container.tags | any(test("^0\\.0\\.0-[0-9]{14}\\.[0-9a-f]+$"))))
+            | map(select(.metadata.container.tags | all(test("^0\\.0\\.0-[0-9]{14}\\.[0-9a-f]+$"))))
+            | sort_by(.created_at)
+            | if length > 3 then .[0:-3] else [] end
+            | map(select((.created_at | fromdateiso8601) < ($cutoff|tonumber)))
+            | .[].id
+          ')"
+          for id in $ids; do
+            echo "Deleting ${PACKAGE} version ${id}"
+            gh api -X DELETE "/orgs/${OWNER}/packages/container/${PACKAGE//\//%2F}/versions/${id}"
+          done
+
+...

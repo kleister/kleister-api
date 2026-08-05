@@ -1,0 +1,49 @@
+{{- if and .Values.server.metrics.enabled .Values.server.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+
+metadata:
+  name: {{ include "kleister-api.fullname" . }}-server
+  namespace: {{ default .Release.Namespace .Values.server.metrics.serviceMonitor.namespace }}
+  labels:
+    {{- include "kleister-api.labels" . | nindent 4 }}
+{{- if .Values.server.metrics.serviceMonitor.labels }}
+    {{- toYaml .Values.server.metrics.serviceMonitor.labels | nindent 4 }}
+{{- end }}
+{{- if  .Values.server.metrics.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml .Values.server.metrics.serviceMonitor.annotations | nindent 4 }}
+{{- end }}
+
+spec:
+  {{- if .Values.server.metrics.serviceMonitor.jobLabel }}
+  jobLabel: {{ .Values.server.metrics.serviceMonitor.jobLabel }}
+  {{- end }}
+
+  selector:
+    matchLabels:
+      {{- include "kleister-api.server.selectorLabels" . | nindent 6 }}
+
+  endpoints:
+    - port: metrics
+      scheme: http
+      {{- if .Values.server.metrics.serviceMonitor.interval }}
+      interval: {{ .Values.server.metrics.serviceMonitor.interval }}
+      {{- end }}
+      {{- if .Values.server.metrics.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ .Values.server.metrics.serviceMonitor.scrapeTimeout }}
+      {{- end }}
+      {{- if .Values.server.metrics.serviceMonitor.honorLabels }}
+      honorLabels: {{ .Values.server.metrics.serviceMonitor.honorLabels }}
+      {{- end }}
+      {{- if .Values.server.metrics.serviceMonitor.metricRelabelings }}
+      metricRelabelings: {{- toYaml .Values.server.metrics.serviceMonitor.metricRelabelings | nindent 6 }}
+      {{- end }}
+      {{- if .Values.server.metrics.serviceMonitor.relabelings }}
+      relabelings: {{- toYaml .Values.server.metrics.serviceMonitor.relabelings | nindent 6 }}
+      {{- end }}
+
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+{{- end }}

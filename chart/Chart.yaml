@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://www.schemastore.org/chart.json
+apiVersion: v2
+version: 0.0.0
+appVersion: 0.0.0
+type: application
+name: kleister-api
+description: Server to manage mod packs for Minecraft
+home: https://kleister.eu
+
+maintainers:
+  - email: thomas@webhippie.de
+    name: tboerger
+    url: https://github.com/tboerger
+
+sources:
+  - https://github.com/kleister/kleister-api
+
+...

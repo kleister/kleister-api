@@ -103,6 +103,12 @@ export interface Config {
   responseValidator?: (data: unknown) => Promise<unknown>
 }
 
+/**
+ * Arbitrary metadata passed through the `meta` request option.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ClientMeta {}
+
 type IsExactlyNeverOrNeverUndefined<T> = [T] extends [never]
   ? true
   : [T] extends [never | undefined]
@@ -112,7 +118,9 @@ type IsExactlyNeverOrNeverUndefined<T> = [T] extends [never]
     : false
 
 export type OmitNever<T extends Record<string, unknown>> = {
-  [K in keyof T as IsExactlyNeverOrNeverUndefined<T[K]> extends true
-    ? never
-    : K]: T[K]
+  [
+    K in keyof T as IsExactlyNeverOrNeverUndefined<T[K]> extends true
+      ? never
+      : K
+  ]: T[K]
 }

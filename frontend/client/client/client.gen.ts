@@ -58,10 +58,7 @@ export const createClient = (config: Config = {}): Client => {
     }
 
     if (opts.security) {
-      await setAuthParams({
-        ...opts,
-        security: opts.security,
-      })
+      await setAuthParams(opts)
     }
 
     if (opts.requestValidator) {
@@ -264,9 +261,7 @@ export const createClient = (config: Config = {}): Client => {
           return request
         },
         serializedBody: getValidRequestBody(opts) as
-          | BodyInit
-          | null
-          | undefined,
+          BodyInit | null | undefined,
         url,
       })
     }

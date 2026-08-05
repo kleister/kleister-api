@@ -1,0 +1,74 @@
+apiVersion: batch/v1
+kind: CronJob
+
+metadata:
+  name: {{ include "kleister-api.fullname" . }}-cleanup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kleister-api.labels" . | nindent 4 }}
+{{- if .Values.cleanup.labels }}
+    {{- toYaml .Values.cleanup.labels | nindent 4 }}
+{{- end }}
+{{- if  .Values.cleanup.annotations }}
+  annotations:
+    {{- toYaml .Values.cleanup.annotations | nindent 4 }}
+{{- end }}
+
+spec:
+  schedule: {{ .Values.cleanup.schedule }}
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
+
+  jobTemplate:
+    metadata:
+      name: {{ include "kleister-api.fullname" . }}-cleanup
+      namespace: {{ .Release.Namespace }}
+
+    spec:
+      backoffLimit: 5
+
+      template:
+        metadata:
+          labels:
+            {{- include "kleister-api.cleanup.labels" . | nindent 12 }}
+
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ template "kleister-api.serviceAccountName" . }}
+          {{- if .Values.pullSecrets }}
+
+          imagePullSecrets:
+          {{- range .Values.pullSecrets }}
+            - name: {{ . }}
+          {{- end }}
+          {{- end }}
+          {{- with .Values.cleanup.securityContext }}
+
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          containers:
+            - name: kleister-api
+              image: {{ .Values.cleanup.image.repository }}:{{ .Values.cleanup.image.tag | default .Chart.AppVersion }}
+              imagePullPolicy: {{ .Values.cleanup.image.pullPolicy }}
+              {{- with .Values.cleanup.podSecurityContext }}
+
+              securityContext:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+
+              args:
+                - database
+                - cleanup
+
+              env:
+                {{- include "kleister-api.cleanup.environment" . | nindent 16 }}
+              {{- if .Values.cleanup.resources }}
+
+              resources:
+                {{- toYaml .Values.cleanup.resources | nindent 16 }}
+              {{- end }}
+
+...

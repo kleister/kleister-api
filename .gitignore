@@ -1,8 +1,6 @@
-.direnv/
-.devenv/
-.task/
+mise.local.toml
 
-.envrc
+.task/
 coverage.out
 
 bin/
@@ -14,5 +12,3 @@ pkg/frontend/files/
 node_modules/
 npm-debug.log*
 *.log
-
-.pre-commit-config.yaml

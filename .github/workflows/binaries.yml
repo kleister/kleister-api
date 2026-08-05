@@ -10,6 +10,10 @@ name: binaries
     tags:
       - v*
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   packages: write
@@ -19,10 +23,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Setup nodejs
+        if: github.event_name != 'pull_request'
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: Generate token
+        if: github.event_name != 'pull_request'
+        id: token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.TOKEN_EXCHANGE_APP }}
+          private-key: ${{ secrets.TOKEN_EXCHANGE_KEY }}
+          permission-contents: write
+          permission-packages: write
+
       - name: Checkout source
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      - name: Install tools
+        uses: jdx/mise-action@v4
 
       - name: Configure aws
         uses: aws-actions/configure-aws-credentials@v6
@@ -31,29 +54,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
 
-      - name: Setup golang
-        uses: actions/setup-go@v7
-        with:
-          go-version-file: go.mod
-
-      - name: Setup nodejs
-        uses: actions/setup-node@v7.0.0
-        with:
-          node-version: 24.x
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-
-      - name: Setup task
-        uses: arduino/setup-task@v3.0.0
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup goreleaser
-        uses: goreleaser/goreleaser-action@v7
-        with:
-          install-only: true
-
       - name: Setup signing
         uses: crazy-max/ghaction-import-gpg@v7
         with:
@@ -61,6 +61,8 @@ jobs:
           passphrase: ${{ secrets.GNUPG_PASSWORD }}
 
       - name: Run release
+        env:
+          GITHUB_TOKEN: ${{ github.event_name == 'pull_request' && secrets.GITHUB_TOKEN || steps.token.outputs.token }}
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             task build:release
@@ -78,14 +80,10 @@ jobs:
         run: |
           aws s3 sync --exclude "*" --include "kleister-api-*" dist s3://dl.kleister.eu/api/testing/
 
-      - name: Install cloudsmith
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: cloudsmith-io/cloudsmith-cli-action@v3.1.0
-        with:
-          api-key: ${{ secrets.CLOUDSMITH_API_KEY }}
-
       - name: Upload packages
         if: startsWith(github.ref, 'refs/tags/')
+        env:
+          CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
         run: |
           for PACKAGE in dist/kleister-*.deb; do
             cloudsmith push deb kleister/general/any-distro/any-version "${PACKAGE}"

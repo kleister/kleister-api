@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
-name: openapi
+name: schema
 
 "on":
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  openapi:
+  schema:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,12 +21,15 @@ jobs:
       - name: Install tools
         uses: jdx/mise-action@v4
 
-      - name: Upload spec
+      - name: Generate schema
+        run: go run ./hack/jsonschema --out dist/schema
+
+      - name: Upload schema
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: eu-central-1
         run: |
-          s5cmd cp openapi/v1.yaml s3://dl.kleister.eu/openapi/$(yq -r .info.version openapi/v1.yaml).yaml
+          s5cmd cp dist/schema/ s3://dl.kleister.eu/schema/
 
 ...

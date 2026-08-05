@@ -5,7 +5,5 @@ linters:
   exclusions:
     paths:
       - node_modules/
-      - .devenv/
-      - .direnv/
 
 ...
