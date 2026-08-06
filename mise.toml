@@ -11,7 +11,7 @@ node = "24"
 pipx = "1.16.6"
 pre-commit = "4.6.1"
 s5cmd = "2.3.0"
-sqlite = "3.53.3"
+sqlite = "3.53.4"
 task = "3.52.0"
 yq = "4.53.3"
 
