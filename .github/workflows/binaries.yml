@@ -55,6 +55,7 @@ jobs:
           aws-region: eu-central-1
 
       - name: Setup signing
+        if: github.event_name != 'pull_request'
         uses: crazy-max/ghaction-import-gpg@v7
         with:
           gpg_private_key: ${{ secrets.GNUPG_KEY }}
