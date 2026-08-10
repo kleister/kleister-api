@@ -382,8 +382,8 @@ github.com/klauspost/compress v1.19.1 h1:VsB4HPswih7mmZ8WleSFQ75c/Ui1M4trX5oAsJn
 github.com/klauspost/compress v1.19.1/go.mod h1:cwPg85FWrGar70rWktvGQj8/hthj3wpl0PGDogxkrSQ=
 github.com/kleister/go-forge v1.0.1 h1:1KygJJZOC7b4zhX1k4oCnrsmIzjDGmA9VJWfp1bR/jM=
 github.com/kleister/go-forge v1.0.1/go.mod h1:nhm4NJXVh6zlVwAzex2j3qiC0R9P9sDzlxGWRgatlxQ=
-github.com/kleister/go-minecraft v1.8.0 h1:MpL+SYmuxap4IrSlDeMbWxzyGRcgJkqfGiUqIL12Na4=
-github.com/kleister/go-minecraft v1.8.0/go.mod h1:g8iNY4iYkpPva6DTJ+avcCDTF386XxcnoX98nsAh1tI=
+github.com/kleister/go-minecraft v1.9.0 h1:GuB8+Bo7GX5B/iJhYC5iIn0i2Hu9sszA846e6DbWDg4=
+github.com/kleister/go-minecraft v1.9.0/go.mod h1:dq0nTB2nG0ZjJ0H/P0vt63uxAFFbI1xxPbnq8byi8m4=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
