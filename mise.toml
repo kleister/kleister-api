@@ -13,7 +13,7 @@ pre-commit = "4.6.2"
 s5cmd = "2.3.0"
 sqlite = "3.53.4"
 task = "3.53.1"
-yq = "4.53.3"
+yq = "4.53.4"
 
 "github:cloudsmith-io/cloudsmith-cli" = "1.24.0"
 "pipx:httpie" = "3.2.4"
