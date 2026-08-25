@@ -15,7 +15,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.38
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.37
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.107.3
-	github.com/aws/smithy-go v1.27.9
+	github.com/aws/smithy-go v1.28.0
 	github.com/cenkalti/backoff/v7 v7.0.0
 	github.com/coreos/go-oidc/v3 v3.20.0
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e
