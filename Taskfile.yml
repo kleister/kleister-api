@@ -23,7 +23,7 @@ tasks:
     desc: Run standard formatter for backend
     vars:
       SOURCES:
-        sh: find . -name "*.go" -type f -not -iname mock.go -not -path "./.devenv/*" -not -path "./.direnv/*" | xargs echo
+        sh: find . -name "*.go" -type f -not -iname mock.go | xargs echo
     cmds:
       - gofmt -s -w {{ .SOURCES }}
 
