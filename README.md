@@ -97,10 +97,10 @@ After installing the tools via `mise install` as described above set up the
 pre-commit hooks so they run automatically on every commit:
 
 ```console
-pre-commit install --hook-type pre-commit --hook-type commit-msg
+prek install --hook-type pre-commit --hook-type commit-msg
 ```
 
-> `pre-commit` is managed by mise and will be available after `mise install`.
+> `prek` is managed by mise and will be available after `mise install`.
 
 If you have changed something on the source you should simply commit following
 the mentioned conventions:

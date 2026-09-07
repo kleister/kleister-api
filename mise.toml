@@ -1,18 +1,17 @@
 #:schema https://mise.jdx.dev/schema/mise.json
 
 [tools]
-1password = "latest"
 cosign = "3.1.3"
 go = "1.27.1"
 golangci-lint = "2.13.2"
 goreleaser = "2.18.1"
 helm = "4.2.4"
 node = "24"
-pipx = "1.17.2"
-pre-commit = "4.6.2"
+prek = "0.5.2"
 s5cmd = "2.3.0"
 sqlite = "3.53.4"
 task = "3.53.1"
+uv = "0.12.10"
 yq = "4.53.6"
 
 "github:cloudsmith-io/cloudsmith-cli" = "1.26.0"
