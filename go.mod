@@ -57,7 +57,7 @@ require (
 	github.com/uptrace/bun/driver/sqliteshim v1.2.18
 	github.com/vincent-petithory/dataurl v1.0.0
 	golang.org/x/crypto v0.57.0
-	golang.org/x/oauth2 v0.36.0
+	golang.org/x/oauth2 v0.37.0
 )
 
 require (
