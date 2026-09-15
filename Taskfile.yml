@@ -41,12 +41,12 @@ tasks:
       PACKAGES:
         sh: go list ./... | xargs echo
     cmds:
-      - for PKG in {{ .PACKAGES }}; do go tool github.com/mgechev/revive -config revive.toml -set_exit_status $PKG || exit 1; done;
+      - for PKG in {{ .PACKAGES }}; do revive -config revive.toml -set_exit_status $PKG || exit 1; done;
 
   be:golangci:
     desc: Run golangci linter for backend
     cmds:
-      - go tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint run ./...
+      - golangci-lint run ./...
 
   be:generate:
     desc: Generate code for backend
