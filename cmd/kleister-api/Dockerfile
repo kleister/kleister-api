@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM debian:13-slim AS builder
+FROM --platform=$BUILDPLATFORM debian:13-slim@sha256:d7e12182ce18b85b93007c1dedf31f2d29e01ccf3182cc4017c709b6259bc132 AS builder
 WORKDIR /src
 
 RUN apt-get update && \
