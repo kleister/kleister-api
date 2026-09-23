@@ -19,7 +19,7 @@ yq = "4.53.6"
 "pipx:posting" = "2.10.0"
 
 "go:github.com/golangci/golangci-lint/v2/cmd/golangci-lint" = "2.13.2"
-"go:github.com/mgechev/revive" = "1.16.0"
+"go:github.com/mgechev/revive" = "1.17.0"
 "go:github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen" = "2.8.0"
 "go:go.uber.org/mock/mockgen" = "0.6.0"
 
