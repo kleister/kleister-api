@@ -41,12 +41,12 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
-	github.com/uptrace/bun v1.2.18
-	github.com/uptrace/bun/dialect/mysqldialect v1.2.18
-	github.com/uptrace/bun/dialect/pgdialect v1.2.18
-	github.com/uptrace/bun/dialect/sqlitedialect v1.2.18
-	github.com/uptrace/bun/driver/pgdriver v1.2.18
-	github.com/uptrace/bun/driver/sqliteshim v1.2.18
+	github.com/uptrace/bun v1.3.0
+	github.com/uptrace/bun/dialect/mysqldialect v1.3.0
+	github.com/uptrace/bun/dialect/pgdialect v1.3.0
+	github.com/uptrace/bun/dialect/sqlitedialect v1.3.0
+	github.com/uptrace/bun/driver/pgdriver v1.3.0
+	github.com/uptrace/bun/driver/sqliteshim v1.3.0
 	github.com/vincent-petithory/dataurl v1.0.0
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.57.0
