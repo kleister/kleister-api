@@ -16,7 +16,7 @@ yq = "4.54.1"
 
 "github:cloudsmith-io/cloudsmith-cli" = "1.27.0"
 "pipx:httpie" = "3.2.4"
-"pipx:posting" = "2.11.0"
+"pipx:posting" = "2.11.1"
 
 "go:github.com/golangci/golangci-lint/v2/cmd/golangci-lint" = "2.14.0"
 "go:github.com/mgechev/revive" = "1.17.0"
