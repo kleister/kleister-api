@@ -14,7 +14,7 @@ task = "3.54.0"
 uv = "0.12.23"
 yq = "4.54.1"
 
-"github:cloudsmith-io/cloudsmith-cli" = "1.27.0"
+"github:cloudsmith-io/cloudsmith-cli" = "1.28.0"
 "pipx:httpie" = "3.2.4"
 "pipx:posting" = "2.11.1"
 
