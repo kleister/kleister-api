@@ -54,11 +54,11 @@ func (s *Packs) List(ctx context.Context, params model.ListParams) ([]*model.Pac
 	}
 
 	if params.Limit > 0 {
-		q = q.Limit(int(params.Limit))
+		q = q.Limit(params.Limit)
 	}
 
 	if params.Offset > 0 {
-		q = q.Offset(int(params.Offset))
+		q = q.Offset(params.Offset)
 	}
 
 	if err := q.Scan(ctx); err != nil {
@@ -360,11 +360,11 @@ func (s *Packs) ListGroups(ctx context.Context, params model.GroupPackParams) ([
 	}
 
 	if params.Limit > 0 {
-		q = q.Limit(int(params.Limit))
+		q = q.Limit(params.Limit)
 	}
 
 	if params.Offset > 0 {
-		q = q.Offset(int(params.Offset))
+		q = q.Offset(params.Offset)
 	}
 
 	if err := q.Scan(ctx); err != nil {
@@ -543,11 +543,11 @@ func (s *Packs) ListUsers(ctx context.Context, params model.UserPackParams) ([]*
 	}
 
 	if params.Limit > 0 {
-		q = q.Limit(int(params.Limit))
+		q = q.Limit(params.Limit)
 	}
 
 	if params.Offset > 0 {
-		q = q.Offset(int(params.Offset))
+		q = q.Offset(params.Offset)
 	}
 
 	if err := q.Scan(ctx); err != nil {

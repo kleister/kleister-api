@@ -30,11 +30,11 @@ func (s *Fabric) List(ctx context.Context, params model.ListParams) ([]*model.Fa
 	}
 
 	if params.Limit > 0 {
-		q = q.Limit(int(params.Limit))
+		q = q.Limit(params.Limit)
 	}
 
 	if params.Offset > 0 {
-		q = q.Offset(int(params.Offset))
+		q = q.Offset(params.Offset)
 	}
 
 	if err := q.Scan(ctx); err != nil {
@@ -114,11 +114,11 @@ func (s *Fabric) ListBuilds(ctx context.Context, params model.FabricBuildParams)
 	}
 
 	if params.Limit > 0 {
-		q = q.Limit(int(params.Limit))
+		q = q.Limit(params.Limit)
 	}
 
 	if params.Offset > 0 {
-		q = q.Offset(int(params.Offset))
+		q = q.Offset(params.Offset)
 	}
 
 	if err := q.Scan(ctx); err != nil {

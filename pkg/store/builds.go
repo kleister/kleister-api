@@ -49,11 +49,11 @@ func (s *Builds) List(ctx context.Context, pack *model.Pack, params model.ListPa
 	}
 
 	if params.Limit > 0 {
-		q = q.Limit(int(params.Limit))
+		q = q.Limit(params.Limit)
 	}
 
 	if params.Offset > 0 {
-		q = q.Offset(int(params.Offset))
+		q = q.Offset(params.Offset)
 	}
 
 	if err := q.Scan(ctx); err != nil {
@@ -187,11 +187,11 @@ func (s *Builds) ListVersions(ctx context.Context, _ *model.Pack, build *model.B
 	}
 
 	if params.Limit > 0 {
-		q = q.Limit(int(params.Limit))
+		q = q.Limit(params.Limit)
 	}
 
 	if params.Offset > 0 {
-		q = q.Offset(int(params.Offset))
+		q = q.Offset(params.Offset)
 	}
 
 	if err := q.Scan(ctx); err != nil {
