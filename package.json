@@ -77,6 +77,6 @@
     "fsevents@2.3.3": true
   },
   "overrides": {
-    "js-yaml": "^4.3.2"
+    "js-yaml": "^5.0.0"
   }
 }
