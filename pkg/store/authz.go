@@ -282,3 +282,25 @@ func authzDeleteObject(ctx context.Context, checker authz.Checker, object string
 
 	return checker.Delete(ctx, tuples...)
 }
+
+// authzDeleteSubject removes every direct assignment held by the given
+// subject across the given object types, the reverse direction of
+// authzDeleteObject — used to strip a user's own tuples when the user itself
+// is being deleted.
+func authzDeleteSubject(ctx context.Context, checker authz.Checker, subject string, objectTypes ...string) error {
+	tuples := make([]authz.TupleKey, 0)
+
+	for _, objectType := range objectTypes {
+		assignments, err := authzSubjectAssignments(ctx, checker, objectType, subject)
+
+		if err != nil {
+			return err
+		}
+
+		for id, a := range assignments {
+			tuples = append(tuples, authz.TupleKey{Object: authzObject(objectType, id), Relation: a.Perm, Subject: subject})
+		}
+	}
+
+	return checker.Delete(ctx, tuples...)
+}

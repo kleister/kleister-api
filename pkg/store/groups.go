@@ -155,7 +155,11 @@ func (s *Groups) Delete(ctx context.Context, name string) error {
 		return err
 	}
 
-	return authzDeleteObject(ctx, s.client.authz, authzObject("group", record.ID))
+	if err := authzDeleteObject(ctx, s.client.authz, authzObject("group", record.ID)); err != nil {
+		return err
+	}
+
+	return authzDeleteSubject(ctx, s.client.authz, authzGroupSubject(record.ID), "mod", "pack")
 }
 
 // ListUsers implements the listing of all users for a group.

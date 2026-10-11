@@ -128,7 +128,7 @@ func (s *Users) Delete(ctx context.Context, name string) error {
 		return err
 	}
 
-	return nil
+	return authzDeleteSubject(ctx, s.client.authz, authzUserSubject(record.ID), "group", "mod", "pack")
 }
 
 // ShowRedirectToken implements the details for a specific redirect token.
