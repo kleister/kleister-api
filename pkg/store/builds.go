@@ -10,6 +10,7 @@ import (
 	"github.com/Machiel/slugify"
 	"github.com/dchest/uniuri"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/kleister/kleister-api/pkg/authz"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/validate"
 	"github.com/uptrace/bun"
@@ -105,7 +106,11 @@ func (s *Builds) Create(ctx context.Context, pack *model.Pack, record *model.Bui
 		return err
 	}
 
-	return nil
+	return s.client.authz.Write(ctx, authz.TupleKey{
+		Object:   authzObject("build", record.ID),
+		Relation: "parent",
+		Subject:  authzObject("pack", pack.ID),
+	})
 }
 
 // Update implements the update of an existing credential.
@@ -153,7 +158,11 @@ func (s *Builds) Delete(ctx context.Context, pack *model.Pack, name string) erro
 		return err
 	}
 
-	return nil
+	return s.client.authz.Delete(ctx, authz.TupleKey{
+		Object:   authzObject("build", record.ID),
+		Relation: "parent",
+		Subject:  authzObject("pack", pack.ID),
+	})
 }
 
 // ListVersions implements the listing of all versions for a build.

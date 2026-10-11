@@ -10,10 +10,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kleister/kleister-api/pkg/authz"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/migrations"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/upload"
+	"github.com/lrstanley/go-queryparser/v3"
 	"github.com/rs/zerolog"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/mysqldialect"
@@ -37,6 +39,7 @@ var (
 type Store struct {
 	scim   config.Scim
 	upload upload.Upload
+	authz  authz.Checker
 
 	driver          string
 	username        string
@@ -76,37 +79,54 @@ func (s *Store) WithPrincipal(principal *model.User) *Store {
 	return s
 }
 
+// Authz returns the authorization checker used for permission tuples.
+func (s *Store) Authz() authz.Checker {
+	return s.authz
+}
+
+// searchCut strips the same characters as queryparser.DefaultCut but keeps
+// the asterisk so it can still be used as a wildcard marker for SQL LIKE
+// queries.
+func searchCut(r rune) bool {
+	return r != '*' && queryparser.DefaultCut(r)
+}
+
 // SearchQuery builds a query for search terms.
-func (s *Store) SearchQuery(q *bun.SelectQuery, _ string) *bun.SelectQuery {
-	// opts := queryparser.Options{
-	// 	CutFn: searchCut,
-	// 	Allowed: []string{
-	// 		"slug",
-	// 		"name",
-	// 	},
-	// }
+func (s *Store) SearchQuery(q *bun.SelectQuery, term string) *bun.SelectQuery {
+	opts := queryparser.Options{
+		CutFn: searchCut,
+		Allowed: []string{
+			"username",
+			"email",
+			"fullname",
+		},
+	}
 
-	// parser := queryparser.New(
-	// 	term,
-	// 	opts,
-	// ).Parse()
+	parser := queryparser.New(
+		term,
+		opts,
+	).Parse()
 
-	// for _, name := range opts.Allowed {
-	// 	if parser.Has(name) {
-
-	// 		q = q.Where(
-	// 			fmt.Sprintf(
-	// 				"%s LIKE ?",
-	// 				name,
-	// 			),
-	// 			strings.ReplaceAll(
-	// 				parser.GetOne(name),
-	// 				"*",
-	// 				"%",
-	// 			),
-	// 		)
-	// 	}
-	// }
+	for _, name := range opts.Allowed {
+		if parser.Has(name) {
+			q = q.Where(
+				"? LIKE ?",
+				bun.Ident(name),
+				strings.Join(
+					[]string{
+						"%",
+						strings.ReplaceAll(
+							parser.GetOne(name),
+							"*",
+							"%",
+						),
+						"%",
+					},
+					"",
+				),
+			)
+		}
+	}
 
 	return q
 }
@@ -414,7 +434,7 @@ func (s *Store) open() error {
 }
 
 // NewStore initializes a new Bun
-func NewStore(cfg config.Database, scim config.Scim, uploads upload.Upload) (*Store, error) {
+func NewStore(cfg config.Database, scim config.Scim, uploads upload.Upload, checker authz.Checker) (*Store, error) {
 	username, err := config.Value(cfg.Username)
 
 	if err != nil {
@@ -430,6 +450,7 @@ func NewStore(cfg config.Database, scim config.Scim, uploads upload.Upload) (*St
 	client := &Store{
 		scim:     scim,
 		upload:   uploads,
+		authz:    checker,
 		driver:   cfg.Driver,
 		database: cfg.Name,
 		username: username,
@@ -583,8 +604,8 @@ func NewStore(cfg config.Database, scim config.Scim, uploads upload.Upload) (*St
 }
 
 // MustStore simply calls NewStore and panics on an error.
-func MustStore(cfg config.Database, scim config.Scim, uploads upload.Upload) *Store {
-	s, err := NewStore(cfg, scim, uploads)
+func MustStore(cfg config.Database, scim config.Scim, uploads upload.Upload, checker authz.Checker) *Store {
+	s, err := NewStore(cfg, scim, uploads, checker)
 
 	if err != nil {
 		panic(err)

@@ -55,6 +55,18 @@ scim:
   enabled: false
   token: ~
 
+authz:
+  driver: sqlite3
+  address: ~
+  port: ~
+  username: ~
+  password: ~
+  name: storage/authz.sqlite3
+  options: {}
+  api: ~
+  store: ~
+  token: ~
+
 admin:
   create: true
   username: admin

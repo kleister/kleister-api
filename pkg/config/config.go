@@ -90,6 +90,23 @@ type Scim struct {
 	Token   string `mapstructure:"token"`
 }
 
+// Authz defines the authorization engine configuration. Driver selects the
+// embedded database engine (sqlite3, mysql, mariadb, postgres, postgresql)
+// or "external" to talk to a standalone OpenFGA service via API/Store/Token
+// instead.
+type Authz struct {
+	Driver   string            `mapstructure:"driver"`
+	Address  string            `mapstructure:"address"`
+	Port     string            `mapstructure:"port"`
+	Username string            `mapstructure:"username"`
+	Password string            `mapstructure:"password"`
+	Name     string            `mapstructure:"name"`
+	Options  map[string]string `mapstructure:"options"`
+	API      string            `mapstructure:"api"`
+	Store    string            `mapstructure:"store"`
+	Token    string            `mapstructure:"token"`
+}
+
 // Config is a combination of all available configurations.
 type Config struct {
 	Server   Server   `mapstructure:"server"`
@@ -102,6 +119,7 @@ type Config struct {
 	Token    Token    `mapstructure:"token"`
 	Scim     Scim     `mapstructure:"scim"`
 	Admin    Admin    `mapstructure:"admin"`
+	Authz    Authz    `mapstructure:"authz"`
 }
 
 // Load initializes a default configuration struct.

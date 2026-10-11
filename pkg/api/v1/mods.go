@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -1078,26 +1079,21 @@ func (a *API) DeleteModFromUser(w http.ResponseWriter, r *http.Request, _ UserID
 
 // AllowCreateMod defines a middleware to check permissions.
 func (a *API) AllowCreateMod(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.AllowAuthenticatedOnly(next)
 }
 
 // AllowShowMod defines a middleware to check permissions.
 func (a *API) AllowShowMod(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.allowObjectAccess("mod", model.UserPerm, func(ctx context.Context) string {
+		return a.ModFromContext(ctx).ID
+	})(next)
 }
 
 // AllowManageMod defines a middleware to check permissions.
 func (a *API) AllowManageMod(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.allowObjectAccess("mod", model.AdminPerm, func(ctx context.Context) string {
+		return a.ModFromContext(ctx).ID
+	})(next)
 }
 
 func (a *API) convertMod(record *model.Mod) Mod {

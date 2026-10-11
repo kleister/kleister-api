@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/kleister/kleister-api/pkg/authz"
 	"github.com/kleister/kleister-api/pkg/config"
 	"github.com/kleister/kleister-api/pkg/upload"
 	"github.com/rs/zerolog"
@@ -99,4 +100,8 @@ func setupUploads(cfg *config.Config) (upload.Upload, error) {
 	}
 
 	return nil, upload.ErrUnknownDriver
+}
+
+func setupAuthz(cfg *config.Config) (authz.Checker, error) {
+	return authz.New(cfg.Authz)
 }

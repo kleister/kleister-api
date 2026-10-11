@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -562,26 +563,30 @@ func (a *API) DeleteBuildFromVersion(w http.ResponseWriter, r *http.Request, _ P
 
 // AllowCreateBuild defines a middleware to check permissions.
 func (a *API) AllowCreateBuild(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.allowObjectAccess("pack", model.AdminPerm, func(ctx context.Context) string {
+		return a.PackFromContext(ctx).ID
+	})(next)
 }
 
 // AllowShowBuild defines a middleware to check permissions.
 func (a *API) AllowShowBuild(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.allowObjectAccess("build", model.UserPerm, func(ctx context.Context) string {
+		return a.BuildFromContext(ctx).ID
+	})(next)
 }
 
-// AllowManageBuild defines a middleware to check permissions.
+// AllowManageBuild defines a middleware to check permissions. It is mounted
+// both on routes that create a build (where only the parent pack is in
+// context yet) and on routes that manage an existing build, so it checks
+// against whichever of the two is available.
 func (a *API) AllowManageBuild(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.allowObject(model.AdminPerm, func(ctx context.Context) string {
+		if build := a.BuildFromContext(ctx); build != nil {
+			return "build:" + build.ID
+		}
+
+		return "pack:" + a.PackFromContext(ctx).ID
+	}, "build")(next)
 }
 
 func (a *API) convertBuild(record *model.Build) Build {

@@ -67,6 +67,16 @@ var (
 	defaultAdminPassword    = "admin"
 	defaultAdminEmail       = "admin@localhost"
 	defaultAuthConfig       = ""
+	defaultAuthzDriver      = "sqlite3"
+	defaultAuthzAddress     = ""
+	defaultAuthzPort        = ""
+	defaultAuthzUsername    = ""
+	defaultAuthzPassword    = ""
+	defaultAuthzName        = "authz.sqlite3"
+	defaultAuthzOptions     = make(map[string]string, 0)
+	defaultAuthzAPI         = ""
+	defaultAuthzStore       = ""
+	defaultAuthzToken       = ""
 )
 
 func init() {
@@ -227,6 +237,46 @@ func init() {
 	serverCmd.PersistentFlags().String("auth-config", defaultAuthConfig, "Path to authentication config for OAuth2/OIDC")
 	viper.SetDefault("auth.config", defaultAuthConfig)
 	_ = viper.BindPFlag("auth.config", serverCmd.PersistentFlags().Lookup("auth-config"))
+
+	serverCmd.PersistentFlags().String("authz-driver", defaultAuthzDriver, "Driver for the embedded authorization datastore, or external to use a standalone OpenFGA service")
+	viper.SetDefault("authz.driver", defaultAuthzDriver)
+	_ = viper.BindPFlag("authz.driver", serverCmd.PersistentFlags().Lookup("authz-driver"))
+
+	serverCmd.PersistentFlags().String("authz-address", defaultAuthzAddress, "Address for the embedded authorization datastore")
+	viper.SetDefault("authz.address", defaultAuthzAddress)
+	_ = viper.BindPFlag("authz.address", serverCmd.PersistentFlags().Lookup("authz-address"))
+
+	serverCmd.PersistentFlags().String("authz-port", defaultAuthzPort, "Port for the embedded authorization datastore")
+	viper.SetDefault("authz.port", defaultAuthzPort)
+	_ = viper.BindPFlag("authz.port", serverCmd.PersistentFlags().Lookup("authz-port"))
+
+	serverCmd.PersistentFlags().String("authz-username", defaultAuthzUsername, "Username for the embedded authorization datastore")
+	viper.SetDefault("authz.username", defaultAuthzUsername)
+	_ = viper.BindPFlag("authz.username", serverCmd.PersistentFlags().Lookup("authz-username"))
+
+	serverCmd.PersistentFlags().String("authz-password", defaultAuthzPassword, "Password for the embedded authorization datastore")
+	viper.SetDefault("authz.password", defaultAuthzPassword)
+	_ = viper.BindPFlag("authz.password", serverCmd.PersistentFlags().Lookup("authz-password"))
+
+	serverCmd.PersistentFlags().String("authz-name", defaultAuthzName, "Name of the authorization database or path for local databases")
+	viper.SetDefault("authz.name", defaultAuthzName)
+	_ = viper.BindPFlag("authz.name", serverCmd.PersistentFlags().Lookup("authz-name"))
+
+	serverCmd.PersistentFlags().StringToString("authz-options", defaultAuthzOptions, "Options for the embedded authorization datastore connection")
+	viper.SetDefault("authz.options", defaultAuthzOptions)
+	_ = viper.BindPFlag("authz.options", serverCmd.PersistentFlags().Lookup("authz-options"))
+
+	serverCmd.PersistentFlags().String("authz-api", defaultAuthzAPI, "API URL for an external authorization service")
+	viper.SetDefault("authz.api", defaultAuthzAPI)
+	_ = viper.BindPFlag("authz.api", serverCmd.PersistentFlags().Lookup("authz-api"))
+
+	serverCmd.PersistentFlags().String("authz-store", defaultAuthzStore, "Store ID for an external authorization service")
+	viper.SetDefault("authz.store", defaultAuthzStore)
+	_ = viper.BindPFlag("authz.store", serverCmd.PersistentFlags().Lookup("authz-store"))
+
+	serverCmd.PersistentFlags().String("authz-token", defaultAuthzToken, "Token for an external authorization service")
+	viper.SetDefault("authz.token", defaultAuthzToken)
+	_ = viper.BindPFlag("authz.token", serverCmd.PersistentFlags().Lookup("authz-token"))
 }
 
 func serverAction(ccmd *cobra.Command, _ []string) {
@@ -258,10 +308,23 @@ func serverAction(ccmd *cobra.Command, _ []string) {
 
 	defer func() { _ = uploads.Close() }()
 
+	checker, err := setupAuthz(cfg)
+
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Failed to setup authorization")
+
+		os.Exit(1)
+	}
+
+	defer func() { _ = checker.Close() }()
+
 	storage, err := store.NewStore(
 		cfg.Database,
 		cfg.Scim,
 		uploads,
+		checker,
 	)
 
 	if err != nil {

@@ -314,10 +314,21 @@ func dbCreateAction(ccmd *cobra.Command, args []string) {
 }
 
 func prepareStorage(ctx context.Context) *store.Store {
+	checker, err := setupAuthz(cfg)
+
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Failed to setup authorization")
+
+		os.Exit(1)
+	}
+
 	storage, err := store.NewStore(
 		cfg.Database,
 		cfg.Scim,
 		nil,
+		checker,
 	)
 
 	if err != nil {

@@ -105,6 +105,95 @@ func (a *API) AllowAdminAccessOnly(next http.Handler) http.Handler {
 	})
 }
 
+// AllowAuthenticatedOnly defines a middleware that only requires a
+// principal to be set, used for create endpoints where the target object
+// doesn't exist yet to check a tier against.
+func (a *API) AllowAuthenticatedOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		if current.GetUser(ctx) == nil {
+			a.RenderNotify(w, r, Notification{
+				Message: ToPtr("Authentication required"),
+				Status:  ToPtr(http.StatusForbidden),
+			})
+
+			return
+		}
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// allowObjectAccess builds a middleware that checks whether the current
+// principal holds the given relation on the object identified by kind and
+// id(ctx), bypassing the check entirely for global admins.
+func (a *API) allowObjectAccess(kind, relation string, id func(ctx context.Context) string) func(http.Handler) http.Handler {
+	return a.allowObject(relation, func(ctx context.Context) string {
+		return kind + ":" + id(ctx)
+	}, kind)
+}
+
+// allowObject builds a middleware that checks whether the current principal
+// holds the given relation on the full object reference returned by
+// object(ctx) (e.g. "pack:01ABC"), bypassing the check entirely for global
+// admins. subject names the kind of resource for error messages/logging.
+func (a *API) allowObject(relation string, object func(ctx context.Context) string, subject string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			principal := current.GetUser(ctx)
+
+			if principal == nil {
+				a.RenderNotify(w, r, Notification{
+					Message: ToPtr("Authentication required"),
+					Status:  ToPtr(http.StatusForbidden),
+				})
+
+				return
+			}
+
+			if principal.Admin {
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
+			}
+
+			allowed, err := a.storage.Authz().Check(
+				ctx,
+				"user:"+principal.ID,
+				relation,
+				object(ctx),
+			)
+
+			if err != nil {
+				log.Error().
+					Err(err).
+					Str("subject", subject).
+					Str("relation", relation).
+					Msg("Failed to check authorization")
+
+				a.RenderNotify(w, r, Notification{
+					Message: ToPtr("Failed to check authorization"),
+					Status:  ToPtr(http.StatusInternalServerError),
+				})
+
+				return
+			}
+
+			if !allowed {
+				a.RenderNotify(w, r, Notification{
+					Message: ToPtr(fmt.Sprintf("Not allowed to access this %s", subject)),
+					Status:  ToPtr(http.StatusForbidden),
+				})
+
+				return
+			}
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
 // Authentication provides the authentication for the OpenAPI filter.
 func (a *API) Authentication(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
 	authenticating := &model.User{}

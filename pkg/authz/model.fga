@@ -1,0 +1,36 @@
+model
+  schema 1.1
+
+type user
+
+type group
+  relations
+    define owner: [user]
+    define admin: [user] or owner
+    define user: [user] or admin
+
+type pack
+  relations
+    define owner: [user, group#user]
+    define admin: [user, group#user] or owner
+    define user: [user, group#user] or admin
+
+type mod
+  relations
+    define owner: [user, group#user]
+    define admin: [user, group#user] or owner
+    define user: [user, group#user] or admin
+
+type build
+  relations
+    define parent: [pack]
+    define owner: owner from parent
+    define admin: admin from parent
+    define user: user from parent
+
+type version
+  relations
+    define parent: [mod]
+    define owner: owner from parent
+    define admin: admin from parent
+    define user: user from parent

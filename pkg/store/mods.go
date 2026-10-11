@@ -13,6 +13,7 @@ import (
 	"github.com/dchest/uniuri"
 	"github.com/gabriel-vasile/mimetype"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/kleister/kleister-api/pkg/authz"
 	"github.com/kleister/kleister-api/pkg/identicon"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/secret"
@@ -111,19 +112,9 @@ func (s *Mods) Create(ctx context.Context, record *model.Mod) error {
 		return err
 	}
 
-	return s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+	if err := s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		if _, err := tx.NewInsert().
 			Model(record).
-			Exec(ctx); err != nil {
-			return err
-		}
-
-		if _, err := tx.NewInsert().
-			Model(&model.UserMod{
-				ModID:  record.ID,
-				UserID: s.client.principal.ID,
-				Perm:   model.UserModAdminPerm,
-			}).
 			Exec(ctx); err != nil {
 			return err
 		}
@@ -153,6 +144,14 @@ func (s *Mods) Create(ctx context.Context, record *model.Mod) error {
 			),
 			avatar,
 		)
+	}); err != nil {
+		return err
+	}
+
+	return s.client.authz.Write(ctx, authz.TupleKey{
+		Object:   authzObject("mod", record.ID),
+		Relation: model.UserModAdminPerm,
+		Subject:  authzUserSubject(s.client.principal.ID),
 	})
 }
 
@@ -189,7 +188,7 @@ func (s *Mods) Delete(ctx context.Context, name string) error {
 		return err
 	}
 
-	return s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+	if err := s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		if _, err := tx.NewDelete().
 			Model((*model.Mod)(nil)).
 			Where("id = ?", record.ID).
@@ -218,7 +217,11 @@ func (s *Mods) Delete(ctx context.Context, name string) error {
 			),
 			true,
 		)
-	})
+	}); err != nil {
+		return err
+	}
+
+	return authzDeleteObject(ctx, s.client.authz, authzObject("mod", record.ID))
 }
 
 // CreateAvatar implements the upload and storage of a mod avatar.
@@ -336,52 +339,60 @@ func (s *Mods) replaceAvatar(ctx context.Context, record *model.Mod, tx bun.Tx, 
 	)
 }
 
-// ListGroups implements the listing of all groups for an user.
+// ListGroups implements the listing of all groups for a mod.
 func (s *Mods) ListGroups(ctx context.Context, params model.GroupModParams) ([]*model.GroupMod, int64, error) {
-	records := make([]*model.GroupMod, 0)
-
-	q := s.client.handle.NewSelect().
-		Model(&records).
-		Relation("Mod").
-		Relation("Group").
-		Where("mod_id = ?", params.ModID)
-
-	if val, ok := s.client.Groups.ValidSort(params.Sort); ok {
-		q = q.Order(strings.Join(
-			[]string{
-				val,
-				sortOrder(params.Order),
-			},
-			" ",
-		))
-	}
-
-	if params.Search != "" {
-		q = s.client.SearchQuery(q, params.Search)
-	}
-
-	counter, err := q.Count(ctx)
+	assignments, err := authzDirectAssignments(ctx, s.client.authz, authzObject("mod", params.ModID))
 
 	if err != nil {
 		return nil, 0, err
 	}
 
-	if params.Limit > 0 {
-		q = q.Limit(params.Limit)
-	}
+	desc := descending(params.Order)
 
-	if params.Offset > 0 {
-		q = q.Offset(params.Offset)
-	}
+	return authzAssemble(
+		assignments,
+		func(subject string, a authzAssignment) (*model.GroupMod, bool, error) {
+			group, err := s.client.Groups.Show(ctx, groupIDFromSubject(subject))
 
-	if err := q.Scan(ctx); err != nil {
-		return nil, int64(counter), err
-	}
+			if err != nil {
+				if errors.Is(err, ErrGroupNotFound) {
+					return nil, false, nil
+				}
 
-	return records, int64(counter), nil
+				return nil, false, err
+			}
+
+			return &model.GroupMod{
+				ModID:     params.ModID,
+				GroupID:   group.ID,
+				Group:     group,
+				Perm:      a.Perm,
+				CreatedAt: a.CreatedAt,
+				UpdatedAt: a.CreatedAt,
+			}, true, nil
+		},
+		params.Search,
+		func(item *model.GroupMod, search string) bool {
+			return searchMatches(search, item.Group.Name, item.Group.Slug)
+		},
+		func(a, b *model.GroupMod) bool {
+			switch strings.ToLower(params.Sort) {
+			case "slug":
+				return compareStrings(a.Group.Slug, b.Group.Slug, desc)
+			case "created":
+				return compareTimes(a.CreatedAt, b.CreatedAt, desc)
+			case "updated":
+				return compareTimes(a.UpdatedAt, b.UpdatedAt, desc)
+			default:
+				return compareStrings(a.Group.Name, b.Group.Name, desc)
+			}
+		},
+		params.Limit,
+		params.Offset,
+	)
 }
 
-// AttachGroup implements the attachment of an user to a group.
+// AttachGroup implements the attachment of a mod to a group.
 func (s *Mods) AttachGroup(ctx context.Context, params model.GroupModParams) error {
 	mod, err := s.Show(ctx, params.ModID)
 
@@ -395,7 +406,11 @@ func (s *Mods) AttachGroup(ctx context.Context, params model.GroupModParams) err
 		return err
 	}
 
-	assigned, err := s.isGroupAssigned(ctx, mod.ID, group.ID)
+	if err := s.validatePerm(params.Perm); err != nil {
+		return err
+	}
+
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("mod", mod.ID), authzGroupSubject(group.ID))
 
 	if err != nil {
 		return err
@@ -405,23 +420,7 @@ func (s *Mods) AttachGroup(ctx context.Context, params model.GroupModParams) err
 		return ErrAlreadyAssigned
 	}
 
-	record := &model.GroupMod{
-		ModID:   mod.ID,
-		GroupID: group.ID,
-		Perm:    params.Perm,
-	}
-
-	if err := s.validatePerm(record.Perm); err != nil {
-		return err
-	}
-
-	if _, err := s.client.handle.NewInsert().
-		Model(record).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return authzWriteAssignment(ctx, s.client.authz, authzObject("mod", mod.ID), authzGroupSubject(group.ID), params.Perm)
 }
 
 // PermitGroup implements the permission update for a group on a mod.
@@ -438,25 +437,21 @@ func (s *Mods) PermitGroup(ctx context.Context, params model.GroupModParams) err
 		return err
 	}
 
-	unassigned, err := s.isGroupUnassigned(ctx, mod.ID, group.ID)
+	if err := s.validatePerm(params.Perm); err != nil {
+		return err
+	}
+
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("mod", mod.ID), authzGroupSubject(group.ID))
 
 	if err != nil {
 		return err
 	}
 
-	if unassigned {
+	if !assigned {
 		return ErrNotAssigned
 	}
 
-	if _, err := s.client.handle.NewUpdate().
-		Model((*model.GroupMod)(nil)).
-		Set("perm = ?", params.Perm).
-		Where("mod_id = ? AND group_id = ?", mod.ID, group.ID).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return authzWriteAssignment(ctx, s.client.authz, authzObject("mod", mod.ID), authzGroupSubject(group.ID), params.Perm)
 }
 
 // DropGroup implements the removal of a mod from a group.
@@ -473,98 +468,75 @@ func (s *Mods) DropGroup(ctx context.Context, params model.GroupModParams) error
 		return err
 	}
 
-	unassigned, err := s.isGroupUnassigned(ctx, mod.ID, group.ID)
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("mod", mod.ID), authzGroupSubject(group.ID))
 
 	if err != nil {
 		return err
 	}
 
-	if unassigned {
+	if !assigned {
 		return ErrNotAssigned
 	}
 
-	if _, err := s.client.handle.NewDelete().
-		Model((*model.GroupMod)(nil)).
-		Where("mod_id = ? AND group_id = ?", mod.ID, group.ID).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return authzRemoveAssignment(ctx, s.client.authz, authzObject("mod", mod.ID), authzGroupSubject(group.ID))
 }
 
-func (s *Mods) isGroupAssigned(ctx context.Context, modID, groupID string) (bool, error) {
-	count, err := s.client.handle.NewSelect().
-		Model((*model.GroupMod)(nil)).
-		Where("mod_id = ? AND group_id = ?", modID, groupID).
-		Count(ctx)
-
-	if err != nil {
-		return false, err
-	}
-
-	return count > 0, nil
-}
-
-func (s *Mods) isGroupUnassigned(ctx context.Context, modID, groupID string) (bool, error) {
-	count, err := s.client.handle.NewSelect().
-		Model((*model.GroupMod)(nil)).
-		Where("mod_id = ? AND group_id = ?", modID, groupID).
-		Count(ctx)
-
-	if err != nil {
-		return false, err
-	}
-
-	return count < 1, nil
-}
-
-// ListUsers implements the listing of all users for an user.
+// ListUsers implements the listing of all users for a mod.
 func (s *Mods) ListUsers(ctx context.Context, params model.UserModParams) ([]*model.UserMod, int64, error) {
-	records := make([]*model.UserMod, 0)
-
-	q := s.client.handle.NewSelect().
-		Model(&records).
-		Relation("Mod").
-		Relation("User").
-		Where("mod_id = ?", params.ModID)
-
-	if val, ok := s.client.Users.ValidSort(params.Sort); ok {
-		q = q.Order(strings.Join(
-			[]string{
-				val,
-				sortOrder(params.Order),
-			},
-			" ",
-		))
-	}
-
-	if params.Search != "" {
-		q = s.client.SearchQuery(q, params.Search)
-	}
-
-	counter, err := q.Count(ctx)
+	assignments, err := authzDirectAssignments(ctx, s.client.authz, authzObject("mod", params.ModID))
 
 	if err != nil {
 		return nil, 0, err
 	}
 
-	if params.Limit > 0 {
-		q = q.Limit(params.Limit)
-	}
+	desc := descending(params.Order)
 
-	if params.Offset > 0 {
-		q = q.Offset(params.Offset)
-	}
+	return authzAssemble(
+		assignments,
+		func(subject string, a authzAssignment) (*model.UserMod, bool, error) {
+			user, err := s.client.Users.Show(ctx, userIDFromSubject(subject))
 
-	if err := q.Scan(ctx); err != nil {
-		return nil, int64(counter), err
-	}
+			if err != nil {
+				if errors.Is(err, ErrUserNotFound) {
+					return nil, false, nil
+				}
 
-	return records, int64(counter), nil
+				return nil, false, err
+			}
+
+			return &model.UserMod{
+				ModID:     params.ModID,
+				UserID:    user.ID,
+				User:      user,
+				Perm:      a.Perm,
+				CreatedAt: a.CreatedAt,
+				UpdatedAt: a.CreatedAt,
+			}, true, nil
+		},
+		params.Search,
+		func(item *model.UserMod, search string) bool {
+			return searchMatches(search, item.User.Username, item.User.Email, item.User.Fullname)
+		},
+		func(a, b *model.UserMod) bool {
+			switch strings.ToLower(params.Sort) {
+			case "email":
+				return compareStrings(a.User.Email, b.User.Email, desc)
+			case "fullname":
+				return compareStrings(a.User.Fullname, b.User.Fullname, desc)
+			case "created":
+				return compareTimes(a.CreatedAt, b.CreatedAt, desc)
+			case "updated":
+				return compareTimes(a.UpdatedAt, b.UpdatedAt, desc)
+			default:
+				return compareStrings(a.User.Username, b.User.Username, desc)
+			}
+		},
+		params.Limit,
+		params.Offset,
+	)
 }
 
-// AttachUser implements the attachment of an user to a user.
+// AttachUser implements the attachment of a mod to a user.
 func (s *Mods) AttachUser(ctx context.Context, params model.UserModParams) error {
 	mod, err := s.Show(ctx, params.ModID)
 
@@ -578,7 +550,11 @@ func (s *Mods) AttachUser(ctx context.Context, params model.UserModParams) error
 		return err
 	}
 
-	assigned, err := s.isUserAssigned(ctx, mod.ID, user.ID)
+	if err := s.validatePerm(params.Perm); err != nil {
+		return err
+	}
+
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("mod", mod.ID), authzUserSubject(user.ID))
 
 	if err != nil {
 		return err
@@ -588,23 +564,7 @@ func (s *Mods) AttachUser(ctx context.Context, params model.UserModParams) error
 		return ErrAlreadyAssigned
 	}
 
-	record := &model.UserMod{
-		ModID:  mod.ID,
-		UserID: user.ID,
-		Perm:   params.Perm,
-	}
-
-	if err := s.validatePerm(record.Perm); err != nil {
-		return err
-	}
-
-	if _, err := s.client.handle.NewInsert().
-		Model(record).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return authzWriteAssignment(ctx, s.client.authz, authzObject("mod", mod.ID), authzUserSubject(user.ID), params.Perm)
 }
 
 // PermitUser implements the permission update for a user on a mod.
@@ -621,25 +581,21 @@ func (s *Mods) PermitUser(ctx context.Context, params model.UserModParams) error
 		return err
 	}
 
-	unassigned, err := s.isUserUnassigned(ctx, mod.ID, user.ID)
+	if err := s.validatePerm(params.Perm); err != nil {
+		return err
+	}
+
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("mod", mod.ID), authzUserSubject(user.ID))
 
 	if err != nil {
 		return err
 	}
 
-	if unassigned {
+	if !assigned {
 		return ErrNotAssigned
 	}
 
-	if _, err := s.client.handle.NewUpdate().
-		Model((*model.UserMod)(nil)).
-		Set("perm = ?", params.Perm).
-		Where("mod_id = ? AND user_id = ?", mod.ID, user.ID).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return authzWriteAssignment(ctx, s.client.authz, authzObject("mod", mod.ID), authzUserSubject(user.ID), params.Perm)
 }
 
 // DropUser implements the removal of a mod from a user.
@@ -656,50 +612,17 @@ func (s *Mods) DropUser(ctx context.Context, params model.UserModParams) error {
 		return err
 	}
 
-	unassigned, err := s.isUserUnassigned(ctx, mod.ID, user.ID)
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("mod", mod.ID), authzUserSubject(user.ID))
 
 	if err != nil {
 		return err
 	}
 
-	if unassigned {
+	if !assigned {
 		return ErrNotAssigned
 	}
 
-	if _, err := s.client.handle.NewDelete().
-		Model((*model.UserMod)(nil)).
-		Where("mod_id = ? AND user_id = ?", mod.ID, user.ID).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *Mods) isUserAssigned(ctx context.Context, modID, userID string) (bool, error) {
-	count, err := s.client.handle.NewSelect().
-		Model((*model.UserMod)(nil)).
-		Where("mod_id = ? AND user_id = ?", modID, userID).
-		Count(ctx)
-
-	if err != nil {
-		return false, err
-	}
-
-	return count > 0, nil
-}
-
-func (s *Mods) isUserUnassigned(ctx context.Context, modID, userID string) (bool, error) {
-	count, err := s.client.handle.NewSelect().
-		Model((*model.UserMod)(nil)).
-		Where("mod_id = ? AND user_id = ?", modID, userID).
-		Count(ctx)
-
-	if err != nil {
-		return false, err
-	}
-
-	return count < 1, nil
+	return authzRemoveAssignment(ctx, s.client.authz, authzObject("mod", mod.ID), authzUserSubject(user.ID))
 }
 
 func (s *Mods) validatePerm(perm string) error {

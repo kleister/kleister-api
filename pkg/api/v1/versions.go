@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -541,26 +542,30 @@ func (a *API) DeleteVersionFromBuild(w http.ResponseWriter, r *http.Request, _ M
 
 // AllowCreateVersion defines a middleware to check permissions.
 func (a *API) AllowCreateVersion(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.allowObjectAccess("mod", model.AdminPerm, func(ctx context.Context) string {
+		return a.ModFromContext(ctx).ID
+	})(next)
 }
 
 // AllowShowVersion defines a middleware to check permissions.
 func (a *API) AllowShowVersion(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.allowObjectAccess("version", model.UserPerm, func(ctx context.Context) string {
+		return a.VersionFromContext(ctx).ID
+	})(next)
 }
 
-// AllowManageVersion defines a middleware to check permissions.
+// AllowManageVersion defines a middleware to check permissions. It is
+// mounted both on routes that create a version (where only the parent mod
+// is in context yet) and on routes that manage an existing version, so it
+// checks against whichever of the two is available.
 func (a *API) AllowManageVersion(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.allowObject(model.AdminPerm, func(ctx context.Context) string {
+		if version := a.VersionFromContext(ctx); version != nil {
+			return "version:" + version.ID
+		}
+
+		return "mod:" + a.ModFromContext(ctx).ID
+	}, "version")(next)
 }
 
 func (a *API) convertVersion(record *model.Version) Version {

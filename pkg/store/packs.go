@@ -13,6 +13,7 @@ import (
 	"github.com/dchest/uniuri"
 	"github.com/gabriel-vasile/mimetype"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/kleister/kleister-api/pkg/authz"
 	"github.com/kleister/kleister-api/pkg/identicon"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/secret"
@@ -111,19 +112,9 @@ func (s *Packs) Create(ctx context.Context, record *model.Pack) error {
 		return err
 	}
 
-	return s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+	if err := s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		if _, err := tx.NewInsert().
 			Model(record).
-			Exec(ctx); err != nil {
-			return err
-		}
-
-		if _, err := tx.NewInsert().
-			Model(&model.UserPack{
-				PackID: record.ID,
-				UserID: s.client.principal.ID,
-				Perm:   model.UserPackAdminPerm,
-			}).
 			Exec(ctx); err != nil {
 			return err
 		}
@@ -153,6 +144,14 @@ func (s *Packs) Create(ctx context.Context, record *model.Pack) error {
 			),
 			avatar,
 		)
+	}); err != nil {
+		return err
+	}
+
+	return s.client.authz.Write(ctx, authz.TupleKey{
+		Object:   authzObject("pack", record.ID),
+		Relation: model.UserPackAdminPerm,
+		Subject:  authzUserSubject(s.client.principal.ID),
 	})
 }
 
@@ -189,7 +188,7 @@ func (s *Packs) Delete(ctx context.Context, name string) error {
 		return err
 	}
 
-	return s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+	if err := s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		if _, err := tx.NewDelete().
 			Model((*model.Pack)(nil)).
 			Where("id = ?", record.ID).
@@ -211,7 +210,11 @@ func (s *Packs) Delete(ctx context.Context, name string) error {
 		}
 
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
+
+	return authzDeleteObject(ctx, s.client.authz, authzObject("pack", record.ID))
 }
 
 // CreateAvatar implements the upload and storage of a pack avatar.
@@ -329,52 +332,60 @@ func (s *Packs) replaceAvatar(ctx context.Context, record *model.Pack, tx bun.Tx
 	)
 }
 
-// ListGroups implements the listing of all groups for an user.
+// ListGroups implements the listing of all groups for a pack.
 func (s *Packs) ListGroups(ctx context.Context, params model.GroupPackParams) ([]*model.GroupPack, int64, error) {
-	records := make([]*model.GroupPack, 0)
-
-	q := s.client.handle.NewSelect().
-		Model(&records).
-		Relation("Pack").
-		Relation("Group").
-		Where("pack_id = ?", params.PackID)
-
-	if val, ok := s.client.Groups.ValidSort(params.Sort); ok {
-		q = q.Order(strings.Join(
-			[]string{
-				val,
-				sortOrder(params.Order),
-			},
-			" ",
-		))
-	}
-
-	if params.Search != "" {
-		q = s.client.SearchQuery(q, params.Search)
-	}
-
-	counter, err := q.Count(ctx)
+	assignments, err := authzDirectAssignments(ctx, s.client.authz, authzObject("pack", params.PackID))
 
 	if err != nil {
 		return nil, 0, err
 	}
 
-	if params.Limit > 0 {
-		q = q.Limit(params.Limit)
-	}
+	desc := descending(params.Order)
 
-	if params.Offset > 0 {
-		q = q.Offset(params.Offset)
-	}
+	return authzAssemble(
+		assignments,
+		func(subject string, a authzAssignment) (*model.GroupPack, bool, error) {
+			group, err := s.client.Groups.Show(ctx, groupIDFromSubject(subject))
 
-	if err := q.Scan(ctx); err != nil {
-		return nil, int64(counter), err
-	}
+			if err != nil {
+				if errors.Is(err, ErrGroupNotFound) {
+					return nil, false, nil
+				}
 
-	return records, int64(counter), nil
+				return nil, false, err
+			}
+
+			return &model.GroupPack{
+				PackID:    params.PackID,
+				GroupID:   group.ID,
+				Group:     group,
+				Perm:      a.Perm,
+				CreatedAt: a.CreatedAt,
+				UpdatedAt: a.CreatedAt,
+			}, true, nil
+		},
+		params.Search,
+		func(item *model.GroupPack, search string) bool {
+			return searchMatches(search, item.Group.Name, item.Group.Slug)
+		},
+		func(a, b *model.GroupPack) bool {
+			switch strings.ToLower(params.Sort) {
+			case "slug":
+				return compareStrings(a.Group.Slug, b.Group.Slug, desc)
+			case "created":
+				return compareTimes(a.CreatedAt, b.CreatedAt, desc)
+			case "updated":
+				return compareTimes(a.UpdatedAt, b.UpdatedAt, desc)
+			default:
+				return compareStrings(a.Group.Name, b.Group.Name, desc)
+			}
+		},
+		params.Limit,
+		params.Offset,
+	)
 }
 
-// AttachGroup implements the attachment of an user to a group.
+// AttachGroup implements the attachment of a pack to a group.
 func (s *Packs) AttachGroup(ctx context.Context, params model.GroupPackParams) error {
 	pack, err := s.Show(ctx, params.PackID)
 
@@ -388,7 +399,11 @@ func (s *Packs) AttachGroup(ctx context.Context, params model.GroupPackParams) e
 		return err
 	}
 
-	assigned, err := s.isGroupAssigned(ctx, pack.ID, group.ID)
+	if err := s.validatePerm(params.Perm); err != nil {
+		return err
+	}
+
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("pack", pack.ID), authzGroupSubject(group.ID))
 
 	if err != nil {
 		return err
@@ -398,23 +413,7 @@ func (s *Packs) AttachGroup(ctx context.Context, params model.GroupPackParams) e
 		return ErrAlreadyAssigned
 	}
 
-	record := &model.GroupPack{
-		PackID:  pack.ID,
-		GroupID: group.ID,
-		Perm:    params.Perm,
-	}
-
-	if err := s.validatePerm(record.Perm); err != nil {
-		return err
-	}
-
-	if _, err := s.client.handle.NewInsert().
-		Model(record).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return authzWriteAssignment(ctx, s.client.authz, authzObject("pack", pack.ID), authzGroupSubject(group.ID), params.Perm)
 }
 
 // PermitGroup implements the permission update for a group on a pack.
@@ -431,25 +430,21 @@ func (s *Packs) PermitGroup(ctx context.Context, params model.GroupPackParams) e
 		return err
 	}
 
-	unassigned, err := s.isGroupUnassigned(ctx, pack.ID, group.ID)
+	if err := s.validatePerm(params.Perm); err != nil {
+		return err
+	}
+
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("pack", pack.ID), authzGroupSubject(group.ID))
 
 	if err != nil {
 		return err
 	}
 
-	if unassigned {
+	if !assigned {
 		return ErrNotAssigned
 	}
 
-	if _, err := s.client.handle.NewUpdate().
-		Model((*model.GroupPack)(nil)).
-		Set("perm = ?", params.Perm).
-		Where("pack_id = ? AND group_id = ?", pack.ID, group.ID).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return authzWriteAssignment(ctx, s.client.authz, authzObject("pack", pack.ID), authzGroupSubject(group.ID), params.Perm)
 }
 
 // DropGroup implements the removal of a pack from a group.
@@ -466,98 +461,75 @@ func (s *Packs) DropGroup(ctx context.Context, params model.GroupPackParams) err
 		return err
 	}
 
-	unassigned, err := s.isGroupUnassigned(ctx, pack.ID, group.ID)
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("pack", pack.ID), authzGroupSubject(group.ID))
 
 	if err != nil {
 		return err
 	}
 
-	if unassigned {
+	if !assigned {
 		return ErrNotAssigned
 	}
 
-	if _, err := s.client.handle.NewDelete().
-		Model((*model.GroupPack)(nil)).
-		Where("pack_id = ? AND group_id = ?", pack.ID, group.ID).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return authzRemoveAssignment(ctx, s.client.authz, authzObject("pack", pack.ID), authzGroupSubject(group.ID))
 }
 
-func (s *Packs) isGroupAssigned(ctx context.Context, packID, groupID string) (bool, error) {
-	count, err := s.client.handle.NewSelect().
-		Model((*model.GroupPack)(nil)).
-		Where("pack_id = ? AND group_id = ?", packID, groupID).
-		Count(ctx)
-
-	if err != nil {
-		return false, err
-	}
-
-	return count > 0, nil
-}
-
-func (s *Packs) isGroupUnassigned(ctx context.Context, packID, groupID string) (bool, error) {
-	count, err := s.client.handle.NewSelect().
-		Model((*model.GroupPack)(nil)).
-		Where("pack_id = ? AND group_id = ?", packID, groupID).
-		Count(ctx)
-
-	if err != nil {
-		return false, err
-	}
-
-	return count < 1, nil
-}
-
-// ListUsers implements the listing of all users for an user.
+// ListUsers implements the listing of all users for a pack.
 func (s *Packs) ListUsers(ctx context.Context, params model.UserPackParams) ([]*model.UserPack, int64, error) {
-	records := make([]*model.UserPack, 0)
-
-	q := s.client.handle.NewSelect().
-		Model(&records).
-		Relation("Pack").
-		Relation("User").
-		Where("pack_id = ?", params.PackID)
-
-	if val, ok := s.client.Users.ValidSort(params.Sort); ok {
-		q = q.Order(strings.Join(
-			[]string{
-				val,
-				sortOrder(params.Order),
-			},
-			" ",
-		))
-	}
-
-	if params.Search != "" {
-		q = s.client.SearchQuery(q, params.Search)
-	}
-
-	counter, err := q.Count(ctx)
+	assignments, err := authzDirectAssignments(ctx, s.client.authz, authzObject("pack", params.PackID))
 
 	if err != nil {
 		return nil, 0, err
 	}
 
-	if params.Limit > 0 {
-		q = q.Limit(params.Limit)
-	}
+	desc := descending(params.Order)
 
-	if params.Offset > 0 {
-		q = q.Offset(params.Offset)
-	}
+	return authzAssemble(
+		assignments,
+		func(subject string, a authzAssignment) (*model.UserPack, bool, error) {
+			user, err := s.client.Users.Show(ctx, userIDFromSubject(subject))
 
-	if err := q.Scan(ctx); err != nil {
-		return nil, int64(counter), err
-	}
+			if err != nil {
+				if errors.Is(err, ErrUserNotFound) {
+					return nil, false, nil
+				}
 
-	return records, int64(counter), nil
+				return nil, false, err
+			}
+
+			return &model.UserPack{
+				PackID:    params.PackID,
+				UserID:    user.ID,
+				User:      user,
+				Perm:      a.Perm,
+				CreatedAt: a.CreatedAt,
+				UpdatedAt: a.CreatedAt,
+			}, true, nil
+		},
+		params.Search,
+		func(item *model.UserPack, search string) bool {
+			return searchMatches(search, item.User.Username, item.User.Email, item.User.Fullname)
+		},
+		func(a, b *model.UserPack) bool {
+			switch strings.ToLower(params.Sort) {
+			case "email":
+				return compareStrings(a.User.Email, b.User.Email, desc)
+			case "fullname":
+				return compareStrings(a.User.Fullname, b.User.Fullname, desc)
+			case "created":
+				return compareTimes(a.CreatedAt, b.CreatedAt, desc)
+			case "updated":
+				return compareTimes(a.UpdatedAt, b.UpdatedAt, desc)
+			default:
+				return compareStrings(a.User.Username, b.User.Username, desc)
+			}
+		},
+		params.Limit,
+		params.Offset,
+	)
 }
 
-// AttachUser implements the attachment of an user to a user.
+// AttachUser implements the attachment of a pack to a user.
 func (s *Packs) AttachUser(ctx context.Context, params model.UserPackParams) error {
 	pack, err := s.Show(ctx, params.PackID)
 
@@ -571,7 +543,11 @@ func (s *Packs) AttachUser(ctx context.Context, params model.UserPackParams) err
 		return err
 	}
 
-	assigned, err := s.isUserAssigned(ctx, pack.ID, user.ID)
+	if err := s.validatePerm(params.Perm); err != nil {
+		return err
+	}
+
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("pack", pack.ID), authzUserSubject(user.ID))
 
 	if err != nil {
 		return err
@@ -581,23 +557,7 @@ func (s *Packs) AttachUser(ctx context.Context, params model.UserPackParams) err
 		return ErrAlreadyAssigned
 	}
 
-	record := &model.UserPack{
-		PackID: pack.ID,
-		UserID: user.ID,
-		Perm:   params.Perm,
-	}
-
-	if err := s.validatePerm(record.Perm); err != nil {
-		return err
-	}
-
-	if _, err := s.client.handle.NewInsert().
-		Model(record).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return authzWriteAssignment(ctx, s.client.authz, authzObject("pack", pack.ID), authzUserSubject(user.ID), params.Perm)
 }
 
 // PermitUser implements the permission update for a user on a pack.
@@ -614,25 +574,21 @@ func (s *Packs) PermitUser(ctx context.Context, params model.UserPackParams) err
 		return err
 	}
 
-	unassigned, err := s.isUserUnassigned(ctx, pack.ID, user.ID)
+	if err := s.validatePerm(params.Perm); err != nil {
+		return err
+	}
+
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("pack", pack.ID), authzUserSubject(user.ID))
 
 	if err != nil {
 		return err
 	}
 
-	if unassigned {
+	if !assigned {
 		return ErrNotAssigned
 	}
 
-	if _, err := s.client.handle.NewUpdate().
-		Model((*model.UserPack)(nil)).
-		Set("perm = ?", params.Perm).
-		Where("pack_id = ? AND user_id = ?", pack.ID, user.ID).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return authzWriteAssignment(ctx, s.client.authz, authzObject("pack", pack.ID), authzUserSubject(user.ID), params.Perm)
 }
 
 // DropUser implements the removal of a pack from a user.
@@ -649,50 +605,17 @@ func (s *Packs) DropUser(ctx context.Context, params model.UserPackParams) error
 		return err
 	}
 
-	unassigned, err := s.isUserUnassigned(ctx, pack.ID, user.ID)
+	_, assigned, err := authzAssignmentFor(ctx, s.client.authz, authzObject("pack", pack.ID), authzUserSubject(user.ID))
 
 	if err != nil {
 		return err
 	}
 
-	if unassigned {
+	if !assigned {
 		return ErrNotAssigned
 	}
 
-	if _, err := s.client.handle.NewDelete().
-		Model((*model.UserPack)(nil)).
-		Where("pack_id = ? AND user_id = ?", pack.ID, user.ID).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *Packs) isUserAssigned(ctx context.Context, packID, userID string) (bool, error) {
-	count, err := s.client.handle.NewSelect().
-		Model((*model.UserPack)(nil)).
-		Where("pack_id = ? AND user_id = ?", packID, userID).
-		Count(ctx)
-
-	if err != nil {
-		return false, err
-	}
-
-	return count > 0, nil
-}
-
-func (s *Packs) isUserUnassigned(ctx context.Context, packID, userID string) (bool, error) {
-	count, err := s.client.handle.NewSelect().
-		Model((*model.UserPack)(nil)).
-		Where("pack_id = ? AND user_id = ?", packID, userID).
-		Count(ctx)
-
-	if err != nil {
-		return false, err
-	}
-
-	return count < 1, nil
+	return authzRemoveAssignment(ctx, s.client.authz, authzObject("pack", pack.ID), authzUserSubject(user.ID))
 }
 
 func (s *Packs) validatePerm(perm string) error {

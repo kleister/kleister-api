@@ -18,22 +18,25 @@ var (
 type User struct {
 	bun.BaseModel `bun:"table:users"`
 
-	ID        string       `bun:",pk,type:varchar(20)"`
-	Scim      string       `bun:"type:varchar(255)"`
-	Username  string       `bun:",unique,type:varchar(255)"`
-	Password  string       `bun:"-"`
-	Hashword  string       `bun:"type:varchar(255)"`
-	Email     string       `bun:"type:varchar(255)"`
-	Fullname  string       `bun:"type:varchar(255)"`
-	Profile   string       `bun:"-"`
-	Active    bool         `bun:"default:false"`
-	Admin     bool         `bun:"default:false"`
-	CreatedAt time.Time    `bun:",nullzero,notnull,default:current_timestamp"`
-	UpdatedAt time.Time    `bun:",nullzero,notnull,default:current_timestamp"`
-	Auths     []*UserAuth  `bun:"rel:has-many,join:id=user_id"`
-	Groups    []*UserGroup `bun:"rel:has-many,join:id=user_id"`
-	Mods      []*UserMod   `bun:"rel:has-many,join:id=user_id"`
-	Packs     []*UserPack  `bun:"rel:has-many,join:id=user_id"`
+	ID        string      `bun:",pk,type:varchar(20)"`
+	Scim      string      `bun:"type:varchar(255)"`
+	Username  string      `bun:",unique,type:varchar(255)"`
+	Password  string      `bun:"-"`
+	Hashword  string      `bun:"type:varchar(255)"`
+	Email     string      `bun:"type:varchar(255)"`
+	Fullname  string      `bun:"type:varchar(255)"`
+	Profile   string      `bun:"-"`
+	Active    bool        `bun:"default:false"`
+	Admin     bool        `bun:"default:false"`
+	CreatedAt time.Time   `bun:",nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time   `bun:",nullzero,notnull,default:current_timestamp"`
+	Auths     []*UserAuth `bun:"rel:has-many,join:id=user_id"`
+
+	// Groups, Mods and Packs hold the user's effective direct assignments,
+	// populated from OpenFGA tuples rather than loaded as a bun relation.
+	Groups []*UserGroup `bun:"-"`
+	Mods   []*UserMod   `bun:"-"`
+	Packs  []*UserPack  `bun:"-"`
 }
 
 // BeforeAppendModel implements the bun hook interface.

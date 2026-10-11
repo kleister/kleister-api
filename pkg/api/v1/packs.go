@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -1046,26 +1047,21 @@ func (a *API) DeletePackFromUser(w http.ResponseWriter, r *http.Request, _ UserI
 
 // AllowCreatePack defines a middleware to check permissions.
 func (a *API) AllowCreatePack(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.AllowAuthenticatedOnly(next)
 }
 
 // AllowShowPack defines a middleware to check permissions.
 func (a *API) AllowShowPack(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.allowObjectAccess("pack", model.UserPerm, func(ctx context.Context) string {
+		return a.PackFromContext(ctx).ID
+	})(next)
 }
 
 // AllowManagePack defines a middleware to check permissions.
 func (a *API) AllowManagePack(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	return a.allowObjectAccess("pack", model.AdminPerm, func(ctx context.Context) string {
+		return a.PackFromContext(ctx).ID
+	})(next)
 }
 
 func (a *API) convertPack(record *model.Pack) Pack {

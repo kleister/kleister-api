@@ -17,17 +17,15 @@ var (
 type Pack struct {
 	bun.BaseModel `bun:"table:packs"`
 
-	ID        string       `bun:",pk,type:varchar(20)"`
-	Slug      string       `bun:",unique,type:varchar(255)"`
-	Name      string       `bun:",unique,type:varchar(255)"`
-	Avatar    *PackAvatar  `bun:"rel:has-one,join:id=pack_id"`
-	Website   string       `bun:"type:varchar(255)"`
-	Public    bool         `bun:"default:true"`
-	CreatedAt time.Time    `bun:",nullzero,notnull,default:current_timestamp"`
-	UpdatedAt time.Time    `bun:",nullzero,notnull,default:current_timestamp"`
-	Builds    []*Build     `bun:"rel:has-many,join:id=pack_id"`
-	Users     []*UserPack  `bun:"rel:has-many,join:id=pack_id"`
-	Groups    []*GroupPack `bun:"rel:has-many,join:id=pack_id"`
+	ID        string      `bun:",pk,type:varchar(20)"`
+	Slug      string      `bun:",unique,type:varchar(255)"`
+	Name      string      `bun:",unique,type:varchar(255)"`
+	Avatar    *PackAvatar `bun:"rel:has-one,join:id=pack_id"`
+	Website   string      `bun:"type:varchar(255)"`
+	Public    bool        `bun:"default:true"`
+	CreatedAt time.Time   `bun:",nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time   `bun:",nullzero,notnull,default:current_timestamp"`
+	Builds    []*Build    `bun:"rel:has-many,join:id=pack_id"`
 }
 
 // BeforeAppendModel implements the bun hook interface.

@@ -11,6 +11,7 @@ import (
 	"github.com/Machiel/slugify"
 	"github.com/gabriel-vasile/mimetype"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/kleister/kleister-api/pkg/authz"
 	"github.com/kleister/kleister-api/pkg/model"
 	"github.com/kleister/kleister-api/pkg/secret"
 	"github.com/kleister/kleister-api/pkg/validate"
@@ -105,7 +106,7 @@ func (s *Versions) Create(ctx context.Context, mod *model.Mod, record *model.Ver
 		return err
 	}
 
-	return s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+	if err := s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		if _, err := tx.NewInsert().
 			Model(record).
 			Exec(ctx); err != nil {
@@ -167,6 +168,14 @@ func (s *Versions) Create(ctx context.Context, mod *model.Mod, record *model.Ver
 		}
 
 		return nil
+	}); err != nil {
+		return err
+	}
+
+	return s.client.authz.Write(ctx, authz.TupleKey{
+		Object:   authzObject("version", record.ID),
+		Relation: "parent",
+		Subject:  authzObject("mod", mod.ID),
 	})
 }
 
@@ -283,7 +292,7 @@ func (s *Versions) Delete(ctx context.Context, mod *model.Mod, name string) erro
 		return err
 	}
 
-	return s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+	if err := s.client.handle.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		if record.File != nil {
 			if err := s.client.upload.Delete(
 				ctx,
@@ -308,6 +317,14 @@ func (s *Versions) Delete(ctx context.Context, mod *model.Mod, name string) erro
 		}
 
 		return nil
+	}); err != nil {
+		return err
+	}
+
+	return s.client.authz.Delete(ctx, authz.TupleKey{
+		Object:   authzObject("version", record.ID),
+		Relation: "parent",
+		Subject:  authzObject("mod", mod.ID),
 	})
 }
 

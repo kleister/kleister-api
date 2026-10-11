@@ -197,20 +197,16 @@ func (s *Auth) ByID(ctx context.Context, userID string) (*model.User, error) {
 	if err := s.client.handle.NewSelect().
 		Model(record).
 		Relation("Auths").
-		Relation("Groups").
-		Relation("Groups.Group").
-		Relation("Groups.Group.Mods").
-		Relation("Groups.Group.Packs").
-		Relation("Mods").
-		Relation("Mods.Mod").
-		Relation("Packs").
-		Relation("Packs.Pack").
 		Where("id = ?", userID).
 		Scan(ctx); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return record, ErrUserNotFound
 		}
 
+		return record, err
+	}
+
+	if err := s.populateAccess(ctx, record); err != nil {
 		return record, err
 	}
 
@@ -224,14 +220,6 @@ func (s *Auth) ByCreds(ctx context.Context, username, password string) (*model.U
 	if err := s.client.handle.NewSelect().
 		Model(record).
 		Relation("Auths").
-		Relation("Groups").
-		Relation("Groups.Group").
-		Relation("Groups.Group.Mods").
-		Relation("Groups.Group.Packs").
-		Relation("Mods").
-		Relation("Mods.Mod").
-		Relation("Packs").
-		Relation("Packs.Pack").
 		Where("username = ?", username).
 		Scan(ctx); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -248,5 +236,97 @@ func (s *Auth) ByCreds(ctx context.Context, username, password string) (*model.U
 		return nil, ErrWrongCredentials
 	}
 
+	if err := s.populateAccess(ctx, record); err != nil {
+		return record, err
+	}
+
 	return record, nil
+}
+
+// populateAccess fills in the effective groups/mods/packs a user has direct
+// access to, replacing the former bun eager-loaded relations now that those
+// assignments live as OpenFGA tuples rather than database rows.
+func (s *Auth) populateAccess(ctx context.Context, record *model.User) error {
+	groups, err := authzUserAssignments(ctx, s.client.authz, "group", record.ID)
+
+	if err != nil {
+		return err
+	}
+
+	for groupID, a := range groups {
+		group, err := s.client.Groups.Show(ctx, groupID)
+
+		if err != nil {
+			if errors.Is(err, ErrGroupNotFound) {
+				continue
+			}
+
+			return err
+		}
+
+		record.Groups = append(record.Groups, &model.UserGroup{
+			UserID:    record.ID,
+			GroupID:   group.ID,
+			Group:     group,
+			Perm:      a.Perm,
+			CreatedAt: a.CreatedAt,
+			UpdatedAt: a.CreatedAt,
+		})
+	}
+
+	mods, err := authzUserAssignments(ctx, s.client.authz, "mod", record.ID)
+
+	if err != nil {
+		return err
+	}
+
+	for modID, a := range mods {
+		mod, err := s.client.Mods.Show(ctx, modID)
+
+		if err != nil {
+			if errors.Is(err, ErrModNotFound) {
+				continue
+			}
+
+			return err
+		}
+
+		record.Mods = append(record.Mods, &model.UserMod{
+			UserID:    record.ID,
+			ModID:     mod.ID,
+			Mod:       mod,
+			Perm:      a.Perm,
+			CreatedAt: a.CreatedAt,
+			UpdatedAt: a.CreatedAt,
+		})
+	}
+
+	packs, err := authzUserAssignments(ctx, s.client.authz, "pack", record.ID)
+
+	if err != nil {
+		return err
+	}
+
+	for packID, a := range packs {
+		pack, err := s.client.Packs.Show(ctx, packID)
+
+		if err != nil {
+			if errors.Is(err, ErrPackNotFound) {
+				continue
+			}
+
+			return err
+		}
+
+		record.Packs = append(record.Packs, &model.UserPack{
+			UserID:    record.ID,
+			PackID:    pack.ID,
+			Pack:      pack,
+			Perm:      a.Perm,
+			CreatedAt: a.CreatedAt,
+			UpdatedAt: a.CreatedAt,
+		})
+	}
+
+	return nil
 }
