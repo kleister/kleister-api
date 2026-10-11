@@ -204,6 +204,43 @@ cleanup:
     seccompProfile:
       type: RuntimeDefault
 
+migrate:
+  # -- Additional annotations for the migrate hook job
+  annotations: {}
+
+  # -- Additional labels for the migrate hook job
+  labels: {}
+
+  image:
+    # -- Image repository used by deployment
+    repository: ghcr.io/gopad/gopad-api
+
+    # -- (string) Optional tag for the repository
+    tag: ~
+
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+
+  # -- Resources for the deployment
+  resources:
+    limits: {}
+    requests: {}
+
+  # -- Security context for the pod
+  podSecurityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  # -- Security context for the deployment
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1337
+    seccompProfile:
+      type: RuntimeDefault
+
 config:
   server:
     # -- Hostname for the server
@@ -244,6 +281,50 @@ config:
 
     # -- Key within secret to use
     passwordKey: password
+
+    # -- Existing secret to use
+    existingSecret:
+
+  authz:
+    # -- Authorization driver (sqlite3, mysql, mariadb, postgres, postgresql
+    # or external). For multi-replica deployments, use "external" and point
+    # it at a standalone OpenFGA service, or a networked engine pointed at
+    # the SAME database for every replica — never "sqlite3" with more than
+    # one replica. The embedded engine's store/model is bootstrapped once by
+    # the migrate hook job before any replica starts; leave authz.store
+    # empty to let it be auto-provisioned and discovered by name.
+    driver: external
+
+    # -- Authorization datastore address (networked embedded drivers only)
+    address: ~
+
+    # -- Authorization datastore port (networked embedded drivers only)
+    port: ~
+
+    # -- Authorization datastore name (networked embedded drivers only)
+    name: ~
+
+    # -- Authorization datastore username (networked embedded drivers only)
+    username: ~
+
+    # -- Authorization datastore password (networked embedded drivers only)
+    password:
+
+    # -- Key within secret to use for the password
+    passwordKey: password
+
+    # -- API URL for an external OpenFGA service
+    api: ~
+
+    # -- Pre-provisioned store ID for an external OpenFGA service, leave
+    # empty to auto-provision and discover a store named "kleister"
+    store: ~
+
+    # -- Token for an external OpenFGA service
+    token:
+
+    # -- Key within secret to use for the token
+    tokenKey: token
 
     # -- Existing secret to use
     existingSecret:

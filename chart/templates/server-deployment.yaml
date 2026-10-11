@@ -32,6 +32,9 @@ spec:
         {{- if and (not .Values.config.database.existingSecret) (ne .Values.config.database.driver "sqlite3") }}
         checksum/secret-database: {{ (include (print $.Template.BasePath "/secret-database.yaml") . | fromYaml).data | toYaml | sha256sum }}
         {{- end }}
+        {{- if and (not .Values.config.authz.existingSecret) (ne .Values.config.authz.driver "sqlite3") }}
+        checksum/secret-authz: {{ (include (print $.Template.BasePath "/secret-authz.yaml") . | fromYaml).data | toYaml | sha256sum }}
+        {{- end }}
         {{- if and (not .Values.config.upload.existingSecret) (eq .Values.config.database.driver "s3") }}
         checksum/secret-upload: {{ (include (print $.Template.BasePath "/secret-upload.yaml") . | fromYaml).data | toYaml | sha256sum }}
         {{- end }}

@@ -42,6 +42,11 @@ app.kubernetes.io/component: server
 app.kubernetes.io/component: cleanup
 {{- end -}}
 
+{{- define "kleister-api.migrate.labels" -}}
+{{- include "kleister-api.labels" . }}
+app.kubernetes.io/component: migrate
+{{- end -}}
+
 {{- define "kleister-api.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
     {{ default "kleister-api" .Values.serviceAccount.name }}
@@ -58,6 +63,10 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 
 {{- define "kleister-api.database.secretName" -}}
 {{- .Values.config.database.existingSecret | default (printf "%s-database" (include "kleister-api.fullname" .)) -}}
+{{- end -}}
+
+{{- define "kleister-api.authz.secretName" -}}
+{{- .Values.config.authz.existingSecret | default (printf "%s-authz" (include "kleister-api.fullname" .)) -}}
 {{- end -}}
 
 {{- define "kleister-api.token.secretName" -}}
@@ -100,6 +109,42 @@ app.kubernetes.io/instance: {{ .Release.Name }}
     secretKeyRef:
       name: "{{ include "kleister-api.database.secretName" . }}"
       key: "{{ .Values.config.database.passwordKey }}"
+{{- end }}
+{{- if eq .Values.config.authz.driver "sqlite3" }}
+- name: KLEISTER_API_AUTHZ_DRIVER
+  value: "{{ .Values.config.authz.driver }}"
+- name: KLEISTER_API_AUTHZ_NAME
+  value: "{{ .Values.config.authz.name }}"
+{{- else if eq .Values.config.authz.driver "external" }}
+- name: KLEISTER_API_AUTHZ_DRIVER
+  value: "{{ .Values.config.authz.driver }}"
+- name: KLEISTER_API_AUTHZ_API
+  value: "{{ .Values.config.authz.api }}"
+{{- if .Values.config.authz.store }}
+- name: KLEISTER_API_AUTHZ_STORE
+  value: "{{ .Values.config.authz.store }}"
+{{- end }}
+- name: KLEISTER_API_AUTHZ_TOKEN
+  valueFrom:
+    secretKeyRef:
+      name: "{{ include "kleister-api.authz.secretName" . }}"
+      key: "{{ .Values.config.authz.tokenKey }}"
+{{- else }}
+- name: KLEISTER_API_AUTHZ_DRIVER
+  value: "{{ .Values.config.authz.driver }}"
+- name: KLEISTER_API_AUTHZ_ADDRESS
+  value: "{{ .Values.config.authz.address }}"
+- name: KLEISTER_API_AUTHZ_PORT
+  value: "{{ .Values.config.authz.port }}"
+- name: KLEISTER_API_AUTHZ_NAME
+  value: "{{ .Values.config.authz.name }}"
+- name: KLEISTER_API_AUTHZ_USERNAME
+  value: "{{ .Values.config.authz.username }}"
+- name: KLEISTER_API_AUTHZ_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: "{{ include "kleister-api.authz.secretName" . }}"
+      key: "{{ .Values.config.authz.passwordKey }}"
 {{- end }}
 {{- if eq .Values.config.upload.driver "file" }}
 - name: KLEISTER_API_UPLOAD_DRIVER
@@ -187,5 +232,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{- define "kleister-api.cleanup.environment" -}}
+{{- include "kleister-api.shared.environment" . }}
+{{- end -}}
+
+{{- define "kleister-api.migrate.environment" -}}
 {{- include "kleister-api.shared.environment" . }}
 {{- end -}}
