@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { FormItem, FormMessage } from '@/components/ui/form'
 import { Separator } from '@/components/ui/separator'
-import { PlusIcon, TrashIcon } from 'lucide-vue-next'
+import { PlusIcon, TrashIcon } from '@lucide/vue'
 import { FieldArray, FieldContextKey, useField } from 'vee-validate'
 import { computed, provide } from 'vue'
 import * as z from 'zod'

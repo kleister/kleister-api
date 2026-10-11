@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { ref } from 'vue'
 import { type User, deleteUser } from '../../../../client'
 import { toast } from '@/components/ui/toast'
-import { Trash2 } from 'lucide-vue-next'
+import { Trash2 } from '@lucide/vue'
 
 const props = defineProps<{ user: User }>()
 const emit = defineEmits<{ (e: 'deleted'): void }>()

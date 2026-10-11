@@ -23,7 +23,7 @@ import { useForm } from 'vee-validate'
 import { ref, watch } from 'vue'
 import { type Pack, updatePack } from '../../../../client'
 import { toast } from '@/components/ui/toast'
-import { Pencil } from 'lucide-vue-next'
+import { Pencil } from '@lucide/vue'
 
 const props = defineProps<{ pack: Pack }>()
 const emit = defineEmits<{ (e: 'updated'): void }>()

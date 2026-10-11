@@ -23,7 +23,7 @@ import { ref, watch } from 'vue'
 import { type User, updateUser } from '../../../../client'
 import { toast } from '@/components/ui/toast'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Pencil } from 'lucide-vue-next'
+import { Pencil } from '@lucide/vue'
 
 const props = defineProps<{ user: User }>()
 const emit = defineEmits<{ (e: 'updated'): void }>()

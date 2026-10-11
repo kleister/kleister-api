@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils'
-import { ChevronUp } from 'lucide-vue-next'
+import { ChevronUp } from '@lucide/vue'
 import {
   SelectScrollUpButton,
   type SelectScrollUpButtonProps,

@@ -1,4 +1,4 @@
-import { Blocks, Group, LayoutDashboard, Package, Users } from 'lucide-vue-next'
+import { Blocks, Group, LayoutDashboard, Package, Users } from '@lucide/vue'
 import { computed } from 'vue'
 
 export function useNavigationLinks() {

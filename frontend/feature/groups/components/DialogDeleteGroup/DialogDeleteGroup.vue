@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { ref } from 'vue'
 import { type Group, deleteGroup } from '../../../../client'
 import { toast } from '@/components/ui/toast'
-import { Trash2 } from 'lucide-vue-next'
+import { Trash2 } from '@lucide/vue'
 
 const props = defineProps<{ group: Group }>()
 const emit = defineEmits<{ (e: 'deleted'): void }>()

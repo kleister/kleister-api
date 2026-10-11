@@ -15,7 +15,7 @@ import {
   type SortingState,
 } from '@tanstack/vue-table'
 import { refDebounced } from '@vueuse/core'
-import { ArrowDown, ArrowUp, ArrowUpDown, Eye } from 'lucide-vue-next'
+import { ArrowDown, ArrowUp, ArrowUpDown, Eye } from '@lucide/vue'
 import { h, ref, unref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'

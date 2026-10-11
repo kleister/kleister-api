@@ -19,7 +19,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-vue-next'
+import { BadgeCheck, ChevronsUpDown, LogOut } from '@lucide/vue'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useAuthStore } from '@/feature/auth/store/auth'
 import { storeToRefs } from 'pinia'

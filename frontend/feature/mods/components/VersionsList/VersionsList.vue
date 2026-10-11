@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Eye } from 'lucide-vue-next'
+import { Eye } from '@lucide/vue'
 import { type Version, listVersions } from '../../../../client'
 import DialogDeleteVersion from '../DialogDeleteVersion'
 import DialogEditVersion from '../DialogEditVersion'
