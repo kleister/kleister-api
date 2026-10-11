@@ -7,16 +7,22 @@ describe('useNavigationLinks', () => {
 
     expect(links.value.general.map((entry) => entry.name)).toEqual([
       'Dashboard',
+      'Packs',
+      'Mods',
     ])
-    expect(links.value.general[0]?.url).toBe('/')
+    expect(links.value.general.map((entry) => entry.url)).toEqual([
+      '/',
+      '/packs',
+      '/mods',
+    ])
 
     expect(links.value.admin.map((entry) => entry.name)).toEqual([
       'Users',
       'Groups',
     ])
     expect(links.value.admin.map((entry) => entry.url)).toEqual([
-      '/admin/users',
-      '/admin/groups',
+      '/users',
+      '/groups',
     ])
   })
 })

@@ -1,4 +1,4 @@
-import { Group, LayoutDashboard, Users } from 'lucide-vue-next'
+import { Blocks, Group, LayoutDashboard, Package, Users } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 export function useNavigationLinks() {
@@ -10,16 +10,26 @@ export function useNavigationLinks() {
           url: `/`,
           icon: LayoutDashboard,
         },
+        {
+          name: 'Packs',
+          url: `/packs`,
+          icon: Package,
+        },
+        {
+          name: 'Mods',
+          url: `/mods`,
+          icon: Blocks,
+        },
       ],
       admin: [
         {
           name: 'Users',
-          url: `/admin/users`,
+          url: `/users`,
           icon: Users,
         },
         {
           name: 'Groups',
-          url: `/admin/groups`,
+          url: `/groups`,
           icon: Group,
         },
       ],

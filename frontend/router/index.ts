@@ -25,15 +25,63 @@ const routes = [
 
   {
     name: 'users',
-    path: '/admin/users',
+    path: '/users',
     component: () => import('../feature/users/views/Users.vue'),
     meta: { auth: true, admin: true },
   },
   {
+    name: 'user-detail',
+    path: '/users/:user_id',
+    component: () => import('../feature/users/views/UserDetail.vue'),
+    meta: { auth: true, admin: true },
+  },
+  {
     name: 'groups',
-    path: '/admin/groups',
+    path: '/groups',
     component: () => import('../feature/groups/views/Groups.vue'),
     meta: { auth: true, admin: true },
+  },
+  {
+    name: 'group-detail',
+    path: '/groups/:group_id',
+    component: () => import('../feature/groups/views/GroupDetail.vue'),
+    meta: { auth: true, admin: true },
+  },
+  {
+    name: 'packs',
+    path: '/packs',
+    component: () => import('../feature/packs/views/Packs.vue'),
+    meta: { auth: true },
+  },
+  {
+    name: 'pack-detail',
+    path: '/packs/:pack_id',
+    component: () => import('../feature/packs/views/PackDetail.vue'),
+    meta: { auth: true },
+  },
+  {
+    name: 'pack-build-detail',
+    path: '/packs/:pack_id/builds/:build_id',
+    component: () => import('../feature/packs/views/BuildDetail.vue'),
+    meta: { auth: true },
+  },
+  {
+    name: 'mods',
+    path: '/mods',
+    component: () => import('../feature/mods/views/Mods.vue'),
+    meta: { auth: true },
+  },
+  {
+    name: 'mod-detail',
+    path: '/mods/:mod_id',
+    component: () => import('../feature/mods/views/ModDetail.vue'),
+    meta: { auth: true },
+  },
+  {
+    name: 'mod-version-detail',
+    path: '/mods/:mod_id/versions/:version_id',
+    component: () => import('../feature/mods/views/VersionDetail.vue'),
+    meta: { auth: true },
   },
 
   {

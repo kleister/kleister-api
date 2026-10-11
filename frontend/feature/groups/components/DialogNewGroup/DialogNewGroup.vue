@@ -24,7 +24,7 @@ import { createGroup } from '../../../../client'
 import { toast } from '@/components/ui/toast'
 import { useGroups } from '../../providers'
 
-const { addGroup } = useGroups()
+const { loadGroups } = useGroups()
 
 const formSchema = z.object({
   name: z.string().min(3).max(255),
@@ -44,7 +44,7 @@ function closeModal() {
 
 const onSubmit = handleSubmit(async (values) => {
   try {
-    const { data, error } = await createGroup({
+    const { error } = await createGroup({
       body: {
         ...values,
       },
@@ -75,7 +75,7 @@ const onSubmit = handleSubmit(async (values) => {
       return
     }
 
-    addGroup(data)
+    await loadGroups()
     closeModal()
 
     toast({

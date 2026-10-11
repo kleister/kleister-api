@@ -25,7 +25,7 @@ import { toast } from '@/components/ui/toast'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useUsers } from '../../providers'
 
-const { addUser } = useUsers()
+const { loadUsers } = useUsers()
 
 const formSchema = z.object({
   username: z.string().min(3).max(255),
@@ -57,7 +57,7 @@ function closeModal() {
 
 const onSubmit = handleSubmit(async (values) => {
   try {
-    const { data, error } = await createUser({
+    const { error } = await createUser({
       body: {
         ...values,
       },
@@ -88,7 +88,7 @@ const onSubmit = handleSubmit(async (values) => {
       return
     }
 
-    addUser(data)
+    await loadUsers()
     closeModal()
 
     toast({

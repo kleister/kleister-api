@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { provideGroupsContext } from '.'
-import { type Group, listGroups } from '../../../client'
+import { type Group, type ListGroupsData, listGroups } from '../../../client'
 
 const groups = ref<Group[]>([])
+const total = ref(0)
 const isLoading = ref(false)
 
-async function loadGroups() {
+let lastQuery: ListGroupsData['query'] = {}
+
+async function loadGroups(query: ListGroupsData['query'] = lastQuery) {
+  lastQuery = query
   isLoading.value = true
 
-  const { data, error } = await listGroups()
+  const { data, error } = await listGroups({ query })
 
   if (error) {
     isLoading.value = false
@@ -17,18 +21,15 @@ async function loadGroups() {
   }
 
   groups.value = data.groups
+  total.value = data.total
   isLoading.value = false
-}
-
-function addGroup(group: Group) {
-  groups.value = [group, ...groups.value]
 }
 
 provideGroupsContext({
   groups,
+  total,
   isLoading,
   loadGroups,
-  addGroup,
 })
 </script>
 

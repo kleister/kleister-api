@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { provideUsersContext } from '.'
-import { type User, listUsers } from '../../../client'
+import { type ListUsersData, type User, listUsers } from '../../../client'
 
 const users = ref<User[]>([])
+const total = ref(0)
 const isLoading = ref(false)
 
-async function loadUsers() {
+let lastQuery: ListUsersData['query'] = {}
+
+async function loadUsers(query: ListUsersData['query'] = lastQuery) {
+  lastQuery = query
   isLoading.value = true
 
-  const { data, error } = await listUsers()
+  const { data, error } = await listUsers({ query })
 
   if (error) {
     isLoading.value = false
@@ -17,18 +21,15 @@ async function loadUsers() {
   }
 
   users.value = data.users
+  total.value = data.total
   isLoading.value = false
-}
-
-function addUser(user: User) {
-  users.value = [user, ...users.value]
 }
 
 provideUsersContext({
   users,
+  total,
   isLoading,
   loadUsers,
-  addUser,
 })
 </script>
 
