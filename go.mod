@@ -18,7 +18,7 @@ require (
 	github.com/drone/funcmap v0.0.0-20240227160611-7e19e9cd5a1c
 	github.com/elimity-com/scim v0.0.0-20260728105928-2641426a1539
 	github.com/gabriel-vasile/mimetype v1.4.16
-	github.com/getkin/kin-openapi v0.151.0
+	github.com/getkin/kin-openapi v0.152.0
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-chi/render v1.0.3
 	github.com/go-openapi/runtime/server-middleware v0.33.3
@@ -32,7 +32,7 @@ require (
 	github.com/kleister/go-minecraft v1.11.1
 	github.com/lrstanley/go-queryparser/v3 v3.0.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
-	github.com/oapi-codegen/nethttp-middleware v1.2.0
+	github.com/oapi-codegen/nethttp-middleware v1.3.1
 	github.com/oapi-codegen/runtime v1.7.0
 	github.com/oklog/run v1.2.0
 	github.com/openfga/api/proto v0.0.0-20260928071936-c0650ce2169b
