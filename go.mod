@@ -32,7 +32,7 @@ require (
 	github.com/kleister/go-minecraft v1.11.1
 	github.com/lrstanley/go-queryparser/v3 v3.0.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
-	github.com/oapi-codegen/nethttp-middleware v1.2.0
+	github.com/oapi-codegen/nethttp-middleware v1.3.1
 	github.com/oapi-codegen/runtime v1.7.0
 	github.com/oklog/run v1.2.0
 	github.com/openfga/api/proto v0.0.0-20260928071936-c0650ce2169b
