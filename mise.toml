@@ -11,7 +11,7 @@ prek = "0.5.7"
 s5cmd = "2.3.0"
 sqlite = "3.54.1"
 task = "3.54.0"
-uv = "0.13.5"
+uv = "0.13.6"
 yq = "4.54.1"
 
 "github:cloudsmith-io/cloudsmith-cli" = "1.30.0"
