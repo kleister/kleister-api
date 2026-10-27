@@ -22,7 +22,7 @@ require (
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-chi/render v1.0.3
 	github.com/go-openapi/runtime/server-middleware v0.33.3
-	github.com/go-ozzo/ozzo-validation/v4 v4.4.1
+	github.com/go-ozzo/ozzo-validation/v4 v4.5.0
 	github.com/go-sql-driver/mysql v1.10.1
 	github.com/gobwas/glob v1.0.0
 	github.com/golang-jwt/jwt/v5 v5.3.1

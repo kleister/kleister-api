@@ -21,7 +21,6 @@ github.com/antlr4-go/antlr/v4 v4.13.1 h1:SqQKkuVZ+zWkMMNkjy5FZe5mr5WURWnlpmOuzYW
 github.com/antlr4-go/antlr/v4 v4.13.1/go.mod h1:GKmUxMtwp6ZgGwZSva4eWPC5mS6vUAmOABFgjdkM7Nw=
 github.com/apapsch/go-jsonmerge/v2 v2.0.0 h1:axGnT1gRIfimI7gJifB699GoE/oq+F2MU7Dml6nw9rQ=
 github.com/apapsch/go-jsonmerge/v2 v2.0.0/go.mod h1:lvDnEdqiQrp0O42VQGgmlKpxL1AP2+08jFMw88y4klk=
-github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d/go.mod h1:WaHUgvxTVq04UNunO+XhnAqY/wQc+bxr74GqbsZ/Jqw=
 github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 h1:DklsrG3dyBCFEj5IhUbnKptjxatkF07cF2ak3yi77so=
 github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2/go.mod h1:WaHUgvxTVq04UNunO+XhnAqY/wQc+bxr74GqbsZ/Jqw=
 github.com/aws/aws-sdk-go-v2 v1.47.4 h1:bTvk6UdSSSvaQsfLVj1JRDEEqj/PDRwGf1KanaRzau0=
@@ -147,8 +146,8 @@ github.com/go-openapi/runtime/server-middleware v0.33.3 h1:Td5UBla/J/KCjlsD0tmZY
 github.com/go-openapi/runtime/server-middleware v0.33.3/go.mod h1:dopwrwqIqXe4xWtovDZkkXJzYqKw+Ybmy7G/hIDUWKY=
 github.com/go-openapi/testify/v2 v2.8.0 h1:19QDx5b57p8KjO2E4sgs/woL4Akp+FGLRlVm2xn0Rho=
 github.com/go-openapi/testify/v2 v2.8.0/go.mod h1:4gUN8jC+RqOE2qjW/vDmfyTvl5BCht4qL7oca0odrak=
-github.com/go-ozzo/ozzo-validation/v4 v4.4.1 h1:AQ3X8zHnXEuNE04pyc1H/nmIlroNjgZ7hcY7Xv/IgH8=
-github.com/go-ozzo/ozzo-validation/v4 v4.4.1/go.mod h1:4ZtPNefSnNq39wjL+2We8y2ysqEX/S4D5mPybufHd7Y=
+github.com/go-ozzo/ozzo-validation/v4 v4.5.0 h1:ay87N+5vSsdBVMtEAUtP76cJL/I6Yjmhvz+ekAlBTV0=
+github.com/go-ozzo/ozzo-validation/v4 v4.5.0/go.mod h1:zGDObjgC33S3GGdAiAVanGqqA3MH5HdlxH9wPeCL88E=
 github.com/go-sql-driver/mysql v1.10.1 h1:arlSnNLq6a5yxGxV7qg9lF4j0C+KwD6NbQyKr9QL6ME=
 github.com/go-sql-driver/mysql v1.10.1/go.mod h1:M+cqaI7+xxXGG9swrdeUIoPG3Y3KCkF0pZej+SK+nWk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
