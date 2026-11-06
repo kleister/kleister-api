@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/root/go/pkg \
     task fe:install fe:generate fe:build && \
     task be:generate build:server GOOS=${TARGETOS} GOARCH=${TARGETARCH}
 
-FROM alpine:3.24@sha256:ce9e1e6d23f04a0b7593445a062a9fc73ed52f8260b9396f77a958295ad18ee7
+FROM alpine:3.24@sha256:3f4d6b32e26703c6082839234f43769d5046b3ac7c910033911d1e71d8cd630a
 
 RUN apk add --no-cache ca-certificates mailcap && \
     addgroup -g 1337 kleister && \
