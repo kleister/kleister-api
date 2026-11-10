@@ -55,7 +55,7 @@ require (
 	github.com/vincent-petithory/dataurl v1.0.0
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.58.0
-	golang.org/x/oauth2 v0.37.0
+	golang.org/x/oauth2 v0.38.0
 	google.golang.org/protobuf v1.36.12
 )
 
