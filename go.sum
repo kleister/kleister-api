@@ -107,8 +107,8 @@ github.com/drone/funcmap v0.0.0-20240227160611-7e19e9cd5a1c h1:R4T5Tv7YUrKmw+tBP
 github.com/drone/funcmap v0.0.0-20240227160611-7e19e9cd5a1c/go.mod h1:nDRkX7PHq+p39AD5/usv3KZMerxZTYU/9rfLS5IDspU=
 github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
 github.com/dustin/go-humanize v1.0.1/go.mod h1:Mu1zIs6XwVuF/gI1OepvI0qD18qycQx+mFykh5fBlto=
-github.com/elimity-com/scim v0.0.0-20260728105928-2641426a1539 h1:xZWHbTeRWqbowyZgmf6NYgCa6gw94g+ekG4f8TfIp3Q=
-github.com/elimity-com/scim v0.0.0-20260728105928-2641426a1539/go.mod h1:dpiTnMjNr1HGBYKa+Rm6nljbWfApPKBFLIdOdK8fXnE=
+github.com/elimity-com/scim v0.0.0-20261113092633-5fffe914c211 h1:OgMK4yR0kLeklASUsgFhJdZ0pRBYk5sUFo2KBcvnqyo=
+github.com/elimity-com/scim v0.0.0-20261113092633-5fffe914c211/go.mod h1:dpiTnMjNr1HGBYKa+Rm6nljbWfApPKBFLIdOdK8fXnE=
 github.com/emirpasic/gods v1.18.1 h1:FXtiHYKDGKCW2KzwZKx0iC0PQmdlorYgdFG9jPXJ1Bc=
 github.com/emirpasic/gods v1.18.1/go.mod h1:8tpGGwCnJ5H4r6BWwaV6OrWmMoPhUl5jm/FMNAnJvWQ=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=

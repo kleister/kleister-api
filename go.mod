@@ -16,7 +16,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/drexedam/gravatar v0.0.0-20210327211422-e94eea8c338e
 	github.com/drone/funcmap v0.0.0-20240227160611-7e19e9cd5a1c
-	github.com/elimity-com/scim v0.0.0-20260728105928-2641426a1539
+	github.com/elimity-com/scim v0.0.0-20261113092633-5fffe914c211
 	github.com/gabriel-vasile/mimetype v1.4.16
 	github.com/getkin/kin-openapi v0.153.0
 	github.com/go-chi/chi/v5 v5.5.0
