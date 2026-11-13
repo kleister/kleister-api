@@ -36,7 +36,7 @@ require (
 	github.com/oapi-codegen/runtime v1.9.0
 	github.com/oklog/run v1.2.0
 	github.com/openfga/api/proto v0.0.0-20260928071936-c0650ce2169b
-	github.com/openfga/go-sdk v0.8.3
+	github.com/openfga/go-sdk v0.8.4
 	github.com/openfga/language/pkg/go v0.3.2
 	github.com/openfga/openfga v1.22.1
 	github.com/prometheus/client_golang v1.25.0
