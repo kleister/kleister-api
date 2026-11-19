@@ -48,7 +48,7 @@
     "@tailwindcss/vite": "4.3.5",
     "@types/node": "26.6.6",
     "@vitejs/plugin-vue": "6.0.11",
-    "@vue/test-utils": "2.5.1",
+    "@vue/test-utils": "2.6.0",
     "@vue/tsconfig": "0.9.1",
     "autoprefixer": "10.6.2",
     "eslint": "10.15.0",
