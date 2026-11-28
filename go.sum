@@ -150,8 +150,8 @@ github.com/go-openapi/testify/v2 v2.8.1 h1:zk3S6KaDY1iQW91vsOJc25Ql1xm5bhPrZKdnL
 github.com/go-openapi/testify/v2 v2.8.1/go.mod h1:4gUN8jC+RqOE2qjW/vDmfyTvl5BCht4qL7oca0odrak=
 github.com/go-ozzo/ozzo-validation/v4 v4.5.0 h1:ay87N+5vSsdBVMtEAUtP76cJL/I6Yjmhvz+ekAlBTV0=
 github.com/go-ozzo/ozzo-validation/v4 v4.5.0/go.mod h1:zGDObjgC33S3GGdAiAVanGqqA3MH5HdlxH9wPeCL88E=
-github.com/go-sql-driver/mysql v1.10.2 h1:5TRvGvczDohUMOCRA5aCAXgfSZOo/oNDSFD/2RrChS0=
-github.com/go-sql-driver/mysql v1.10.2/go.mod h1:M+cqaI7+xxXGG9swrdeUIoPG3Y3KCkF0pZej+SK+nWk=
+github.com/go-sql-driver/mysql v1.11.0 h1:0dFnuu2mR7g+8Smo/rL18y1WnTLgVrHttzSahf20Gb4=
+github.com/go-sql-driver/mysql v1.11.0/go.mod h1:evJsoGjlO/9BFsnfXyjtluDYb3OSGzPNOnUaBl/2Dao=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/go-viper/mapstructure/v2 v2.5.0 h1:vM5IJoUAy3d7zRSVtIwQgBj7BiWtMPfmPEgAXnvj1Ro=
 github.com/go-viper/mapstructure/v2 v2.5.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
